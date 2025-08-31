@@ -22,6 +22,12 @@ android {
         jvmTarget = '1.8'
     }
 
+    compileSdk 35
+
+    defaultConfig {
+        minSdk 24
+    }
+
     packagingOptions {
         jniLibs.useLegacyPackaging true
     }
@@ -30,4 +36,5 @@ android {
 dependencies {
     implementation project(':FtcRobotController')
 //    implementation 'androidx.core:core-ktx:1.17.0'
+
 }
