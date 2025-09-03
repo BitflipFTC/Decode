@@ -1,23 +1,23 @@
 package org.firstinspires.ftc.teamcode
 
 import com.bylazar.configurables.annotations.Configurable
+import com.bylazar.telemetry.PanelsTelemetry
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import org.firstinspires.ftc.teamcode.util.CombinedTelemetry
 
 @Configurable
 @TeleOp(name = "drive")
 class `2wheelDrive` : LinearOpMode() {
-    val front by lazy { hardwareMap["front"] as DcMotorEx }
-    val back  by lazy { hardwareMap["back"] as DcMotorEx }
+    private val front by lazy { hardwareMap["front"] as DcMotorEx }
+    private val back  by lazy { hardwareMap["back"] as DcMotorEx }
 
     @Throws(InterruptedException::class)
     override fun runOpMode() {
 
-        val combinedTelemetry = CombinedTelemetry(this);
-        combinedTelemetry.addLine("Initialized.")
-        combinedTelemetry.update()
+        val telemetryM = PanelsTelemetry.telemetry;
+        telemetryM.debug("Initialized.")
+        telemetryM.update()
 
         var slowspeed : Boolean = true
 
@@ -34,12 +34,12 @@ class `2wheelDrive` : LinearOpMode() {
             var vertical : Double = gamepad1.left_stick_y.toDouble() * motorPower
             var horizontal : Double = -gamepad1.left_stick_x.toDouble() * motorPower
 
-            combinedTelemetry.addData("Slowmode?", slowspeed)
+            telemetryM.addData("Slowmode?", slowspeed)
 
             front.power = vertical + horizontal
             back.power = vertical - horizontal
 
-            combinedTelemetry.update()
+            telemetryM.update(telemetry)
         }
     }
 }
