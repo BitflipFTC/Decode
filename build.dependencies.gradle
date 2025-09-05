@@ -2,6 +2,9 @@ repositories {
     mavenCentral()
     google() // Needed for androidx
 
+    // nextftc
+    maven { url = "https://maven.rowanmcalpin.com/" }
+
     // pedropathing
     maven { url = 'https://maven.pedropathing.com' }
     maven { url = "https://mymaven.bylazar.com/releases" }
@@ -22,5 +25,10 @@ dependencies {
     implementation 'com.pedropathing:ftc:2.0.0'
     implementation 'com.pedropathing:telemetry:0.0.6'
     implementation 'com.bylazar:fullpanels:1.0.2'
+
+    // nextftc
+    implementation 'com.rowanmcalpin.nextftc:core:0.6.2'
+    implementation 'com.rowanmcalpin.nextftc:ftc:0.6.2'
+    implementation 'com.rowanmcalpin.nextftc:pedro:0.6.2'
 }
 
