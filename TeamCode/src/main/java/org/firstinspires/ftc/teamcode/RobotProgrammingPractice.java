@@ -1,8 +1,10 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
+@TeleOp(name = "Zoe Teleop")
 public class RobotProgrammingPractice extends OpMode {
    private DcMotor frontleftdrive = null;
 
@@ -15,10 +17,10 @@ public class RobotProgrammingPractice extends OpMode {
     @Override
     public void init() {
 
-        frontleftdrive = hardwareMap.get(DcMotor.class, "front_left_drive");
-        backleftdrive = hardwareMap.get(DcMotor.class, "back_left_drive");
-        frontrightdrive = hardwareMap.get(DcMotor.class, "front_right_drive");
-        backrightdrive = hardwareMap.get(DcMotor.class, "back_right_drive");
+        frontleftdrive = hardwareMap.get(DcMotor.class, "frontleft");
+        backleftdrive = hardwareMap.get(DcMotor.class, "backleft");
+        frontrightdrive = hardwareMap.get(DcMotor.class, "frontright");
+        backrightdrive = hardwareMap.get(DcMotor.class, "backright");
 
         frontleftdrive.setDirection(DcMotor.Direction.REVERSE);
         backleftdrive.setDirection(DcMotor.Direction.REVERSE);
