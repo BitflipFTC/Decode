@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.pedroPathing;
+package org.firstinspires.ftc.teamcode;
 
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
@@ -15,7 +15,7 @@ public class FourWheel extends OpMode {
     DcMotorEx back_left;
     DcMotorEx back_right;
     boolean useMax = false;
-    double driveSpeed;
+    double driveSpeed = 0.5;
 
     enum Speed {
         MAX,
@@ -37,13 +37,14 @@ public class FourWheel extends OpMode {
 
         telemetryM.addData("Initialized", true);
         telemetryM.update(telemetry);
+
     }
 
     @Override
     public void loop() {
         telemetryM.addLine("X to change speed, A to toggle max");
 
-        if (gamepad1.x) {
+        if (gamepad1.xWasPressed()) {
             switch (driveSpeedEnum) {
                 case MAX:
                     driveSpeedEnum = Speed.MED;
@@ -60,7 +61,7 @@ public class FourWheel extends OpMode {
             }
         }
 
-        if (gamepad1.a) useMax = !useMax;
+        if (gamepad1.aWasPressed()) useMax = !useMax;
 
         double x = gamepad1.left_stick_x;
         double y = -gamepad1.left_stick_y;
@@ -68,23 +69,24 @@ public class FourWheel extends OpMode {
 
         double max = 1;
         double flPower = (y + x + rx) * driveSpeed;
-        double frPower = (y - x - rx) * driveSpeed;
+        double frPower = (y + x - rx) * driveSpeed;
         double blPower = (y - x + rx) * driveSpeed;
-        double brPower = (y + x - rx) * driveSpeed;
+        double brPower = (y - x - rx) * driveSpeed;
 
         max = Math.max(Math.abs(Math.max(Math.max(Math.abs(frPower), Math.abs(flPower)), Math.abs(blPower))), Math.abs(brPower));
 
         telemetryM.addData("Current speed setting", driveSpeedEnum.toString());
         telemetryM.addData("Current speed value", driveSpeed);
 
-        if (useMax && max > 1) {
+        if (useMax && max > driveSpeed) {
             flPower /= max;
             frPower /= max;
             blPower /= max;
             brPower /= max;
-
-            telemetryM.addData("max value", max);
         }
+
+        if (useMax)
+            telemetryM.addData("max value", max);
 
         front_left.setPower(flPower);
         front_right.setPower(frPower);
