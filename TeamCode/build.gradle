@@ -16,6 +16,22 @@ apply from: '../build.common.gradle'
 apply from: '../build.dependencies.gradle'
 apply plugin: 'org.jetbrains.kotlin.android'
 
+// from slothload
+apply plugin: 'dev.frozenmilk.sinister.sloth.load'
+
+buildscript {
+    repositories {
+        mavenCentral()
+        maven {
+            url "https://repo.dairy.foundation/releases"
+        }
+    }
+    dependencies {
+        classpath "dev.frozenmilk:Load:0.2.4"
+    }
+}
+// end slothload
+
 android {
     namespace = 'org.firstinspires.ftc.teamcode'
     kotlinOptions {
@@ -32,9 +48,20 @@ android {
         jniLibs.useLegacyPackaging true
     }
 }
+// from slothload
+repositories {
+    maven {
+        url = "https://repo.dairy.foundation/releases"
+    }
+}
+// end slothload
 
 dependencies {
     implementation project(':FtcRobotController')
 //    implementation 'androidx.core:core-ktx:1.17.0'
     implementation "com.bylazar:fullpanels:1.0.5"
+    // slothload
+    implementation("dev.frozenmilk.sinister:Sloth:0.2.4")
+
+    implementation("com.acmerobotics.slothboard:dashboard:0.2.4+0.4.17")
 }
