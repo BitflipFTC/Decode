@@ -41,10 +41,12 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.rowanmcalpin.nextftc.core.control.controllers.feedforward.StaticFeedforward;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDirection;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.teamcode.util.TunablePIDFController;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
@@ -78,8 +80,8 @@ public class AprilTagFollower extends LinearOpMode {
     public static double targetTagPos = 160;
     public static double currentTagPos;
 
-//    static PIDFController controller;
-    public static double p=0.0006;
+    private TunablePIDFController controller;
+    public static double p=0.0006, i=0, d=0;
 
 //    enum Speed {
 //        MAX,
@@ -94,7 +96,8 @@ public class AprilTagFollower extends LinearOpMode {
 
         initAprilTag();
 
-//        controller = new PIDFController(new PIDFCoefficients(p,i,d,0));
+        controller = new TunablePIDFController(p,i,d, new StaticFeedforward(0),5);
+
         front_left  = hardwareMap.get(DcMotorEx.class, "frontleft");
         front_right = hardwareMap.get(DcMotorEx.class, "frontright");
         back_left   = hardwareMap.get(DcMotorEx.class, "backleft");
@@ -106,73 +109,49 @@ public class AprilTagFollower extends LinearOpMode {
         telemetryM.addData("Initialized", true);
         telemetryM.update(telemetry);
 
-
         // Wait for the DS start button to be touched.
         telemetry.addData("DS preview on/off", "3 dots, Camera Stream");
         telemetry.addData(">", "Touch START to start OpMode");
         telemetry.update();
         waitForStart();
 
-        if (opModeIsActive()) {
-            while (opModeIsActive()) {
+        while (opModeIsActive()) {
 
-                telemetryAprilTag();
+            telemetryAprilTag();
 
-                // Push telemetry to the Driver Station.
+            // Push telemetry to the Driver Station.
 
-                // Save CPU resources; can resume streaming when needed.
-                if (gamepad1.dpad_down) {
-                    visionPortal.stopStreaming();
-                } else if (gamepad1.dpad_up) {
-                    visionPortal.resumeStreaming();
-                }
-
-                // Share the CPU.
-                sleep(15);
-
-//                double x = gamepad1.left_stick_x;
-//                double y = -gamepad1.left_stick_y;
-//                double rx = gamepad1.right_stick_x;
-
-//                double max;
-//                double flPower = (y + x + rx) * driveSpeed;
-//                double frPower = (y + x - rx) * driveSpeed;
-//                double blPower = (y - x + rx) * driveSpeed;
-//                double brPower = (y - x - rx) * driveSpeed;
-
-//                max = Math.max(Math.abs(Math.max(Math.max(Math.abs(frPower), Math.abs(flPower)), Math.abs(blPower))), Math.abs(brPower));
-
-//                telemetryM.addData("Current speed setting", driveSpeedEnum.toString());
-                telemetryM.addData("Current speed value", driveSpeed);
-                telemetryM.addData("Current tag pos", currentTagPos);
-
-//                if (max > driveSpeed) {
-//                    flPower /= max;
-//                    frPower /= max;
-//                    blPower /= max;
-//                    brPower /= max;
-//
-//                }
-
-//                telemetryM.addData("max value", max);
-
-                double err = Math.sqrt(Math.abs(targetTagPos-currentTagPos)*p);
-                if (targetTagPos<currentTagPos)
-                    err = -err;
-
-                telemetryM.addData("error", err);
-
-//                err = Math.min(0.5, err);
-
-                front_left.setPower(-err);
-                front_right.setPower(err);
-                back_left.setPower(-err);
-                back_right.setPower(err);
-                gm.addData("err",err);
-                gm.update();
-
-                telemetryM.update(telemetry);
+            // Save CPU resources; can resume streaming when needed.
+            if (gamepad1.dpad_down) {
+                visionPortal.stopStreaming();
+            } else if (gamepad1.dpad_up) {
+                visionPortal.resumeStreaming();
             }
+
+            telemetryM.addData("Current speed value", driveSpeed);
+            telemetryM.addData("Current tag pos", currentTagPos);
+
+            controller.setPID(p, i, d);
+
+            double err = Math.sqrt(Math.abs(targetTagPos - currentTagPos) * p);
+            double pidError = Math.sqrt(Math.abs(controller.calculate(currentTagPos, targetTagPos)));
+
+            if (targetTagPos < currentTagPos){
+                err = -err;
+                pidError = -pidError;
+            }
+
+            telemetryM.addData("error", err);
+            telemetryM.addData("pid Error", pidError);
+
+            front_left.setPower(-err);
+            front_right.setPower(err);
+            back_left.setPower(-err);
+            back_right.setPower(err);
+            gm.addData("err",err);
+            gm.update();
+
+            telemetryM.update(telemetry);
         }
 
         // Save more CPU resources when camera is no longer needed.
