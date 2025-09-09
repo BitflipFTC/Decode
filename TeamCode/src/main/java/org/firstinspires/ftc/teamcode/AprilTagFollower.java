@@ -32,15 +32,19 @@ package org.firstinspires.ftc.teamcode;
 import android.annotation.SuppressLint;
 import android.util.Size;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.graph.GraphManager;
 import com.bylazar.graph.PanelsGraph;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
+import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.util.ElapsedTime;
 import com.rowanmcalpin.nextftc.core.control.controllers.feedforward.StaticFeedforward;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDirection;
@@ -83,6 +87,8 @@ public class AprilTagFollower extends LinearOpMode {
     private TunablePIDFController controller;
     public static double p=0.0006, i=0, d=0;
 
+    ElapsedTime timer;
+
 //    enum Speed {
 //        MAX,
 //        MED,
@@ -95,6 +101,8 @@ public class AprilTagFollower extends LinearOpMode {
     public void runOpMode() {
 
         initAprilTag();
+
+        telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
         controller = new TunablePIDFController(p,i,d, new StaticFeedforward(0),5);
 
@@ -109,13 +117,27 @@ public class AprilTagFollower extends LinearOpMode {
         telemetryM.addData("Initialized", true);
         telemetryM.update(telemetry);
 
+        timer = new ElapsedTime();
+
         // Wait for the DS start button to be touched.
         telemetry.addData("DS preview on/off", "3 dots, Camera Stream");
         telemetry.addData(">", "Touch START to start OpMode");
         telemetry.update();
         waitForStart();
 
+        timer.reset();
+
+        List<LynxModule> allHubs = hardwareMap.getAll(LynxModule.class);
+
+        for (LynxModule hub : allHubs) {
+            hub.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
+        }
+
         while (opModeIsActive()) {
+
+            for (LynxModule hub : allHubs) {
+                hub.clearBulkCache();
+            }
 
             telemetryAprilTag();
 
@@ -151,6 +173,7 @@ public class AprilTagFollower extends LinearOpMode {
             gm.addData("err",err);
             gm.update();
 
+            telemetryM.addData("loop time", timer.milliseconds());
             telemetryM.update(telemetry);
         }
 
