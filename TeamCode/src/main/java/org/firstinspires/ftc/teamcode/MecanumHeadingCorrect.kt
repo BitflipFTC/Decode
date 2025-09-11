@@ -29,7 +29,7 @@ class MecanumHeadingCorrect : LinearOpMode() {
     private var targetImuPos = 0.0
 
     @JvmField
-    var p : Double = 0.05
+    var p : Double = 0.005
     @JvmField
     var i : Double = 0.0
     @JvmField
@@ -43,8 +43,8 @@ class MecanumHeadingCorrect : LinearOpMode() {
     override fun runOpMode() {
         telemetry = MultipleTelemetry(FtcDashboard.getInstance().telemetry, telemetry)
 
-        frontLeft.direction = DcMotorSimple.Direction.REVERSE
-        backLeft.direction  = DcMotorSimple.Direction.REVERSE
+        frontRight.direction = DcMotorSimple.Direction.REVERSE
+        backRight.direction  = DcMotorSimple.Direction.REVERSE
 
         frontLeft.mode  = DcMotor.RunMode.STOP_AND_RESET_ENCODER
         frontRight.mode = DcMotor.RunMode.STOP_AND_RESET_ENCODER
@@ -115,10 +115,10 @@ class MecanumHeadingCorrect : LinearOpMode() {
                 backRightPower /= max
             }
 
-            frontLeft.power = frontLeftPower * driveSpeed
+            frontLeft.power  = frontLeftPower  * driveSpeed
             frontRight.power = frontRightPower * driveSpeed
-            backLeft.power = backLeftPower * driveSpeed
-            backRight.power = backRightPower * driveSpeed
+            backLeft.power   = backLeftPower   * driveSpeed
+            backRight.power  = backRightPower  * driveSpeed
 
             telemetry.addData("Using max", usemax)
             telemetry.addData("target imu position", targetImuPos)
