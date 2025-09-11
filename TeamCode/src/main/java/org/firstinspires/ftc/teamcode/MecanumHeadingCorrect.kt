@@ -87,20 +87,20 @@ class MecanumHeadingCorrect : LinearOpMode() {
             controller.setPID(p,i,d)
             val error = controller.calculate(heading, targetImuPos)
 
-            var frontLeftPower = y + x + rot
-            var frontRightPower = y - x - rot
-            var backLeftPower = y - x + rot
-            var backRightPower = y + x - rot
+            var frontLeftPower = y + x - rot
+            var frontRightPower = y - x + rot
+            var backLeftPower = y - x - rot
+            var backRightPower = y + x + rot
 
             // if turning, update the heading
             if (abs(rot - 0.0) > 0.01) {
                 targetImuPos = heading
             } else {
                 // otherwise, automatically steer to correct for drift
-                frontLeftPower += error
-                frontRightPower -= error
-                backLeftPower += error
-                backRightPower -= error
+                frontLeftPower -= error
+                frontRightPower += error
+                backLeftPower -= error
+                backRightPower += error
             }
 
             val max = maxOf(abs(frontLeftPower),abs(frontRightPower),abs(backLeftPower),abs(backRightPower))
