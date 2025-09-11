@@ -33,6 +33,7 @@ import android.annotation.SuppressLint;
 import android.util.Size;
 
 import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.graph.GraphManager;
@@ -57,8 +58,9 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
 import java.util.List;
 
+@Config
 @Configurable
-@TeleOp(name = "Concept: AprilTag Follower", group = "Concept")
+@TeleOp(name = "Concept: AprilTag Tracker", group = "Concept")
 public class AprilTagFollower extends LinearOpMode {
 
     private static final boolean USE_WEBCAM = true;  // true for webcam, false for phone camera
@@ -81,11 +83,11 @@ public class AprilTagFollower extends LinearOpMode {
     DcMotorEx back_right;
 //    boolean useMax = false;
     double driveSpeed = 1;
-    public static double targetTagPos = 160;
+    public static double targetTagPos = 320;
     public static double currentTagPos;
 
     private TunablePIDFController controller;
-    public static double p=0.0006, i=0, d=0;
+    public static double p=0.00015, i=0, d=0;
 
     ElapsedTime timer;
 
@@ -201,7 +203,7 @@ public class AprilTagFollower extends LinearOpMode {
 
             builder.setCamera(hardwareMap.get(WebcamName.class, "camera"));
 
-            builder.setCameraResolution(new Size(320, 240));
+            builder.setCameraResolution(new Size(640, 480));
             builder.enableLiveView(true);
             builder.addProcessor(aprilTag);
             visionPortal=builder.build();
@@ -245,7 +247,7 @@ public class AprilTagFollower extends LinearOpMode {
         }   // end for() loop
 
         if(currentDetections.isEmpty()) {
-            currentTagPos = 160;
+            currentTagPos = 320;
         }
         // Add "key" information to telemetry
         telemetry.addLine("\nkey:\nXYZ = X (Right), Y (Forward), Z (Up) dist.");
