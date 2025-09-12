@@ -46,12 +46,11 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import com.rowanmcalpin.nextftc.core.control.controllers.feedforward.StaticFeedforward;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDirection;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.teamcode.util.TunablePIDFController;
+import org.firstinspires.ftc.teamcode.util.PIDController;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
@@ -86,7 +85,7 @@ public class AprilTagFollower extends LinearOpMode {
     public static double targetTagPos = 320;
     public static double currentTagPos;
 
-    private TunablePIDFController controller;
+    private PIDController controller;
     public static double p=0.00015, i=0, d=0;
 
     ElapsedTime timer;
@@ -106,7 +105,7 @@ public class AprilTagFollower extends LinearOpMode {
 
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
-        controller = new TunablePIDFController(p,i,d, new StaticFeedforward(0),5);
+        controller = new PIDController();
 
         front_left  = hardwareMap.get(DcMotorEx.class, "frontleft");
         front_right = hardwareMap.get(DcMotorEx.class, "frontright");
@@ -155,7 +154,7 @@ public class AprilTagFollower extends LinearOpMode {
             telemetryM.addData("Current speed value", driveSpeed);
             telemetryM.addData("Current tag pos", currentTagPos);
 
-            controller.setPID(p, i, d);
+            controller.setCoeffs(p, i, d,0);
 
             double err = Math.sqrt(Math.abs(targetTagPos - currentTagPos) * p);
             double pidError = Math.sqrt(Math.abs(controller.calculate(currentTagPos, targetTagPos)));
