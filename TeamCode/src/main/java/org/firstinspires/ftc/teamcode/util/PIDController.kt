@@ -16,7 +16,8 @@ class PIDController(
     var targetPosition : Double = 0.0
     var currentPosition : Double = 0.0
         private set
-    var setPointTolerance : Double = 0.0
+    var setPointTolerance : Double = 1.0
+    var velErrorTolerance : Double = Double.POSITIVE_INFINITY
 
     private val timer = ElapsedTime()
     private var lastTime = 0.0
@@ -27,6 +28,14 @@ class PIDController(
     var totalError = 0.0
         private set
 
+    var error = 0.0
+        private set
+    var velError = 0.0
+        private set
+
+    init {
+        reset()
+    }
 
     fun setCoeffs (kP : Double = 0.0, kI: Double = 0.0, kD: Double = 0.0, kf: Double = 0.0) {
         this.kP = kP
@@ -48,8 +57,8 @@ class PIDController(
         this.currentPosition = currentPosition
         this.targetPosition = targetPosition
 
-        val error = targetPosition - currentPosition
-        val velError = if (timePeriod != 0.0) {(error - lastError) / timePeriod} else {0.0}
+        error = targetPosition - currentPosition
+        velError = if (timePeriod != 0.0) {(error - lastError) / timePeriod} else {0.0}
         lastError = error
 
         // handle integral error
@@ -74,6 +83,6 @@ class PIDController(
     }
 
     fun atSetPoint () : Boolean {
-        return (abs(targetPosition - currentPosition) <= setPointTolerance)
+        return (abs(error) <= setPointTolerance) && (abs(velError) <= velErrorTolerance)
     }
 }
