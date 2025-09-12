@@ -13,7 +13,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx
 import com.qualcomm.robotcore.hardware.DcMotorSimple
 import com.qualcomm.robotcore.hardware.IMU
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit
-import org.firstinspires.ftc.teamcode.util.TunablePIDFController
+import org.firstinspires.ftc.teamcode.util.PIDController
 import kotlin.math.abs
 
 @Configurable
@@ -38,7 +38,7 @@ class MecanumHeadingCorrect : LinearOpMode() {
     @JvmField
     var driveSpeed : Double = 0.5
 
-    val controller = TunablePIDFController(p, i, d)
+    val controller = PIDController(p,i,d)
 
     override fun runOpMode() {
         telemetry = MultipleTelemetry(FtcDashboard.getInstance().telemetry, telemetry)
@@ -61,13 +61,13 @@ class MecanumHeadingCorrect : LinearOpMode() {
         backLeft.mode   = DcMotor.RunMode.RUN_WITHOUT_ENCODER
         backRight.mode  = DcMotor.RunMode.RUN_WITHOUT_ENCODER
 
+        controller.setPointTolerance = 1.toDouble()
+
         imu.initialize(IMU.Parameters(RevHubOrientationOnRobot(
             RevHubOrientationOnRobot.LogoFacingDirection.BACKWARD,
             RevHubOrientationOnRobot.UsbFacingDirection.UP)))
 
         targetImuPos = imu.robotYawPitchRollAngles.getYaw(AngleUnit.DEGREES)
-
-        controller.setPointTolerance = 1.toDouble()
 
         // bulk caching
         val allHubs = hardwareMap.getAll(LynxModule::class.java)
@@ -81,26 +81,27 @@ class MecanumHeadingCorrect : LinearOpMode() {
 
             val x : Double = gamepad1.left_stick_x.toDouble()
             val y : Double = -gamepad1.left_stick_y.toDouble()
-            val rot : Double = gamepad1.right_stick_x.toDouble()
+            val rx : Double = gamepad1.right_stick_x.toDouble()
 
             val heading = imu.robotYawPitchRollAngles.getYaw(AngleUnit.DEGREES)
-            controller.setPID(p,i,d)
-            val error = controller.calculate(heading, targetImuPos)
+            
+            controller.setCoeffs(p,i,d)
+            val pidOutput : Double = controller.calculate(heading, targetImuPos)
 
-            var frontLeftPower = y + x - rot
-            var frontRightPower = y - x + rot
-            var backLeftPower = y - x - rot
-            var backRightPower = y + x + rot
+            var frontLeftPower = y + x - rx
+            var frontRightPower = y - x + rx
+            var backLeftPower = y - x - rx
+            var backRightPower = y + x + rx
 
             // if turning, update the heading
-            if (abs(rot - 0.0) > 0.01) {
+            if (abs(rx - 0.0) > 0.01) {
                 targetImuPos = heading
             } else {
                 // otherwise, automatically steer to correct for drift
-                frontLeftPower -= error
-                frontRightPower += error
-                backLeftPower -= error
-                backRightPower += error
+                frontLeftPower -= pidOutput
+                frontRightPower += pidOutput
+                backLeftPower -= pidOutput
+                backRightPower += pidOutput
             }
 
             val max = maxOf(abs(frontLeftPower),abs(frontRightPower),abs(backLeftPower),abs(backRightPower))
@@ -121,13 +122,30 @@ class MecanumHeadingCorrect : LinearOpMode() {
             backRight.power  = backRightPower  * driveSpeed
 
             telemetry.addData("Using max", usemax)
-            telemetry.addData("target imu position", targetImuPos)
-            telemetry.addData("current Imu position", heading)
+            telemetry.addData("targ. Imu position", targetImuPos)
+            telemetry.addData("curr. Imu position", heading)
+            telemetry.addData("PID Output", pidOutput)
             telemetry.addLine("---------------------------------------")
             telemetry.addData("Front Left Wheel", frontLeftPower)
             telemetry.addData("Front Right Wheel", frontRightPower)
             telemetry.addData("Back Left Wheel", backLeftPower)
             telemetry.addData("Back Right Wheel", backRightPower)
+            telemetry.addLine("---------------------------------------")
+            telemetry.addData("Left_X",x)
+            telemetry.addData("Left_Y",y)
+            telemetry.addData("RightX",rx)
+            telemetry.addLine("---------------------------------------")
+            telemetry.addData("PID Controller variables", "")
+            telemetry.addData("PID kP", controller.kP)
+            telemetry.addData("PID kI", controller.kI)
+            telemetry.addData("PID kD", controller.kD)
+            telemetry.addData("PID Target Position", controller.targetPosition)
+            telemetry.addData("PID Current Position", controller.currentPosition)
+            telemetry.addData("PID Last Position", controller.lastPosition)
+            telemetry.addData("PID SetPoint Tolerance", controller.setPointTolerance)
+            telemetry.addData("PID Loop time", controller.timePeriod)
+            telemetry.addData("PID Total Error", controller.totalError)
+            telemetry.addData("PID At SetPoint", controller.atSetPoint())
 
             telemetry.update()
         }
