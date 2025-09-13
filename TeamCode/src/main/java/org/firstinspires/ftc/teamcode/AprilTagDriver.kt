@@ -20,6 +20,7 @@ import org.firstinspires.ftc.teamcode.util.PIDController
 import org.firstinspires.ftc.vision.VisionPortal
 import org.firstinspires.ftc.vision.apriltag.AprilTagLibrary
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor
+import org.openftc.easyopencv.OpenCvWebcam
 
 @Config
 @Configurable
@@ -32,22 +33,33 @@ class AprilTagDriver : LinearOpMode() {
 
     private val imu        by lazy { hardwareMap["imu"] as IMU }
     private var currentTagPos = 320.0
+    private var lastTagPos = 320.0
     private var targetTagPos = 320.0
 
     lateinit var aprilTag : AprilTagProcessor
     lateinit var visionPortal : VisionPortal
 
-    @JvmField
-    var p : Double = 0.005
-    @JvmField
-    var i : Double = 0.0
-    @JvmField
-    var d : Double = 0.0
+    @Config
+    object driverConsts {
+        @JvmField
+        var p: Double = 0.0025
+
+        @JvmField
+        var i: Double = 0.0
+
+        @JvmField
+        var d: Double = 0.0
+
+        @JvmField
+        var min : Double = -10.0
+        var max : Double = 10.0
+    }
 
     @JvmField
     var driveSpeed : Double = 0.5
 
-    val controller = PIDController(p,i,d)
+    val controller = PIDController(driverConsts.p,driverConsts.i,driverConsts.d, 0.0, driverConsts.max,
+        driverConsts.min)
     override fun runOpMode() {
         telemetry = MultipleTelemetry(FtcDashboard.getInstance().telemetry, telemetry)
 
@@ -88,8 +100,11 @@ class AprilTagDriver : LinearOpMode() {
             allHubs.forEach { hub -> hub.clearBulkCache() }
 
             processVision()
-            controller.setCoeffs(p,i,d)
-            val pidOutput = controller.calculate(currentTagPos,targetTagPos)
+            controller.setCoeffs(driverConsts.p,driverConsts.i,driverConsts.d)
+            controller.setIntegrationBounds(driverConsts.min, driverConsts.max)
+            val filtered = currentTagPos * 0.25 + lastTagPos * (1-0.25)
+            lastTagPos = currentTagPos
+            val pidOutput = controller.calculate(filtered,targetTagPos)
 
             val x : Double = gamepad1.left_stick_x.toDouble()
             val y : Double = -gamepad1.left_stick_y.toDouble()
@@ -97,11 +112,13 @@ class AprilTagDriver : LinearOpMode() {
 
             var rot : Double = 0.0
 
-            rot = if (gamepad1.left_trigger >= 0.1) {
-                pidOutput
-            } else {
-                rx
-            }
+//            rot = if (gamepad1.left_trigger >= 0.1) {
+//                -pidOutput
+//            } else {
+//                rx
+//            }
+
+            rot = -pidOutput
 
             val frontLeftPower = y + x - rot
             val frontRightPower = y - x + rot
@@ -130,6 +147,7 @@ class AprilTagDriver : LinearOpMode() {
             telemetry.addData("PID kD", controller.kD)
             telemetry.addData("PID Target Position", controller.targetPosition)
             telemetry.addData("PID Current Position", controller.currentPosition)
+            telemetry.addData("Last position", lastTagPos)
             telemetry.addData("PID Error", controller.error)
             telemetry.addData("PID Velocity error", controller.velError)
             telemetry.addData("PID Last Error", controller.lastError)
@@ -159,6 +177,7 @@ class AprilTagDriver : LinearOpMode() {
         builder.setCameraResolution(Size(640, 480))
         builder.enableLiveView(true)
         builder.addProcessor(aprilTag)
+        builder.setStreamFormat(VisionPortal.StreamFormat.MJPEG)
         visionPortal = builder.build()
     }
 

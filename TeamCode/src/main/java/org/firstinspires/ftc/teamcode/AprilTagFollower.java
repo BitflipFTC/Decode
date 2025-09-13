@@ -205,6 +205,7 @@ public class AprilTagFollower extends LinearOpMode {
             builder.setCameraResolution(new Size(640, 480));
             builder.enableLiveView(true);
             builder.addProcessor(aprilTag);
+            builder.setStreamFormat(VisionPortal.StreamFormat.MJPEG);
             visionPortal=builder.build();
         } else {
             visionPortal = VisionPortal.easyCreateWithDefaults(
