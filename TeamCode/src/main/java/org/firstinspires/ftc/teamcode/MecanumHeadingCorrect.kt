@@ -16,7 +16,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit
 import org.firstinspires.ftc.teamcode.util.PIDController
 import kotlin.math.abs
 
-@Configurable
 @Config
 @TeleOp(name = "Mecanum Heading Correct")
 class MecanumHeadingCorrect : LinearOpMode() {
@@ -28,17 +27,19 @@ class MecanumHeadingCorrect : LinearOpMode() {
     private val imu        by lazy { hardwareMap["imu"] as IMU }
     private var targetImuPos = 0.0
 
-    @JvmField
-    var p : Double = 0.005
-    @JvmField
-    var i : Double = 0.0
-    @JvmField
-    var d : Double = 0.0
+    @Config
+    object Constants {
+        @JvmField var p: Double = 0.015
+
+        @JvmField var i: Double = 0.09
+
+        @JvmField var d: Double = 0.0
+    }
 
     @JvmField
     var driveSpeed : Double = 0.5
 
-    val controller = PIDController(p,i,d)
+    val controller = PIDController(Constants.p,Constants.i,Constants.d)
 
     override fun runOpMode() {
         telemetry = MultipleTelemetry(FtcDashboard.getInstance().telemetry, telemetry)
@@ -83,10 +84,17 @@ class MecanumHeadingCorrect : LinearOpMode() {
             val y : Double = -gamepad1.left_stick_y.toDouble()
             val rx : Double = gamepad1.right_stick_x.toDouble()
 
-            val heading = imu.robotYawPitchRollAngles.getYaw(AngleUnit.DEGREES)
+            var heading = imu.robotYawPitchRollAngles.getYaw(AngleUnit.DEGREES)
+            if (abs(heading - targetImuPos) > 180) {
+                if (heading > targetImuPos) {
+                    heading -= 360
+                } else {
+                    heading += 360
+                }
+            }
             
-            controller.setCoeffs(p,i,d)
-            val pidOutput : Double = controller.calculate(heading, targetImuPos)
+            controller.setCoeffs(Constants.p,Constants.i,Constants.d)
+            val pidOutput : Double = -controller.calculate(heading, targetImuPos)
 
             var frontLeftPower = y + x - rx
             var frontRightPower = y - x + rx
