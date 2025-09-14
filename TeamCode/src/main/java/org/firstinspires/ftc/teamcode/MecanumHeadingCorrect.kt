@@ -13,6 +13,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx
 import com.qualcomm.robotcore.hardware.DcMotorSimple
 import com.qualcomm.robotcore.hardware.IMU
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit
+import org.firstinspires.ftc.teamcode.util.HeadingCorrectPID
 import org.firstinspires.ftc.teamcode.util.PIDController
 import kotlin.math.abs
 
@@ -27,19 +28,9 @@ class MecanumHeadingCorrect : LinearOpMode() {
     private val imu        by lazy { hardwareMap["imu"] as IMU }
     private var targetImuPos = 0.0
 
-    @Config
-    object Constants {
-        @JvmField var p: Double = 0.015
-
-        @JvmField var i: Double = 0.09
-
-        @JvmField var d: Double = 0.0
-    }
-
-    @JvmField
     var driveSpeed : Double = 0.5
 
-    val controller = PIDController(Constants.p,Constants.i,Constants.d)
+    val controller = PIDController(HeadingCorrectPID.p,HeadingCorrectPID.i, HeadingCorrectPID.d)
 
     override fun runOpMode() {
         telemetry = MultipleTelemetry(FtcDashboard.getInstance().telemetry, telemetry)
@@ -93,7 +84,7 @@ class MecanumHeadingCorrect : LinearOpMode() {
                 }
             }
             
-            controller.setCoeffs(Constants.p,Constants.i,Constants.d)
+            controller.setCoeffs(HeadingCorrectPID.p,HeadingCorrectPID.i,HeadingCorrectPID.d)
             val pidOutput : Double = -controller.calculate(heading, targetImuPos)
 
             var frontLeftPower = y + x - rx

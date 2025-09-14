@@ -16,6 +16,7 @@ import com.qualcomm.robotcore.hardware.IMU
 import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDirection
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit
+import org.firstinspires.ftc.teamcode.util.AprilTagDriverPID
 import org.firstinspires.ftc.teamcode.util.PIDController
 import org.firstinspires.ftc.vision.VisionPortal
 import org.firstinspires.ftc.vision.apriltag.AprilTagLibrary
@@ -39,27 +40,12 @@ class AprilTagDriver : LinearOpMode() {
     lateinit var aprilTag : AprilTagProcessor
     lateinit var visionPortal : VisionPortal
 
-    @Config
-    object driverConsts {
-        @JvmField
-        var p: Double = 0.0025
-
-        @JvmField
-        var i: Double = 0.0
-
-        @JvmField
-        var d: Double = 0.0
-
-        @JvmField
-        var min : Double = -10.0
-        var max : Double = 10.0
-    }
-
     @JvmField
     var driveSpeed : Double = 0.5
 
-    val controller = PIDController(driverConsts.p,driverConsts.i,driverConsts.d, 0.0, driverConsts.max,
-        driverConsts.min)
+    val controller = PIDController(
+        AprilTagDriverPID.p,AprilTagDriverPID.i,AprilTagDriverPID.d, 0.0, AprilTagDriverPID.max,
+        AprilTagDriverPID.min)
     override fun runOpMode() {
         telemetry = MultipleTelemetry(FtcDashboard.getInstance().telemetry, telemetry)
 
@@ -100,8 +86,8 @@ class AprilTagDriver : LinearOpMode() {
             allHubs.forEach { hub -> hub.clearBulkCache() }
 
             processVision()
-            controller.setCoeffs(driverConsts.p,driverConsts.i,driverConsts.d)
-            controller.setIntegrationBounds(driverConsts.min, driverConsts.max)
+            controller.setCoeffs(AprilTagDriverPID.p,AprilTagDriverPID.i,AprilTagDriverPID.d)
+            controller.setIntegrationBounds(AprilTagDriverPID.min, AprilTagDriverPID.max)
             val filtered = currentTagPos * 0.25 + lastTagPos * (1-0.25)
             lastTagPos = currentTagPos
             val pidOutput = controller.calculate(filtered,targetTagPos)
