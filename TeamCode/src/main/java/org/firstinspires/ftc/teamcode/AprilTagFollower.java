@@ -50,6 +50,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDirection;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.teamcode.util.AprilTagTrackerPID;
 import org.firstinspires.ftc.teamcode.util.PIDController;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
@@ -86,7 +87,6 @@ public class AprilTagFollower extends LinearOpMode {
     public static double currentTagPos;
 
     private PIDController controller;
-    public static double p=0.00015, i=0, d=0;
 
     ElapsedTime timer;
 
@@ -154,24 +154,21 @@ public class AprilTagFollower extends LinearOpMode {
             telemetryM.addData("Current speed value", driveSpeed);
             telemetryM.addData("Current tag pos", currentTagPos);
 
-            controller.setCoeffs(p, i, d,0);
+            controller.setCoeffs(AprilTagTrackerPID.p, AprilTagTrackerPID.i, AprilTagTrackerPID.d, 0);
+            controller.setIntegrationBounds(AprilTagTrackerPID.min, AprilTagTrackerPID.max);
 
-            double err = Math.sqrt(Math.abs(targetTagPos - currentTagPos) * p);
             double pidError = Math.sqrt(Math.abs(controller.calculate(currentTagPos, targetTagPos)));
 
             if (targetTagPos < currentTagPos){
-                err = -err;
                 pidError = -pidError;
             }
 
-            telemetryM.addData("error", err);
             telemetryM.addData("pid Error", pidError);
 
-            front_left.setPower(-err);
-            front_right.setPower(err);
-            back_left.setPower(-err);
-            back_right.setPower(err);
-            gm.addData("err",err);
+            front_left.setPower(-pidError);
+            front_right.setPower(pidError);
+            back_left.setPower(-pidError);
+            back_right.setPower(pidError);
             gm.update();
 
             telemetryM.addData("loop time", timer.milliseconds());
