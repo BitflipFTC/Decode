@@ -31,7 +31,7 @@ allprojects {
 repositories {
     mavenCentral()
     maven {
-        url "https://repo.dairy.foundation/releases"
+        url = "https://repo.dairy.foundation/releases"
         url = "https://mymaven.bylazar.com/releases"
     }
 }

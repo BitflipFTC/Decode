@@ -2,8 +2,6 @@ repositories {
     mavenCentral()
     google() // Needed for androidx
 
-    // nextftc
-    maven { url = "https://maven.rowanmcalpin.com/" }
 
     // pedropathing
     maven { url = 'https://maven.pedropathing.com' }
@@ -11,24 +9,28 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.firstinspires.ftc:Inspection:10.3.0'
-    implementation 'org.firstinspires.ftc:Blocks:10.3.0'
-    implementation 'org.firstinspires.ftc:RobotCore:10.3.0'
-    implementation 'org.firstinspires.ftc:RobotServer:10.3.0'
-    implementation 'org.firstinspires.ftc:OnBotJava:10.3.0'
-    implementation 'org.firstinspires.ftc:Hardware:10.3.0'
-    implementation 'org.firstinspires.ftc:FtcCommon:10.3.0'
-    implementation 'org.firstinspires.ftc:Vision:10.3.0'
+    implementation 'org.firstinspires.ftc:Inspection:11.0.0'
+    implementation 'org.firstinspires.ftc:Blocks:11.0.0'
+    implementation 'org.firstinspires.ftc:RobotCore:11.0.0'
+    implementation 'org.firstinspires.ftc:RobotServer:11.0.0'
+    implementation 'org.firstinspires.ftc:OnBotJava:11.0.0'
+    implementation 'org.firstinspires.ftc:Hardware:11.0.0'
+    implementation 'org.firstinspires.ftc:FtcCommon:11.0.0'
+    implementation 'org.firstinspires.ftc:Vision:11.0.0'
     implementation 'androidx.appcompat:appcompat:1.2.0'
 
     // pedropathing + panels
-    implementation 'com.pedropathing:ftc:2.0.0'
+    implementation('com.pedropathing:ftc:2.0.1'){
+        exclude group: 'com.acmerobotics.dashboard'
+    }
     implementation 'com.pedropathing:telemetry:0.0.6'
-    implementation 'com.bylazar:fullpanels:1.0.2'
+    implementation 'com.bylazar:fullpanels:1.0.5'
 
     // nextftc
-    implementation 'com.rowanmcalpin.nextftc:core:0.6.2'
-    implementation 'com.rowanmcalpin.nextftc:ftc:0.6.2'
-    implementation 'com.rowanmcalpin.nextftc:pedro:0.6.2'
+    implementation 'dev.nextftc:ftc:1.0.0'
+    implementation 'dev.nextftc:hardware:1.0.0'
+    implementation 'dev.nextftc:control:1.0.0'
+    implementation 'dev.nextftc:bindings:1.0.1'
+
 }
 

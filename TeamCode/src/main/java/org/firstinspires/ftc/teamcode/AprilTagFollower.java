@@ -1,0 +1,259 @@
+/* Copyright (c) 2023 FIRST. All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without modification,
+ * are permitted (subject to the limitations in the disclaimer below) provided that
+ * the following conditions are met:
+ *
+ * Redistributions of source code must retain the above copyright notice, this list
+ * of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice, this
+ * list of conditions and the following disclaimer in the documentation and/or
+ * other materials provided with the distribution.
+ *
+ * Neither the name of FIRST nor the names of its contributors may be used to endorse or
+ * promote products derived from this software without specific prior written permission.
+ *
+ * NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY THIS
+ * LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+package org.firstinspires.ftc.teamcode;
+
+import android.annotation.SuppressLint;
+import android.util.Size;
+
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.bylazar.configurables.annotations.Configurable;
+import com.bylazar.graph.GraphManager;
+import com.bylazar.graph.PanelsGraph;
+import com.bylazar.telemetry.PanelsTelemetry;
+import com.bylazar.telemetry.TelemetryManager;
+import com.qualcomm.hardware.lynx.LynxModule;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.util.ElapsedTime;
+
+import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDirection;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.teamcode.util.PIDController;
+import org.firstinspires.ftc.vision.VisionPortal;
+import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
+import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
+
+import java.util.List;
+
+@Config
+@Configurable
+@TeleOp(name = "Concept: AprilTag Tracker", group = "Concept")
+public class AprilTagFollower extends LinearOpMode {
+
+    private static final boolean USE_WEBCAM = true;  // true for webcam, false for phone camera
+
+    /**
+     * The variable to store our instance of the AprilTag processor.
+     */
+    private AprilTagProcessor aprilTag;
+
+    /**
+     * The variable to store our instance of the vision portal.
+     */
+    private VisionPortal visionPortal;
+
+    TelemetryManager telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
+    GraphManager gm = PanelsGraph.INSTANCE.getManager();
+    DcMotorEx front_left;
+    DcMotorEx front_right;
+    DcMotorEx back_left;
+    DcMotorEx back_right;
+//    boolean useMax = false;
+    double driveSpeed = 1;
+    public static double targetTagPos = 320;
+    public static double currentTagPos;
+
+    private PIDController controller;
+    public static double p=0.00015, i=0, d=0;
+
+    ElapsedTime timer;
+
+//    enum Speed {
+//        MAX,
+//        MED,
+//        MIN
+//    }
+
+//    Speed driveSpeedEnum = Speed.MED;
+
+    @Override
+    public void runOpMode() {
+
+        initAprilTag();
+
+        telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
+
+        controller = new PIDController();
+
+        front_left  = hardwareMap.get(DcMotorEx.class, "frontleft");
+        front_right = hardwareMap.get(DcMotorEx.class, "frontright");
+        back_left   = hardwareMap.get(DcMotorEx.class, "backleft");
+        back_right  = hardwareMap.get(DcMotorEx.class, "backright");
+
+        front_left.setDirection(DcMotorSimple.Direction.REVERSE);
+        back_left.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        telemetryM.addData("Initialized", true);
+        telemetryM.update(telemetry);
+
+        timer = new ElapsedTime();
+
+        // Wait for the DS start button to be touched.
+        telemetry.addData("DS preview on/off", "3 dots, Camera Stream");
+        telemetry.addData(">", "Touch START to start OpMode");
+        telemetry.update();
+        waitForStart();
+
+        timer.reset();
+
+        List<LynxModule> allHubs = hardwareMap.getAll(LynxModule.class);
+
+        for (LynxModule hub : allHubs) {
+            hub.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
+        }
+
+        while (opModeIsActive()) {
+
+            for (LynxModule hub : allHubs) {
+                hub.clearBulkCache();
+            }
+
+            telemetryAprilTag();
+
+            // Push telemetry to the Driver Station.
+
+            // Save CPU resources; can resume streaming when needed.
+            if (gamepad1.dpad_down) {
+                visionPortal.stopStreaming();
+            } else if (gamepad1.dpad_up) {
+                visionPortal.resumeStreaming();
+            }
+
+            telemetryM.addData("Current speed value", driveSpeed);
+            telemetryM.addData("Current tag pos", currentTagPos);
+
+            controller.setCoeffs(p, i, d,0);
+
+            double err = Math.sqrt(Math.abs(targetTagPos - currentTagPos) * p);
+            double pidError = Math.sqrt(Math.abs(controller.calculate(currentTagPos, targetTagPos)));
+
+            if (targetTagPos < currentTagPos){
+                err = -err;
+                pidError = -pidError;
+            }
+
+            telemetryM.addData("error", err);
+            telemetryM.addData("pid Error", pidError);
+
+            front_left.setPower(-err);
+            front_right.setPower(err);
+            back_left.setPower(-err);
+            back_right.setPower(err);
+            gm.addData("err",err);
+            gm.update();
+
+            telemetryM.addData("loop time", timer.milliseconds());
+            telemetryM.update(telemetry);
+        }
+
+        // Save more CPU resources when camera is no longer needed.
+        visionPortal.close();
+
+    }   // end method runOpMode()
+
+    /**
+     * Initialize the AprilTag processor.
+     */
+    private void initAprilTag() {
+
+        // Create the AprilTag processor the easy way.
+        aprilTag = new AprilTagProcessor.Builder()
+                .setDrawAxes(true)
+                .setDrawTagOutline(true)
+//                .setTagLibrary(AprilTagGameDatabase.)
+                .build();
+        aprilTag.setDecimation(3);
+
+        // Create the vision portal the easy way.
+        if (USE_WEBCAM) {
+            VisionPortal.Builder builder = new VisionPortal.Builder();
+
+            builder.setCamera(hardwareMap.get(WebcamName.class, "camera"));
+
+            builder.setCameraResolution(new Size(640, 480));
+            builder.enableLiveView(true);
+            builder.addProcessor(aprilTag);
+            builder.setStreamFormat(VisionPortal.StreamFormat.MJPEG);
+            visionPortal=builder.build();
+        } else {
+            visionPortal = VisionPortal.easyCreateWithDefaults(
+                    BuiltinCameraDirection.BACK, aprilTag);
+        }
+
+    }   // end method initAprilTag()
+
+    /**
+     * Add telemetry about AprilTag detections.
+     */
+    @SuppressLint("DefaultLocale")
+    private void telemetryAprilTag() {
+
+        List<AprilTagDetection> currentDetections = aprilTag.getDetections();
+        telemetry.addData("# AprilTags Detected", currentDetections.size());
+
+        // Step through the list of detections and display info for each one.
+        for (AprilTagDetection detection : currentDetections) {
+            if (detection.metadata != null) {
+                telemetry.addLine(String.format("\n==== (ID %d) %s", detection.id, detection.metadata.name));
+                // Only use tags that don't have Obelisk in them
+                if (!detection.metadata.name.contains("Obelisk")) {
+                    telemetry.addLine(String.format("XYZ %6.1f %6.1f %6.1f  (inch)",
+                            detection.robotPose.getPosition().x,
+                            detection.robotPose.getPosition().y,
+                            detection.robotPose.getPosition().z));
+                    telemetry.addLine(String.format("PRY %6.1f %6.1f %6.1f  (deg)",
+                            detection.robotPose.getOrientation().getPitch(AngleUnit.DEGREES),
+                            detection.robotPose.getOrientation().getRoll(AngleUnit.DEGREES),
+                            detection.robotPose.getOrientation().getYaw(AngleUnit.DEGREES)));
+                }
+            } else {
+                telemetry.addLine(String.format("\n==== (ID %d) Unknown", detection.id));
+                telemetry.addLine(String.format("Center %6.0f %6.0f   (pixels)", detection.center.x, detection.center.y));
+            }
+
+            currentTagPos = detection.center.x;
+        }   // end for() loop
+
+        if(currentDetections.isEmpty()) {
+            currentTagPos = 320;
+        }
+        // Add "key" information to telemetry
+        telemetry.addLine("\nkey:\nXYZ = X (Right), Y (Forward), Z (Up) dist.");
+        telemetry.addLine("PRY = Pitch, Roll & Yaw (XYZ Rotation)");
+        telemetry.addLine("RBE = Range, Bearing & Elevation");
+
+    }   // end method telemetryAprilTag()
+
+}   // end class
