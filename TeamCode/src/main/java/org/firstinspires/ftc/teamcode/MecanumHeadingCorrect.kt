@@ -14,6 +14,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple
 import com.qualcomm.robotcore.hardware.IMU
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit
 import org.firstinspires.ftc.teamcode.util.HeadingCorrectPID
+import org.firstinspires.ftc.teamcode.util.LoopTimer
 import org.firstinspires.ftc.teamcode.util.PIDController
 import kotlin.math.abs
 
@@ -27,6 +28,8 @@ class MecanumHeadingCorrect : LinearOpMode() {
 
     private val imu        by lazy { hardwareMap["imu"] as IMU }
     private var targetImuPos = 0.0
+
+    private val loopTimer = LoopTimer()
 
     var driveSpeed : Double = 0.5
 
@@ -66,6 +69,8 @@ class MecanumHeadingCorrect : LinearOpMode() {
         allHubs.forEach { hub -> hub.bulkCachingMode = LynxModule.BulkCachingMode.MANUAL }
 
         waitForStart()
+
+        loopTimer.reset()
 
         while (opModeIsActive()) {
             // more bulk caching
@@ -120,33 +125,35 @@ class MecanumHeadingCorrect : LinearOpMode() {
             backLeft.power   = backLeftPower   * driveSpeed
             backRight.power  = backRightPower  * driveSpeed
 
-            telemetry.addData("Using max", usemax)
             telemetry.addData("targ. Imu position", targetImuPos)
             telemetry.addData("curr. Imu position", heading)
             telemetry.addData("PID Output", pidOutput)
             telemetry.addLine("---------------------------------------")
-            telemetry.addData("Front Left Wheel", frontLeftPower)
-            telemetry.addData("Front Right Wheel", frontRightPower)
-            telemetry.addData("Back Left Wheel", backLeftPower)
-            telemetry.addData("Back Right Wheel", backRightPower)
+            telemetry.addLine()
+
+            telemetry.addData("","%+0.2f -------------------- %+0.2f", frontLeftPower,frontRightPower)
+            telemetry.addLine("     |                      |")
+            telemetry.addLine("     |                      |")
+            telemetry.addLine("     |                      |")
+            telemetry.addLine("     |                      |")
+            telemetry.addData("","%+0.2f -------------------- %+0.2f",backLeftPower,backRightPower)
+
+            telemetry.addLine()
+
             telemetry.addLine("---------------------------------------")
-            telemetry.addData("Left_X",x)
-            telemetry.addData("Left_Y",y)
-            telemetry.addData("RightX",rx)
+            telemetry.addData("Left Stick ","x:%+0.2f y:%+0.2f", x, y)
+            telemetry.addData("Right Stick","x:%+0.2f y:%+0.2f", rx, gamepad1.right_stick_y)
             telemetry.addLine("---------------------------------------")
-            telemetry.addData("PID Controller variables", "")
-            telemetry.addData("PID kP", controller.kP)
-            telemetry.addData("PID kI", controller.kI)
-            telemetry.addData("PID kD", controller.kD)
-            telemetry.addData("PID Target Position", controller.targetPosition)
-            telemetry.addData("PID Current Position", controller.currentPosition)
+            telemetry.addData("PID Controller variables", "kP:%.3f  kI:%.3f  kD:%.3f",
+                HeadingCorrectPID.p, HeadingCorrectPID.i, HeadingCorrectPID.d)
             telemetry.addData("PID Error", controller.error)
             telemetry.addData("PID Velocity error", controller.velError)
-            telemetry.addData("PID Last Error", controller.lastError)
             telemetry.addData("PID SetPoint Tolerance", controller.setPointTolerance)
-            telemetry.addData("PID Loop time", controller.timePeriod)
             telemetry.addData("PID Total Error", controller.totalError)
             telemetry.addData("PID At SetPoint", controller.atSetPoint())
+            telemetry.addLine("---------------------------------------")
+            telemetry.addData("Loop Time","%0.2fms", loopTimer.getLoopTime())
+
 
             telemetry.update()
         }
