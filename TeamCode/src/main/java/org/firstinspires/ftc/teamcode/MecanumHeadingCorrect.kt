@@ -83,9 +83,9 @@ class MecanumHeadingCorrect : LinearOpMode() {
             var heading = imu.robotYawPitchRollAngles.getYaw(AngleUnit.DEGREES)
             if (abs(heading - targetImuPos) > 180) {
                 if (heading > targetImuPos) {
-                    heading -= 360
+                    targetImuPos += 360
                 } else {
-                    heading += 360
+                    targetImuPos -= 360
                 }
             }
             
@@ -131,18 +131,17 @@ class MecanumHeadingCorrect : LinearOpMode() {
             telemetry.addLine("---------------------------------------")
             telemetry.addLine()
 
-            telemetry.addData("","%+0.2f -------------------- %+0.2f", frontLeftPower,frontRightPower)
-            telemetry.addLine("     |                      |")
-            telemetry.addLine("     |                      |")
-            telemetry.addLine("     |                      |")
-            telemetry.addLine("     |                      |")
-            telemetry.addData("","%+0.2f -------------------- %+0.2f",backLeftPower,backRightPower)
+            telemetry.addData("","%+05.2f -------------------- %+05.2f", frontLeftPower,frontRightPower)
+            telemetry.addLine("     |                                |")
+            telemetry.addData("     |               ","%+05.3f       |",heading)
+            telemetry.addLine("     |                                |")
+            telemetry.addData("","%+05.2f -------------------- %+05.2f",backLeftPower,backRightPower)
 
             telemetry.addLine()
 
             telemetry.addLine("---------------------------------------")
-            telemetry.addData("Left Stick ","x:%+0.2f y:%+0.2f", x, y)
-            telemetry.addData("Right Stick","x:%+0.2f y:%+0.2f", rx, gamepad1.right_stick_y)
+            telemetry.addData("Left Stick ","x:%+05.2f y:%+05.2f", x, y)
+            telemetry.addData("Right Stick","x:%+05.2f y:%+05.2f", rx, gamepad1.right_stick_y)
             telemetry.addLine("---------------------------------------")
             telemetry.addData("PID Controller variables", "kP:%.3f  kI:%.3f  kD:%.3f",
                 HeadingCorrectPID.p, HeadingCorrectPID.i, HeadingCorrectPID.d)
@@ -152,7 +151,7 @@ class MecanumHeadingCorrect : LinearOpMode() {
             telemetry.addData("PID Total Error", controller.totalError)
             telemetry.addData("PID At SetPoint", controller.atSetPoint())
             telemetry.addLine("---------------------------------------")
-            telemetry.addData("Loop Time","%0.2fms", loopTimer.getLoopTime())
+            telemetry.addData("Loop Time","%05.2fms", loopTimer.getLoopTime())
 
 
             telemetry.update()
