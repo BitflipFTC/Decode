@@ -80,7 +80,7 @@ class MecanumHeadingCorrect : LinearOpMode() {
             val y : Double = -gamepad1.left_stick_y.toDouble()
             val rx : Double = gamepad1.right_stick_x.toDouble()
 
-            var heading = imu.robotYawPitchRollAngles.getYaw(AngleUnit.DEGREES)
+            val heading = imu.robotYawPitchRollAngles.getYaw(AngleUnit.DEGREES)
             if (abs(heading - targetImuPos) > 180) {
                 if (heading > targetImuPos) {
                     targetImuPos += 360
@@ -90,12 +90,12 @@ class MecanumHeadingCorrect : LinearOpMode() {
             }
             
             controller.setCoeffs(HeadingCorrectPID.p,HeadingCorrectPID.i,HeadingCorrectPID.d)
-            val pidOutput : Double = -controller.calculate(heading, targetImuPos)
+            val pidOutput : Double = controller.calculate(heading, targetImuPos)
 
-            var frontLeftPower = y + x - rx
-            var frontRightPower = y - x + rx
-            var backLeftPower = y - x - rx
-            var backRightPower = y + x + rx
+            var frontLeftPower = y + x + rx
+            var frontRightPower = y - x - rx
+            var backLeftPower = y - x + rx
+            var backRightPower = y + x - rx
 
             // if turning, update the heading
             if (abs(rx - 0.0) > 0.01) {

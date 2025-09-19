@@ -5,6 +5,19 @@ import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 
+/**
+ * A PID(F) Controller.
+ * *Notes*:
+ * - feedforward has yet to be tested.
+ * - integral term may wind up too quickly.
+ *
+ * @param kP Proportional control coefficient
+ * @param kI Integral control coefficient
+ * @param kD Derivative control coefficient
+ * @param kF Feedforward coefficient
+ * @param maxIntegral Maximum integral value (to prevent windup)
+ * @param minIntegral Minimum integral value (to prevent windup)
+ */
 class PIDController(
     var kP : Double = 0.0,
     var kI : Double = 0.0,
@@ -44,6 +57,12 @@ class PIDController(
         this.kF = kf
     }
 
+    /**
+     * Calculates the output given the current position (process variable) and the target position (setpoint)
+     * @param currentPosition (process variable) the current position of the system
+     * @param targetPosition (setpoint) the target position of the system (defaults to the current target)
+     * @return the output of the PID Controller
+     */
     fun calculate (currentPosition : Double, targetPosition : Double = this.targetPosition) : Double {
         // handle time period stuff
         val currentTime = timer.nanoseconds() / 1E9
@@ -68,6 +87,9 @@ class PIDController(
         return kP * error + kI * totalError + kD * velError + targetPosition * kF
     }
 
+    /**
+     * Resets target, tolerance, time, and error
+     */
     fun reset () {
         targetPosition = 0.0
         setPointTolerance = 0.0
@@ -82,6 +104,10 @@ class PIDController(
         maxIntegral = max
     }
 
+    /**
+     * Checks if the PID Controller is at its set point by checking if the position and velocity errors are within their respective tolerances.
+     * @return True if the velocity and position errors are within their tolerances, False otherwise
+     */
     fun atSetPoint () : Boolean {
         return (abs(error) <= setPointTolerance) && (abs(velError) <= velErrorTolerance)
     }
