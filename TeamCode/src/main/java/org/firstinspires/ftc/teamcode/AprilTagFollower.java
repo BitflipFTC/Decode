@@ -54,6 +54,7 @@ import org.firstinspires.ftc.teamcode.util.AprilTagTrackerPID;
 import org.firstinspires.ftc.teamcode.util.PIDController;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
+import org.firstinspires.ftc.vision.apriltag.AprilTagGameDatabase;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
 import java.util.List;
@@ -189,7 +190,7 @@ public class AprilTagFollower extends LinearOpMode {
         aprilTag = new AprilTagProcessor.Builder()
                 .setDrawAxes(true)
                 .setDrawTagOutline(true)
-//                .setTagLibrary(AprilTagGameDatabase.)
+                .setTagLibrary(AprilTagGameDatabase.getDecodeTagLibrary())
                 .build();
         aprilTag.setDecimation(3);
 

@@ -19,13 +19,14 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit
 import org.firstinspires.ftc.teamcode.util.AprilTagDriverPID
 import org.firstinspires.ftc.teamcode.util.PIDController
 import org.firstinspires.ftc.vision.VisionPortal
+import org.firstinspires.ftc.vision.apriltag.AprilTagGameDatabase
 import org.firstinspires.ftc.vision.apriltag.AprilTagLibrary
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor
 import org.openftc.easyopencv.OpenCvWebcam
 
 @Config
 @Configurable
-@TeleOp(name = "Concept: Orient to april tag", group = "Concept")
+@TeleOp(name = "Concept: AprilTag Driver", group = "Concept")
 class AprilTagDriver : LinearOpMode() {
     private val frontLeft  by lazy { hardwareMap["frontleft"]  as DcMotorEx }
     private val frontRight by lazy { hardwareMap["frontright"] as DcMotorEx }
@@ -152,6 +153,7 @@ class AprilTagDriver : LinearOpMode() {
         aprilTag = AprilTagProcessor.Builder()
             .setDrawAxes(true)
             .setDrawTagOutline(true)
+            .setTagLibrary(AprilTagGameDatabase.getDecodeTagLibrary())
             .build()
         aprilTag.setDecimation(3f)
 
