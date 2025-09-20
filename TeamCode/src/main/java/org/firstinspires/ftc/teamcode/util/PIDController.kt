@@ -18,33 +18,27 @@ import kotlin.math.min
  * @param maxIntegral Maximum integral value (to prevent windup)
  * @param minIntegral Minimum integral value (to prevent windup)
  */
-class PIDController(
+open class PIDController(
     var kP : Double = 0.0,
     var kI : Double = 0.0,
     var kD : Double = 0.0,
     var kF : Double = 0.0,
-    private var maxIntegral: Double = 1.0,
-    private var minIntegral: Double = -1.0
+    protected var maxIntegral: Double = 1.0,
+    protected var minIntegral: Double = -1.0
 ) {
-    var targetPosition : Double = 0.0
-    var currentPosition : Double = 0.0
-        private set
-    var setPointTolerance : Double = 1.0
-    var velErrorTolerance : Double = Double.POSITIVE_INFINITY
+    protected var targetPosition : Double = 0.0
+    protected var currentPosition : Double = 0.0
+    protected var setPointTolerance : Double = 1.0
+    protected var velErrorTolerance : Double = Double.POSITIVE_INFINITY
 
-    private val timer = ElapsedTime()
-    private var lastTime = 0.0
-    var timePeriod : Double = 0.0
-        private set
-    var lastError : Double = 0.0
-        private set
-    var totalError = 0.0
-        private set
+    protected val timer = ElapsedTime()
+    protected var lastTime = 0.0
+    protected var timePeriod : Double = 0.0
+    protected var lastError : Double = 0.0
+    protected var totalError = 0.0
 
-    var error = 0.0
-        private set
-    var velError = 0.0
-        private set
+    protected var error = 0.0
+    protected var velError = 0.0
 
     init {
         reset()
@@ -63,7 +57,7 @@ class PIDController(
      * @param targetPosition (setpoint) the target position of the system (defaults to the current target)
      * @return the output of the PID Controller
      */
-    fun calculate (currentPosition : Double, targetPosition : Double = this.targetPosition) : Double {
+    open fun calculate (currentPosition : Double, targetPosition : Double = this.targetPosition) : Double {
         // handle time period stuff
         val currentTime = timer.nanoseconds() / 1E9
         if (lastTime == 0.0) lastTime = currentTime
