@@ -51,6 +51,7 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDir
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.util.AprilTagTrackerPID;
+import org.firstinspires.ftc.teamcode.util.OV9281;
 import org.firstinspires.ftc.teamcode.util.PIDController;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
@@ -63,26 +64,13 @@ import java.util.List;
 @Configurable
 @TeleOp(name = "Concept: AprilTag Tracker", group = "Concept")
 public class AprilTagFollower extends LinearOpMode {
-
-    private static final boolean USE_WEBCAM = true;  // true for webcam, false for phone camera
-
-    /**
-     * The variable to store our instance of the AprilTag processor.
-     */
-    private AprilTagProcessor aprilTag;
-
-    /**
-     * The variable to store our instance of the vision portal.
-     */
-    private VisionPortal visionPortal;
-
+    private OV9281 camera;
     TelemetryManager telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
     GraphManager gm = PanelsGraph.INSTANCE.getManager();
     DcMotorEx front_left;
     DcMotorEx front_right;
     DcMotorEx back_left;
     DcMotorEx back_right;
-//    boolean useMax = false;
     double driveSpeed = 1;
     public static double targetTagPos = 320;
     public static double currentTagPos;
@@ -91,18 +79,10 @@ public class AprilTagFollower extends LinearOpMode {
 
     ElapsedTime timer;
 
-//    enum Speed {
-//        MAX,
-//        MED,
-//        MIN
-//    }
-
-//    Speed driveSpeedEnum = Speed.MED;
-
     @Override
     public void runOpMode() {
 
-        initAprilTag();
+        camera = new OV9281(this);
 
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
@@ -147,9 +127,9 @@ public class AprilTagFollower extends LinearOpMode {
 
             // Save CPU resources; can resume streaming when needed.
             if (gamepad1.dpad_down) {
-                visionPortal.stopStreaming();
+                camera.getVisionPortal().stopStreaming();
             } else if (gamepad1.dpad_up) {
-                visionPortal.resumeStreaming();
+                camera.getVisionPortal().resumeStreaming();
             }
 
             telemetryM.addData("Current speed value", driveSpeed);
@@ -177,40 +157,9 @@ public class AprilTagFollower extends LinearOpMode {
         }
 
         // Save more CPU resources when camera is no longer needed.
-        visionPortal.close();
+        camera.getVisionPortal().close();
 
     }   // end method runOpMode()
-
-    /**
-     * Initialize the AprilTag processor.
-     */
-    private void initAprilTag() {
-
-        // Create the AprilTag processor the easy way.
-        aprilTag = new AprilTagProcessor.Builder()
-                .setDrawAxes(true)
-                .setDrawTagOutline(true)
-                .setTagLibrary(AprilTagGameDatabase.getDecodeTagLibrary())
-                .build();
-        aprilTag.setDecimation(3);
-
-        // Create the vision portal the easy way.
-        if (USE_WEBCAM) {
-            VisionPortal.Builder builder = new VisionPortal.Builder();
-
-            builder.setCamera(hardwareMap.get(WebcamName.class, "camera"));
-
-            builder.setCameraResolution(new Size(640, 480));
-            builder.enableLiveView(true);
-            builder.addProcessor(aprilTag);
-            builder.setStreamFormat(VisionPortal.StreamFormat.MJPEG);
-            visionPortal=builder.build();
-        } else {
-            visionPortal = VisionPortal.easyCreateWithDefaults(
-                    BuiltinCameraDirection.BACK, aprilTag);
-        }
-
-    }   // end method initAprilTag()
 
     /**
      * Add telemetry about AprilTag detections.
@@ -218,7 +167,7 @@ public class AprilTagFollower extends LinearOpMode {
     @SuppressLint("DefaultLocale")
     private void telemetryAprilTag() {
 
-        List<AprilTagDetection> currentDetections = aprilTag.getDetections();
+        List<AprilTagDetection> currentDetections = camera.getAprilTag().getDetections();
         telemetry.addData("# AprilTags Detected", currentDetections.size());
 
         // Step through the list of detections and display info for each one.
