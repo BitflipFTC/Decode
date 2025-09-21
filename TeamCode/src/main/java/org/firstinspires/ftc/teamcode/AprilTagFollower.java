@@ -51,6 +51,7 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDir
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.util.AprilTagTrackerPID;
+import org.firstinspires.ftc.teamcode.util.LoopTimer;
 import org.firstinspires.ftc.teamcode.util.OV9281;
 import org.firstinspires.ftc.teamcode.util.PIDController;
 import org.firstinspires.ftc.vision.VisionPortal;
@@ -65,8 +66,7 @@ import java.util.List;
 @TeleOp(name = "Concept: AprilTag Tracker", group = "Concept")
 public class AprilTagFollower extends LinearOpMode {
     private OV9281 camera;
-    TelemetryManager telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
-    GraphManager gm = PanelsGraph.INSTANCE.getManager();
+    LoopTimer loopTimer;
     DcMotorEx front_left;
     DcMotorEx front_right;
     DcMotorEx back_left;
@@ -77,16 +77,14 @@ public class AprilTagFollower extends LinearOpMode {
 
     private PIDController controller;
 
-    ElapsedTime timer;
-
     @Override
     public void runOpMode() {
 
-        camera = new OV9281(this);
-
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
+        camera = new OV9281(this,3,6);
 
         controller = new PIDController();
+        loopTimer = new LoopTimer();
 
         front_left  = hardwareMap.get(DcMotorEx.class, "frontleft");
         front_right = hardwareMap.get(DcMotorEx.class, "frontright");
@@ -96,10 +94,8 @@ public class AprilTagFollower extends LinearOpMode {
         front_left.setDirection(DcMotorSimple.Direction.REVERSE);
         back_left.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        telemetryM.addData("Initialized", true);
-        telemetryM.update(telemetry);
-
-        timer = new ElapsedTime();
+        telemetry.addData("Initialized", true);
+        telemetry.update();
 
         // Wait for the DS start button to be touched.
         telemetry.addData("DS preview on/off", "3 dots, Camera Stream");
@@ -107,7 +103,6 @@ public class AprilTagFollower extends LinearOpMode {
         telemetry.update();
         waitForStart();
 
-        timer.reset();
 
         List<LynxModule> allHubs = hardwareMap.getAll(LynxModule.class);
 
@@ -132,8 +127,8 @@ public class AprilTagFollower extends LinearOpMode {
                 camera.getVisionPortal().resumeStreaming();
             }
 
-            telemetryM.addData("Current speed value", driveSpeed);
-            telemetryM.addData("Current tag pos", currentTagPos);
+            telemetry.addData("Current speed value", driveSpeed);
+            telemetry.addData("Current tag pos", currentTagPos);
 
             controller.setCoeffs(AprilTagTrackerPID.p, AprilTagTrackerPID.i, AprilTagTrackerPID.d, 0);
             controller.setIntegrationBounds(AprilTagTrackerPID.min, AprilTagTrackerPID.max);
@@ -144,16 +139,17 @@ public class AprilTagFollower extends LinearOpMode {
                 pidError = -pidError;
             }
 
-            telemetryM.addData("pid Error", pidError);
+            telemetry.addData("pid Error", pidError);
 
-            front_left.setPower(-pidError);
-            front_right.setPower(pidError);
-            back_left.setPower(-pidError);
-            back_right.setPower(pidError);
-            gm.update();
+            if (Math.abs(pidError) >= 0.115) {
+                front_left.setPower(-pidError);
+                front_right.setPower(pidError);
+                back_left.setPower(-pidError);
+                back_right.setPower(pidError);
+            }
 
-            telemetryM.addData("loop time", timer.milliseconds());
-            telemetryM.update(telemetry);
+            telemetry.addData("Loop time","%06.3fms",loopTimer.getLoopTime());
+            telemetry.update();
         }
 
         // Save more CPU resources when camera is no longer needed.

@@ -18,7 +18,6 @@ import org.firstinspires.ftc.teamcode.util.LoopTimer
 import org.firstinspires.ftc.teamcode.util.PIDController
 import kotlin.math.abs
 
-@Config
 @TeleOp(name = "Mecanum Heading Correct")
 class MecanumHeadingCorrect : LinearOpMode() {
     private val frontLeft  by lazy { hardwareMap["frontleft"]  as DcMotorEx }
@@ -82,6 +81,8 @@ class MecanumHeadingCorrect : LinearOpMode() {
 
             val heading = imu.robotYawPitchRollAngles.getYaw(AngleUnit.DEGREES)
             if (abs(heading - targetImuPos) > 180) {
+                controller.resetTotalError()
+
                 if (heading > targetImuPos) {
                     targetImuPos += 360
                 } else {
@@ -92,20 +93,21 @@ class MecanumHeadingCorrect : LinearOpMode() {
             controller.setCoeffs(HeadingCorrectPID.p,HeadingCorrectPID.i,HeadingCorrectPID.d)
             val pidOutput : Double = controller.calculate(heading, targetImuPos)
 
-            var frontLeftPower = y + x + rx
-            var frontRightPower = y - x - rx
-            var backLeftPower = y - x + rx
-            var backRightPower = y + x - rx
+            var frontLeftPower = y + x - rx
+            var frontRightPower = y - x + rx
+            var backLeftPower = y - x - rx
+            var backRightPower = y + x + rx
 
             // if turning, update the heading
             if (abs(rx - 0.0) > 0.01) {
                 targetImuPos = heading
-            } else {
+                controller.resetTotalError()
+            } else if (abs(pidOutput) >= 0.115) {
                 // otherwise, automatically steer to correct for drift
-                frontLeftPower -= pidOutput
-                frontRightPower += pidOutput
-                backLeftPower -= pidOutput
-                backRightPower += pidOutput
+                frontLeftPower += pidOutput
+                frontRightPower -= pidOutput
+                backLeftPower += pidOutput
+                backRightPower -= pidOutput
             }
 
             val max = maxOf(abs(frontLeftPower),abs(frontRightPower),abs(backLeftPower),abs(backRightPower))

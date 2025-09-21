@@ -4,9 +4,9 @@ import com.acmerobotics.dashboard.config.Config
 
 @Config
 object HeadingCorrectPID {
-    @JvmField var p: Double = 0.015
+    @JvmField var p: Double = 0.022
 
-    @JvmField var i: Double = 0.09
+    @JvmField var i: Double = 0.1
 
     @JvmField var d: Double = 0.0
 }
@@ -25,7 +25,7 @@ object AprilTagDriverPID {
 
 @Config
 object AprilTagTrackerPID {
-    @JvmField var p: Double = 0.0025
+    @JvmField var p: Double = 0.000
 
     @JvmField var i: Double = 0.0
 
