@@ -111,4 +111,8 @@ open class PIDController(
     fun atSetPoint () : Boolean {
         return (abs(error) <= setPointTolerance) && (abs(velError) <= velErrorTolerance)
     }
+
+    fun resetTotalError () {
+        totalError = 0.0
+    }
 }
