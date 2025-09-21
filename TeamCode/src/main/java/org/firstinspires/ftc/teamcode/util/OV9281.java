@@ -69,6 +69,15 @@ public class OV9281 {
             exposureControl = visionPortal.getCameraControl(ExposureControl.class);
             gainControl = visionPortal.getCameraControl(GainControl.class);
 
+            while (visionPortal.getCameraState() != VisionPortal.CameraState.STREAMING) {
+                try {
+                    Thread.sleep(20);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    return;
+                }
+            }
+
             exposureControl.setMode(ExposureControl.Mode.Manual);
 
             defaultExposure = exposureControl.getExposure(TimeUnit.MILLISECONDS);
@@ -80,12 +89,14 @@ public class OV9281 {
     }
 
     public OV9281(OpMode opMode) {
-        new OV9281(opMode,0,0);
+        this(opMode,0,0);
     }
 
     public void resetExposureGain () {
-        exposureControl.setMode(ExposureControl.Mode.Auto);
-        exposureControl.setExposure(defaultExposure,TimeUnit.MILLISECONDS);
-        gainControl.setGain(defaultGain);
+        if (exposureControl != null && gainControl != null) {
+            exposureControl.setMode(ExposureControl.Mode.Auto);
+            exposureControl.setExposure(defaultExposure,TimeUnit.MILLISECONDS);
+            gainControl.setGain(defaultGain);
+        }
     }
 }
