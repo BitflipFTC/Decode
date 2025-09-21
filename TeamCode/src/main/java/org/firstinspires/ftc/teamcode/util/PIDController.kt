@@ -26,19 +26,25 @@ open class PIDController(
     protected var maxIntegral: Double = 1.0,
     protected var minIntegral: Double = -1.0
 ) {
-    protected var targetPosition : Double = 0.0
-    protected var currentPosition : Double = 0.0
-    protected var setPointTolerance : Double = 1.0
-    protected var velErrorTolerance : Double = Double.POSITIVE_INFINITY
+    var targetPosition : Double = 0.0
+    var currentPosition : Double = 0.0
+        protected set
+    var setPointTolerance : Double = 1.0
+    var velErrorTolerance : Double = Double.POSITIVE_INFINITY
 
     protected val timer = ElapsedTime()
     protected var lastTime = 0.0
-    protected var timePeriod : Double = 0.0
-    protected var lastError : Double = 0.0
-    protected var totalError = 0.0
+    var timePeriod : Double = 0.0
+        protected set
+    var lastError : Double = 0.0
+        protected set
+    var totalError = 0.0
+        protected set
 
-    protected var error = 0.0
-    protected var velError = 0.0
+    var error = 0.0
+        protected set
+    var velError = 0.0
+        protected set
 
     init {
         reset()
