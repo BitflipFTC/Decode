@@ -45,6 +45,8 @@ public class OV9281 {
         return visionPortal;
     }
 
+    // exposure: 1-7
+    // gain: 1-6
     public OV9281 (OpMode opMode, int exposureMS, int gain) {
         aprilTag = new AprilTagProcessor.Builder()
                 .setTagLibrary(AprilTagGameDatabase.getDecodeTagLibrary())
@@ -65,7 +67,16 @@ public class OV9281 {
                 .addProcessor(aprilTag)
                 .build();
 
-        if (exposureMS != 0 && gain != 0) {
+        while (visionPortal.getCameraState() != VisionPortal.CameraState.STREAMING) {
+            try {
+                Thread.sleep(20);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return;
+            }
+        }
+
+        if (exposureMS != 0 && gain != 01) {
             exposureControl = visionPortal.getCameraControl(ExposureControl.class);
             gainControl = visionPortal.getCameraControl(GainControl.class);
 
