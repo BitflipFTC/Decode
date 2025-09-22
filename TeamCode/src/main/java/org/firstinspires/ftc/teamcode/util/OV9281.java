@@ -76,7 +76,7 @@ public class OV9281 {
             }
         }
 
-        if (exposureMS != 0 && gain != 01) {
+        if (exposureMS != 0 && gain != 0) {
             exposureControl = visionPortal.getCameraControl(ExposureControl.class);
             gainControl = visionPortal.getCameraControl(GainControl.class);
 
