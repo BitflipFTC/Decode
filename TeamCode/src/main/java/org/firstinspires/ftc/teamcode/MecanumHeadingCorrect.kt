@@ -27,6 +27,7 @@ class MecanumHeadingCorrect : LinearOpMode() {
 
     private val imu        by lazy { hardwareMap["imu"] as IMU }
     private var targetImuPos = 0.0
+    private var lastImuPos = 0.0
 
     private val loopTimer = LoopTimer()
 
@@ -70,6 +71,7 @@ class MecanumHeadingCorrect : LinearOpMode() {
         waitForStart()
 
         loopTimer.reset()
+        lastImuPos = imu.robotYawPitchRollAngles.getYaw(AngleUnit.DEGREES)
 
         while (opModeIsActive()) {
             // more bulk caching
@@ -80,6 +82,8 @@ class MecanumHeadingCorrect : LinearOpMode() {
             val rx : Double = gamepad1.right_stick_x.toDouble()
 
             val heading = imu.robotYawPitchRollAngles.getYaw(AngleUnit.DEGREES)
+            val imuVelocity = heading - lastImuPos
+            lastImuPos = heading
             if (abs(heading - targetImuPos) > 180) {
                 controller.resetTotalError()
 
@@ -99,7 +103,7 @@ class MecanumHeadingCorrect : LinearOpMode() {
             var backRightPower = y + x + rx
 
             // if turning, update the heading
-            if (abs(rx - 0.0) > 0.01) {
+            if (abs(rx - 0.0) > 0.01 && imuVelocity <= 1.0) {
                 targetImuPos = heading
                 controller.resetTotalError()
             } else if (abs(pidOutput) >= 0.115) {
@@ -129,6 +133,7 @@ class MecanumHeadingCorrect : LinearOpMode() {
 
             telemetry.addData("targ. Imu position", targetImuPos)
             telemetry.addData("curr. Imu position", heading)
+            telemetry.addData("IMU Velocity","%+05.2fdeg/s",imuVelocity)
             telemetry.addData("PID Output", pidOutput)
             telemetry.addLine("---------------------------------------")
             telemetry.addLine()
