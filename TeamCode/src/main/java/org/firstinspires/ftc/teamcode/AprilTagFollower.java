@@ -190,8 +190,10 @@ public class AprilTagFollower extends LinearOpMode {
         }   // end for() loop
 
         if(currentDetections.isEmpty()) {
+            // stop turning (because there is nothing to turn to)
             currentTagPos = 320;
         }
+
         // Add "key" information to telemetry
         telemetry.addLine("\nkey:\nXYZ = X (Right), Y (Forward), Z (Up) dist.");
         telemetry.addLine("PRY = Pitch, Roll & Yaw (XYZ Rotation)");
