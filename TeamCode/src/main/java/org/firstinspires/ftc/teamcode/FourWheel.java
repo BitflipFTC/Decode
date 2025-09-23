@@ -16,7 +16,6 @@ public class FourWheel extends OpMode {
     DcMotorEx front_right;
     DcMotorEx back_left;
     DcMotorEx back_right;
-    boolean useMax = false;
     double driveSpeed = 0.5;
     IMU imu;
 
@@ -67,9 +66,9 @@ public class FourWheel extends OpMode {
 
     @Override
     public void loop() {
-        telemetry.addLine("X to change speed, A to toggle max");
+        telemetry.addLine("right bumper to change speed");
 
-        if (gamepad1.xWasPressed()) {
+        if (gamepad1.rightBumperWasPressed()) {
             switch (driveSpeedEnum) {
                 case MAX:
                     driveSpeedEnum = Speed.ALM;
@@ -90,13 +89,11 @@ public class FourWheel extends OpMode {
             }
         }
 
-        if (gamepad1.aWasPressed()) useMax = !useMax;
-
         double x = gamepad1.left_stick_x;
         double y = -gamepad1.left_stick_y;
         double rx = gamepad1.right_stick_x;
 
-        double max = 1;
+        double max;
         double flPower = (y + x - rx) * driveSpeed;
         double frPower = (y - x + rx) * driveSpeed;
         double blPower = (y - x - rx) * driveSpeed;
@@ -107,25 +104,32 @@ public class FourWheel extends OpMode {
         telemetry.addData("Current speed setting", driveSpeedEnum.toString());
         telemetry.addData("Current speed value", driveSpeed);
 
-        if (useMax && max > driveSpeed) {
+        if (max > driveSpeed) {
             flPower /= max;
             frPower /= max;
             blPower /= max;
             brPower /= max;
         }
 
-        if (useMax)
-            telemetry.addData("max value", max);
-
         front_left.setPower(flPower);
         front_right.setPower(frPower);
         back_left.setPower(blPower);
         back_right.setPower(brPower);
 
+        if (gamepad1.a)
+            back_left.setPower(driveSpeed);
+        if (gamepad1.x)
+            front_left.setPower(driveSpeed);
+        if (gamepad1.y)
+            front_right.setPower(driveSpeed);
+        if (gamepad1.b)
+            back_right.setPower(driveSpeed);
+
         telemetry.addLine("---------------------------------------");
-        telemetry.addData("c x", x);
-        telemetry.addData("c y", y);
-        telemetry.addData("crx", rx);
+        telemetry.addData("A", "back_left");
+        telemetry.addData("X", "front_left");
+        telemetry.addData("Y", "front_right");
+        telemetry.addData("B", "back_right");
 
         telemetry.addLine("---------------------------------------");
 
