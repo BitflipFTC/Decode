@@ -1,8 +1,8 @@
 package org.firstinspires.ftc.teamcode.util
 
-import com.acmerobotics.dashboard.config.Config
+import com.bylazar.configurables.annotations.Configurable
 
-@Config
+@Configurable
 object HeadingCorrectPID {
     @JvmField var p: Double = 0.022
 
@@ -11,7 +11,7 @@ object HeadingCorrectPID {
     @JvmField var d: Double = 0.0
 }
 
-@Config
+@Configurable
 object AprilTagDriverPID {
     @JvmField var p: Double = 0.0025
 
@@ -23,7 +23,7 @@ object AprilTagDriverPID {
     @JvmField var max : Double = 10.0
 }
 
-@Config
+@Configurable
 object AprilTagTrackerPID {
     @JvmField var p: Double = 0.000
 

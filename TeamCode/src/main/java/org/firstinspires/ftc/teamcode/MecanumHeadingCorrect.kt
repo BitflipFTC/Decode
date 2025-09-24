@@ -4,6 +4,10 @@ import com.acmerobotics.dashboard.FtcDashboard
 import com.acmerobotics.dashboard.config.Config
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry
 import com.bylazar.configurables.annotations.Configurable
+import com.bylazar.graph.PanelsGraph
+import com.bylazar.telemetry.JoinedTelemetry
+import com.bylazar.telemetry.PanelsTelemetry
+import com.bylazar.utils.LoopTimer
 import com.qualcomm.hardware.lynx.LynxModule
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
@@ -14,7 +18,6 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple
 import com.qualcomm.robotcore.hardware.IMU
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit
 import org.firstinspires.ftc.teamcode.util.HeadingCorrectPID
-import org.firstinspires.ftc.teamcode.util.LoopTimer
 import org.firstinspires.ftc.teamcode.util.PIDController
 import kotlin.math.abs
 
@@ -36,7 +39,8 @@ class MecanumHeadingCorrect : LinearOpMode() {
     val controller = PIDController(HeadingCorrectPID.p,HeadingCorrectPID.i, HeadingCorrectPID.d)
 
     override fun runOpMode() {
-        telemetry = MultipleTelemetry(FtcDashboard.getInstance().telemetry, telemetry)
+        telemetry = JoinedTelemetry(PanelsTelemetry.ftcTelemetry, telemetry, FtcDashboard.getInstance().telemetry)
+        val graphManager = PanelsGraph.manager
 
         frontRight.direction = DcMotorSimple.Direction.REVERSE
         backRight.direction  = DcMotorSimple.Direction.REVERSE
@@ -70,7 +74,7 @@ class MecanumHeadingCorrect : LinearOpMode() {
 
         waitForStart()
 
-        loopTimer.reset()
+        loopTimer.start()
         lastImuPos = imu.robotYawPitchRollAngles.getYaw(AngleUnit.DEGREES)
 
         while (opModeIsActive()) {
@@ -131,6 +135,11 @@ class MecanumHeadingCorrect : LinearOpMode() {
             backLeft.power   = backLeftPower   * driveSpeed
             backRight.power  = backRightPower  * driveSpeed
 
+            graphManager.addData("setpoint (target)", targetImuPos)
+            graphManager.addData("Process variable (current)", heading)
+            graphManager.addData("Heading velocity", imuVelocity)
+            graphManager.update()
+
             telemetry.addData("targ. Imu position", targetImuPos)
             telemetry.addData("curr. Imu position", heading)
             telemetry.addData("IMU Velocity","%+05.2fdeg/s",imuVelocity)
@@ -158,7 +167,7 @@ class MecanumHeadingCorrect : LinearOpMode() {
             telemetry.addData("PID Total Error", controller.totalError)
             telemetry.addData("PID At SetPoint", controller.atSetPoint())
             telemetry.addLine("---------------------------------------")
-            telemetry.addData("Loop Time","%05.2fms", loopTimer.getLoopTime())
+            telemetry.addData("Loop Time","%05.2fms", loopTimer.ms)
 
 
             telemetry.update()

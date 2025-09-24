@@ -59,7 +59,7 @@ repositories {
 dependencies {
     implementation project(':FtcRobotController')
 //    implementation 'androidx.core:core-ktx:1.17.0'
-    implementation "com.bylazar:fullpanels:1.0.5"
+    implementation "com.bylazar:fullpanels:1.0.6"
     // slothload
     implementation("dev.frozenmilk.sinister:Sloth:0.2.4")
 

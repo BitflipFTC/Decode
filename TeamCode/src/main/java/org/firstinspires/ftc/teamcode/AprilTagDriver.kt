@@ -5,6 +5,8 @@ import com.acmerobotics.dashboard.FtcDashboard
 import com.acmerobotics.dashboard.config.Config
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry
 import com.bylazar.configurables.annotations.Configurable
+import com.bylazar.telemetry.JoinedTelemetry
+import com.bylazar.telemetry.PanelsTelemetry
 import com.qualcomm.hardware.lynx.LynxModule
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
@@ -24,7 +26,6 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagLibrary
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor
 import org.openftc.easyopencv.OpenCvWebcam
 
-@Config
 @Configurable
 @TeleOp(name = "Concept: AprilTag Driver", group = "Concept")
 class AprilTagDriver : LinearOpMode() {
@@ -41,14 +42,16 @@ class AprilTagDriver : LinearOpMode() {
     lateinit var aprilTag : AprilTagProcessor
     lateinit var visionPortal : VisionPortal
 
-    @JvmField
-    var driveSpeed : Double = 0.5
+    companion object {
+        @JvmField
+        var driveSpeed: Double = 0.5
+    }
 
     val controller = PIDController(
         AprilTagDriverPID.p,AprilTagDriverPID.i,AprilTagDriverPID.d, 0.0, AprilTagDriverPID.max,
         AprilTagDriverPID.min)
     override fun runOpMode() {
-        telemetry = MultipleTelemetry(FtcDashboard.getInstance().telemetry, telemetry)
+        telemetry = JoinedTelemetry(PanelsTelemetry.ftcTelemetry, telemetry, FtcDashboard.getInstance().telemetry)
 
         frontRight.direction = DcMotorSimple.Direction.REVERSE
         backRight.direction  = DcMotorSimple.Direction.REVERSE
