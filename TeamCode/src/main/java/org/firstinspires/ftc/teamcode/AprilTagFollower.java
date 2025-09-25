@@ -41,6 +41,7 @@ import com.bylazar.graph.PanelsGraph;
 import com.bylazar.telemetry.JoinedTelemetry;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
+import com.bylazar.utils.LoopTimer;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -52,7 +53,6 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDir
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.util.AprilTagTrackerPID;
-import org.firstinspires.ftc.teamcode.util.LoopTimer;
 import org.firstinspires.ftc.teamcode.util.OV9281;
 import org.firstinspires.ftc.teamcode.util.PIDController;
 import org.firstinspires.ftc.vision.VisionPortal;
@@ -104,6 +104,8 @@ public class AprilTagFollower extends LinearOpMode {
         telemetry.update();
         waitForStart();
 
+        loopTimer.start();
+
 
         List<LynxModule> allHubs = hardwareMap.getAll(LynxModule.class);
 
@@ -149,7 +151,7 @@ public class AprilTagFollower extends LinearOpMode {
                 back_right.setPower(pidError);
             }
 
-            telemetry.addData("Loop time","%06.3fms",loopTimer.getLoopTime());
+            telemetry.addData("Loop time","%06.3fms",loopTimer.getMs());
             telemetry.update();
         }
 

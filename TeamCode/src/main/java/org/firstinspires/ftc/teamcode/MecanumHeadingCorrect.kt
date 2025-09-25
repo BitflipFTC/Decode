@@ -4,6 +4,7 @@ import com.acmerobotics.dashboard.FtcDashboard
 import com.acmerobotics.dashboard.config.Config
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry
 import com.bylazar.configurables.annotations.Configurable
+import com.bylazar.gamepad.PanelsGamepad
 import com.bylazar.graph.PanelsGraph
 import com.bylazar.telemetry.JoinedTelemetry
 import com.bylazar.telemetry.PanelsTelemetry
@@ -33,6 +34,9 @@ class MecanumHeadingCorrect : LinearOpMode() {
     private var lastImuPos = 0.0
 
     private val loopTimer = LoopTimer()
+    private var rotating = false
+
+    val g1 = PanelsGamepad.firstManager
 
     var driveSpeed : Double = 0.5
 
@@ -80,6 +84,7 @@ class MecanumHeadingCorrect : LinearOpMode() {
         while (opModeIsActive()) {
             // more bulk caching
             allHubs.forEach { hub -> hub.clearBulkCache() }
+            val g1 = g1.asCombinedFTCGamepad(gamepad1)
 
             val x : Double = gamepad1.left_stick_x.toDouble()
             val y : Double = -gamepad1.left_stick_y.toDouble()
@@ -107,10 +112,17 @@ class MecanumHeadingCorrect : LinearOpMode() {
             var backRightPower = y + x + rx
 
             // if turning, update the heading
-            if (abs(rx - 0.0) > 0.01 && imuVelocity <= 1.0) {
+            if (abs(rx - 0.0) > 0.01) {
                 targetImuPos = heading
                 controller.resetTotalError()
-            } else if (abs(pidOutput) >= 0.115) {
+                rotating = true
+            } else if (rotating) {
+                if (abs(imuVelocity) > 0.1)
+                    targetImuPos = heading
+                else {
+                    rotating = false
+                }
+            } else if (!rotating && abs(pidOutput) >= 0.115) {
                 // otherwise, automatically steer to correct for drift
                 frontLeftPower += pidOutput
                 frontRightPower -= pidOutput
@@ -167,7 +179,7 @@ class MecanumHeadingCorrect : LinearOpMode() {
             telemetry.addData("PID Total Error", controller.totalError)
             telemetry.addData("PID At SetPoint", controller.atSetPoint())
             telemetry.addLine("---------------------------------------")
-            telemetry.addData("Loop Time","%05.2fms", loopTimer.ms)
+            telemetry.addData("Loop Time", loopTimer.ms)
 
 
             telemetry.update()
