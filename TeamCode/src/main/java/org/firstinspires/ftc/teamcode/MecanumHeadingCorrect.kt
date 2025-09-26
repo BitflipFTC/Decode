@@ -107,7 +107,7 @@ class MecanumHeadingCorrect : LinearOpMode() {
             var backRightPower = y + x + rx
 
             // if turning, update the heading
-            if (abs(rx - 0.0) > 0.01 && imuVelocity <= 1.0) {
+            if (abs(rx) > 0.01 && imuVelocity <= 1.0) {
                 targetImuPos = heading
                 controller.resetTotalError()
             } else if (abs(pidOutput) >= 0.115) {
