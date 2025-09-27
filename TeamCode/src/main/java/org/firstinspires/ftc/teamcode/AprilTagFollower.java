@@ -55,6 +55,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.util.AprilTagTrackerPID;
 import org.firstinspires.ftc.teamcode.util.OV9281;
 import org.firstinspires.ftc.teamcode.util.PIDController;
+import org.firstinspires.ftc.teamcode.util.SquidController;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagGameDatabase;
@@ -62,7 +63,6 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
 import java.util.List;
 
-@Config
 @Configurable
 @TeleOp(name = "Concept: AprilTag Tracker", group = "Concept")
 public class AprilTagFollower extends LinearOpMode {
@@ -84,7 +84,7 @@ public class AprilTagFollower extends LinearOpMode {
         telemetry = new JoinedTelemetry(PanelsTelemetry.INSTANCE.getFtcTelemetry(), telemetry, FtcDashboard.getInstance().getTelemetry());
         camera = new OV9281(this,3,6);
 
-        controller = new PIDController();
+        controller = new SquidController();
         loopTimer = new LoopTimer();
 
         front_left  = hardwareMap.get(DcMotorEx.class, "frontleft");
@@ -136,11 +136,7 @@ public class AprilTagFollower extends LinearOpMode {
             controller.setCoeffs(AprilTagTrackerPID.p, AprilTagTrackerPID.i, AprilTagTrackerPID.d, 0);
             controller.setIntegrationBounds(AprilTagTrackerPID.min, AprilTagTrackerPID.max);
 
-            double pidError = Math.sqrt(Math.abs(controller.calculate(currentTagPos, targetTagPos)));
-
-            if (targetTagPos < currentTagPos){
-                pidError = -pidError;
-            }
+            double pidError = controller.calculate(currentTagPos, targetTagPos);
 
             telemetry.addData("pid Error", pidError);
 
@@ -151,7 +147,8 @@ public class AprilTagFollower extends LinearOpMode {
                 back_right.setPower(pidError);
             }
 
-            telemetry.addData("Loop time","%06.3fms",loopTimer.getMs());
+            telemetry.addData("Loop time","%dms",loopTimer.getMs());
+            telemetry.addData("Target Tag Pos", targetTagPos);
             telemetry.update();
         }
 

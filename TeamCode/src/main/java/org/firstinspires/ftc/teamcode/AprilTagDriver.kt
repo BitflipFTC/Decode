@@ -25,6 +25,7 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagGameDatabase
 import org.firstinspires.ftc.vision.apriltag.AprilTagLibrary
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor
 import org.openftc.easyopencv.OpenCvWebcam
+import kotlin.math.abs
 
 @Configurable
 @TeleOp(name = "Concept: AprilTag Driver", group = "Concept")
@@ -53,8 +54,8 @@ class AprilTagDriver : LinearOpMode() {
     override fun runOpMode() {
         telemetry = JoinedTelemetry(PanelsTelemetry.ftcTelemetry, telemetry, FtcDashboard.getInstance().telemetry)
 
-        frontRight.direction = DcMotorSimple.Direction.REVERSE
-        backRight.direction  = DcMotorSimple.Direction.REVERSE
+        frontLeft.direction = DcMotorSimple.Direction.REVERSE
+        backLeft.direction  = DcMotorSimple.Direction.REVERSE
 
         frontLeft.mode  = DcMotor.RunMode.STOP_AND_RESET_ENCODER
         frontRight.mode = DcMotor.RunMode.STOP_AND_RESET_ENCODER
@@ -100,20 +101,14 @@ class AprilTagDriver : LinearOpMode() {
             val y : Double = -gamepad1.left_stick_y.toDouble()
             val rx : Double = gamepad1.right_stick_x.toDouble()
 
-            var rot : Double = 0.0
+            var rot = 0.0
+            if (abs(pidOutput) >= 0.12)
+                rot = -pidOutput
 
-//            rot = if (gamepad1.left_trigger >= 0.1) {
-//                -pidOutput
-//            } else {
-//                rx
-//            }
-
-            rot = -pidOutput
-
-            val frontLeftPower = y + x - rot
-            val frontRightPower = y - x + rot
-            val backLeftPower = y - x - rot
-            val backRightPower = y + x + rot
+            val frontLeftPower = y + x + rot
+            val frontRightPower = y - x - rot
+            val backLeftPower = y - x + rot
+            val backRightPower = y + x - rot
 
             frontLeft.power  = frontLeftPower  * driveSpeed
             frontRight.power = frontRightPower * driveSpeed

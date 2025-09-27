@@ -38,8 +38,8 @@ public class FourWheel extends OpMode {
         back_left   = hardwareMap.get(DcMotorEx.class, "backleft");
         back_right  = hardwareMap.get(DcMotorEx.class, "backright");
 
-        front_right.setDirection(DcMotorSimple.Direction.REVERSE);
-        back_right.setDirection(DcMotorSimple.Direction.REVERSE);
+        front_left.setDirection(DcMotorSimple.Direction.REVERSE);
+        back_left.setDirection(DcMotorSimple.Direction.REVERSE);
 
         front_left.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         front_right.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -96,17 +96,17 @@ public class FourWheel extends OpMode {
         double rx = gamepad1.right_stick_x;
 
         double max;
-        double flPower = (y + x - rx) * driveSpeed;
-        double frPower = (y - x + rx) * driveSpeed;
-        double blPower = (y - x - rx) * driveSpeed;
-        double brPower = (y + x + rx) * driveSpeed;
+        double flPower = (y + x + rx) * driveSpeed;
+        double frPower = (y - x - rx) * driveSpeed;
+        double blPower = (y - x + rx) * driveSpeed;
+        double brPower = (y + x - rx) * driveSpeed;
 
         max = Math.max(Math.abs(Math.max(Math.max(Math.abs(frPower), Math.abs(flPower)), Math.abs(blPower))), Math.abs(brPower));
 
         telemetry.addData("Current speed setting", driveSpeedEnum.toString());
         telemetry.addData("Current speed value", driveSpeed);
 
-        if (max > driveSpeed) {
+        if (max > 1) {
             flPower /= max;
             frPower /= max;
             blPower /= max;
