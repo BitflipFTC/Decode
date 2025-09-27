@@ -51,7 +51,13 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDirection;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
+import org.firstinspires.ftc.robotcore.external.navigation.Quaternion;
 import org.firstinspires.ftc.teamcode.util.AprilTagTrackerPID;
 import org.firstinspires.ftc.teamcode.util.OV9281;
 import org.firstinspires.ftc.teamcode.util.PIDController;
@@ -132,6 +138,8 @@ public class AprilTagFollower extends LinearOpMode {
 
             telemetry.addData("Current speed value", driveSpeed);
             telemetry.addData("Current tag pos", currentTagPos);
+            telemetry.addData("Target Tag Pos", targetTagPos);
+            telemetry.addData("Loop time","%dms",loopTimer.getMs());
 
             controller.setCoeffs(AprilTagTrackerPID.p, AprilTagTrackerPID.i, AprilTagTrackerPID.d, 0);
             controller.setIntegrationBounds(AprilTagTrackerPID.min, AprilTagTrackerPID.max);
@@ -147,8 +155,6 @@ public class AprilTagFollower extends LinearOpMode {
                 back_right.setPower(pidError);
             }
 
-            telemetry.addData("Loop time","%dms",loopTimer.getMs());
-            telemetry.addData("Target Tag Pos", targetTagPos);
             telemetry.update();
         }
 
@@ -166,12 +172,62 @@ public class AprilTagFollower extends LinearOpMode {
         List<AprilTagDetection> currentDetections = camera.getAprilTag().getDetections();
         telemetry.addData("# AprilTags Detected", currentDetections.size());
 
+
+        /*
+        ======================================
+        DECODE TAG LIBRARY
+        ======================================
+
+        public static AprilTagLibrary getDecodeTagLibrary(){
+        return new AprilTagLibrary.Builder()
+                .addTag(20, "BlueTarget",
+                        6.5, new VectorF(-58.3727f, -55.6425f, 29.5f), DistanceUnit.INCH,
+                        new Quaternion(0.2182149f, -0.2182149f, -0.6725937f, 0.6725937f, 0))
+                .addTag(21, "Obelisk_GPP",
+                        6.5, DistanceUnit.INCH)
+                .addTag(22, "Obelisk_PGP",
+                        6.5, DistanceUnit.INCH)
+                .addTag(23, "Obelisk_PPG",
+                        6.5, DistanceUnit.INCH)
+                .addTag(24, "RedTarget",
+                        6.5, new VectorF(-58.3727f, 55.6425f, 29.5f), DistanceUnit.INCH,
+                        new Quaternion(0.6725937f, -0.6725937f, -0.2182149f, 0.2182149f, 0))
+                .build();
+         }
+
+         Given the targets on the left, Blue on the bottom, red on the top
+         */
+
         // Step through the list of detections and display info for each one.
         for (AprilTagDetection detection : currentDetections) {
             if (detection.metadata != null) {
+                if (detection.metadata.name.contains("Obelisk")) {
+                    telemetry.addLine("Obelisk Tag:");
+                }
                 telemetry.addLine(String.format("\n==== (ID %d) %s", detection.id, detection.metadata.name));
                 // Only use tags that don't have Obelisk in them
                 if (!detection.metadata.name.contains("Obelisk")) {
+                    Pose2D tagPos = new Pose2D(DistanceUnit.INCH, detection.metadata.fieldPosition.get(0), detection.metadata.fieldPosition.get(1),
+                            AngleUnit.DEGREES, detection.metadata.fieldOrientation.toOrientation(AxesReference.EXTRINSIC, AxesOrder.XYZ,AngleUnit.DEGREES).secondAngle); // given north is 0, clockwise
+                    Pose2D robotPos = new Pose2D(detection.robotPose.getPosition().unit, detection.robotPose.getPosition().x, detection.robotPose.getPosition().y,
+                            AngleUnit.DEGREES, detection.robotPose.getOrientation().getYaw(AngleUnit.DEGREES));
+
+                    double dist = Math.sqrt(
+                            Math.pow(
+                                    tagPos.getX(DistanceUnit.INCH) - robotPos.getX(DistanceUnit.INCH),
+                                    2
+                            )
+                            + Math.pow(
+                                    tagPos.getY(DistanceUnit.INCH) - robotPos.getY(DistanceUnit.INCH),
+                                    2
+                            )
+                    );
+
+                    telemetry.addData("Distance to tag", dist);
+                    telemetry.addData("aprilTag Rot", tagPos.getHeading(AngleUnit.DEGREES));
+                    telemetry.addData("Robot Rot", robotPos.getHeading(AngleUnit.DEGREES));
+
+                    // sqrt (( pow ( tag.x - rob.x ), 2 ) + ( pow ( tag.y - rob.y ), 2 ))
                     telemetry.addLine(String.format("XYZ %6.1f %6.1f %6.1f  (inch)",
                             detection.robotPose.getPosition().x,
                             detection.robotPose.getPosition().y,
@@ -200,5 +256,6 @@ public class AprilTagFollower extends LinearOpMode {
         telemetry.addLine("RBE = Range, Bearing & Elevation");
 
     }   // end method telemetryAprilTag()
+
 
 }   // end class
