@@ -26,8 +26,8 @@ open class PIDController(
     protected var maxIntegral: Double = 1.0,
     protected var minIntegral: Double = -1.0
 ) {
-    var targetPosition : Double = 0.0
-    var currentPosition : Double = 0.0
+    var setpoint : Double = 0.0
+    var processVariable : Double = 0.0
         protected set
     var setPointTolerance : Double = 1.0
     var velErrorTolerance : Double = Double.POSITIVE_INFINITY
@@ -59,11 +59,11 @@ open class PIDController(
 
     /**
      * Calculates the output given the current position (process variable) and the target position (setpoint)
-     * @param currentPosition (process variable) the current position of the system
-     * @param targetPosition (setpoint) the target position of the system (defaults to the current target)
+     * @param processVariable (process variable) the current position of the system
+     * @param setpoint (setpoint) the target position of the system (defaults to the current target)
      * @return the output of the PID Controller
      */
-    open fun calculate (currentPosition : Double, targetPosition : Double = this.targetPosition) : Double {
+    open fun calculate (processVariable : Double, setpoint : Double = this.setpoint) : Double {
         // handle time period stuff
         val currentTime = timer.nanoseconds() / 1E9
         if (lastTime == 0.0) lastTime = currentTime
@@ -73,10 +73,10 @@ open class PIDController(
 
 
         // handle error and velocity error
-        this.currentPosition = currentPosition
-        this.targetPosition = targetPosition
+        this.processVariable = processVariable
+        this.setpoint = setpoint
 
-        error = targetPosition - currentPosition
+        error = setpoint - processVariable
         velError = if (timePeriod != 0.0) {(error - lastError) / timePeriod} else {0.0}
         lastError = error
 
@@ -84,14 +84,14 @@ open class PIDController(
         totalError += timePeriod * error
         totalError = min(maxIntegral, max(minIntegral, totalError))
 
-        return kP * error + kI * totalError + kD * velError + targetPosition * kF
+        return kP * error + kI * totalError + kD * velError + setpoint * kF
     }
 
     /**
      * Resets target, tolerance, time, and error
      */
     fun reset () {
-        targetPosition = 0.0
+        setpoint = 0.0
         setPointTolerance = 0.0
         lastTime = 0.0
         timer.reset()

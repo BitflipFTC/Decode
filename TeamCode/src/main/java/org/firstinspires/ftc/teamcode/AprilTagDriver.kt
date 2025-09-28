@@ -2,8 +2,6 @@ package org.firstinspires.ftc.teamcode
 
 import android.util.Size
 import com.acmerobotics.dashboard.FtcDashboard
-import com.acmerobotics.dashboard.config.Config
-import com.acmerobotics.dashboard.telemetry.MultipleTelemetry
 import com.bylazar.configurables.annotations.Configurable
 import com.bylazar.telemetry.JoinedTelemetry
 import com.bylazar.telemetry.PanelsTelemetry
@@ -15,16 +13,12 @@ import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.DcMotorEx
 import com.qualcomm.robotcore.hardware.DcMotorSimple
 import com.qualcomm.robotcore.hardware.IMU
-import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDirection
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit
 import org.firstinspires.ftc.teamcode.util.AprilTagDriverPID
 import org.firstinspires.ftc.teamcode.util.PIDController
 import org.firstinspires.ftc.vision.VisionPortal
 import org.firstinspires.ftc.vision.apriltag.AprilTagGameDatabase
-import org.firstinspires.ftc.vision.apriltag.AprilTagLibrary
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor
-import org.openftc.easyopencv.OpenCvWebcam
 import kotlin.math.abs
 
 @Configurable
@@ -130,8 +124,8 @@ class AprilTagDriver : LinearOpMode() {
             telemetry.addData("PID kP", controller.kP)
             telemetry.addData("PID kI", controller.kI)
             telemetry.addData("PID kD", controller.kD)
-            telemetry.addData("PID Target Position", controller.targetPosition)
-            telemetry.addData("PID Current Position", controller.currentPosition)
+            telemetry.addData("PID Target Position", controller.setpoint)
+            telemetry.addData("PID Current Position", controller.processVariable)
             telemetry.addData("Last position", lastTagPos)
             telemetry.addData("PID Error", controller.error)
             telemetry.addData("PID Velocity error", controller.velError)
