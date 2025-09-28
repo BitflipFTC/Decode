@@ -118,13 +118,18 @@ class MecanumHeadingCorrect : LinearOpMode() {
 
 
             if (fieldCentric) {
-                var theta = atan2(y,x)
-                val r = hypot(x,y)
-                theta = AngleUnit.normalizeRadians(theta - imu.robotYawPitchRollAngles.getYaw(
-                    AngleUnit.RADIANS))
+                // impl 1:
+//                var theta = atan2(y,x)
+//                val r = hypot(x,y)
+//                theta = AngleUnit.normalizeRadians(theta - imu.robotYawPitchRollAngles.getYaw(
+//                    AngleUnit.RADIANS))
+//
+//                x = r * cos(theta)
+//                y = r * sin(theta)
 
-                x = r * cos(theta)
-                y = r * sin(theta)
+                // impl 2:
+                x = x * cos(Math.toRadians(heading)) - y * sin(Math.toRadians(heading))
+                y = x * sin(Math.toRadians(heading)) + y * sin(Math.toRadians(heading))
             }
 
             if (gamepad1.yWasPressed()) {

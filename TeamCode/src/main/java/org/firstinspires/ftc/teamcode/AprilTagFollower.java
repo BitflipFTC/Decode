@@ -88,7 +88,7 @@ public class AprilTagFollower extends LinearOpMode {
     public void runOpMode() {
 
         telemetry = new JoinedTelemetry(PanelsTelemetry.INSTANCE.getFtcTelemetry(), telemetry, FtcDashboard.getInstance().getTelemetry());
-        camera = new OV9281(this,3,6);
+        camera = new OV9281(this,4,6);
 
         controller = new SquidController();
         loopTimer = new LoopTimer();
