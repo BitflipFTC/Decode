@@ -39,4 +39,5 @@ object AprilTagTrackerPID {
 
     @JvmField var min : Double = -10.0
     @JvmField var max : Double = 10.0
+    @JvmField var targetTagPos : Double = 320.0
 }

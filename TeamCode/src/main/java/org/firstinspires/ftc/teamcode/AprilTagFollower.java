@@ -29,43 +29,33 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import static org.firstinspires.ftc.teamcode.util.AprilTagTrackerPID.targetTagPos;
+
+import static java.lang.Math.abs;
+
 import android.annotation.SuppressLint;
-import android.util.Size;
 
 import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.config.Config;
-import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.bylazar.configurables.annotations.Configurable;
-import com.bylazar.graph.GraphManager;
-import com.bylazar.graph.PanelsGraph;
 import com.bylazar.telemetry.JoinedTelemetry;
 import com.bylazar.telemetry.PanelsTelemetry;
-import com.bylazar.telemetry.TelemetryManager;
 import com.bylazar.utils.LoopTimer;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDirection;
-import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
-import org.firstinspires.ftc.robotcore.external.navigation.Quaternion;
 import org.firstinspires.ftc.teamcode.util.AprilTagTrackerPID;
 import org.firstinspires.ftc.teamcode.util.OV9281;
 import org.firstinspires.ftc.teamcode.util.PIDController;
 import org.firstinspires.ftc.teamcode.util.SquidController;
-import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
-import org.firstinspires.ftc.vision.apriltag.AprilTagGameDatabase;
-import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
 import java.util.List;
 
@@ -79,7 +69,6 @@ public class AprilTagFollower extends LinearOpMode {
     DcMotorEx back_left;
     DcMotorEx back_right;
     double driveSpeed = 1;
-    public static double targetTagPos = 320;
     public static double currentTagPos;
 
     private PIDController controller;
@@ -136,6 +125,14 @@ public class AprilTagFollower extends LinearOpMode {
                 camera.getVisionPortal().resumeStreaming();
             }
 
+            if (gamepad1.a) {
+                targetTagPos = 160;
+            } else if (gamepad1.b) {
+                targetTagPos = 320;
+            } else if (gamepad1.x) {
+                targetTagPos = 480;
+            }
+
             telemetry.addData("Current speed value", driveSpeed);
             telemetry.addData("Current tag pos", currentTagPos);
             telemetry.addData("Target Tag Pos", targetTagPos);
@@ -148,11 +145,16 @@ public class AprilTagFollower extends LinearOpMode {
 
             telemetry.addData("pid Error", pidError);
 
-            if (Math.abs(pidError) >= 0.115) {
+            if (abs(pidError) > 0.05) {
                 front_left.setPower(-pidError);
                 front_right.setPower(pidError);
                 back_left.setPower(-pidError);
                 back_right.setPower(pidError);
+            } else {
+                front_left.setPower(0);
+                front_right.setPower(0);
+                back_left.setPower(0);
+                back_right.setPower(0);
             }
 
             telemetry.update();
@@ -247,7 +249,7 @@ public class AprilTagFollower extends LinearOpMode {
 
         if(currentDetections.isEmpty()) {
             // stop turning (because there is nothing to turn to)
-            currentTagPos = 320;
+            currentTagPos = targetTagPos;
         }
 
         // Add "key" information to telemetry
