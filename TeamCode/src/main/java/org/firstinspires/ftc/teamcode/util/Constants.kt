@@ -31,13 +31,25 @@ object AprilTagDriverPID {
 @Configurable
 @Config
 object AprilTagTrackerPID {
-    @JvmField var p: Double = 0.000
+    @JvmField var p: Double = 0.011
 
     @JvmField var i: Double = 0.0
 
-    @JvmField var d: Double = 0.0
+    @JvmField var d: Double = 0.000003
 
     @JvmField var min : Double = -10.0
     @JvmField var max : Double = 10.0
     @JvmField var targetTagPos : Double = 320.0
+}
+
+@Configurable
+@Config
+object FlywheelVelPID {
+    @JvmField var kP : Double = 0.0
+    @JvmField var kI : Double = 0.0
+    @JvmField var kD : Double = 0.0
+    @JvmField var kF : Double = 0.0
+    @JvmField var maxIntegral: Double = 1.0
+    @JvmField var minIntegral: Double = -1.0
+    @JvmField var targetRPM : Double = 3000.0
 }
