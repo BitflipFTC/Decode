@@ -42,14 +42,31 @@ object AprilTagTrackerPID {
     @JvmField var targetTagPos : Double = 320.0
 }
 
+// tuned (or so)
 @Configurable
 @Config
 object FlywheelVelPID {
+    @JvmField var kP : Double = 0.0000
+    @JvmField var kI : Double = 0.0
+    @JvmField var kD : Double = 0.0
+    @JvmField var kF : Double = 0.00001
+
+    @JvmField var maxIntegral: Double = 1.0
+    @JvmField var minIntegral: Double = -1.0
+    @JvmField var targetRPM : Double = 5500.0
+    @JvmField var hoodangle : Double = 0.0
+    @JvmField var totPower : Double = 0.0
+    @JvmField var rawPower : Boolean = false
+}
+
+@Configurable
+@Config
+object TurretAtagFollow {
     @JvmField var kP : Double = 0.0
     @JvmField var kI : Double = 0.0
     @JvmField var kD : Double = 0.0
     @JvmField var kF : Double = 0.0
     @JvmField var maxIntegral: Double = 1.0
     @JvmField var minIntegral: Double = -1.0
-    @JvmField var targetRPM : Double = 3000.0
+    @JvmField var setPointTolerance : Double = 5.0
 }

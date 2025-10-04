@@ -18,11 +18,16 @@ import org.firstinspires.ftc.teamcode.util.FlywheelVelPID.maxIntegral
 import org.firstinspires.ftc.teamcode.util.FlywheelVelPID.minIntegral
 import org.firstinspires.ftc.teamcode.util.FlywheelVelPID.targetRPM
 import org.firstinspires.ftc.teamcode.util.PIDController
+import com.qualcomm.robotcore.hardware.Servo
+import org.firstinspires.ftc.teamcode.util.FlywheelVelPID.hoodangle
+import org.firstinspires.ftc.teamcode.util.FlywheelVelPID.rawPower
+import org.firstinspires.ftc.teamcode.util.FlywheelVelPID.totPower
 
 @TeleOp(name = "Tuning: Flywheel", group = "Tuning")
 class FlywheelTuning : LinearOpMode() {
     val controller = PIDController(kP, kI, kD, kF, maxIntegral, minIntegral)
     val flywheel by lazy { hardwareMap["flywheel"] as DcMotorEx }
+    val hood by lazy { hardwareMap["hood"] as Servo }
 
     override fun runOpMode() {
         telemetry = JoinedTelemetry(PanelsTelemetry.ftcTelemetry, FtcDashboard.getInstance().telemetry, telemetry)
@@ -30,7 +35,7 @@ class FlywheelTuning : LinearOpMode() {
         flywheel.direction = DcMotorSimple.Direction.FORWARD
         flywheel.mode = DcMotor.RunMode.STOP_AND_RESET_ENCODER
         flywheel.mode = DcMotor.RunMode.RUN_WITHOUT_ENCODER
-        flywheel.zeroPowerBehavior = DcMotor.ZeroPowerBehavior.FLOAT
+        flywheel.zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE
 
         controller.setPointTolerance = 5.toDouble()
 
@@ -39,23 +44,31 @@ class FlywheelTuning : LinearOpMode() {
         allHubs.forEach { hub -> hub.bulkCachingMode = LynxModule.BulkCachingMode.MANUAL }
 
         waitForStart()
+        hood.position = hoodangle
 
         while (opModeIsActive()) {
             // more bulk caching
             allHubs.forEach { hub -> hub.clearBulkCache() }
 
+            // reset the target rpm
             if (gamepad1.aWasPressed()) {
-                targetRPM = 3000.0
+                targetRPM = 5500.0
             }
+            hood.position = hoodangle
+
 
             targetRPM += gamepad1.left_stick_x
 
             //                         degrees/s / 360 = rotations/s   rotations/s * 60 = rotations/m
-            val flywheelRPM = (flywheel.getVelocity(AngleUnit.DEGREES) / 360) * 60
-
+            val flywheelRPM = -(flywheel.getVelocity(AngleUnit.DEGREES) / 360) * 6000
+//
             controller.setCoeffs(kP, kI, kD, kF)
             val pidOutput = controller.calculate(flywheelRPM, targetRPM)
-            flywheel.power = pidOutput
+            if (rawPower) {
+                flywheel.power = totPower
+            } else {
+                flywheel.power = pidOutput
+            }
 
             telemetry.addData("Current RPM", flywheelRPM)
             telemetry.addData("Target RPM", targetRPM)
