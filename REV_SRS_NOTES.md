@@ -28,3 +28,12 @@
 		1. left rotates left until the limit (135 degrees by default)
 		2. right rotates right until the limit (135 degrees by default)
 		3. program moves it back to center.
+
+# Servo Usage Notes
+
+## PWM Custom Range
+- Servo : ServoImplEx
+- CRServo : CRServoImplEx
+- 0 is lower bound, 1 is upper bound
+- defaults to 600µs - 2400µs
+- should be set to 500µs - 2500µs
