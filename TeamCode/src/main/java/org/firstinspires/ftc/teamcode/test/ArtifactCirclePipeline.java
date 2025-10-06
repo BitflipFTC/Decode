@@ -21,12 +21,6 @@ public class ArtifactCirclePipeline extends OpenCvPipeline {
     Mat contoursOnPlainImageMat = new Mat();
 
     /*
-     * Threshold values
-     */
-    static final int CB_CHAN_MASK_THRESHOLD = 80;
-    static final double DENSITY_UPRIGHT_THRESHOLD = 0.03;
-
-    /*
      * The elements we use for noise reduction
      */
     Mat erodeElement = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(8, 8));
@@ -42,22 +36,6 @@ public class ArtifactCirclePipeline extends OpenCvPipeline {
     static final Scalar BLUE = new Scalar(0, 0, 255);
 
     static final int CONTOUR_LINE_THICKNESS = 2;
-    static final int CB_CHAN_IDX = 2;
-
-    static class AnalyzedStone
-    {
-        StoneOrientation orientation;
-        double angle;
-    }
-
-    enum StoneOrientation
-    {
-        UPRIGHT,
-        NOT_UPRIGHT
-    }
-
-    ArrayList<AnalyzedStone> internalStoneList = new ArrayList<>();
-    volatile ArrayList<AnalyzedStone> clientStoneList = new ArrayList<>();
 
     /*
      * Some stuff to handle returning our various buffers
@@ -100,15 +78,10 @@ public class ArtifactCirclePipeline extends OpenCvPipeline {
     @Override
     public Mat processFrame(Mat input)
     {
-        // We'll be updating this with new data below
-        internalStoneList.clear();
-
         /*
          * Run the image processing
          */
         analyzeArtifacts(input, findContours(input));
-
-        clientStoneList = new ArrayList<>(internalStoneList);
 
         switch (stages[stageNum])
         {
@@ -144,11 +117,6 @@ public class ArtifactCirclePipeline extends OpenCvPipeline {
         }
 
         return input;
-    }
-
-    public ArrayList<AnalyzedStone> getDetectedStones()
-    {
-        return clientStoneList;
     }
 
     Artifacts findContours(Mat input)
