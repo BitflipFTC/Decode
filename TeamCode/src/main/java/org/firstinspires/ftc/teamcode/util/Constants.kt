@@ -62,8 +62,8 @@ object FlywheelVelPID {
 @Configurable
 @Config
 object TurretAtagFollow {
-    @JvmField var kP : Double = 0.00003
-    @JvmField var kS : Double = 0.065
+    @JvmField var kP : Double = 0.00004
+    @JvmField var kS : Double = 0.085
     @JvmField var kI : Double = 0.0
     @JvmField var kD : Double = 0.00001
     @JvmField var kF : Double = 0.0
