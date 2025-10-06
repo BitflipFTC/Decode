@@ -1,6 +1,5 @@
-package org.firstinspires.ftc.teamcode.util
+package org.firstinspires.ftc.teamcode.hardware
 
-import com.qualcomm.robotcore.hardware.CRServo
 import com.qualcomm.robotcore.hardware.CRServoImplEx
 import com.qualcomm.robotcore.hardware.HardwareMap
 import com.qualcomm.robotcore.hardware.PwmControl

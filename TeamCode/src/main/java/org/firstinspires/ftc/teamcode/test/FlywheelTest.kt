@@ -10,21 +10,21 @@ import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.DcMotorEx
 import com.qualcomm.robotcore.hardware.DcMotorSimple
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit
-import org.firstinspires.ftc.teamcode.util.FlywheelVelPID.kD
-import org.firstinspires.ftc.teamcode.util.FlywheelVelPID.kF
-import org.firstinspires.ftc.teamcode.util.FlywheelVelPID.kI
-import org.firstinspires.ftc.teamcode.util.FlywheelVelPID.kP
-import org.firstinspires.ftc.teamcode.util.FlywheelVelPID.maxIntegral
-import org.firstinspires.ftc.teamcode.util.FlywheelVelPID.minIntegral
-import org.firstinspires.ftc.teamcode.util.FlywheelVelPID.targetRPM
+import org.firstinspires.ftc.teamcode.util.FlywheelTestPID.kD
+import org.firstinspires.ftc.teamcode.util.FlywheelTestPID.kF
+import org.firstinspires.ftc.teamcode.util.FlywheelTestPID.kI
+import org.firstinspires.ftc.teamcode.util.FlywheelTestPID.kP
+import org.firstinspires.ftc.teamcode.util.FlywheelTestPID.maxIntegral
+import org.firstinspires.ftc.teamcode.util.FlywheelTestPID.minIntegral
+import org.firstinspires.ftc.teamcode.util.FlywheelTestPID.targetRPM
 import org.firstinspires.ftc.teamcode.util.PIDController
 import com.qualcomm.robotcore.hardware.Servo
-import org.firstinspires.ftc.teamcode.util.FlywheelVelPID.hoodangle
-import org.firstinspires.ftc.teamcode.util.FlywheelVelPID.rawPower
-import org.firstinspires.ftc.teamcode.util.FlywheelVelPID.totPower
+import org.firstinspires.ftc.teamcode.util.FlywheelTestPID.hoodangle
+import org.firstinspires.ftc.teamcode.util.FlywheelTestPID.rawPower
+import org.firstinspires.ftc.teamcode.util.FlywheelTestPID.totPower
 
-@TeleOp(name = "Tuning: Flywheel", group = "Tuning")
-class FlywheelTuning : LinearOpMode() {
+@TeleOp(name = "Test: Flywheel", group = "Test")
+class FlywheelTest : LinearOpMode() {
     val controller = PIDController(kP, kI, kD, kF, maxIntegral, minIntegral)
     val flywheel by lazy { hardwareMap["flywheel"] as DcMotorEx }
     val hood by lazy { hardwareMap["hood"] as Servo }

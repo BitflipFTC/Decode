@@ -65,7 +65,7 @@ import java.util.concurrent.TimeUnit;
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list.
  */
 
-@TeleOp(name="Optimize AprilTag Exposure", group = "Utility")
+@TeleOp(name="Tuning: Optimize AprilTag Exposure", group = "Tuning")
 public class UtilityAprilTagOptimizeExposure extends LinearOpMode
 {
     private VisionPortal visionPortal = null;        // Used to manage the video source.

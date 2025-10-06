@@ -30,7 +30,7 @@ object AprilTagDriverPID {
 
 @Configurable
 @Config
-object AprilTagTrackerPID {
+object AprilTagAutoPID {
     @JvmField var p: Double = 0.011
 
     @JvmField var i: Double = 0.0
@@ -45,7 +45,7 @@ object AprilTagTrackerPID {
 // tuned (or so)
 @Configurable
 @Config
-object FlywheelVelPID {
+object FlywheelTestPID {
     @JvmField var kP : Double = 0.0000
     @JvmField var kI : Double = 0.0
     @JvmField var kD : Double = 0.0
@@ -61,7 +61,7 @@ object FlywheelVelPID {
 
 @Configurable
 @Config
-object TurretAtagFollow {
+object TurretTestPID {
     @JvmField var kP : Double = 0.0
     @JvmField var kI : Double = 0.0
     @JvmField var kD : Double = 0.0

@@ -6,20 +6,20 @@ import com.bylazar.telemetry.PanelsTelemetry
 import com.qualcomm.hardware.lynx.LynxModule
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
-import org.firstinspires.ftc.teamcode.util.OV9281
+import org.firstinspires.ftc.teamcode.hardware.OV9281
 import org.firstinspires.ftc.teamcode.util.PIDController
-import org.firstinspires.ftc.teamcode.util.Turret
-import org.firstinspires.ftc.teamcode.util.TurretAtagFollow.kD
-import org.firstinspires.ftc.teamcode.util.TurretAtagFollow.kF
-import org.firstinspires.ftc.teamcode.util.TurretAtagFollow.kI
-import org.firstinspires.ftc.teamcode.util.TurretAtagFollow.kP
-import org.firstinspires.ftc.teamcode.util.TurretAtagFollow.maxIntegral
-import org.firstinspires.ftc.teamcode.util.TurretAtagFollow.minIntegral
-import org.firstinspires.ftc.teamcode.util.TurretAtagFollow.setPointTolerance
+import org.firstinspires.ftc.teamcode.hardware.Turret
+import org.firstinspires.ftc.teamcode.util.TurretTestPID.kD
+import org.firstinspires.ftc.teamcode.util.TurretTestPID.kF
+import org.firstinspires.ftc.teamcode.util.TurretTestPID.kI
+import org.firstinspires.ftc.teamcode.util.TurretTestPID.kP
+import org.firstinspires.ftc.teamcode.util.TurretTestPID.maxIntegral
+import org.firstinspires.ftc.teamcode.util.TurretTestPID.minIntegral
+import org.firstinspires.ftc.teamcode.util.TurretTestPID.setPointTolerance
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection
 import kotlin.math.abs
 
-@TeleOp(name = "Turret Test")
+@TeleOp(name = "Test: Turret", group = "Test")
 class TurretTest : LinearOpMode() {
     var targetTagPos : Double = 320.0
     var currentTagPos : Double = 320.0

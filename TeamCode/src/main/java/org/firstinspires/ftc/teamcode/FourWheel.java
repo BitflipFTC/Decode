@@ -12,7 +12,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
 
-@TeleOp(name = "4 wheel drive")
+@TeleOp(name = "Default Drive", group = "TeleOp")
 public class FourWheel extends OpMode {
     DcMotorEx front_left;
     DcMotorEx front_right;

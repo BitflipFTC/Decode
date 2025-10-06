@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
-@TeleOp(name = "volt test")
+@TeleOp(name = "Utility: Voltage kS Tuning", group = "Utility")
 public class VoltageTest extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
