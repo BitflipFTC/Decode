@@ -25,6 +25,15 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagDetection
 import kotlin.math.abs
 import kotlin.math.pow
 import kotlin.math.sqrt
+import com.qualcomm.robotcore.hardware.Servo
+import com.qualcomm.robotcore.util.Range
+import org.firstinspires.ftc.teamcode.util.TurretAtagFollow.exposure
+import org.firstinspires.ftc.teamcode.util.TurretAtagFollow.kS
+import org.firstinspires.ftc.teamcode.util.TurretAtagFollow.tuneKs
+import org.firstinspires.ftc.teamcode.util.toInt
+import kotlin.math.max
+import kotlin.math.min
+import kotlin.math.sign
 
 @TeleOp(name = "Turret Test")
 class TurretTest : LinearOpMode() {
@@ -38,7 +47,9 @@ class TurretTest : LinearOpMode() {
         )
 
         val turret = Turret(hardwareMap)
-        val camera = OV9281(this)
+        val hood by lazy { hardwareMap["hood"] as Servo }
+        var hoodPos : Double = 0.0
+        val camera = OV9281(this,4,6)
 
         val controller = PIDController(kP, kI, kD, kF, maxIntegral, minIntegral);
 
@@ -56,29 +67,33 @@ class TurretTest : LinearOpMode() {
             // more bulk caching
             allHubs.forEach { hub -> hub.clearBulkCache() }
 
+            camera.setExposure(exposure)
+
             // atag stuff
 
             val currentDetections: List<AprilTagDetection> =
                 camera.aprilTag.detections
 
-//            if (currentDetections.isEmpty()) currentTagPos = {320.0
+            if (currentDetections.isEmpty()) currentTagPos = 320.0
             if (!currentDetections.isEmpty() && currentDetections.get(0).metadata.name.contains("Obelisk"))
                 currentTagPos = currentDetections.get(0).center.x
 
+            hood.position = hoodPos
+            hoodPos += (gamepad1.right_stick_y * 0.005)
+            hoodPos = max((0).toDouble(), min(hoodPos, 0.45))
 
             controller.setCoeffs(kP, kI, kD, kF)
             controller.setPointTolerance = setPointTolerance
-            val pidError = controller.calculate(currentTagPos, targetTagPos)
+            var pidError = controller.calculate(currentTagPos, targetTagPos)
+            if (!controller.atSetPoint()) {pidError += sign(pidError) * kS}
 
-            if (abs(pidError) > 0.01) {
-                turret.setPower(pidError);
-            } else {
-                turret.setPower(0.0);
-            }
+            if (tuneKs) turret.setPower(kS) else turret.setPower(pidError)
 
             telemetry.addData("current tag pos", currentTagPos)
             telemetry.addData(" target tag pos", targetTagPos)
+            telemetry.addData("turret power", pidError * 300)
             telemetry.addData("At Setpoint?",controller.atSetPoint())
+            telemetry.addData("Hood pos", hoodPos)
 
             telemetry.update()
         }

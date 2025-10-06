@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.ExposureControl;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.FocusControl;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.GainControl;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
@@ -20,16 +21,16 @@ import java.util.concurrent.TimeUnit;
 
 public class OV9281 {
 
-    private AprilTagProcessor aprilTag;
-    private VisionPortal visionPortal;
+    private final AprilTagProcessor aprilTag;
+    private final VisionPortal visionPortal;
     private ExposureControl exposureControl;
     private GainControl gainControl;
     private long defaultExposure;
     private int defaultGain;
 
-    private Position cameraPosition = new Position(DistanceUnit.INCH,
+    private final Position cameraPosition = new Position(DistanceUnit.INCH,
             0, 0, 0, 0);
-    private YawPitchRollAngles cameraOrientation = new YawPitchRollAngles(AngleUnit.DEGREES,
+    private final YawPitchRollAngles cameraOrientation = new YawPitchRollAngles(AngleUnit.DEGREES,
             0, -90, 0, 0);
 
     double fx = 549.993552641,
@@ -59,9 +60,11 @@ public class OV9281 {
                 .setOutputUnits(DistanceUnit.INCH, AngleUnit.DEGREES)
                 .build();
 
+
         visionPortal = new VisionPortal.Builder()
                 .setCamera(opMode.hardwareMap.get(WebcamName.class, "camera"))
                 .setCameraResolution(new Size(640,480))
+                .setShowStatsOverlay(true)
                 .setStreamFormat(VisionPortal.StreamFormat.MJPEG)
                 .enableLiveView(true)
                 .addProcessor(aprilTag)
@@ -109,5 +112,9 @@ public class OV9281 {
             exposureControl.setExposure(defaultExposure,TimeUnit.MILLISECONDS);
             gainControl.setGain(defaultGain);
         }
+    }
+
+    public void setExposure (int exposure) {
+        exposureControl.setExposure(exposure, TimeUnit.MILLISECONDS);
     }
 }

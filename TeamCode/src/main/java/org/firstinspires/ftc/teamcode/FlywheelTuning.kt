@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode
 
 import com.acmerobotics.dashboard.FtcDashboard
+import com.bylazar.battery.PanelsBattery
 import com.bylazar.telemetry.JoinedTelemetry
 import com.bylazar.telemetry.PanelsTelemetry
 import com.qualcomm.hardware.lynx.LynxModule
@@ -35,7 +36,7 @@ class FlywheelTuning : LinearOpMode() {
         flywheel.direction = DcMotorSimple.Direction.FORWARD
         flywheel.mode = DcMotor.RunMode.STOP_AND_RESET_ENCODER
         flywheel.mode = DcMotor.RunMode.RUN_WITHOUT_ENCODER
-        flywheel.zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE
+        flywheel.zeroPowerBehavior = DcMotor.ZeroPowerBehavior.FLOAT
 
         controller.setPointTolerance = 5.toDouble()
 
@@ -52,7 +53,7 @@ class FlywheelTuning : LinearOpMode() {
 
             // reset the target rpm
             if (gamepad1.aWasPressed()) {
-                targetRPM = 5500.0
+                targetRPM = 4500.0
             }
             hood.position = hoodangle
 
@@ -73,6 +74,7 @@ class FlywheelTuning : LinearOpMode() {
             telemetry.addData("Current RPM", flywheelRPM)
             telemetry.addData("Target RPM", targetRPM)
             telemetry.addData("Motor Power", pidOutput)
+            telemetry.addData("battery", PanelsBattery.provider.batteryVoltage)
             telemetry.update()
         }
     }

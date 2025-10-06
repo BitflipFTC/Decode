@@ -49,11 +49,11 @@ object FlywheelVelPID {
     @JvmField var kP : Double = 0.0000
     @JvmField var kI : Double = 0.0
     @JvmField var kD : Double = 0.0
-    @JvmField var kF : Double = 0.00001
+    @JvmField var kF : Double = 0.00021
 
     @JvmField var maxIntegral: Double = 1.0
     @JvmField var minIntegral: Double = -1.0
-    @JvmField var targetRPM : Double = 5500.0
+    @JvmField var targetRPM : Double = 4500.0
     @JvmField var hoodangle : Double = 0.0
     @JvmField var totPower : Double = 0.0
     @JvmField var rawPower : Boolean = false
@@ -62,11 +62,18 @@ object FlywheelVelPID {
 @Configurable
 @Config
 object TurretAtagFollow {
-    @JvmField var kP : Double = 0.0
+    @JvmField var kP : Double = 0.00003
+    @JvmField var kS : Double = 0.065
     @JvmField var kI : Double = 0.0
-    @JvmField var kD : Double = 0.0
+    @JvmField var kD : Double = 0.00001
     @JvmField var kF : Double = 0.0
     @JvmField var maxIntegral: Double = 1.0
     @JvmField var minIntegral: Double = -1.0
-    @JvmField var setPointTolerance : Double = 5.0
+    @JvmField var setPointTolerance : Double = 25.toDouble()
+    @JvmField var tuneKs : Boolean = false
+    @JvmField var exposure : Int = 4
+}
+
+fun Boolean.toInt(): Int {
+    return if(this) 1 else 0
 }
