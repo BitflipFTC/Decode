@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode
+package org.firstinspires.ftc.teamcode.test
 
 import android.graphics.Color
 import com.bylazar.telemetry.JoinedTelemetry
@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import com.qualcomm.robotcore.hardware.ColorSensor
 
-@TeleOp(name = "Color sensor test")
+@TeleOp(name = "Test: Color Sensor", group = "Test")
 class ColorSensorTest : LinearOpMode() {
     val colorSensor by lazy { hardwareMap["color"] as ColorSensor }
     override fun runOpMode() {

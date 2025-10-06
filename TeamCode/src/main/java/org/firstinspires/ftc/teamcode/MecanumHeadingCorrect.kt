@@ -27,7 +27,7 @@ import kotlin.math.cos
 import kotlin.math.hypot
 import kotlin.math.sin
 
-@TeleOp(name = "Mecanum Heading Correct")
+@TeleOp(name = "Heading Correct Drive", group = "TeleOp")
 class MecanumHeadingCorrect : LinearOpMode() {
     private val frontLeft  by lazy { hardwareMap["frontleft"]  as DcMotorEx }
     private val frontRight by lazy { hardwareMap["frontright"] as DcMotorEx }

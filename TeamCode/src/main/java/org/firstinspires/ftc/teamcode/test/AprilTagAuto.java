@@ -27,9 +27,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.test;
 
-import static org.firstinspires.ftc.teamcode.util.AprilTagTrackerPID.targetTagPos;
+import static org.firstinspires.ftc.teamcode.util.AprilTagAutoPID.targetTagPos;
 
 import static java.lang.Math.abs;
 
@@ -51,8 +51,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
-import org.firstinspires.ftc.teamcode.util.AprilTagTrackerPID;
-import org.firstinspires.ftc.teamcode.util.OV9281;
+import org.firstinspires.ftc.teamcode.util.AprilTagAutoPID;
+import org.firstinspires.ftc.teamcode.hardware.OV9281;
 import org.firstinspires.ftc.teamcode.util.PIDController;
 import org.firstinspires.ftc.teamcode.util.SquidController;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
@@ -60,8 +60,8 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import java.util.List;
 
 @Configurable
-@TeleOp(name = "Concept: AprilTag Tracker", group = "Concept")
-public class AprilTagFollower extends LinearOpMode {
+@TeleOp(name = "Concept: AprilTag Auto", group = "Concept")
+public class AprilTagAuto extends LinearOpMode {
     private OV9281 camera;
     LoopTimer loopTimer;
     DcMotorEx front_left;
@@ -138,8 +138,8 @@ public class AprilTagFollower extends LinearOpMode {
             telemetry.addData("Target Tag Pos", targetTagPos);
             telemetry.addData("Loop time","%dms",loopTimer.getMs());
 
-            controller.setCoeffs(AprilTagTrackerPID.p, AprilTagTrackerPID.i, AprilTagTrackerPID.d, 0);
-            controller.setIntegrationBounds(AprilTagTrackerPID.min, AprilTagTrackerPID.max);
+            controller.setCoeffs(AprilTagAutoPID.p, AprilTagAutoPID.i, AprilTagAutoPID.d, 0);
+            controller.setIntegrationBounds(AprilTagAutoPID.min, AprilTagAutoPID.max);
 
             double pidError = controller.calculate(currentTagPos, targetTagPos);
 
