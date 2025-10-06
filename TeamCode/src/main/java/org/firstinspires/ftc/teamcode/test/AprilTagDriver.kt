@@ -14,7 +14,11 @@ import com.qualcomm.robotcore.hardware.DcMotorEx
 import com.qualcomm.robotcore.hardware.DcMotorSimple
 import com.qualcomm.robotcore.hardware.IMU
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName
-import org.firstinspires.ftc.teamcode.util.AprilTagDriverPID
+import org.firstinspires.ftc.teamcode.util.AprilTagDriverPID.kP
+import org.firstinspires.ftc.teamcode.util.AprilTagDriverPID.kI
+import org.firstinspires.ftc.teamcode.util.AprilTagDriverPID.kD
+import org.firstinspires.ftc.teamcode.util.AprilTagDriverPID.max
+import org.firstinspires.ftc.teamcode.util.AprilTagDriverPID.min
 import org.firstinspires.ftc.teamcode.util.PIDController
 import org.firstinspires.ftc.vision.VisionPortal
 import org.firstinspires.ftc.vision.apriltag.AprilTagGameDatabase
@@ -43,8 +47,8 @@ class AprilTagDriver : LinearOpMode() {
     }
 
     val controller = PIDController(
-        AprilTagDriverPID.p,AprilTagDriverPID.i,AprilTagDriverPID.d, 0.0, AprilTagDriverPID.max,
-        AprilTagDriverPID.min)
+        kP,kI,kD, 0.0, 0.0, max,
+        min)
     override fun runOpMode() {
         telemetry = JoinedTelemetry(PanelsTelemetry.ftcTelemetry, telemetry, FtcDashboard.getInstance().telemetry)
 
@@ -85,8 +89,8 @@ class AprilTagDriver : LinearOpMode() {
             allHubs.forEach { hub -> hub.clearBulkCache() }
 
             processVision()
-            controller.setCoeffs(AprilTagDriverPID.p,AprilTagDriverPID.i,AprilTagDriverPID.d)
-            controller.setIntegrationBounds(AprilTagDriverPID.min, AprilTagDriverPID.max)
+            controller.setCoeffs(kP,kI,kD)
+            controller.setIntegrationBounds(min, max)
             val filtered = currentTagPos * 0.25 + lastTagPos * (1-0.25)
             lastTagPos = currentTagPos
             val pidOutput = controller.calculate(filtered,targetTagPos)

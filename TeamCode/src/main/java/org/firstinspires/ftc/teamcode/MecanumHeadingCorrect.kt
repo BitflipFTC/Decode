@@ -19,6 +19,9 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple
 import com.qualcomm.robotcore.hardware.IMU
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit
 import org.firstinspires.ftc.teamcode.util.HeadingCorrectPID
+import org.firstinspires.ftc.teamcode.util.HeadingCorrectPID.kD
+import org.firstinspires.ftc.teamcode.util.HeadingCorrectPID.kI
+import org.firstinspires.ftc.teamcode.util.HeadingCorrectPID.kP
 import org.firstinspires.ftc.teamcode.util.HeadingCorrectPID.targetImuPos
 import org.firstinspires.ftc.teamcode.util.PIDController
 import kotlin.math.abs
@@ -46,7 +49,7 @@ class MecanumHeadingCorrect : LinearOpMode() {
 
     var driveSpeed : Double = 0.5
 
-    val controller = PIDController(HeadingCorrectPID.p,HeadingCorrectPID.i, HeadingCorrectPID.d)
+    val controller = PIDController(kP,kI, kD)
 
     override fun runOpMode() {
         telemetry = JoinedTelemetry(PanelsTelemetry.ftcTelemetry, telemetry, FtcDashboard.getInstance().telemetry)
@@ -110,7 +113,7 @@ class MecanumHeadingCorrect : LinearOpMode() {
                 }
             }
             
-            controller.setCoeffs(HeadingCorrectPID.p,HeadingCorrectPID.i,HeadingCorrectPID.d)
+            controller.setCoeffs(kP,kI,kD)
             val pidOutput : Double = -controller.calculate(heading, targetImuPos)
 
             if (gamepad1.left_trigger >= 0.25)
@@ -202,8 +205,6 @@ class MecanumHeadingCorrect : LinearOpMode() {
             telemetry.addData("Left Stick ","x:%+05.2f y:%+05.2f", x, y)
             telemetry.addData("Right Stick","x:%+05.2f y:%+05.2f", rx, gamepad1.right_stick_y)
             telemetry.addLine("---------------------------------------")
-            telemetry.addData("PID Controller variables", "kP:%.3f  kI:%.3f  kD:%.3f",
-                HeadingCorrectPID.p, HeadingCorrectPID.i, HeadingCorrectPID.d)
             telemetry.addData("PID Error", controller.error)
             telemetry.addData("PID Velocity error", controller.velError)
             telemetry.addData("PID SetPoint Tolerance", controller.setPointTolerance)

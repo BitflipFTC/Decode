@@ -10,18 +10,14 @@ import org.firstinspires.ftc.teamcode.hardware.OV9281
 import org.firstinspires.ftc.teamcode.util.PIDController
 import org.firstinspires.ftc.teamcode.hardware.Turret
 import org.firstinspires.ftc.teamcode.util.TurretTestPID.kD
-import org.firstinspires.ftc.teamcode.util.TurretTestPID.kF
+import org.firstinspires.ftc.teamcode.util.TurretTestPID.kV
 import org.firstinspires.ftc.teamcode.util.TurretTestPID.kI
 import org.firstinspires.ftc.teamcode.util.TurretTestPID.kP
 import org.firstinspires.ftc.teamcode.util.TurretTestPID.maxIntegral
 import org.firstinspires.ftc.teamcode.util.TurretTestPID.minIntegral
 import org.firstinspires.ftc.teamcode.util.TurretTestPID.setPointTolerance
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection
-import kotlin.math.abs
-import kotlin.math.pow
-import kotlin.math.sqrt
 import com.qualcomm.robotcore.hardware.Servo
-import com.qualcomm.robotcore.util.Range
 import org.firstinspires.ftc.teamcode.util.TurretTestPID.exposure
 import org.firstinspires.ftc.teamcode.util.TurretTestPID.kS
 import org.firstinspires.ftc.teamcode.util.TurretTestPID.tuneKs
@@ -45,7 +41,7 @@ class TurretTest : LinearOpMode() {
         var hoodPos : Double = 0.0
         val camera = OV9281(this,4,6)
 
-        val controller = PIDController(kP, kI, kD, kF, maxIntegral, minIntegral);
+        val controller = PIDController(kP, kI, kD, kV, kS,maxIntegral, minIntegral);
 
 
         // bulk caching
@@ -69,14 +65,14 @@ class TurretTest : LinearOpMode() {
                 camera.aprilTag.detections
 
             if (currentDetections.isEmpty()) currentTagPos = 320.0
-            if (!currentDetections.isEmpty() && currentDetections.get(0).metadata.name.contains("Obelisk"))
-                currentTagPos = currentDetections.get(0).center.x
+            if (!currentDetections.isEmpty() && currentDetections[0].metadata.name.contains("Obelisk"))
+                currentTagPos = currentDetections[0].center.x
 
             hood.position = hoodPos
             hoodPos += (gamepad1.right_stick_y * 0.005)
             hoodPos = max((0).toDouble(), min(hoodPos, 0.45))
 
-            controller.setCoeffs(kP, kI, kD, kF)
+            controller.setCoeffs(kP, kI, kD, kV,kS)
             controller.setPointTolerance = setPointTolerance
             var pidError = controller.calculate(currentTagPos, targetTagPos)
             if (!controller.atSetPoint()) {pidError += sign(pidError) * kS}

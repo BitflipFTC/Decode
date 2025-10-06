@@ -4,17 +4,18 @@ import com.qualcomm.robotcore.util.ElapsedTime
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.math.sign
 
 /**
  * A PID(F) Controller.
  * *Notes*:
- * - feedforward has yet to be tested.
  * - integral term may wind up too quickly.
  *
  * @param kP Proportional control coefficient
  * @param kI Integral control coefficient
  * @param kD Derivative control coefficient
- * @param kF Feedforward coefficient
+ * @param kV Position Feedforward coefficient
+ * @param kS Static feedforward coefficient
  * @param maxIntegral Maximum integral value (to prevent windup)
  * @param minIntegral Minimum integral value (to prevent windup)
  */
@@ -22,7 +23,8 @@ open class PIDController(
     var kP : Double = 0.0,
     var kI : Double = 0.0,
     var kD : Double = 0.0,
-    var kF : Double = 0.0,
+    var kV : Double = 0.0,
+    var kS : Double = 0.0,
     protected var maxIntegral: Double = 1.0,
     protected var minIntegral: Double = -1.0
 ) {
@@ -50,11 +52,12 @@ open class PIDController(
         reset()
     }
 
-    fun setCoeffs (kP : Double = 0.0, kI: Double = 0.0, kD: Double = 0.0, kf: Double = 0.0) {
+    fun setCoeffs (kP : Double = 0.0, kI: Double = 0.0, kD: Double = 0.0, kV: Double = 0.0, kS: Double = 0.0) {
         this.kP = kP
         this.kI = kI
         this.kD = kD
-        this.kF = kf
+        this.kV = kV
+        this.kS = kS
     }
 
     /**
@@ -84,7 +87,7 @@ open class PIDController(
         totalError += timePeriod * error
         totalError = min(maxIntegral, max(minIntegral, totalError))
 
-        return kP * error + kI * totalError + kD * velError + setpoint * kF
+        return kP * error + kI * totalError + kD * velError + setpoint * kV + sign(error) * kS
     }
 
     /**

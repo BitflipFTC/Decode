@@ -12,7 +12,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx
 import com.qualcomm.robotcore.hardware.DcMotorSimple
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit
 import org.firstinspires.ftc.teamcode.util.FlywheelTestPID.kD
-import org.firstinspires.ftc.teamcode.util.FlywheelTestPID.kF
+import org.firstinspires.ftc.teamcode.util.FlywheelTestPID.kV
 import org.firstinspires.ftc.teamcode.util.FlywheelTestPID.kI
 import org.firstinspires.ftc.teamcode.util.FlywheelTestPID.kP
 import org.firstinspires.ftc.teamcode.util.FlywheelTestPID.maxIntegral
@@ -21,12 +21,13 @@ import org.firstinspires.ftc.teamcode.util.FlywheelTestPID.targetRPM
 import org.firstinspires.ftc.teamcode.util.PIDController
 import com.qualcomm.robotcore.hardware.Servo
 import org.firstinspires.ftc.teamcode.util.FlywheelTestPID.hoodangle
+import org.firstinspires.ftc.teamcode.util.FlywheelTestPID.kS
 import org.firstinspires.ftc.teamcode.util.FlywheelTestPID.rawPower
 import org.firstinspires.ftc.teamcode.util.FlywheelTestPID.totPower
 
 @TeleOp(name = "Test: Flywheel", group = "Test")
 class FlywheelTest : LinearOpMode() {
-    val controller = PIDController(kP, kI, kD, kF, maxIntegral, minIntegral)
+    val controller = PIDController(kP, kI, kD, kV, kS,maxIntegral, minIntegral)
     val flywheel by lazy { hardwareMap["flywheel"] as DcMotorEx }
     val hood by lazy { hardwareMap["hood"] as Servo }
 
@@ -63,7 +64,7 @@ class FlywheelTest : LinearOpMode() {
             //                         degrees/s / 360 = rotations/s   rotations/s * 60 = rotations/m
             val flywheelRPM = -(flywheel.getVelocity(AngleUnit.DEGREES) / 360) * 6000
 //
-            controller.setCoeffs(kP, kI, kD, kF)
+            controller.setCoeffs(kP, kI, kD, kV,kS)
             val pidOutput = controller.calculate(flywheelRPM, targetRPM)
             if (rawPower) {
                 flywheel.power = totPower

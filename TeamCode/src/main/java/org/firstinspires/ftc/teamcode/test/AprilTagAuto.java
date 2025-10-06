@@ -52,6 +52,12 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.util.AprilTagAutoPID;
+import static org.firstinspires.ftc.teamcode.util.AprilTagAutoPID.max;
+import static org.firstinspires.ftc.teamcode.util.AprilTagAutoPID.min;
+import static org.firstinspires.ftc.teamcode.util.AprilTagAutoPID.kD;
+import static org.firstinspires.ftc.teamcode.util.AprilTagAutoPID.kI;
+import static org.firstinspires.ftc.teamcode.util.AprilTagAutoPID.kP;
+
 import org.firstinspires.ftc.teamcode.hardware.OV9281;
 import org.firstinspires.ftc.teamcode.util.PIDController;
 import org.firstinspires.ftc.teamcode.util.SquidController;
@@ -138,7 +144,7 @@ public class AprilTagAuto extends LinearOpMode {
             telemetry.addData("Target Tag Pos", targetTagPos);
             telemetry.addData("Loop time","%dms",loopTimer.getMs());
 
-            controller.setCoeffs(AprilTagAutoPID.p, AprilTagAutoPID.i, AprilTagAutoPID.d, 0);
+            controller.setCoeffs(kP, kI, kD,0,0);
             controller.setIntegrationBounds(AprilTagAutoPID.min, AprilTagAutoPID.max);
 
             double pidError = controller.calculate(currentTagPos, targetTagPos);

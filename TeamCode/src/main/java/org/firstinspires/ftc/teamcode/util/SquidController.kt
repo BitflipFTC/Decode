@@ -10,10 +10,10 @@ class SquidController(
     kP : Double = 0.0,
     kI : Double = 0.0,
     kD : Double = 0.0,
-    kF : Double = 0.0,
+    kV : Double = 0.0,
     maxIntegral: Double = 1.0,
     minIntegral: Double = -1.0
-) : PIDController(kP, kI, kD, kF, maxIntegral, minIntegral) {
+) : PIDController(kP, kI, kD, kV, 0.0,maxIntegral, minIntegral) {
     override fun calculate(processVariable : Double, setpoint : Double): Double {
         // handle time period stuff
         val currentTime = timer.nanoseconds() / 1E9
@@ -37,6 +37,6 @@ class SquidController(
         // only difference between PIDController.kt and this
         // sqrt of the error to better follow kinematics or whatever
         // https://www.youtube.com/watch?v=WA9o3e4a01Q
-        return kP * sqrt(abs(error)) * sign(error) + kI * totalError + kD * velError + setpoint * kF
+        return kP * sqrt(abs(error)) * sign(error) + kI * totalError + kD * velError + setpoint * kV
     }
 }
