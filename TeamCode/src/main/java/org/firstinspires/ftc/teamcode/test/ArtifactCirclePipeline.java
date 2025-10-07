@@ -1,10 +1,11 @@
-package org.firstinspires.ftc.teamcode.test;
+package org.firstinspires.ftc.teamcode;
 
 import org.opencv.core.*;
 import org.opencv.imgproc.Imgproc;
 import org.openftc.easyopencv.OpenCvPipeline;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class ArtifactCirclePipeline extends OpenCvPipeline {
@@ -14,17 +15,28 @@ public class ArtifactCirclePipeline extends OpenCvPipeline {
     Mat yCrCbMat = new Mat();
     Mat crMat = new Mat();
     Mat cbMat = new Mat();
-
-
     Mat thresholdMat = new Mat();
     Mat morphedThreshold = new Mat();
     Mat contoursOnPlainImageMat = new Mat();
 
+    // purple artifacts
+    Mat pCrMat = new Mat();
+    Mat pCbMat = new Mat();
+    Mat pThresholdMat = new Mat();
+    Mat pMorphedThreshold = new Mat();
+
+    // green artifacts
+    Mat gCrMat = new Mat();
+    Mat gCbMat = new Mat();
+    Mat gThresholdMat = new Mat();
+    Mat gMorphedThreshold = new Mat();
+
+
     /*
      * The elements we use for noise reduction
      */
-    Mat erodeElement = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(8, 8));
-    Mat dilateElement = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(11, 11));
+    Mat erodeElement = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(3, 3));
+    Mat dilateElement = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(6, 6));
 
     /*
      * Colors
@@ -45,10 +57,10 @@ public class ArtifactCirclePipeline extends OpenCvPipeline {
         FINAL,
         Cb,
         Cr,
-        CbThresh,
-        CrThresh,
-        MASK,
-        MASK_NR,
+        pThresh,
+        pMorph,
+        gThresh,
+        gMorph,
         CONTOURS;
     }
 
@@ -85,6 +97,11 @@ public class ArtifactCirclePipeline extends OpenCvPipeline {
 
         switch (stages[stageNum])
         {
+            case FINAL:
+            {
+                return input;
+            }
+
             case Cb:
             {
                 return cbMat;
@@ -95,20 +112,14 @@ public class ArtifactCirclePipeline extends OpenCvPipeline {
                 return crMat;
             }
 
-            case FINAL:
-            {
-                return input;
-            }
-
-            case MASK:
-            {
-                return thresholdMat;
-            }
-
-            case MASK_NR:
-            {
-                return morphedThreshold;
-            }
+            case pThresh:
+                return pThresholdMat;
+            case pMorph:
+                return pMorphedThreshold;
+            case gThresh:
+                return gThresholdMat;
+            case gMorph:
+                return gMorphedThreshold;
 
             case CONTOURS:
             {
@@ -137,17 +148,15 @@ public class ArtifactCirclePipeline extends OpenCvPipeline {
 
         // A list we'll be using to store the contours we find
         Artifacts artifacts = new Artifacts();
+
+        // Convert the input image to YCrCb color space, then extract the Cb and Cr channels
         Imgproc.cvtColor(input, yCrCbMat, Imgproc.COLOR_RGB2YCrCb);
         Core.extractChannel(yCrCbMat, crMat, 1);
         Core.extractChannel(yCrCbMat, cbMat, 2);
 
         // ------ get purple artifacts --------
 
-        // Convert the input image to YCrCb color space, then extract the Cb and Cr channels
-        Mat pCrMat = new Mat();
-        Mat pCbMat = new Mat();
-        Mat pThresholdMat = new Mat();
-        Mat pMorphedThreshold = new Mat();
+
 
         // get thresholds for cB and cR channels
         Core.inRange(crMat, new Scalar(135),new Scalar(200),pCrMat);
@@ -162,14 +171,11 @@ public class ArtifactCirclePipeline extends OpenCvPipeline {
         // Ok, now actually look for the contours! We only look for external contours.
         Imgproc.findContours(pMorphedThreshold, artifacts.purple, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_NONE);
 
-        artifacts.purple.removeIf(contour -> Imgproc.contourArea(contour) <= 2500);
+        artifacts.purple.removeIf(contour -> Imgproc.contourArea(contour) <= 675);
 
 
         // ------- green artifacts ---------
-        Mat gCrMat = new Mat();
-        Mat gCbMat = new Mat();
-        Mat gThresholdMat = new Mat();
-        Mat gMorphedThreshold = new Mat();
+
 
         // Convert the input image to YCrCb color space, then extract the Cb and Cr channels
 
@@ -189,7 +195,7 @@ public class ArtifactCirclePipeline extends OpenCvPipeline {
         Imgproc.findContours(gMorphedThreshold, artifacts.green, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_NONE);
 
         // We do draw the contours we find, but not to the main input buffer.
-        artifacts.green.removeIf(contour -> Imgproc.contourArea(contour) <= 2500);
+        artifacts.green.removeIf(contour -> Imgproc.contourArea(contour) <= 675);
 
         input.copyTo(contoursOnPlainImageMat);
         Imgproc.drawContours(contoursOnPlainImageMat, artifacts.purple, -1, PURPLE, CONTOUR_LINE_THICKNESS, 8);
@@ -204,9 +210,9 @@ public class ArtifactCirclePipeline extends OpenCvPipeline {
          * Apply some erosion and dilation for noise reduction
          */
 
+
         Imgproc.erode(input, output, erodeElement);
         Imgproc.erode(output, output, erodeElement);
-
         Imgproc.dilate(output, output, dilateElement);
         Imgproc.dilate(output, output, dilateElement);
     }
@@ -216,7 +222,7 @@ public class ArtifactCirclePipeline extends OpenCvPipeline {
         // Transform the contour to a different format
 //        Point[] points = contour.toArray();
 //        MatOfPoint2f contour2f = new MatOfPoint2f(contour.toArray());
-
+        int i = 0;
         for (MatOfPoint contour : artifacts.purple) {
             MatOfPoint2f contour2f = new MatOfPoint2f();
             contour.convertTo(contour2f, CvType.CV_32F);
@@ -228,10 +234,16 @@ public class ArtifactCirclePipeline extends OpenCvPipeline {
 
             // Draw filled circle on mask
             Imgproc.circle(input, center,2, new Scalar(255,255,255), 2);
-            Imgproc.putText(input,"PURPLE:" + radius[0],center,Imgproc.FONT_HERSHEY_PLAIN,1,new Scalar(255,255,255));
+            Imgproc.putText(input,String.format("PURPLE: %.2f,%.2f",center.x,center.y),center,Imgproc.FONT_HERSHEY_PLAIN,1,new Scalar(255,0,2550));
             Imgproc.circle(input, center, (int) radius[0], new Scalar(255,0,255), 3);  // -1 = filled
+            HashMap<Integer,Point> m = new HashMap<>();
+            m.put(i,center);
+
+            Artifacts.purplePoints.add(m);
+            i++;
         }
 
+        i = 0;
         for (MatOfPoint contour : artifacts.green) {
             MatOfPoint2f contour2f = new MatOfPoint2f();
             contour.convertTo(contour2f, CvType.CV_32F);
@@ -243,8 +255,13 @@ public class ArtifactCirclePipeline extends OpenCvPipeline {
 
             // Draw filled circle on mask
             Imgproc.circle(input, center,2, new Scalar(255,255,255), 2);
-            Imgproc.putText(input,"GREEN:" + radius[0],center,Imgproc.FONT_HERSHEY_PLAIN,1,new Scalar(255,255,255));
+            Imgproc.putText(input,String.format("GREEN: %.2f,%.2f",center.x,center.y),center,Imgproc.FONT_HERSHEY_PLAIN,1,new Scalar(0,255,0));
             Imgproc.circle(input, center, (int) radius[0], new Scalar(0,255,0), 3);  // -1 = filled
+
+            HashMap<Integer,Point> m = new HashMap<>();
+            m.put(i,center);
+            Artifacts.greenPoints.add(m);
+            i++;
         }
 
 
@@ -253,103 +270,27 @@ public class ArtifactCirclePipeline extends OpenCvPipeline {
 //        drawRotatedRect(rotatedRectFitToContour, input);
     }
 
-    static class Artifacts {
+    public static class Artifacts {
         ArrayList<MatOfPoint> purple;
         ArrayList<MatOfPoint> green;
+        static ArrayList<HashMap<Integer,Point>> purplePoints;
+        static ArrayList<HashMap<Integer,Point>> greenPoints;
+
 
         Artifacts() {
             purple = new ArrayList<>();
             green = new ArrayList<>();
+
+            purplePoints = new ArrayList<>();
+            greenPoints = new ArrayList<>();
         }
-    }
 
-    static class ContourRegionAnalysis
-    {
-        /*
-         * This class holds the results of analyzeContourRegion()
-         */
-
-        double hullArea;
-        double contourArea;
-        double density;
-        List<MatOfPoint> listHolderOfMatOfPoint;
-    }
-
-    static ContourRegionAnalysis analyzeContourRegion(ArrayList<Point> contourPoints)
-    {
-        // drawContours() requires a LIST of contours (there's no singular drawContour()
-        // method), so we have to make a list, even though we're only going to use a single
-        // position in it...
-        MatOfPoint matOfPoint = new MatOfPoint();
-        matOfPoint.fromList(contourPoints);
-        List<MatOfPoint> listHolderOfMatOfPoint = List.of(matOfPoint);
-
-        // Compute the convex hull of the contour
-        MatOfInt hullMatOfInt = new MatOfInt();
-        Imgproc.convexHull(matOfPoint, hullMatOfInt);
-
-        // Was the convex hull calculation successful?
-        if(hullMatOfInt.toArray().length > 0)
-        {
-            // The convex hull calculation tells us the INDEX of the points which
-            // which were passed in eariler which form the convex hull. That's all
-            // well and good, but now we need filter out that original list to find
-            // the actual POINTS which form the convex hull
-            Point[] hullPoints = new Point[hullMatOfInt.rows()];
-            List<Integer> hullContourIdxList = hullMatOfInt.toList();
-
-            for (int i = 0; i < hullContourIdxList.size(); i++)
-            {
-                hullPoints[i] = contourPoints.get(hullContourIdxList.get(i));
-            }
-
-            ContourRegionAnalysis analysis = new ContourRegionAnalysis();
-            analysis.listHolderOfMatOfPoint = listHolderOfMatOfPoint;
-
-            // Compute the hull area
-            analysis.hullArea = Imgproc.contourArea(new MatOfPoint(hullPoints));
-
-            // Compute the original contour area
-            analysis.contourArea = Imgproc.contourArea(listHolderOfMatOfPoint.get(0));
-
-            // Compute the contour density. This is the ratio of the contour area to the
-            // area of the convex hull formed by the contour
-            analysis.density = analysis.contourArea / analysis.hullArea;
-
-            return analysis;
+        public static ArrayList<HashMap<Integer,Point>> getArtifactsPurple() {
+            return purplePoints;
         }
-        else
-        {
-            return null;
-        }
-    }
 
-    static void drawTagText(RotatedRect rect, String text, Mat mat)
-    {
-        Imgproc.putText(
-                mat, // The buffer we're drawing on
-                text, // The text we're drawing
-                new Point( // The anchor point for the text
-                        rect.center.x-50,  // x anchor point
-                        rect.center.y+25), // y anchor point
-                Imgproc.FONT_HERSHEY_PLAIN, // Font
-                1, // Font size
-                TEAL, // Font color
-                1); // Font thickness
-    }
-
-    static void drawRotatedRect(RotatedRect rect, Mat drawOn)
-    {
-        /*
-         * Draws a rotated rect by drawing each of the 4 lines individually
-         */
-
-        Point[] points = new Point[4];
-        rect.points(points);
-
-        for(int i = 0; i < 4; ++i)
-        {
-            Imgproc.line(drawOn, points[i], points[(i+1)%4], RED, 2);
+        public static ArrayList<HashMap<Integer,Point>> getArtifactsGreen() {
+            return greenPoints;
         }
     }
 }
