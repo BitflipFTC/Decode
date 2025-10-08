@@ -63,16 +63,18 @@ object FlywheelTestPID {
 @Configurable
 @Config
 object TurretTestPID {
-    @JvmField var kP : Double = 0.00004
-    @JvmField var kS : Double = 0.085
+    @JvmField var kP : Double = 0.0003
+    @JvmField var kS : Double = 0.0275
     @JvmField var kI : Double = 0.0
-    @JvmField var kD : Double = 0.00001
+    @JvmField var kD : Double = 0.00000
     @JvmField var kV : Double = 0.0
     @JvmField var maxIntegral: Double = 1.0
     @JvmField var minIntegral: Double = -1.0
     @JvmField var setPointTolerance : Double = 25.toDouble()
     @JvmField var tuneKs : Boolean = false
     @JvmField var exposure : Int = 4
+    @JvmField var targetTagPos : Double = 320.0
+
 }
 
 fun Boolean.toInt(): Int {

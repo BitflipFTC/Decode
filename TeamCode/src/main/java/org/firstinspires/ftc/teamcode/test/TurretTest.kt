@@ -20,6 +20,7 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagDetection
 import com.qualcomm.robotcore.hardware.Servo
 import org.firstinspires.ftc.teamcode.util.TurretTestPID.exposure
 import org.firstinspires.ftc.teamcode.util.TurretTestPID.kS
+import org.firstinspires.ftc.teamcode.util.TurretTestPID.targetTagPos
 import org.firstinspires.ftc.teamcode.util.TurretTestPID.tuneKs
 import kotlin.math.max
 import kotlin.math.min
@@ -27,7 +28,6 @@ import kotlin.math.sign
 
 @TeleOp(name = "Test: Turret", group = "Test")
 class TurretTest : LinearOpMode() {
-    var targetTagPos : Double = 320.0
     var currentTagPos : Double = 320.0
     override fun runOpMode() {
         telemetry = JoinedTelemetry(
@@ -38,11 +38,10 @@ class TurretTest : LinearOpMode() {
 
         val turret = Turret(hardwareMap)
         val hood by lazy { hardwareMap["hood"] as Servo }
-        var hoodPos : Double = 0.0
+        var hoodPos = 0.0
         val camera = OV9281(this,4,6)
 
         val controller = PIDController(kP, kI, kD, kV, kS,maxIntegral, minIntegral);
-
 
         // bulk caching
         val allHubs = hardwareMap.getAll(LynxModule::class.java)
@@ -64,7 +63,7 @@ class TurretTest : LinearOpMode() {
             val currentDetections: List<AprilTagDetection> =
                 camera.aprilTag.detections
 
-            if (currentDetections.isEmpty()) currentTagPos = 320.0
+            if (currentDetections.isEmpty()) currentTagPos = targetTagPos
             if (!currentDetections.isEmpty() && currentDetections[0].metadata.name.contains("Obelisk"))
                 currentTagPos = currentDetections[0].center.x
 
@@ -77,7 +76,7 @@ class TurretTest : LinearOpMode() {
             var pidError = controller.calculate(currentTagPos, targetTagPos)
             if (!controller.atSetPoint()) {pidError += sign(pidError) * kS}
 
-            if (tuneKs) turret.setPower(kS) else turret.setPower(pidError)
+            if (tuneKs) {if (gamepad1.right_bumper) {turret.setPower(kS)}else{turret.setPower(0.0)}} else {turret.setPower(pidError)}
 
             telemetry.addData("current tag pos", currentTagPos)
             telemetry.addData(" target tag pos", targetTagPos)
