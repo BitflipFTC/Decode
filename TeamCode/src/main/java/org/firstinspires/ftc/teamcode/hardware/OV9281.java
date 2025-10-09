@@ -12,10 +12,13 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.vision.VisionPortal;
+import org.firstinspires.ftc.vision.VisionProcessor;
 import org.firstinspires.ftc.vision.apriltag.AprilTagGameDatabase;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
 import java.util.concurrent.TimeUnit;
+
+import dev.frozenmilk.util.modifier.BiModifier;
 
 
 public class OV9281 {
@@ -59,7 +62,6 @@ public class OV9281 {
                 .setOutputUnits(DistanceUnit.INCH, AngleUnit.DEGREES)
                 .build();
 
-
         visionPortal = new VisionPortal.Builder()
                 .setCamera(opMode.hardwareMap.get(WebcamName.class, "camera"))
                 .setCameraResolution(new Size(640,480))
@@ -67,6 +69,7 @@ public class OV9281 {
                 .setStreamFormat(VisionPortal.StreamFormat.MJPEG)
                 .enableLiveView(true)
                 .addProcessor(aprilTag)
+                .setAutoStopLiveView(true)
                 .build();
 
         while (visionPortal.getCameraState() != VisionPortal.CameraState.STREAMING) {
@@ -115,5 +118,13 @@ public class OV9281 {
 
     public void setExposure (int exposure) {
         exposureControl.setExposure(exposure, TimeUnit.MILLISECONDS);
+    }
+
+    public void stopStreaming() {
+        visionPortal.stopStreaming();
+    }
+
+    public void resumeStreaming() {
+        visionPortal.resumeStreaming();
     }
 }
