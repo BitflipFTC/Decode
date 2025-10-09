@@ -111,9 +111,7 @@ open class PIDController(
      * Checks if the PID Controller is at its set point by checking if the position and velocity errors are within their respective tolerances.
      * @return True if the velocity and position errors are within their tolerances, False otherwise
      */
-    fun atSetPoint () : Boolean {
-        return (abs(error) <= setPointTolerance) && (abs(velError) <= velErrorTolerance)
-    }
+    fun atSetPoint () = (abs(error) <= setPointTolerance) && (abs(velError) <= velErrorTolerance)
 
     fun resetTotalError () {
         totalError = 0.0

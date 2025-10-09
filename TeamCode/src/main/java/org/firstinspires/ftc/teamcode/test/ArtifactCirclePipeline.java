@@ -7,6 +7,7 @@ import org.openftc.easyopencv.OpenCvPipeline;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
 public class ArtifactCirclePipeline extends OpenCvPipeline {
     /*
@@ -45,6 +46,7 @@ public class ArtifactCirclePipeline extends OpenCvPipeline {
     static final Scalar PURPLE = new Scalar(158, 52, 235);
     static final Scalar RED = new Scalar(255, 0, 0);
     static final Scalar GREEN = new Scalar(0, 255, 0);
+    static final Scalar BLACK = new Scalar(255, 255, 255);
     static final Scalar BLUE = new Scalar(0, 0, 255);
 
     static final int CONTOUR_LINE_THICKNESS = 2;
@@ -133,18 +135,18 @@ public class ArtifactCirclePipeline extends OpenCvPipeline {
     Artifacts findContours(Mat input)
     {
         /*
-            public static final ColorRange ARTIFACT_GREEN = new ColorRange(
-            ColorSpace.YCrCb,
-            new Scalar( 32,  50, 118),
-            new Scalar(255, 105, 145)
-    );
+        public static final ColorRange ARTIFACT_GREEN = new ColorRange(
+                ColorSpace.YCrCb,
+                new Scalar( 32,  50, 118),
+                new Scalar(255, 105, 145)
+        );
 
-    public static final ColorRange ARTIFACT_PURPLE = new ColorRange(
-            ColorSpace.YCrCb,
-            new Scalar( 32, 135, 135),
-            new Scalar(255, 155, 169)
-    );
-    */
+        public static final ColorRange ARTIFACT_PURPLE = new ColorRange(
+                ColorSpace.YCrCb,
+                new Scalar( 32, 135, 135),
+                new Scalar(255, 155, 169)
+        );
+        */
 
         // A list we'll be using to store the contours we find
         Artifacts artifacts = new Artifacts();
@@ -155,8 +157,6 @@ public class ArtifactCirclePipeline extends OpenCvPipeline {
         Core.extractChannel(yCrCbMat, cbMat, 2);
 
         // ------ get purple artifacts --------
-
-
 
         // get thresholds for cB and cR channels
         Core.inRange(crMat, new Scalar(135),new Scalar(200),pCrMat);
@@ -171,13 +171,8 @@ public class ArtifactCirclePipeline extends OpenCvPipeline {
         // Ok, now actually look for the contours! We only look for external contours.
         Imgproc.findContours(pMorphedThreshold, artifacts.purple, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_NONE);
 
-        artifacts.purple.removeIf(contour -> Imgproc.contourArea(contour) <= 675);
-
 
         // ------- green artifacts ---------
-
-
-        // Convert the input image to YCrCb color space, then extract the Cb and Cr channels
 
         // get thresholds for cB and cR channels
 
@@ -194,9 +189,10 @@ public class ArtifactCirclePipeline extends OpenCvPipeline {
         // Ok, now actually look for the contours! We only look for external contours.
         Imgproc.findContours(gMorphedThreshold, artifacts.green, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_NONE);
 
-        // We do draw the contours we find, but not to the main input buffer.
+        artifacts.purple.removeIf(contour -> Imgproc.contourArea(contour) <= 675);
         artifacts.green.removeIf(contour -> Imgproc.contourArea(contour) <= 675);
 
+        // We do draw the contours we find, but not to the main input buffer.
         input.copyTo(contoursOnPlainImageMat);
         Imgproc.drawContours(contoursOnPlainImageMat, artifacts.purple, -1, PURPLE, CONTOUR_LINE_THICKNESS, 8);
         Imgproc.drawContours(contoursOnPlainImageMat, artifacts.green, -1, GREEN, CONTOUR_LINE_THICKNESS, 8);
@@ -210,58 +206,43 @@ public class ArtifactCirclePipeline extends OpenCvPipeline {
          * Apply some erosion and dilation for noise reduction
          */
 
-
         Imgproc.erode(input, output, erodeElement);
         Imgproc.erode(output, output, erodeElement);
         Imgproc.dilate(output, output, dilateElement);
         Imgproc.dilate(output, output, dilateElement);
     }
 
+    void analyzeArtifactContour(Mat input, MatOfPoint contour, Scalar color, String colorName, int i, ArrayList<HashMap<Integer, Point>> artifactPoints) {
+        MatOfPoint2f contour2f = new MatOfPoint2f();
+        contour.convertTo(contour2f, CvType.CV_32F);
+
+        // Fit minimum enclosing circle
+        Point center = new Point();
+        float[] radius = new float[1];
+        Imgproc.minEnclosingCircle(contour2f, center, radius);
+
+        // Draw filled circle on mask
+        // center point
+        Imgproc.circle(input, center,2, BLACK, 2);
+        Imgproc.putText(input,String.format(Locale.ENGLISH,"%s: %.2f,%.2f",colorName, center.x,center.y),center,Imgproc.FONT_HERSHEY_PLAIN,1,color);
+        // border
+        Imgproc.circle(input, center, (int) radius[0], color, 3);  // -1 = filled
+        HashMap<Integer,Point> m = new HashMap<>();
+        m.put(i,center);
+
+        artifactPoints.add(m);
+    }
+
     void analyzeArtifacts(Mat input, Artifacts artifacts)
     {
-        // Transform the contour to a different format
-//        Point[] points = contour.toArray();
-//        MatOfPoint2f contour2f = new MatOfPoint2f(contour.toArray());
-        int i = 0;
-        for (MatOfPoint contour : artifacts.purple) {
-            MatOfPoint2f contour2f = new MatOfPoint2f();
-            contour.convertTo(contour2f, CvType.CV_32F);
-
-            // Fit minimum enclosing circle
-            Point center = new Point();
-            float[] radius = new float[1];
-            Imgproc.minEnclosingCircle(contour2f, center, radius);
-
-            // Draw filled circle on mask
-            Imgproc.circle(input, center,2, new Scalar(255,255,255), 2);
-            Imgproc.putText(input,String.format("PURPLE: %.2f,%.2f",center.x,center.y),center,Imgproc.FONT_HERSHEY_PLAIN,1,new Scalar(255,0,2550));
-            Imgproc.circle(input, center, (int) radius[0], new Scalar(255,0,255), 3);  // -1 = filled
-            HashMap<Integer,Point> m = new HashMap<>();
-            m.put(i,center);
-
-            Artifacts.purplePoints.add(m);
-            i++;
+        for (int i = 0; i < artifacts.purple.size(); i++) {
+            MatOfPoint contour = artifacts.purple.get(i);
+            analyzeArtifactContour(input, contour, PURPLE, "PURPLE", i, Artifacts.purplePoints);
         }
 
-        i = 0;
-        for (MatOfPoint contour : artifacts.green) {
-            MatOfPoint2f contour2f = new MatOfPoint2f();
-            contour.convertTo(contour2f, CvType.CV_32F);
-
-            // Fit minimum enclosing circle
-            Point center = new Point();
-            float[] radius = new float[1];
-            Imgproc.minEnclosingCircle(contour2f, center, radius);
-
-            // Draw filled circle on mask
-            Imgproc.circle(input, center,2, new Scalar(255,255,255), 2);
-            Imgproc.putText(input,String.format("GREEN: %.2f,%.2f",center.x,center.y),center,Imgproc.FONT_HERSHEY_PLAIN,1,new Scalar(0,255,0));
-            Imgproc.circle(input, center, (int) radius[0], new Scalar(0,255,0), 3);  // -1 = filled
-
-            HashMap<Integer,Point> m = new HashMap<>();
-            m.put(i,center);
-            Artifacts.greenPoints.add(m);
-            i++;
+        for (int i = 0; i < artifacts.green.size(); i++) {
+            MatOfPoint contour = artifacts.green.get(i);
+            analyzeArtifactContour(input, contour, GREEN, "GREEN", i, Artifacts.greenPoints);
         }
 
 
