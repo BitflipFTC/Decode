@@ -20,6 +20,7 @@ import org.firstinspires.ftc.teamcode.util.FlywheelTestPID.minIntegral
 import org.firstinspires.ftc.teamcode.util.FlywheelTestPID.targetRPM
 import org.firstinspires.ftc.teamcode.util.PIDController
 import com.qualcomm.robotcore.hardware.Servo
+import org.firstinspires.ftc.teamcode.util.FlywheelTestPID.engageHood
 import org.firstinspires.ftc.teamcode.util.FlywheelTestPID.hoodangle
 import org.firstinspires.ftc.teamcode.util.FlywheelTestPID.kS
 import org.firstinspires.ftc.teamcode.util.FlywheelTestPID.rawPower
@@ -29,6 +30,7 @@ import org.firstinspires.ftc.teamcode.util.FlywheelTestPID.totPower
 class FlywheelTest : LinearOpMode() {
     val controller = PIDController(kP, kI, kD, kV, kS,maxIntegral, minIntegral)
     val flywheel by lazy { hardwareMap["flywheel"] as DcMotorEx }
+    val flywheelppr = 28
     val hood by lazy { hardwareMap["hood"] as Servo }
 
     override fun runOpMode() {
@@ -56,13 +58,15 @@ class FlywheelTest : LinearOpMode() {
             if (gamepad1.aWasPressed()) {
                 targetRPM = 4500.0
             }
-            hood.position = hoodangle
+
+            if (engageHood) {
+                hood.position = hoodangle
+            }
 
 
             targetRPM += gamepad1.left_stick_x
 
-            //                         degrees/s / 360 = rotations/s   rotations/s * 60 = rotations/m
-            val flywheelRPM = -(flywheel.getVelocity(AngleUnit.DEGREES) / 360) * 6000
+            val flywheelRPM = -(flywheel.velocity / flywheelppr) * 60
 //
             controller.setCoeffs(kP, kI, kD, kV,kS)
             val pidOutput = controller.calculate(flywheelRPM, targetRPM)

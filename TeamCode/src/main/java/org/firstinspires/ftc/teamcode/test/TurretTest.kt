@@ -28,7 +28,7 @@ import kotlin.math.sign
 
 @TeleOp(name = "Test: Turret", group = "Test")
 class TurretTest : LinearOpMode() {
-    var currentTagPos : Double = 320.0
+    var currentTagPos: Double = 320.0
     override fun runOpMode() {
         telemetry = JoinedTelemetry(
             PanelsTelemetry.ftcTelemetry,
@@ -39,9 +39,9 @@ class TurretTest : LinearOpMode() {
         val turret = Turret(hardwareMap)
         val hood by lazy { hardwareMap["hood"] as Servo }
         var hoodPos = 0.0
-        val camera = OV9281(this,4,6)
+        val camera = OV9281(this, 4, 6)
 
-        val controller = PIDController(kP, kI, kD, kV, kS,maxIntegral, minIntegral);
+        val controller = PIDController(kP, kI, kD, kV, kS, maxIntegral, minIntegral)
 
         // bulk caching
         val allHubs = hardwareMap.getAll(LynxModule::class.java)
@@ -60,28 +60,39 @@ class TurretTest : LinearOpMode() {
 
             // atag stuff
 
-            val currentDetections: List<AprilTagDetection> =
+            val currentDetections: ArrayList<AprilTagDetection> =
                 camera.aprilTag.detections
 
-            if (currentDetections.isEmpty()) currentTagPos = targetTagPos
-            if (!currentDetections.isEmpty() && currentDetections[0].metadata.name.contains("Obelisk"))
-                currentTagPos = currentDetections[0].center.x
+            currentTagPos = when {
+                currentDetections.isEmpty() -> targetTagPos
+                else                        -> currentDetections[0].center.x
+            }
 
             hood.position = hoodPos
             hoodPos += (gamepad1.right_stick_y * 0.005)
             hoodPos = max((0).toDouble(), min(hoodPos, 0.45))
 
-            controller.setCoeffs(kP, kI, kD, kV,kS)
+            controller.setCoeffs(kP, kI, kD, kV, kS)
             controller.setPointTolerance = setPointTolerance
             var pidError = controller.calculate(currentTagPos, targetTagPos)
-            if (!controller.atSetPoint()) {pidError += sign(pidError) * kS}
+            if (!controller.atSetPoint()) {
+                pidError += sign(pidError) * kS
+            }
 
-            if (tuneKs) {if (gamepad1.right_bumper) {turret.setPower(kS)}else{turret.setPower(0.0)}} else {turret.setPower(pidError)}
+            if (tuneKs) {
+                if (gamepad1.right_bumper) {
+                    turret.setPower(kS)
+                } else {
+                    turret.setPower(0.0)
+                }
+            } else {
+                turret.setPower(pidError)
+            }
 
             telemetry.addData("current tag pos", currentTagPos)
             telemetry.addData(" target tag pos", targetTagPos)
             telemetry.addData("turret power", pidError * 300)
-            telemetry.addData("At Setpoint?",controller.atSetPoint())
+            telemetry.addData("At Setpoint?", controller.atSetPoint())
             telemetry.addData("Hood pos", hoodPos)
 
             telemetry.update()

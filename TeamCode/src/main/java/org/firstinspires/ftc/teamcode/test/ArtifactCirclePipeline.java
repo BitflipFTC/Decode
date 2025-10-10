@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.test;
 
 import org.opencv.core.*;
 import org.opencv.imgproc.Imgproc;
@@ -6,7 +6,6 @@ import org.openftc.easyopencv.OpenCvPipeline;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 
 public class ArtifactCirclePipeline extends OpenCvPipeline {
@@ -16,8 +15,6 @@ public class ArtifactCirclePipeline extends OpenCvPipeline {
     Mat yCrCbMat = new Mat();
     Mat crMat = new Mat();
     Mat cbMat = new Mat();
-    Mat thresholdMat = new Mat();
-    Mat morphedThreshold = new Mat();
     Mat contoursOnPlainImageMat = new Mat();
 
     // purple artifacts
@@ -63,7 +60,7 @@ public class ArtifactCirclePipeline extends OpenCvPipeline {
         pMorph,
         gThresh,
         gMorph,
-        CONTOURS;
+        CONTOURS
     }
 
     Stage[] stages = Stage.values();

@@ -1,9 +1,6 @@
 package org.firstinspires.ftc.teamcode
 
 import com.acmerobotics.dashboard.FtcDashboard
-import com.acmerobotics.dashboard.config.Config
-import com.acmerobotics.dashboard.telemetry.MultipleTelemetry
-import com.bylazar.configurables.annotations.Configurable
 import com.bylazar.gamepad.PanelsGamepad
 import com.bylazar.telemetry.JoinedTelemetry
 import com.bylazar.telemetry.PanelsTelemetry
@@ -17,16 +14,13 @@ import com.qualcomm.robotcore.hardware.DcMotorEx
 import com.qualcomm.robotcore.hardware.DcMotorSimple
 import com.qualcomm.robotcore.hardware.IMU
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit
-import org.firstinspires.ftc.teamcode.util.HeadingCorrectPID
 import org.firstinspires.ftc.teamcode.util.HeadingCorrectPID.kD
 import org.firstinspires.ftc.teamcode.util.HeadingCorrectPID.kI
 import org.firstinspires.ftc.teamcode.util.HeadingCorrectPID.kP
 import org.firstinspires.ftc.teamcode.util.HeadingCorrectPID.targetImuPos
 import org.firstinspires.ftc.teamcode.util.PIDController
 import kotlin.math.abs
-import kotlin.math.atan2
 import kotlin.math.cos
-import kotlin.math.hypot
 import kotlin.math.sin
 
 @TeleOp(name = "Heading Correct Drive", group = "TeleOp")
@@ -90,7 +84,7 @@ class MecanumHeadingCorrect : LinearOpMode() {
         while (opModeIsActive()) {
             // more bulk caching
             allHubs.forEach { hub -> hub.clearBulkCache() }
-            val g1 = ga1.asCombinedFTCGamepad(gamepad1)
+            ga1.asCombinedFTCGamepad(gamepad1)
 
             var x : Double = gamepad1.left_stick_x.toDouble()
             var y : Double = -gamepad1.left_stick_y.toDouble()

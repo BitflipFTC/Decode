@@ -169,7 +169,7 @@ class AprilTagDriver : LinearOpMode() {
         val currentDetections = aprilTag.detections
 
         if (currentDetections.isEmpty()) {
-            currentTagPos = targetTagPos;
+            currentTagPos = targetTagPos
         } else {
             telemetry.addData("Detected april tags", currentDetections.size)
             currentDetections.forEach { detection -> currentTagPos = detection.center.x }

@@ -45,18 +45,19 @@ object AprilTagAutoPID {
 @Configurable
 @Config
 object FlywheelTestPID {
-    @JvmField var kP : Double = 0.0
+    @JvmField var kP : Double = 0.0007
     @JvmField var kI : Double = 0.0
     @JvmField var kD : Double = 0.0
-    @JvmField var kV : Double = 0.0
+    @JvmField var kV : Double = 0.00018
     @JvmField var kS : Double = 0.0
 
     @JvmField var maxIntegral: Double = 1.0
     @JvmField var minIntegral: Double = -1.0
-    @JvmField var targetRPM : Double = 4500.0
-    @JvmField var hoodangle : Double = 0.0
+    @JvmField var targetRPM : Double = 3000.0
+    @JvmField var hoodangle : Double = 0.3
     @JvmField var totPower : Double = 0.0
     @JvmField var rawPower : Boolean = false
+    @JvmField var engageHood : Boolean = true
 }
 
 // 95% tuned
@@ -79,4 +80,22 @@ object TurretTestPID {
 
 fun Boolean.toInt(): Int {
     return if(this) 1 else 0
+}
+
+@Configurable
+@Config
+object ArtifactTrackAutoPID {
+    @JvmField var kP : Double = 0.0
+    @JvmField var kS : Double = 0.0
+    @JvmField var kI : Double = 0.0
+    @JvmField var kD : Double = 0.0
+    @JvmField var kV : Double = 0.0
+    @JvmField var maxIntegral: Double = 1.0
+    @JvmField var minIntegral: Double = -1.0
+    @JvmField var setPointTolerance : Double = 1.toDouble()
+
+    @JvmField var minSize = 50.0
+    @JvmField var maxSize = 20000.0
+    @JvmField var minCirc = 0.6
+    @JvmField var maxCirc = 1.0
 }
