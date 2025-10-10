@@ -5,7 +5,6 @@ import com.acmerobotics.dashboard.config.Config
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry
 import com.bylazar.configurables.annotations.Configurable
 import com.bylazar.gamepad.PanelsGamepad
-import com.bylazar.graph.PanelsGraph
 import com.bylazar.telemetry.JoinedTelemetry
 import com.bylazar.telemetry.PanelsTelemetry
 import com.bylazar.utils.LoopTimer
@@ -53,9 +52,6 @@ class MecanumHeadingCorrect : LinearOpMode() {
 
     override fun runOpMode() {
         telemetry = JoinedTelemetry(PanelsTelemetry.ftcTelemetry, telemetry, FtcDashboard.getInstance().telemetry)
-        val graphManager = PanelsGraph.manager
-
-        val g1 = PanelsGamepad.firstManager
         frontLeft.direction = DcMotorSimple.Direction.REVERSE
         backLeft.direction  = DcMotorSimple.Direction.REVERSE
 
@@ -180,11 +176,6 @@ class MecanumHeadingCorrect : LinearOpMode() {
             frontRight.power = frontRightPower * driveSpeed
             backLeft.power   = backLeftPower   * driveSpeed
             backRight.power  = backRightPower  * driveSpeed
-
-            graphManager.addData("setpoint (target)", targetImuPos)
-            graphManager.addData("Process variable (current)", heading)
-            graphManager.addData("Heading velocity", imuVelocity)
-            graphManager.update()
 
             telemetry.addData("targ. Imu position", targetImuPos)
             telemetry.addData("curr. Imu position", heading)
