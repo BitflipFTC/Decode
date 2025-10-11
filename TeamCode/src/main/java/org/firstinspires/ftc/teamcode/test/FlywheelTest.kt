@@ -23,6 +23,7 @@ import com.qualcomm.robotcore.hardware.Servo
 import org.firstinspires.ftc.teamcode.util.FlywheelTestPID.engageHood
 import org.firstinspires.ftc.teamcode.util.FlywheelTestPID.hoodangle
 import org.firstinspires.ftc.teamcode.util.FlywheelTestPID.kS
+import org.firstinspires.ftc.teamcode.util.FlywheelTestPID.lowPassCoeff
 import org.firstinspires.ftc.teamcode.util.FlywheelTestPID.rawPower
 import org.firstinspires.ftc.teamcode.util.FlywheelTestPID.totPower
 
@@ -33,6 +34,9 @@ class FlywheelTest : LinearOpMode() {
     val flywheelppr = 28
     val hood by lazy { hardwareMap["hood"] as Servo }
 
+    var flywheelRPM = 0.0
+    var lastFlywheelRPM = 0.0
+
     override fun runOpMode() {
         telemetry = JoinedTelemetry(PanelsTelemetry.ftcTelemetry, FtcDashboard.getInstance().telemetry, telemetry)
 
@@ -42,6 +46,7 @@ class FlywheelTest : LinearOpMode() {
         flywheel.zeroPowerBehavior = DcMotor.ZeroPowerBehavior.FLOAT
 
         controller.setPointTolerance = 5.toDouble()
+
 
         // bulk caching
         val allHubs = hardwareMap.getAll(LynxModule::class.java)
@@ -63,11 +68,12 @@ class FlywheelTest : LinearOpMode() {
                 hood.position = hoodangle
             }
 
-
             targetRPM += gamepad1.left_stick_x
 
-            val flywheelRPM = -(flywheel.velocity / flywheelppr) * 60
-//
+            //     currentRPM * 0.1 + lastRPM * 0.9
+            flywheelRPM = (-(flywheel.velocity / flywheelppr) * 60) * lowPassCoeff + (1 - lowPassCoeff) * lastFlywheelRPM
+            lastFlywheelRPM = flywheelRPM
+
             controller.setCoeffs(kP, kI, kD, kV,kS)
             val pidOutput = controller.calculate(flywheelRPM, targetRPM)
             if (rawPower) {

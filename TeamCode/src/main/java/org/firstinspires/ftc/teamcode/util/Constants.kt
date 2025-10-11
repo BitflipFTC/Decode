@@ -58,6 +58,8 @@ object FlywheelTestPID {
     @JvmField var totPower : Double = 0.0
     @JvmField var rawPower : Boolean = false
     @JvmField var engageHood : Boolean = true
+
+    @JvmField var lowPassCoeff : Double = 0.1
 }
 
 // 95% tuned
