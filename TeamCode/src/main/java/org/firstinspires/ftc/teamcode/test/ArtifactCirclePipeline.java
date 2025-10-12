@@ -1,5 +1,11 @@
 package org.firstinspires.ftc.teamcode.test;
 
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+
+import org.firstinspires.ftc.robotcore.internal.camera.calibration.CameraCalibration;
+import org.firstinspires.ftc.vision.VisionProcessor;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -9,17 +15,15 @@ import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
-import org.openftc.easyopencv.OpenCvPipeline;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.concurrent.CopyOnWriteArrayList;
+
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 
-public class ArtifactCirclePipeline extends OpenCvPipeline {
+public class ArtifactCirclePipeline implements VisionProcessor {
     /*
      * Our working image buffers
      */
@@ -67,71 +71,79 @@ public class ArtifactCirclePipeline extends OpenCvPipeline {
     public ArrayList<Artifact> getFoundArtifacts() {
         return foundArtifacts;
     }
-    /*
-     * Some stuff to handle returning our various buffers
-     */
-    enum Stage {
-        FINAL,
-        Cb,
-        Cr,
-        pThresh,
-        pMorph,
-        gThresh,
-        gMorph,
-        CONTOURS
-    }
-
-
-    Stage[] stages = Stage.values();
-
-    // Keep track of what stage the viewport is showing
-    int stageNum = 0;
 
     @Override
-    public void onViewportTapped() {
-        /*
-         * Note that this method is invoked from the UI thread
-         * so whatever we do here, we must do quickly.
-         */
+    public void init(int width, int height, CameraCalibration calibration) {
 
-        int nextStageNum = stageNum + 1;
-
-        if (nextStageNum >= stages.length) {
-            nextStageNum = 0;
-        }
-
-        stageNum = nextStageNum;
     }
 
     @Override
-    public Mat processFrame(Mat input) {
+    public Object processFrame(Mat frame, long captureTimeNanos) {
         foundArtifacts = new ArrayList<>();
         /*
          * Run the image processing
          */
-        analyzeArtifacts(input, findContours(input));
+        analyzeArtifacts(frame, findContours(frame));
 
-        switch (stages[stageNum]) {
-            case FINAL:
-                return input;
-            case Cb:
-                return cbMat;
-            case Cr:
-                return crMat;
-            case pThresh:
-                return pThresholdMat;
-            case pMorph:
-                return pMorphedThreshold;
-            case gThresh:
-                return gThresholdMat;
-            case gMorph:
-                return gMorphedThreshold;
-            case CONTOURS:
-                return contoursOnPlainImageMat;
-        }
+//        switch (stages[stageNum]) {
+//            case FINAL:
+//                return frame;
+//            case Cb:
+//                return cbMat;
+//            case Cr:
+//                return crMat;
+//            case pThresh:
+//                return pThresholdMat;
+//            case pMorph:
+//                return pMorphedThreshold;
+//            case gThresh:
+//                return gThresholdMat;
+//            case gMorph:
+//                return gMorphedThreshold;
+//            case CONTOURS:
+//                return contoursOnPlainImageMat;
+//        }
 
-        return input;
+        return frame;
     }
+
+    @Override
+    public void onDrawFrame(Canvas canvas, int onscreenWidth, int onscreenHeight, float scaleBmpPxToCanvasPx, float scaleCanvasDensity, Object userContext) {
+//        for (Artifact a : foundArtifacts) {
+//            Paint p = new Paint();
+//            Scalar color;
+//            switch (a.color) {
+//                case GREEN: color = GREEN; break;
+//                case PURPLE: color = PURPLE; break;
+//                default: color = new Scalar(0,0,0);
+//            }
+//
+//            p.setColor(Color.rgb((int) color.val[0], (int) color.val[1], (int) color.val[2]));
+//            p.setStyle(Paint.Style.STROKE);
+//            p.setStrokeWidth(scaleCanvasDensity * 2);
+//            canvas.drawCircle((float) a.center.x, (float) a.center.y, (float) a.radius, p);
+//        }
+    }
+
+    /*
+     * Some stuff to handle returning our various buffers
+     */
+//    enum Stage {
+//        FINAL,
+//        Cb,
+//        Cr,
+//        pThresh,
+//        pMorph,
+//        gThresh,
+//        gMorph,
+//        CONTOURS
+//    }
+//
+//
+//    Stage[] stages = Stage.values();
+//
+//    // Keep track of what stage the viewport is showing
+//    int stageNum = 0;
 
     List<ArrayList<MatOfPoint>> findContours(Mat input) {
         // A list we'll be using to store the contours we find
@@ -177,11 +189,11 @@ public class ArtifactCirclePipeline extends OpenCvPipeline {
         purpleContours.removeIf(contour -> Imgproc.contourArea(contour) <= 675);
 
         // We do draw the contours we find, but not to the main input buffer.
-        if (stages[stageNum] == Stage.CONTOURS) {
-            input.copyTo(contoursOnPlainImageMat);
-            Imgproc.drawContours(contoursOnPlainImageMat, purpleContours, -1, PURPLE, CONTOUR_LINE_THICKNESS, 8);
-            Imgproc.drawContours(contoursOnPlainImageMat, greenContours, -1, GREEN, CONTOUR_LINE_THICKNESS, 8);
-        }
+//        if (stages[stageNum] == Stage.CONTOURS) {
+        input.copyTo(contoursOnPlainImageMat);
+        Imgproc.drawContours(contoursOnPlainImageMat, purpleContours, -1, PURPLE, CONTOUR_LINE_THICKNESS, 8);
+        Imgproc.drawContours(contoursOnPlainImageMat, greenContours, -1, GREEN, CONTOUR_LINE_THICKNESS, 8);
+//        }
 
         return Arrays.asList(purpleContours, greenContours);
     }
@@ -230,21 +242,23 @@ public class ArtifactCirclePipeline extends OpenCvPipeline {
         // border
         Imgproc.circle(input, center, (int) radius[0], drawColor, 3);  // -1 = filled
         
-        foundArtifacts.add(new Artifact(color, center));
+        foundArtifacts.add(new Artifact(color, center, radius[0]));
     }
 
     public static class Artifact {
         Color color;
         Point center;
+        double radius;
 
         public enum Color {
             PURPLE,
             GREEN
         }
 
-        public Artifact(Color color, Point center) {
+        public Artifact(Color color, Point center, double radius) {
             this.color = color;
             this.center = center;
+            this.radius = radius;
         }
     }
 }
