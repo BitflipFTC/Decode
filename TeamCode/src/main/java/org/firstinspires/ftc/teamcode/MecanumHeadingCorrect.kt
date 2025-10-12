@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode
 
 import com.acmerobotics.dashboard.FtcDashboard
+import com.bylazar.battery.PanelsBattery
 import com.bylazar.gamepad.PanelsGamepad
 import com.bylazar.telemetry.JoinedTelemetry
 import com.bylazar.telemetry.PanelsTelemetry
@@ -13,12 +14,22 @@ import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.DcMotorEx
 import com.qualcomm.robotcore.hardware.DcMotorSimple
 import com.qualcomm.robotcore.hardware.IMU
+import com.qualcomm.robotcore.hardware.Servo
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit
+import org.firstinspires.ftc.teamcode.util.FlywheelTestPID
+import org.firstinspires.ftc.teamcode.util.FlywheelTestPID.hoodangle
+import org.firstinspires.ftc.teamcode.util.FlywheelTestPID.kS
+import org.firstinspires.ftc.teamcode.util.FlywheelTestPID.kV
+import org.firstinspires.ftc.teamcode.util.FlywheelTestPID.lowPassCoeff
+import org.firstinspires.ftc.teamcode.util.FlywheelTestPID.maxIntegral
+import org.firstinspires.ftc.teamcode.util.FlywheelTestPID.minIntegral
+import org.firstinspires.ftc.teamcode.util.FlywheelTestPID.targetRPM
 import org.firstinspires.ftc.teamcode.util.HeadingCorrectPID.kD
 import org.firstinspires.ftc.teamcode.util.HeadingCorrectPID.kI
 import org.firstinspires.ftc.teamcode.util.HeadingCorrectPID.kP
 import org.firstinspires.ftc.teamcode.util.HeadingCorrectPID.targetImuPos
 import org.firstinspires.ftc.teamcode.util.PIDController
+import org.firstinspires.ftc.teamcode.util.toInt
 import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.sin
@@ -42,7 +53,20 @@ class MecanumHeadingCorrect : LinearOpMode() {
 
     var driveSpeed : Double = 0.5
 
-    val controller = PIDController(kP,kI, kD)
+    val headingController = PIDController(kP,kI, kD)
+
+    val flywheelController = PIDController(
+        FlywheelTestPID.kP,
+        FlywheelTestPID.kI,
+        FlywheelTestPID.kD, kV, kS,maxIntegral, minIntegral)
+    val flywheel by lazy { hardwareMap["flywheel"] as DcMotorEx }
+    val flywheelppr = 28
+    val hood by lazy { hardwareMap["hood"] as Servo }
+
+    var flywheelRPM = 0.0
+    var lastFlywheelRPM = 0.0
+
+    var hoodPos = 0.0
 
     override fun runOpMode() {
         telemetry = JoinedTelemetry(PanelsTelemetry.ftcTelemetry, telemetry, FtcDashboard.getInstance().telemetry)
@@ -64,13 +88,26 @@ class MecanumHeadingCorrect : LinearOpMode() {
         backLeft.mode   = DcMotor.RunMode.RUN_WITHOUT_ENCODER
         backRight.mode  = DcMotor.RunMode.RUN_WITHOUT_ENCODER
 
-        controller.setPointTolerance = 1.toDouble()
+        headingController.setPointTolerance = 1.toDouble()
 
         imu.initialize(IMU.Parameters(RevHubOrientationOnRobot(
             RevHubOrientationOnRobot.LogoFacingDirection.BACKWARD,
             RevHubOrientationOnRobot.UsbFacingDirection.UP)))
 
         targetImuPos = imu.robotYawPitchRollAngles.getYaw(AngleUnit.DEGREES)
+
+
+
+        flywheel.direction = DcMotorSimple.Direction.FORWARD
+        flywheel.mode = DcMotor.RunMode.STOP_AND_RESET_ENCODER
+        flywheel.mode = DcMotor.RunMode.RUN_WITHOUT_ENCODER
+        flywheel.zeroPowerBehavior = DcMotor.ZeroPowerBehavior.FLOAT
+
+        flywheelController.setPointTolerance = 5.toDouble()
+        flywheelController.setpoint = 3500.0
+
+        hood.position = hoodPos
+
 
         // bulk caching
         val allHubs = hardwareMap.getAll(LynxModule::class.java)
@@ -94,7 +131,7 @@ class MecanumHeadingCorrect : LinearOpMode() {
             val imuVelocity = heading - lastImuPos
             lastImuPos = heading
             if (abs(heading - targetImuPos) > 180) {
-                controller.resetTotalError()
+                headingController.resetTotalError()
 
                 if (heading > targetImuPos) {
                     targetImuPos += 360
@@ -102,13 +139,12 @@ class MecanumHeadingCorrect : LinearOpMode() {
                     targetImuPos -= 360
                 }
             }
-            
-            controller.setCoeffs(kP,kI,kD)
-            val pidOutput : Double = -controller.calculate(heading, targetImuPos)
+
+            headingController.setCoeffs(kP,kI,kD)
+            val pidOutput : Double = -headingController.calculate(heading, targetImuPos)
 
             if (gamepad1.left_trigger >= 0.25)
                 fieldCentric = !fieldCentric
-
 
             if (fieldCentric) {
                 // impl 1:
@@ -137,7 +173,7 @@ class MecanumHeadingCorrect : LinearOpMode() {
             // if turning, update the heading
             if (abs(rx - 0.0) > 0.01) {
                 targetImuPos = heading
-                controller.resetTotalError()
+                headingController.resetTotalError()
                 rotating = true
             } else if (rotating) {
                 if (abs(imuVelocity) > 0.1)
@@ -152,51 +188,48 @@ class MecanumHeadingCorrect : LinearOpMode() {
                 backLeftPower += pidOutput
                 backRightPower -= pidOutput
             }
-
-            val max = maxOf(abs(frontLeftPower),abs(frontRightPower),abs(backLeftPower),abs(backRightPower))
-
-            var usemax = false
-            if (max > 1) {
-                usemax = true
-
-                frontLeftPower /= max
-                frontRightPower /= max
-                backLeftPower /= max
-                backRightPower /= max
-            }
-
+//
+//            val max = maxOf(abs(frontLeftPower),abs(frontRightPower),abs(backLeftPower),abs(backRightPower))
+//
+//            var usemax = false
+//            if (max > 1) {
+//                usemax = true
+//
+//                frontLeftPower /= max
+//                frontRightPower /= max
+//                backLeftPower /= max
+//                backRightPower /= max
+//            }
 
             frontLeft.power  = frontLeftPower  * driveSpeed
             frontRight.power = frontRightPower * driveSpeed
             backLeft.power   = backLeftPower   * driveSpeed
             backRight.power  = backRightPower  * driveSpeed
 
+            hoodPos += (gamepad1.right_bumper.toInt() * 0.01 - gamepad1.left_bumper.toInt() * 0.01)
+            hood.position = hoodPos
+
+            flywheelRPM = (-(flywheel.velocity / flywheelppr) * 60) * lowPassCoeff + (1 - lowPassCoeff) * lastFlywheelRPM
+            lastFlywheelRPM = flywheelRPM
+            val flywheelPower = flywheelController.calculate(flywheelRPM, targetRPM)
+            flywheel.power = flywheelPower
+
+            telemetry.addData("Current RPM", flywheelRPM)
+            telemetry.addData("Target RPM", targetRPM)
+            telemetry.addData("flywheel Power", flywheelPower)
+            telemetry.addData("battery", PanelsBattery.provider.batteryVoltage)
+
+
             telemetry.addData("targ. Imu position", targetImuPos)
             telemetry.addData("curr. Imu position", heading)
             telemetry.addData("IMU Velocity","%+05.2fdeg/s",imuVelocity)
-            telemetry.addData("PID Output", pidOutput)
+            telemetry.addData("heading PID Output", pidOutput)
             telemetry.addLine("---------------------------------------")
-            telemetry.addLine()
+            telemetry.addData("PID Error", headingController.error)
+            telemetry.addData("PID At SetPoint", headingController.atSetPoint())
+            telemetry.addLine("---------------------------------------")
 
-            telemetry.addData("","%+05.2f -------------------- %+05.2f", frontLeftPower,frontRightPower)
-            telemetry.addLine("     |                                |")
-            telemetry.addData("     |               ","%+05.3f       |",heading)
-            telemetry.addLine("     |                                |")
-            telemetry.addData("","%+05.2f -------------------- %+05.2f",backLeftPower,backRightPower)
 
-            telemetry.addLine()
-
-            telemetry.addLine("---------------------------------------")
-            telemetry.addData("Left Stick ","x:%+05.2f y:%+05.2f", x, y)
-            telemetry.addData("Right Stick","x:%+05.2f y:%+05.2f", rx, gamepad1.right_stick_y)
-            telemetry.addLine("---------------------------------------")
-            telemetry.addData("PID Error", controller.error)
-            telemetry.addData("PID Velocity error", controller.velError)
-            telemetry.addData("PID SetPoint Tolerance", controller.setPointTolerance)
-            telemetry.addData("PID Total Error", controller.totalError)
-            telemetry.addData("PID At SetPoint", controller.atSetPoint())
-            telemetry.addLine("---------------------------------------")
-            telemetry.addData("Loop Time", loopTimer.ms)
 
 
             telemetry.update()
