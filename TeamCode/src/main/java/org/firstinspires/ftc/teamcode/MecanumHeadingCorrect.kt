@@ -55,18 +55,18 @@ class MecanumHeadingCorrect : LinearOpMode() {
 
     val headingController = PIDController(kP,kI, kD)
 
-    val flywheelController = PIDController(
-        FlywheelTestPID.kP,
-        FlywheelTestPID.kI,
-        FlywheelTestPID.kD, kV, kS,maxIntegral, minIntegral)
-    val flywheel by lazy { hardwareMap["flywheel"] as DcMotorEx }
-    val flywheelppr = 28
-    val hood by lazy { hardwareMap["hood"] as Servo }
-
-    var flywheelRPM = 0.0
-    var lastFlywheelRPM = 0.0
-
-    var hoodPos = 0.0
+//    val flywheelController = PIDController(
+//        FlywheelTestPID.kP,
+//        FlywheelTestPID.kI,
+//        FlywheelTestPID.kD, kV, kS,maxIntegral, minIntegral)
+//    val flywheel by lazy { hardwareMap["flywheel"] as DcMotorEx }
+//    val flywheelppr = 28
+//    val hood by lazy { hardwareMap["hood"] as Servo }
+//
+//    var flywheelRPM = 0.0
+//    var lastFlywheelRPM = 0.0
+//
+//    var hoodPos = 0.0
 
     override fun runOpMode() {
         telemetry = JoinedTelemetry(PanelsTelemetry.ftcTelemetry, telemetry, FtcDashboard.getInstance().telemetry)
@@ -92,21 +92,21 @@ class MecanumHeadingCorrect : LinearOpMode() {
 
         imu.initialize(IMU.Parameters(RevHubOrientationOnRobot(
             RevHubOrientationOnRobot.LogoFacingDirection.BACKWARD,
-            RevHubOrientationOnRobot.UsbFacingDirection.UP)))
+            RevHubOrientationOnRobot.UsbFacingDirection.LEFT)))
 
         targetImuPos = imu.robotYawPitchRollAngles.getYaw(AngleUnit.DEGREES)
 
 
 
-        flywheel.direction = DcMotorSimple.Direction.FORWARD
-        flywheel.mode = DcMotor.RunMode.STOP_AND_RESET_ENCODER
-        flywheel.mode = DcMotor.RunMode.RUN_WITHOUT_ENCODER
-        flywheel.zeroPowerBehavior = DcMotor.ZeroPowerBehavior.FLOAT
-
-        flywheelController.setPointTolerance = 5.toDouble()
-        flywheelController.setpoint = 3500.0
-
-        hood.position = hoodPos
+//        flywheel.direction = DcMotorSimple.Direction.FORWARD
+//        flywheel.mode = DcMotor.RunMode.STOP_AND_RESET_ENCODER
+//        flywheel.mode = DcMotor.RunMode.RUN_WITHOUT_ENCODER
+//        flywheel.zeroPowerBehavior = DcMotor.ZeroPowerBehavior.FLOAT
+//
+//        flywheelController.setPointTolerance = 5.toDouble()
+//        flywheelController.setpoint = 3500.0
+//
+//        hood.position = hoodPos
 
 
         // bulk caching
@@ -206,18 +206,18 @@ class MecanumHeadingCorrect : LinearOpMode() {
             backLeft.power   = backLeftPower   * driveSpeed
             backRight.power  = backRightPower  * driveSpeed
 
-            hoodPos += (gamepad1.right_bumper.toInt() * 0.01 - gamepad1.left_bumper.toInt() * 0.01)
-            hood.position = hoodPos
+//            hoodPos += (gamepad1.right_bumper.toInt() * 0.01 - gamepad1.left_bumper.toInt() * 0.01)
+//            hood.position = hoodPos
+//
+//            flywheelRPM = (-(flywheel.velocity / flywheelppr) * 60) * lowPassCoeff + (1 - lowPassCoeff) * lastFlywheelRPM
+//            lastFlywheelRPM = flywheelRPM
+//            val flywheelPower = flywheelController.calculate(flywheelRPM, targetRPM)
+//            flywheel.power = flywheelPower
 
-            flywheelRPM = (-(flywheel.velocity / flywheelppr) * 60) * lowPassCoeff + (1 - lowPassCoeff) * lastFlywheelRPM
-            lastFlywheelRPM = flywheelRPM
-            val flywheelPower = flywheelController.calculate(flywheelRPM, targetRPM)
-            flywheel.power = flywheelPower
-
-            telemetry.addData("Current RPM", flywheelRPM)
-            telemetry.addData("Target RPM", targetRPM)
-            telemetry.addData("flywheel Power", flywheelPower)
-            telemetry.addData("battery", PanelsBattery.provider.batteryVoltage)
+//            telemetry.addData("Current RPM", flywheelRPM)
+//            telemetry.addData("Target RPM", targetRPM)
+//            telemetry.addData("flywheel Power", flywheelPower)
+//            telemetry.addData("battery", PanelsBattery.provider.batteryVoltage)
 
 
             telemetry.addData("targ. Imu position", targetImuPos)

@@ -75,7 +75,10 @@ class FlywheelTest : LinearOpMode() {
             lastFlywheelRPM = flywheelRPM
 
             controller.setCoeffs(kP, kI, kD, kV,kS)
-            val pidOutput = controller.calculate(flywheelRPM, targetRPM)
+
+            var pidOutput = controller.calculate(flywheelRPM, targetRPM)
+
+            if(controller.error <= -750) pidOutput = 0.0
             if (rawPower) {
                 flywheel.power = totPower
             } else {
