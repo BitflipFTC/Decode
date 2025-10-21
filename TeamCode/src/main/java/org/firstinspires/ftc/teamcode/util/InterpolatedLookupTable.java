@@ -46,12 +46,15 @@ public class InterpolatedLookupTable {
      * Helper class to encapsulate the three necessary arrays for the lookup table.
      */
     static class Dataset {
-        /** The independent variable array (e.g., Distance). Must be strictly increasing. */
+        /** The independent variable array (Distance). Must be strictly increasing. */
         double[] distanceTable;
-        /** The first dependent variable array (e.g., Angle). */
+        /** The first dependent variable array (Angle). */
         double[] angleTable;
-        /** The second dependent variable array (e.g., Velocity). */
+        /** The second dependent variable array (Velocity). */
         double[] velocityTable;
+        /** The third dependent variable array (Estimated shot time) */
+        double[] estimatedShotTimeTable;
+
 
         /**
          * Constructs a Dataset object.
@@ -59,10 +62,35 @@ public class InterpolatedLookupTable {
          * @param angleTable The array of angles corresponding to the distances.
          * @param velocityTable The array of velocities corresponding to the distances.
          */
-        protected Dataset(double[] distanceTable, double[] angleTable, double[] velocityTable) {
+        protected Dataset(double[] distanceTable, double[] angleTable, double[] velocityTable, double[] estimatedShotTimeTable) {
             this.distanceTable = distanceTable;
             this.angleTable = angleTable;
             this.velocityTable = velocityTable;
+            this.estimatedShotTimeTable = estimatedShotTimeTable;
+        }
+    }
+
+    public static class FlywheelState {
+        private final double angle;
+        private final double rpm;
+        private final double estimatedShotTime;
+
+        private FlywheelState(double angle, double rpm, double estimatedShotTime) {
+            this.angle = angle;
+            this.rpm = rpm;
+            this.estimatedShotTime = estimatedShotTime;
+        }
+
+        public double getAngle() {
+            return angle;
+        }
+
+        public double getRpm() {
+            return rpm;
+        }
+
+        public double getEstimatedShotTime() {
+            return estimatedShotTime;
         }
     }
 
@@ -76,11 +104,12 @@ public class InterpolatedLookupTable {
      * <li>dataset[0]: Distance
      * <li>dataset[1]: Angle
      * <li>dataset[2]: Velocity
+     * <li>dataset[3]: Estimated Shot Time</li>
      * </ul>
      * @param dataset A 2D array containing the lookup table data.
      */
     public InterpolatedLookupTable(double[][] dataset) {
-        this.dataset = new Dataset(dataset[0],dataset[1],dataset[2]);
+        this.dataset = new Dataset(dataset[0],dataset[1],dataset[2],dataset[3]);
     }
 
     /**
@@ -89,15 +118,17 @@ public class InterpolatedLookupTable {
      * A segment is found where the input lies, and linear interpolation is used
      * to estimate the corresponding output values.
      * * @param input The distance value to look up.
-     * @return A double array containing {angle, velocity}.
+     * @return new FlywheelState() containing angle, velocity, and estimated shot time
      */
-    public double[] calculate(double input) {
+    public FlywheelState calculate(double input) {
         double[] distanceTable = dataset.distanceTable;
         double[] angleTable = dataset.angleTable;
         double[] velocityTable = dataset.velocityTable;
+        double[] estimatedShotTimeTable = dataset.estimatedShotTimeTable;
 
         double angle;
         double velocity;
+        double estimatedShotTime;
 
         Bounds bounds = new Bounds();
 
@@ -132,8 +163,9 @@ public class InterpolatedLookupTable {
         // 3. Interpolate Output Values
         angle = interpolate(index, (int) bounds.lowerIndex, (int) bounds.upperIndex, angleTable);
         velocity = interpolate(index, (int) bounds.lowerIndex, (int) bounds.upperIndex, velocityTable);
+        estimatedShotTime = interpolate(index, (int) bounds.lowerIndex, (int) bounds.upperIndex, estimatedShotTimeTable);
 
-        return new double[] {angle, velocity};
+        return new FlywheelState(angle, velocity, estimatedShotTime);
     }
 
     /**
