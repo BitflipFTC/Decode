@@ -37,6 +37,8 @@ public class FourWheel extends OpMode {
         front_right = hardwareMap.get(DcMotorEx.class, "frontright");
         back_left   = hardwareMap.get(DcMotorEx.class, "backleft");
         back_right  = hardwareMap.get(DcMotorEx.class, "backright");
+        DcMotorEx tryt  = hardwareMap.get(DcMotorEx.class, "flywheel");
+
 
         front_left.setDirection(DcMotorSimple.Direction.REVERSE);
         back_left.setDirection(DcMotorSimple.Direction.REVERSE);

@@ -76,7 +76,7 @@ class FlywheelTest : LinearOpMode() {
 
             controller.setCoeffs(kP, kI, kD, kV,kS)
 
-            var pidOutput = controller.calculate(flywheelRPM, targetRPM)
+            var pidOutput = -controller.calculate(flywheelRPM, targetRPM)
 
             if(controller.error <= -750) pidOutput = 0.0
             if (rawPower) {
