@@ -54,10 +54,9 @@ object FlywheelTestPID {
     @JvmField var maxIntegral: Double = 1.0
     @JvmField var minIntegral: Double = -1.0
     @JvmField var targetRPM : Double = 3000.0
-    @JvmField var hoodangle : Double = 0.3
+    @JvmField var hoodPosition : Double = 0.3
     @JvmField var totPower : Double = 0.0
     @JvmField var rawPower : Boolean = false
-    @JvmField var engageHood : Boolean = true
 
     @JvmField var lowPassCoeff : Double = 0.1
 }

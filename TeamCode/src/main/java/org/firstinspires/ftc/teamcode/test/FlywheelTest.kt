@@ -10,7 +10,6 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.DcMotorEx
 import com.qualcomm.robotcore.hardware.DcMotorSimple
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit
 import org.firstinspires.ftc.teamcode.util.FlywheelTestPID.kD
 import org.firstinspires.ftc.teamcode.util.FlywheelTestPID.kV
 import org.firstinspires.ftc.teamcode.util.FlywheelTestPID.kI
@@ -20,8 +19,7 @@ import org.firstinspires.ftc.teamcode.util.FlywheelTestPID.minIntegral
 import org.firstinspires.ftc.teamcode.util.FlywheelTestPID.targetRPM
 import org.firstinspires.ftc.teamcode.util.PIDController
 import com.qualcomm.robotcore.hardware.Servo
-import org.firstinspires.ftc.teamcode.util.FlywheelTestPID.engageHood
-import org.firstinspires.ftc.teamcode.util.FlywheelTestPID.hoodangle
+import org.firstinspires.ftc.teamcode.util.FlywheelTestPID.hoodPosition
 import org.firstinspires.ftc.teamcode.util.FlywheelTestPID.kS
 import org.firstinspires.ftc.teamcode.util.FlywheelTestPID.lowPassCoeff
 import org.firstinspires.ftc.teamcode.util.FlywheelTestPID.rawPower
@@ -53,7 +51,7 @@ class FlywheelTest : LinearOpMode() {
         allHubs.forEach { hub -> hub.bulkCachingMode = LynxModule.BulkCachingMode.MANUAL }
 
         waitForStart()
-        hood.position = hoodangle
+        hood.position = hoodPosition
 
         while (opModeIsActive()) {
             // more bulk caching
@@ -64,9 +62,7 @@ class FlywheelTest : LinearOpMode() {
                 targetRPM = 4500.0
             }
 
-            if (engageHood) {
-                hood.position = hoodangle
-            }
+            hood.position = hoodPosition
 
             targetRPM += gamepad1.left_stick_x
 

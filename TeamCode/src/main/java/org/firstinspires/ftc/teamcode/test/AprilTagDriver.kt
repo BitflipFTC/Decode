@@ -18,12 +18,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D
-import org.firstinspires.ftc.teamcode.util.AprilTagDriverPID.kD
-import org.firstinspires.ftc.teamcode.util.AprilTagDriverPID.kI
-import org.firstinspires.ftc.teamcode.util.AprilTagDriverPID.kP
-import org.firstinspires.ftc.teamcode.util.AprilTagDriverPID.max
-import org.firstinspires.ftc.teamcode.util.AprilTagDriverPID.min
-import org.firstinspires.ftc.teamcode.util.PIDController
 import org.firstinspires.ftc.vision.VisionPortal
 import org.firstinspires.ftc.vision.apriltag.AprilTagGameDatabase
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor
