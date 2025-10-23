@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode
 
 import com.acmerobotics.dashboard.FtcDashboard
-import com.bylazar.battery.PanelsBattery
 import com.bylazar.gamepad.PanelsGamepad
 import com.bylazar.telemetry.JoinedTelemetry
 import com.bylazar.telemetry.PanelsTelemetry
@@ -14,28 +13,18 @@ import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.DcMotorEx
 import com.qualcomm.robotcore.hardware.DcMotorSimple
 import com.qualcomm.robotcore.hardware.IMU
-import com.qualcomm.robotcore.hardware.Servo
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit
-import org.firstinspires.ftc.teamcode.util.FlywheelTestPID
-import org.firstinspires.ftc.teamcode.util.FlywheelTestPID.hoodangle
-import org.firstinspires.ftc.teamcode.util.FlywheelTestPID.kS
-import org.firstinspires.ftc.teamcode.util.FlywheelTestPID.kV
-import org.firstinspires.ftc.teamcode.util.FlywheelTestPID.lowPassCoeff
-import org.firstinspires.ftc.teamcode.util.FlywheelTestPID.maxIntegral
-import org.firstinspires.ftc.teamcode.util.FlywheelTestPID.minIntegral
-import org.firstinspires.ftc.teamcode.util.FlywheelTestPID.targetRPM
 import org.firstinspires.ftc.teamcode.util.HeadingCorrectPID.kD
 import org.firstinspires.ftc.teamcode.util.HeadingCorrectPID.kI
 import org.firstinspires.ftc.teamcode.util.HeadingCorrectPID.kP
 import org.firstinspires.ftc.teamcode.util.HeadingCorrectPID.targetImuPos
 import org.firstinspires.ftc.teamcode.util.PIDController
-import org.firstinspires.ftc.teamcode.util.toInt
 import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.sin
 
 @TeleOp(name = "Heading Correct Drive", group = "TeleOp")
-class MecanumHeadingCorrect : LinearOpMode() {
+class HeadingCorrectDrive : LinearOpMode() {
     private val frontLeft  by lazy { hardwareMap["frontleft"]  as DcMotorEx }
     private val frontRight by lazy { hardwareMap["frontright"] as DcMotorEx }
     private val backLeft   by lazy { hardwareMap["backleft"]   as DcMotorEx }

@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.bylazar.telemetry.JoinedTelemetry;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
@@ -13,7 +12,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
 
 @TeleOp(name = "Default Drive", group = "TeleOp")
-public class FourWheel extends OpMode {
+public class DefaultDrive extends OpMode {
     DcMotorEx front_left;
     DcMotorEx front_right;
     DcMotorEx back_left;
