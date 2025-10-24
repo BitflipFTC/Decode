@@ -25,13 +25,7 @@ allprojects {
     repositories {
         mavenCentral()
         google()
-    }
-}
-
-repositories {
-    mavenCentral()
-    maven {
-        url = "https://repo.dairy.foundation/releases"
-        url = "https://mymaven.bylazar.com/releases"
+        maven { url "https://repo.dairy.foundation/releases" }
+        maven { url "https://mymaven.bylazar.com/releases" }
     }
 }
