@@ -37,8 +37,6 @@ class TurretTest : LinearOpMode() {
         )
 
         val turret = Turret(hardwareMap)
-        val hood by lazy { hardwareMap["hood"] as Servo }
-        var hoodPos = 0.0
         val camera = OV9281(this, 4, 6)
 
         val controller = PIDController(kP, kI, kD, kV, kS, maxIntegral, minIntegral)
@@ -68,15 +66,13 @@ class TurretTest : LinearOpMode() {
                 else                        -> currentDetections[0].center.x
             }
 
-            hood.position = hoodPos
-            hoodPos += (gamepad1.right_stick_y * 0.005)
-            hoodPos = max((0).toDouble(), min(hoodPos, 0.45))
-
             controller.setCoeffs(kP, kI, kD, kV, kS)
             controller.setPointTolerance = setPointTolerance
-            var pidError = controller.calculate(currentTagPos, targetTagPos)
+            
+            var pidOutput = controller.calculate(currentTagPos, targetTagPos)
+
             if (!controller.atSetPoint()) {
-                pidError += sign(pidError) * kS
+                pidOutput += sign(pidOutput) * kS
             }
 
             if (tuneKs) {
@@ -86,14 +82,13 @@ class TurretTest : LinearOpMode() {
                     turret.setPower(0.0)
                 }
             } else {
-                turret.setPower(pidError)
+                turret.setPower(pidOutput)
             }
 
             telemetry.addData("current tag pos", currentTagPos)
             telemetry.addData(" target tag pos", targetTagPos)
-            telemetry.addData("turret power", pidError * 300)
+            telemetry.addData("turret power", pidOutput)
             telemetry.addData("At Setpoint?", controller.atSetPoint())
-            telemetry.addData("Hood pos", hoodPos)
 
             telemetry.update()
         }
