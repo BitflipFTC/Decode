@@ -29,23 +29,14 @@ class Spindexer(val hwMap: HardwareMap) {
         var kD = 0.0
     }
 
-    enum class Positions {
-        INTAKE_ZERO,
-        INTAKE_ONE,
-        INTAKE_TWO,
-        OUTTAKE_ZERO,
-        OUTTAKE_ONE,
-        OUTTAKE_TWO,
+    enum class Positions(val referenceAngle: Double) {
+        INTAKE_ZERO(0.0),
+        INTAKE_ONE(120.0),
+        INTAKE_TWO(240.0),
+        OUTTAKE_ZERO(180.0),
+        OUTTAKE_ONE(300.0),
+        OUTTAKE_TWO(60.0);
     }
-
-    val positionsToAnglesMap = mapOf(
-        Positions.INTAKE_ZERO  to 0.0,
-        Positions.OUTTAKE_ZERO to 180.0,
-        Positions.INTAKE_ONE   to 120.0,
-        Positions.OUTTAKE_ONE  to 300.0,
-        Positions.INTAKE_TWO   to 240.0,
-        Positions.OUTTAKE_TWO  to 60.0,
-    )
 
     val positionsToSlotsMap = mapOf(
         Positions.INTAKE_ZERO to 0,
@@ -75,12 +66,14 @@ class Spindexer(val hwMap: HardwareMap) {
         Artifact.NONE,
     )
 
+    fun getArtifactString() = collectedArtifacts.joinToString("") { it.firstLetter().toString() }
+
     private val motor by lazy { hwMap["spindexer"] as DcMotorEx }
 
     private val controller = PIDController(kP,kI,kD)
 
     private var position = Positions.INTAKE_ZERO
-    private var targetAngle = positionsToAnglesMap.getValue(position)
+    private var targetAngle = position.referenceAngle
 
     init {
         motor.mode = DcMotor.RunMode.STOP_AND_RESET_ENCODER
@@ -111,6 +104,6 @@ class Spindexer(val hwMap: HardwareMap) {
 
     fun setPosition(newPosition: Positions) {
         position = newPosition
-        targetAngle = positionsToAnglesMap.getValue(position)
+        targetAngle = position.referenceAngle
     }
 }

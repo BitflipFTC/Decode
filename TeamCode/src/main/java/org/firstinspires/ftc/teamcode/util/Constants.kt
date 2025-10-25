@@ -104,5 +104,7 @@ object ArtifactTrackAutoPID {
 enum class Artifact {
     GREEN,
     PURPLE,
-    NONE
+    NONE;
+
+    fun firstLetter() = this.name.first()
 }
