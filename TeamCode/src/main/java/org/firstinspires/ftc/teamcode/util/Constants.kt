@@ -100,3 +100,9 @@ object ArtifactTrackAutoPID {
     @JvmField var minCirc = 0.6
     @JvmField var maxCirc = 1.0
 }
+
+enum class Artifact {
+    GREEN,
+    PURPLE,
+    NONE
+}

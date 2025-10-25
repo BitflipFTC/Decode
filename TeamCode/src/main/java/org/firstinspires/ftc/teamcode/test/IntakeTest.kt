@@ -10,11 +10,14 @@ import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.DcMotorEx
 import com.qualcomm.robotcore.hardware.DcMotorSimple
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName
+import org.firstinspires.ftc.teamcode.hardware.Spindexer
 import org.firstinspires.ftc.vision.VisionPortal
 
 @TeleOp(name = "Test: Intake", group = "Test")
 class IntakeTest1 : LinearOpMode() {
     val intake by lazy { hardwareMap["intake"] as DcMotorEx }
+    val spindexer = Spindexer(hardwareMap)
+
 
     override fun runOpMode() {
         telemetry = JoinedTelemetry(PanelsTelemetry.ftcTelemetry, FtcDashboard.getInstance().telemetry, telemetry)
@@ -22,6 +25,7 @@ class IntakeTest1 : LinearOpMode() {
         intake.mode = DcMotor.RunMode.RUN_WITHOUT_ENCODER
         intake.direction = DcMotorSimple.Direction.FORWARD
         var camera : WebcamName? = null
+
 
 
         try {
@@ -48,8 +52,24 @@ class IntakeTest1 : LinearOpMode() {
         waitForStart()
 
         while(opModeIsActive()) {
+            val results = spindexer.update()
+            telemetry.addData("Current spindexer position", results[0])
+            telemetry.addData("Target spindexer position", results[1])
+
+            if (gamepad1.crossWasPressed()) {
+                spindexer.setPosition(Spindexer.Positions.INTAKE_ZERO)
+            }
+
+            if (gamepad1.squareWasPressed()) {
+                spindexer.setPosition(Spindexer.Positions.INTAKE_TWO)
+            }
+
+            if (gamepad1.triangleWasPressed()) {
+                spindexer.setPosition(Spindexer.Positions.OUTTAKE_ONE)
+            }
+
             intake.power = gamepad1.right_trigger.toDouble() - gamepad1.left_trigger.toDouble()
-            telemetry.addData("Motor Power", intake.power)
+            telemetry.addData("Intake Power", intake.power)
             telemetry.update()
         }
 
