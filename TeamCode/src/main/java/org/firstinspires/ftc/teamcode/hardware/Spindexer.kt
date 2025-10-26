@@ -72,8 +72,10 @@ class Spindexer(val hwMap: HardwareMap) {
 
     private val controller = PIDController(kP,kI,kD)
 
-    private var position = Positions.INTAKE_ZERO
-    private var targetAngle = position.referenceAngle
+    var position = Positions.INTAKE_ZERO
+        private set
+    var targetAngle = position.referenceAngle
+        private set
 
     init {
         motor.mode = DcMotor.RunMode.STOP_AND_RESET_ENCODER
@@ -84,14 +86,13 @@ class Spindexer(val hwMap: HardwareMap) {
 
     fun getAngle() = ( (motor.currentPosition / TICKS_PER_REVOLUTION) * 360 ) % 360
 
-    fun update(): List<Double> {
+    fun update() {
         controller.setCoeffs(kP,kI,kD)
         val currentAngle = getAngle()
         // creates a "fake" target to ensure the spindexer always takes the shortest path
         val localTarget = (targetAngle - currentAngle + 540) % 360 - 180
         val pidOutput = controller.calculate(currentAngle, localTarget)
         motor.power = pidOutput
-        return listOf(currentAngle, targetAngle)
     }
 
     private fun findFirstFullSlot()   = collectedArtifacts.indexOfFirst { it != Artifact.NONE }

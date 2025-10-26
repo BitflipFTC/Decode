@@ -26,8 +26,6 @@ class IntakeTest1 : LinearOpMode() {
         intake.direction = DcMotorSimple.Direction.FORWARD
         var camera : WebcamName? = null
 
-
-
         try {
             camera = hardwareMap["Webcam 1"] as WebcamName
         } catch (e: IllegalArgumentException) {
@@ -52,9 +50,10 @@ class IntakeTest1 : LinearOpMode() {
         waitForStart()
 
         while(opModeIsActive()) {
-            val results = spindexer.update()
-            telemetry.addData("Current spindexer position", results[0])
-            telemetry.addData("Target spindexer position", results[1])
+            spindexer.update()
+            telemetry.addData("Current spindexer position", spindexer.getAngle())
+            telemetry.addData("Target spindexer position", spindexer.targetAngle)
+            telemetry.addData("Name spindexer position", spindexer.position.name)
 
             if (gamepad1.crossWasPressed()) {
                 spindexer.setPosition(Spindexer.Positions.INTAKE_ZERO)
@@ -66,6 +65,11 @@ class IntakeTest1 : LinearOpMode() {
 
             if (gamepad1.triangleWasPressed()) {
                 spindexer.setPosition(Spindexer.Positions.OUTTAKE_ONE)
+            }
+
+            if (gamepad1.circleWasPressed()) {
+                spindexer.toNextPosition()
+                gamepad1.rumble(500)
             }
 
             intake.power = gamepad1.right_trigger.toDouble() - gamepad1.left_trigger.toDouble()
