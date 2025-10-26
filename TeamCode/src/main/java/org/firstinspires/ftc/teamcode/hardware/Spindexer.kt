@@ -46,13 +46,13 @@ class Spindexer(val hwMap: HardwareMap) {
         Positions.INTAKE_TWO to 2,
         Positions.OUTTAKE_TWO to 2,
     )
-    
+
     val slotsToOuttakes = listOf(
         Positions.OUTTAKE_ZERO,
         Positions.OUTTAKE_ONE,
         Positions.OUTTAKE_TWO,
     )
-    
+
     val slotsToIntakes = listOf(
         Positions.INTAKE_ZERO,
         Positions.INTAKE_ONE,
@@ -89,9 +89,9 @@ class Spindexer(val hwMap: HardwareMap) {
         val currentAngle = getAngle()
         // creates a "fake" target to ensure the spindexer always takes the shortest path
         val localTarget = (targetAngle - currentAngle + 540) % 360 - 180
-        val pidOutput = controller.calculate(currentAngle, targetAngle)
+        val pidOutput = controller.calculate(currentAngle, localTarget)
         motor.power = pidOutput
-        return listOf<Double>(currentAngle, targetAngle)
+        return listOf(currentAngle, targetAngle)
     }
 
     private fun findFirstFullSlot()   = collectedArtifacts.indexOfFirst { it != Artifact.NONE }
@@ -105,5 +105,16 @@ class Spindexer(val hwMap: HardwareMap) {
     fun setPosition(newPosition: Positions) {
         position = newPosition
         targetAngle = position.referenceAngle
+    }
+
+    fun getPosition() = position.name
+
+    val allPositions = Positions.entries.toTypedArray()
+    var allPositionsIndex = 0
+
+    fun toNextPosition() {
+        allPositionsIndex = if (allPositionsIndex == allPositions.size - 1) 0 else allPositionsIndex + 1
+
+        setPosition(allPositions[allPositionsIndex])
     }
 }
