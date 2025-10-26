@@ -11,7 +11,7 @@ public class Transfer {
     private boolean transferring;
     private final String configName = "transfer";
     // 1150rpm motor, so
-    private final double TICKS_PER_REVOLUTION = 145.1;
+    private final double TICKS_PER_REVOLUTION = 103.8;
     private double targetPosition = 0;
 
     // amount of times the motor should turn every time it transfers an
