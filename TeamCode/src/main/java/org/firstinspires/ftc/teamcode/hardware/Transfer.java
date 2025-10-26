@@ -12,6 +12,7 @@ public class Transfer {
     private final String configName = "transfer";
     // 1150rpm motor, so
     private final double TICKS_PER_REVOLUTION = 145.1;
+    private double targetPosition = 0;
 
     // amount of times the motor should turn every time it transfers an
     // artifact to the flywheel
@@ -24,14 +25,22 @@ public class Transfer {
     }
 
     private void setMotorTarget(double ticks) {
-        // todo set motor target to this value
+        targetPosition = ticks;
     }
 
     private void returnToStart() {
         // todo: fill this with code that determines the current angle
-        // todo: using getTransferAngle(), figures out where it needs to go to be at its 0 point
+        // todo: using getTransferMotorAngle(), figures out where it needs to go to be at its 0 point
         // todo: relative to the current interval (modulo by TICKS_PER_REVOLUTION?),
         // todo: and sets the new target position using setMotorTarget()
+    }
+
+    public double getCurrentPosition() {
+        return motor.getCurrentPosition();
+    }
+
+    public double getTargetPosition() {
+        return targetPosition;
     }
 
     public void transferArtifact() {
@@ -40,11 +49,7 @@ public class Transfer {
         // TODO make sure to call returnToStart()
     }
 
-    public double getCurrentPosition() {
-        return motor.getCurrentPosition();
-    }
-
-    public double getTransferAngle() {
+    public double getTransferMotorAngle() {
         // TODO do math here to figure out the current angle of the transfer in
         // TODO the interval [0,360), then return it
         return 0.0;
