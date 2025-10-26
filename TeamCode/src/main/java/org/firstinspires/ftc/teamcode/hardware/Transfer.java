@@ -1,14 +1,14 @@
 package org.firstinspires.ftc.teamcode.hardware;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-
+import org.firstinspires.ftc.teamcode.util.PIDController;
 @Config
 public class Transfer {
     private final DcMotorEx motor;
+    private boolean transferring;
     private final String configName = "transfer";
     // 1150rpm motor, so
     private final double TICKS_PER_REVOLUTION = 145.1;
@@ -18,10 +18,16 @@ public class Transfer {
     // artifact to the flywheel
     public static int MOTOR_TURNS = 15;
 
+    public static double kP = 0;
+    public static double kI = 0;
+    public static double kD = 0;
+    private PIDController controller = new PIDController(kP, kI, kD, 0, 0, 1, -1);
+
     public Transfer(HardwareMap hwMap) {
         motor = hwMap.get(DcMotorEx.class, configName);
-        // TODO do rest of motor setup
-        // TODO make sure to call stop and reset encoder so the zero value is consistent
+        motor.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        motor.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+        motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
 
     private void setMotorTarget(double ticks) {
@@ -29,10 +35,11 @@ public class Transfer {
     }
 
     private void returnToStart() {
-        // todo: fill this with code that determines the current angle
-        // todo: using getTransferMotorAngle(), figures out where it needs to go to be at its 0 point
-        // todo: relative to the current interval (modulo by TICKS_PER_REVOLUTION?),
-        // todo: and sets the new target position using setMotorTarget()
+        double motorAngle = getTransferMotorAngle();
+        double error = Math.abs(motorAngle);
+        double targetTicksRel = (error / 360) * TICKS_PER_REVOLUTION;
+        double targetTicks = getCurrentPosition() + targetTicksRel;
+        setMotorTarget(targetTicks);
     }
 
     public double getCurrentPosition() {
@@ -44,14 +51,25 @@ public class Transfer {
     }
 
     public void transferArtifact() {
-        // TODO fill this with code that turns the transfer MOTOR_TURNS amount of times,
-        // TODO then makes the shortest turn to be fully down
-        // TODO make sure to call returnToStart()
+        setMotorTarget(getCurrentPosition() + MOTOR_TURNS * TICKS_PER_REVOLUTION);
+        transferring = true;
     }
 
     public double getTransferMotorAngle() {
-        // TODO do math here to figure out the current angle of the transfer in
-        // TODO the interval [0,360), then return it
-        return 0.0;
+        double degreesPosition = (motor.getCurrentPosition() / TICKS_PER_REVOLUTION) * 360;
+        degreesPosition %= 360;
+        degreesPosition = (degreesPosition + 360) % 360;
+        return degreesPosition;
+    }
+    public void update() {
+        double pidOutput = controller.calculate(getCurrentPosition(), targetPosition);
+        motor.setPower(pidOutput);
+        controller.setSetPointTolerance(10);
+        controller.setCoeffs(kP, kI, kD, 0.0, 0.0);
+        if (controller.atSetPoint() && transferring) {
+            returnToStart();
+            transferring = false;
+        }
     }
 }
+
