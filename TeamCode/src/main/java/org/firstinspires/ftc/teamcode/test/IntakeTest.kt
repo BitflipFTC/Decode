@@ -16,7 +16,7 @@ import org.firstinspires.ftc.vision.VisionPortal
 @TeleOp(name = "Test: Intake", group = "Test")
 class IntakeTest1 : LinearOpMode() {
     val intake by lazy { hardwareMap["intake"] as DcMotorEx }
-    val spindexer = Spindexer(hardwareMap)
+    val transferMotor by lazy { hardwareMap["transfer"] as DcMotorEx }
 
 
     override fun runOpMode() {
@@ -24,37 +24,18 @@ class IntakeTest1 : LinearOpMode() {
         intake.zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE
         intake.mode = DcMotor.RunMode.RUN_WITHOUT_ENCODER
         intake.direction = DcMotorSimple.Direction.FORWARD
-        var camera : WebcamName? = null
-
-        try {
-            camera = hardwareMap["Webcam 1"] as WebcamName
-        } catch (e: IllegalArgumentException) {
-            telemetry.addData("Webcam", "null")
-            telemetry.addData("Err", e.toString())
-            telemetry.update()
-        }
-
-        val visionPortal : VisionPortal
-        
-        if (camera != null) {
-            visionPortal = VisionPortal.Builder()
-                .setCamera(hardwareMap["Webcam 1"] as WebcamName)
-                .setCameraResolution(Size(320, 240))
-                .setShowStatsOverlay(true)
-                .setStreamFormat(VisionPortal.StreamFormat.YUY2)
-                .enableLiveView(true)
-                .setAutoStopLiveView(true)
-                .build()
-        }
+        val spindexer = Spindexer(hardwareMap)
 
         waitForStart()
 
         while(opModeIsActive()) {
             spindexer.update()
-            telemetry.addData("Current spindexer position", spindexer.getAngle())
-            telemetry.addData("Target spindexer position", spindexer.targetAngle)
+            telemetry.addData("Current spindexer position", spindexer.getPosition())
+            telemetry.addData("Target spindexer position", spindexer.ticksTarget)
             telemetry.addData("Name spindexer position", spindexer.position.name)
+//            spindexer.setPower(gamepad1.left_stick_x.toDouble())
 
+            transferMotor.power = -gamepad1.right_stick_y.toDouble()
             if (gamepad1.crossWasPressed()) {
                 spindexer.setPosition(Spindexer.Positions.INTAKE_ZERO)
             }

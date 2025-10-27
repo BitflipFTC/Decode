@@ -14,17 +14,14 @@ import kotlin.math.PI
 
 @Config
 @Configurable
-class Spindexer(val hwMap: HardwareMap) {
     companion object {
-        const val GEAR_RATIO: Double = 1.375
-        const val TICKS_PER_REVOLUTION: Double = 145.1 * GEAR_RATIO
+        const val GEAR_RATIO: Double = 1.375 // 22t out to 16t in
+        const val TICKS_PER_REVOLUTION: Double = 537.7 * GEAR_RATIO
 
         @JvmField
-        var kP = 0.0
-
+        var kP = 0.001
         @JvmField
-        var kI = 0.0
-
+        var kI = 0.09
         @JvmField
         var kD = 0.0
     }
@@ -66,6 +63,9 @@ class Spindexer(val hwMap: HardwareMap) {
         Artifact.NONE,
     )
 
+    var ticksTarget: Double = 0.0
+        private set
+
     fun getArtifactString() = collectedArtifacts.joinToString("") { it.firstLetter().toString() }
 
     private val motor by lazy { hwMap["spindexer"] as DcMotorEx }
@@ -88,11 +88,16 @@ class Spindexer(val hwMap: HardwareMap) {
 
     fun update() {
         controller.setCoeffs(kP,kI,kD)
-        val currentAngle = getAngle()
+        val currentPosition: Double = motor.currentPosition.toDouble()
+
         // creates a "fake" target to ensure the spindexer always takes the shortest path
-        val localTarget = (targetAngle - currentAngle + 540) % 360 - 180
-        val pidOutput = controller.calculate(currentAngle, localTarget)
+        ticksTarget = (targetAngle / 360) * TICKS_PER_REVOLUTION
+        val pidOutput = controller.calculate(currentPosition, ticksTarget)
         motor.power = pidOutput
+    }
+
+    fun setPower(power: Double) {
+        motor.power = power
     }
 
     private fun findFirstFullSlot()   = collectedArtifacts.indexOfFirst { it != Artifact.NONE }
@@ -108,7 +113,8 @@ class Spindexer(val hwMap: HardwareMap) {
         targetAngle = position.referenceAngle
     }
 
-    fun getPosition() = position.name
+    fun getNamedPosition() = position.name
+    fun getPosition() = motor.currentPosition
 
     val allPositions = Positions.entries.toTypedArray()
     var allPositionsIndex = 0

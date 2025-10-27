@@ -58,9 +58,11 @@ class FlywheelTest : LinearOpMode() {
             allHubs.forEach { hub -> hub.clearBulkCache() }
 
             // reset the target rpm
-            if (gamepad1.aWasPressed()) {
-                targetRPM = 4500.0
+            if (gamepad1.crossWasPressed()) {
+                targetRPM = 3000.0
             }
+
+            flywheelRPM += -gamepad1.left_stick_y.toDouble() * 50
 
             hood.position = hoodPosition
 
