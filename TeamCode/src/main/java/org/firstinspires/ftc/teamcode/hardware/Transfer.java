@@ -16,12 +16,12 @@ public class Transfer {
 
     // amount of times the motor should turn every time it transfers an
     // artifact to the flywheel
-    public static int MOTOR_TURNS = 15;
+    public static int MOTOR_TURNS = 5;
 
     public static double kP = 0;
     public static double kI = 0;
     public static double kD = 0;
-    private PIDController controller = new PIDController(kP, kI, kD, 0, 0, 1, -1);
+    private final PIDController controller = new PIDController(kP, kI, kD, 0, 0, 1, -1);
 
     public Transfer(HardwareMap hwMap) {
         motor = hwMap.get(DcMotorEx.class, configName);
