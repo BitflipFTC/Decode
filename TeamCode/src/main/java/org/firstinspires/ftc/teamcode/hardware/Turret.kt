@@ -5,7 +5,6 @@ import com.qualcomm.robotcore.hardware.CRServoImplEx
 import com.qualcomm.robotcore.hardware.HardwareMap
 import com.qualcomm.robotcore.hardware.PwmControl
 import org.firstinspires.ftc.teamcode.util.PIDController
-import org.firstinspires.ftc.teamcode.util.Subsystem
 
 @Config
 class Turret(val hwMap : HardwareMap) {

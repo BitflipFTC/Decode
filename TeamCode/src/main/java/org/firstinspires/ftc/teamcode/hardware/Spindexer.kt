@@ -14,6 +14,7 @@ import kotlin.math.PI
 
 @Config
 @Configurable
+class Spindexer(val hwMap: HardwareMap) {
     companion object {
         const val GEAR_RATIO: Double = 1.375 // 22t out to 16t in
         const val TICKS_PER_REVOLUTION: Double = 537.7 * GEAR_RATIO

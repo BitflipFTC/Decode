@@ -10,6 +10,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.DcMotorEx
 import com.qualcomm.robotcore.hardware.DcMotorSimple
+import com.qualcomm.robotcore.hardware.PwmControl
 import org.firstinspires.ftc.teamcode.util.FlywheelTestPID.kD
 import org.firstinspires.ftc.teamcode.util.FlywheelTestPID.kV
 import org.firstinspires.ftc.teamcode.util.FlywheelTestPID.kI
@@ -19,6 +20,7 @@ import org.firstinspires.ftc.teamcode.util.FlywheelTestPID.minIntegral
 import org.firstinspires.ftc.teamcode.util.FlywheelTestPID.targetRPM
 import org.firstinspires.ftc.teamcode.util.PIDController
 import com.qualcomm.robotcore.hardware.Servo
+import com.qualcomm.robotcore.hardware.ServoImplEx
 import org.firstinspires.ftc.teamcode.util.FlywheelTestPID.hoodPosition
 import org.firstinspires.ftc.teamcode.util.FlywheelTestPID.kS
 import org.firstinspires.ftc.teamcode.util.FlywheelTestPID.lowPassCoeff
@@ -30,7 +32,7 @@ class FlywheelTest : LinearOpMode() {
     val controller = PIDController(kP, kI, kD, kV, kS,maxIntegral, minIntegral)
     val flywheel by lazy { hardwareMap["flywheel"] as DcMotorEx }
     val flywheelppr = 28
-    val hood by lazy { hardwareMap["hood"] as Servo }
+    val hood by lazy { hardwareMap["hood"] as ServoImplEx }
 
     var flywheelRPM = 0.0
     var lastFlywheelRPM = 0.0
@@ -44,6 +46,7 @@ class FlywheelTest : LinearOpMode() {
         flywheel.zeroPowerBehavior = DcMotor.ZeroPowerBehavior.FLOAT
 
         controller.setPointTolerance = 5.toDouble()
+        hood.pwmRange = PwmControl.PwmRange(500.0, 2500.0)
 
 
         // bulk caching
