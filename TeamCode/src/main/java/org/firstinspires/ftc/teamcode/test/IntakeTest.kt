@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.test
 
-import android.util.Size
 import com.acmerobotics.dashboard.FtcDashboard
 import com.bylazar.telemetry.JoinedTelemetry
 import com.bylazar.telemetry.PanelsTelemetry
@@ -9,12 +8,10 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.DcMotorEx
 import com.qualcomm.robotcore.hardware.DcMotorSimple
-import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName
 import org.firstinspires.ftc.teamcode.hardware.Spindexer
-import org.firstinspires.ftc.vision.VisionPortal
 
 @TeleOp(name = "Test: Intake", group = "Test")
-class IntakeTest1 : LinearOpMode() {
+class IntakeTest : LinearOpMode() {
     val intake by lazy { hardwareMap["intake"] as DcMotorEx }
     val transferMotor by lazy { hardwareMap["transfer"] as DcMotorEx }
 
