@@ -5,6 +5,14 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.teamcode.util.PIDController;
+
+/**
+ * Manages the transfer mechanism, which moves artifacts from the spindexer to the shooter.
+ *
+ * This class uses a PID controller to precisely control the rotation of the transfer motor.
+ * The main function is [transferArtifact], which initiates a transfer sequence.
+ * The [update] method must be called in a loop to drive the motor to its target position.
+ */
 @Config
 public class Transfer {
     private final DcMotorEx motor;
@@ -50,6 +58,10 @@ public class Transfer {
         return targetPosition;
     }
 
+    /**
+     * Initiates the transfer of an artifact. The motor will turn a specified number of times
+     * and then return to its starting position.
+     */
     public void transferArtifact() {
         setMotorTarget(getCurrentPosition() + MOTOR_TURNS * TICKS_PER_REVOLUTION);
         transferring = true;
@@ -61,6 +73,10 @@ public class Transfer {
         degreesPosition = (degreesPosition + 360) % 360;
         return degreesPosition;
     }
+
+    /**
+     * Updates the transfer mechanism. This method should be called in a loop.
+     */
     public void update() {
         double pidOutput = controller.calculate(getCurrentPosition(), targetPosition);
         motor.setPower(pidOutput);
@@ -72,4 +88,3 @@ public class Transfer {
         }
     }
 }
-

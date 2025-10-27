@@ -9,6 +9,15 @@ import com.qualcomm.robotcore.hardware.HardwareMap
 import org.firstinspires.ftc.teamcode.util.Artifact
 import org.firstinspires.ftc.teamcode.util.PIDController
 
+/**
+ * Manages the "spindexer" mechanism, a rotating drum with multiple slots for holding artifacts.
+ *
+ * This class uses a PID controller to move the spindexer to precise angular positions.
+ * It tracks the contents of each slot and provides methods for cycling through intake and outtake positions.
+ * The [update] method must be called in a loop to drive the motor to its target.
+ *
+ * @param hwMap The HardwareMap from an OpMode, used to initialize the motor.
+ */
 @Config
 @Configurable
 class Spindexer(val hwMap: HardwareMap) {
@@ -24,6 +33,10 @@ class Spindexer(val hwMap: HardwareMap) {
         var kD = 0.0
     }
 
+    /**
+     * Defines the named angular positions for the spindexer, used for both intake and outtake.
+     * Each position corresponds to a reference angle in degrees.
+     */
     enum class Positions(val referenceAngle: Double) {
         INTAKE_ZERO(0.0),
         INTAKE_ONE(120.0),
@@ -84,6 +97,10 @@ class Spindexer(val hwMap: HardwareMap) {
 
     fun getAngle() = ( (motor.currentPosition / TICKS_PER_REVOLUTION) * 360 ) % 360
 
+    /**
+     * Updates the spindexer's motor power based on the PID controller.
+     * This method must be called in a loop for the spindexer to move to its target.
+     */
     fun update() {
         controller.setCoeffs(kP,kI,kD)
         val currentPosition: Double = motor.currentPosition.toDouble()
@@ -103,9 +120,20 @@ class Spindexer(val hwMap: HardwareMap) {
     private fun findFirstGreenSlot()  = collectedArtifacts.indexOf(Artifact.GREEN)
     private fun findFirstPurpleSlot() = collectedArtifacts.indexOf(Artifact.PURPLE)
 
+    /**
+     * Records that an artifact of a certain color has been collected in the current slot.
+     */
     fun recordIntake(color: Artifact) = collectedArtifacts.set(positionsToSlotsMap.getValue(position), color)
+
+    /**
+     * Records that an artifact has been removed from the current slot.
+     */
     fun recordOuttake() = collectedArtifacts.set(positionsToSlotsMap.getValue(position), Artifact.NONE)
 
+    /**
+     * Sets the spindexer's target position.
+     * The spindexer will begin moving towards this position on the next [update] call.
+     */
     fun setPosition(newPosition: Positions) {
         position = newPosition
         targetAngle = position.referenceAngle
@@ -117,6 +145,9 @@ class Spindexer(val hwMap: HardwareMap) {
     val allPositions = Positions.entries.toTypedArray()
     var allPositionsIndex = 0
 
+    /**
+     * Cycles to the next position in the [allPositions] list.
+     */
     fun toNextPosition() {
         allPositionsIndex = if (allPositionsIndex == allPositions.size - 1) 0 else allPositionsIndex + 1
 
@@ -124,6 +155,9 @@ class Spindexer(val hwMap: HardwareMap) {
     }
 
     var intakePositionsIndex = 0
+    /**
+     * Cycles to the next intake position.
+     */
     fun toNextIntakePosition() {
         intakePositionsIndex = if (intakePositionsIndex == slotsToIntakes.size - 1) 0 else intakePositionsIndex + 1
 
@@ -131,6 +165,9 @@ class Spindexer(val hwMap: HardwareMap) {
     }
 
     var outtakePositionsIndex = 0
+    /**
+     * Cycles to the next outtake position.
+     */
     fun toNextOuttakePosition() {
         outtakePositionsIndex = if (outtakePositionsIndex == slotsToOuttakes.size - 1) 0 else outtakePositionsIndex + 1
 

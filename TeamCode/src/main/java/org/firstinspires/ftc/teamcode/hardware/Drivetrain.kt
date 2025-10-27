@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.hardware
 
+import android.annotation.SuppressLint
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot
 import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.DcMotorEx
@@ -10,7 +11,12 @@ import kotlin.math.cos
 import kotlin.math.sin
 
 class Drivetrain(val hwMap: HardwareMap) {
-    class DrivePowers(val fl: Double, val fr: Double, val bl: Double, val br: Double)
+    class DrivePowers(val fl: Double, val fr: Double, val bl: Double, val br: Double) {
+        @SuppressLint("DefaultLocale")
+        override fun toString(): String {
+            return String.format("FL: %.2f, FR: %.2f, BL: %.2f, BR: %.2f", fl, fr, bl, br)
+        }
+    }
 
     var currentDrivePowers = DrivePowers(0.0,0.0,0.0,0.0)
         private set
