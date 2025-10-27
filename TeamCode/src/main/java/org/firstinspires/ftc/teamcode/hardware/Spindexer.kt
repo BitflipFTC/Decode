@@ -125,4 +125,18 @@ class Spindexer(val hwMap: HardwareMap) {
 
         setPosition(allPositions[allPositionsIndex])
     }
+
+    var intakePositionsIndex = 0
+    fun toNextIntakePosition() {
+        intakePositionsIndex = if (intakePositionsIndex == slotsToIntakes.size - 1) 0 else intakePositionsIndex + 1
+
+        setPosition(slotsToIntakes[intakePositionsIndex])
+    }
+
+    var outtakePositionsIndex = 0
+    fun toNextOuttakePosition() {
+        outtakePositionsIndex = if (outtakePositionsIndex == slotsToOuttakes.size - 1) 0 else outtakePositionsIndex + 1
+
+        setPosition(slotsToOuttakes[outtakePositionsIndex])
+    }
 }
