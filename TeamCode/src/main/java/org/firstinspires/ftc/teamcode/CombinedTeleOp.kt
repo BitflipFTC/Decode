@@ -38,11 +38,19 @@ class CombinedTeleOp : LinearOpMode() {
     override fun runOpMode() {
         telemetry = JoinedTelemetry(PanelsTelemetry.ftcTelemetry, telemetry, FtcDashboard.getInstance().telemetry)
         telemetry.setDisplayFormat(Telemetry.DisplayFormat.MONOSPACE)
-        val drivetrain = Drivetrain(hardwareMap)
-        val intake = Intake(hardwareMap)
-        val transfer = Transfer(hardwareMap)
-        val spindexer = Spindexer(hardwareMap)
-        val shooter = Shooter(hardwareMap)
+        val drivetrain = Drivetrain(this)
+        val intake = Intake(this)
+        val transfer = Transfer(this)
+        val spindexer = Spindexer(this)
+        val shooter = Shooter(this)
+
+        val subsystems = listOf(
+            drivetrain,
+            intake,
+            transfer,
+            spindexer,
+            shooter
+        )
         camera = OV9281(this)
 
         val timer = ElapsedTime()
@@ -98,9 +106,9 @@ class CombinedTeleOp : LinearOpMode() {
             shooter.targetFlywheelRPM = flywheelRPM
 
             // update all mechanisms
-            transfer.update()
-            spindexer.update()
-            shooter.update()
+            subsystems.forEach {
+                it.periodic()
+            }
 
             distanceToGoal = getDistanceToGoal()
 

@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.DcMotorEx
 import com.qualcomm.robotcore.hardware.DcMotorSimple
+import org.firstinspires.ftc.teamcode.hardware.Intake
 import org.firstinspires.ftc.teamcode.hardware.Spindexer
 
 @TeleOp(name = "Test: Intake", group = "Test")
@@ -18,15 +19,13 @@ class IntakeTest : LinearOpMode() {
 
     override fun runOpMode() {
         telemetry = JoinedTelemetry(PanelsTelemetry.ftcTelemetry, FtcDashboard.getInstance().telemetry, telemetry)
-        intake.zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE
-        intake.mode = DcMotor.RunMode.RUN_WITHOUT_ENCODER
-        intake.direction = DcMotorSimple.Direction.FORWARD
-        val spindexer = Spindexer(hardwareMap)
+        val intake = Intake(this)
+        val spindexer = Spindexer(this)
 
         waitForStart()
 
         while(opModeIsActive()) {
-            spindexer.update()
+            spindexer.periodic()
             telemetry.addData("Current spindexer position", spindexer.getPosition())
             telemetry.addData("Target spindexer position", spindexer.ticksTarget)
             telemetry.addData("Name spindexer position", spindexer.position.name)

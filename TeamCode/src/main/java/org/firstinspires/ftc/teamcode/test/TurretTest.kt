@@ -36,7 +36,7 @@ class TurretTest : LinearOpMode() {
             FtcDashboard.getInstance().telemetry
         )
 
-        val turret = Turret(hardwareMap)
+        val turret = Turret(this)
         val camera = OV9281(this, 4, 6)
 
         val controller = PIDController(kP, kI, kD, kV, kS, maxIntegral, minIntegral)
