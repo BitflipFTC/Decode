@@ -5,13 +5,23 @@ import com.bylazar.telemetry.JoinedTelemetry
 import com.bylazar.telemetry.PanelsTelemetry
 import com.qualcomm.hardware.lynx.LynxModule
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
+import com.qualcomm.robotcore.hardware.Gamepad
+import com.qualcomm.robotcore.util.ElapsedTime
+import gay.zharel.fateweaver.flight.FlightRecorder
 import org.firstinspires.ftc.robotcore.external.Telemetry
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit
+import org.firstinspires.ftc.robotcore.external.navigation.Pose2D
 import org.firstinspires.ftc.teamcode.hardware.Drivetrain
 import org.firstinspires.ftc.teamcode.hardware.Intake
+import org.firstinspires.ftc.teamcode.hardware.OV9281
 import org.firstinspires.ftc.teamcode.hardware.Shooter
 import org.firstinspires.ftc.teamcode.hardware.Spindexer
 import org.firstinspires.ftc.teamcode.hardware.Transfer
-import org.firstinspires.ftc.teamcode.util.HeadingCorrectPID.targetImuPos
+import kotlin.math.pow
+import kotlin.math.sqrt
 
 class CombinedTeleOp : LinearOpMode() {
     companion object {
@@ -23,6 +33,7 @@ class CombinedTeleOp : LinearOpMode() {
     // Drivetrain
     private var fieldCentric : Boolean = false
     private val driveSpeed = 0.8
+    lateinit var camera: OV9281
 
     override fun runOpMode() {
         telemetry = JoinedTelemetry(PanelsTelemetry.ftcTelemetry, telemetry, FtcDashboard.getInstance().telemetry)
@@ -32,6 +43,15 @@ class CombinedTeleOp : LinearOpMode() {
         val transfer = Transfer(hardwareMap)
         val spindexer = Spindexer(hardwareMap)
         val shooter = Shooter(hardwareMap)
+        camera = OV9281(this)
+
+        val timer = ElapsedTime()
+        val timestampRecorder = FlightRecorder.createChannel("TIMESTAMP", Double::class.java)
+        val hoodPositionRecorder = FlightRecorder.createChannel("HOOD POSITION", Double::class.java)
+        val flywheelRPMRecorder = FlightRecorder.createChannel("FLYWHEEL RPM", Double::class.java)
+        val distanceRecorder = FlightRecorder.createChannel("DISTANCE (IN)", Double::class.java)
+
+        var distanceToGoal: Double = -1.0
 
         // bulk caching
         val allHubs = hardwareMap.getAll(LynxModule::class.java)
@@ -82,6 +102,25 @@ class CombinedTeleOp : LinearOpMode() {
             spindexer.update()
             shooter.update()
 
+            distanceToGoal = getDistanceToGoal()
+
+            if (distanceToGoal >= 0.0) {
+                gamepad1.setLedColor(255.0, 136.0, 30.0, Gamepad.LED_DURATION_CONTINUOUS)
+            } else {
+                gamepad1.setLedColor(255.0, 255.0, 255.0, Gamepad.LED_DURATION_CONTINUOUS)
+            }
+
+            // for logging optimal flywheel / hood
+            if (gamepad1.touchpadWasPressed()) {
+                gamepad1.rumble(500)
+                gamepad1.setLedColor(255.0, 136.0, 30.0, 500)
+
+                timestampRecorder.put(timer.milliseconds())
+                hoodPositionRecorder.put(hoodPosition)
+                flywheelRPMRecorder.put(flywheelRPM)
+                distanceRecorder.put(distanceToGoal)
+            }
+
             telemetry.addData("Drivetrain Powers", drivetrain.currentDrivePowers.toString())
             telemetry.addData("Heading", drivetrain.heading)
             telemetry.addData("Field Centric? ", drivetrain.fieldCentric)
@@ -98,8 +137,62 @@ class CombinedTeleOp : LinearOpMode() {
             telemetry.addData("Flywheel target RPM", shooter.targetFlywheelRPM)
             telemetry.addData("FLywheel current RPM", shooter.flywheelRPM)
             telemetry.addData("Hood position", shooter.hoodPosition)
+            telemetry.addData("Distance to goal", distanceToGoal)
 
             telemetry.update()
+        }
+    }
+
+    /**
+     * @return -1.0 if there is no detected goal april tag. Otherwise, it returns the distance from the robot to the apriltag in inches.
+     */
+    fun getDistanceToGoal(): Double {
+        val currentDetections = camera.aprilTag.detections
+
+        if (!currentDetections.isEmpty()) {
+            telemetry.addData("Detected april tags", currentDetections.size)
+            var dist = -1.0
+
+            currentDetections.forEach { detection ->
+                {
+                    telemetry.addData("TAG NAME", detection.metadata.name)
+
+                    if (!detection.metadata.name.contains("Obelisk")) {
+                        val tagPos = Pose2D(
+                            DistanceUnit.INCH,
+                            detection.metadata.fieldPosition.get(0).toDouble(),
+                            detection.metadata.fieldPosition.get(1).toDouble(),
+                            AngleUnit.DEGREES,
+                            detection.metadata.fieldOrientation.toOrientation(
+                                AxesReference.EXTRINSIC,
+                                AxesOrder.XYZ,
+                                AngleUnit.DEGREES
+                            ).secondAngle.toDouble()
+                        ) // given north is 0, clockwise
+
+                        val robotPos = Pose2D(
+                            detection.robotPose.getPosition().unit,
+                            detection.robotPose.getPosition().x,
+                            detection.robotPose.getPosition().y,
+                            AngleUnit.DEGREES,
+                            detection.robotPose.getOrientation().getYaw(AngleUnit.DEGREES)
+                        )
+
+                        dist = sqrt(
+                            (tagPos.getX(DistanceUnit.INCH) - robotPos.getX(DistanceUnit.INCH)).pow(
+                                2.0
+                            ) + (tagPos.getY(DistanceUnit.INCH) - robotPos.getY(DistanceUnit.INCH)).pow(
+                                2.0
+                            )
+                        )
+                    }
+                }
+            }
+
+            return dist
+        } else { // no detections
+            telemetry.addData("Detected april tags", 0)
+            return -1.0
         }
     }
 }
