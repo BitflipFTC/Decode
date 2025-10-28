@@ -72,7 +72,7 @@ class Shooter(val hwMap: HardwareMap) {
         flywheelMotor.mode = DcMotor.RunMode.RUN_WITHOUT_ENCODER
         flywheelMotor.zeroPowerBehavior = DcMotor.ZeroPowerBehavior.FLOAT
 
-        flywheelController.setPointTolerance = 5.toDouble()
+        flywheelController.setPointTolerance = 85.toDouble()
     }
     
     fun update() {
