@@ -1,23 +1,26 @@
 package org.firstinspires.ftc.teamcode.hardware
 
 import com.acmerobotics.dashboard.config.Config
+import com.qualcomm.robotcore.eventloop.opmode.OpMode
 import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.DcMotorEx
 import com.qualcomm.robotcore.hardware.DcMotorSimple
 import com.qualcomm.robotcore.hardware.HardwareMap
 import com.qualcomm.robotcore.hardware.PwmControl
 import com.qualcomm.robotcore.hardware.ServoImplEx
+import com.seattlesolvers.solverslib.command.SubsystemBase
+import org.firstinspires.ftc.robotcore.external.Telemetry
 import org.firstinspires.ftc.teamcode.util.PIDController
 
 /**
  * Manages the robot's shooter mechanism, controlling a flywheel and an adjustable hood servo.
  *
  * This class encapsulates the hardware and control logic for the shooter. To use it,
- * you must instantiate it with the `hardwareMap`, and then call the [update] method
+ * you must instantiate it with the `hardwareMap`, and then call the [periodic] method
  * repeatedly in your OpMode's main loop.
  *
  * The two primary control parameters are [targetFlywheelRPM] and [hoodPosition].
- * Setting these properties will cause the [update] method to adjust the physical
+ * Setting these properties will cause the [periodic] method to adjust the physical
  * hardware to match the targets.
  *
  * The flywheel speed is managed by a PID controller, and its constants ([kP], [kI], [kD], [kV])
@@ -27,7 +30,7 @@ import org.firstinspires.ftc.teamcode.util.PIDController
  * @param hwMap The HardwareMap from your OpMode, used to initialize the motors and servos.
  */
 @Config
-class Shooter(val hwMap: HardwareMap) {
+class Shooter(opMode: OpMode): SubsystemBase() {
     companion object {
         const val FLYWHEEL_PPR = 28
         const val LOW_PASS = 0.05
@@ -45,6 +48,10 @@ class Shooter(val hwMap: HardwareMap) {
         @JvmField
         var kV = 0.00018
     }
+
+    val hwMap: HardwareMap = opMode.hardwareMap
+    val telemetry: Telemetry = opMode.telemetry
+
     private val hoodServo by lazy { hwMap["hood"] as ServoImplEx }
     private val flywheelMotor by lazy { hwMap["flywheel"] as DcMotorEx }
     private val flywheelController = PIDController(kP, kI, kD, kV)
@@ -75,7 +82,7 @@ class Shooter(val hwMap: HardwareMap) {
         flywheelController.setPointTolerance = 85.toDouble()
     }
     
-    fun update() {
+    override fun periodic() {
         lastFlywheelRPM = flywheelRPM
         flywheelRPM = (flywheelMotor.velocity / FLYWHEEL_PPR) * 60
         filteredFlywheelRPM = flywheelRPM * LOW_PASS + lastFlywheelRPM * (1 - LOW_PASS)

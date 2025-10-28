@@ -2,21 +2,27 @@ package org.firstinspires.ftc.teamcode.hardware
 
 import android.annotation.SuppressLint
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot
+import com.qualcomm.robotcore.eventloop.opmode.OpMode
 import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.DcMotorEx
 import com.qualcomm.robotcore.hardware.DcMotorSimple
 import com.qualcomm.robotcore.hardware.HardwareMap
 import com.qualcomm.robotcore.hardware.IMU
+import com.seattlesolvers.solverslib.command.SubsystemBase
+import org.firstinspires.ftc.robotcore.external.Telemetry
 import kotlin.math.cos
 import kotlin.math.sin
 
-class Drivetrain(val hwMap: HardwareMap) {
+class Drivetrain(opMode: OpMode): SubsystemBase() {
     class DrivePowers(val fl: Double, val fr: Double, val bl: Double, val br: Double) {
         @SuppressLint("DefaultLocale")
         override fun toString(): String {
             return String.format("FL: %.2f, FR: %.2f, BL: %.2f, BR: %.2f", fl, fr, bl, br)
         }
     }
+
+    val hwMap: HardwareMap = opMode.hardwareMap
+    val telemetry: Telemetry = opMode.telemetry
 
     var currentDrivePowers = DrivePowers(0.0,0.0,0.0,0.0)
         private set

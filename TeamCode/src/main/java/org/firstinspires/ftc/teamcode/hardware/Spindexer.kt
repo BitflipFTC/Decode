@@ -2,10 +2,13 @@ package org.firstinspires.ftc.teamcode.hardware
 
 import com.acmerobotics.dashboard.config.Config
 import com.bylazar.configurables.annotations.Configurable
+import com.qualcomm.robotcore.eventloop.opmode.OpMode
 import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.DcMotorEx
 import com.qualcomm.robotcore.hardware.DcMotorSimple
 import com.qualcomm.robotcore.hardware.HardwareMap
+import com.seattlesolvers.solverslib.command.SubsystemBase
+import org.firstinspires.ftc.robotcore.external.Telemetry
 import org.firstinspires.ftc.teamcode.util.Artifact
 import org.firstinspires.ftc.teamcode.util.PIDController
 
@@ -14,13 +17,13 @@ import org.firstinspires.ftc.teamcode.util.PIDController
  *
  * This class uses a PID controller to move the spindexer to precise angular positions.
  * It tracks the contents of each slot and provides methods for cycling through intake and outtake positions.
- * The [update] method must be called in a loop to drive the motor to its target.
+ * The [periodic] method must be called in a loop to drive the motor to its target.
  *
  * @param hwMap The HardwareMap from an OpMode, used to initialize the motor.
  */
 @Config
 @Configurable
-class Spindexer(val hwMap: HardwareMap) {
+class Spindexer(opMode: OpMode): SubsystemBase() {
     companion object {
         const val GEAR_RATIO: Double = 1.375 // 22t out to 16t in
         const val TICKS_PER_REVOLUTION: Double = 537.7 * GEAR_RATIO
@@ -32,6 +35,9 @@ class Spindexer(val hwMap: HardwareMap) {
         @JvmField
         var kD = 0.0
     }
+
+    val hwMap: HardwareMap = opMode.hardwareMap
+    val telemetry: Telemetry = opMode.telemetry
 
     /**
      * Defines the named angular positions for the spindexer, used for both intake and outtake.
@@ -101,7 +107,7 @@ class Spindexer(val hwMap: HardwareMap) {
      * Updates the spindexer's motor power based on the PID controller.
      * This method must be called in a loop for the spindexer to move to its target.
      */
-    fun update() {
+    override fun periodic() {
         controller.setCoeffs(kP,kI,kD)
         val currentPosition: Double = motor.currentPosition.toDouble()
 

@@ -1,9 +1,12 @@
 package org.firstinspires.ftc.teamcode.hardware
 
+import com.qualcomm.robotcore.eventloop.opmode.OpMode
 import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.DcMotorEx
 import com.qualcomm.robotcore.hardware.DcMotorSimple
 import com.qualcomm.robotcore.hardware.HardwareMap
+import com.seattlesolvers.solverslib.command.SubsystemBase
+import org.firstinspires.ftc.robotcore.external.Telemetry
 
 /**
  * Manages the robot's intake mechanism.
@@ -13,7 +16,10 @@ import com.qualcomm.robotcore.hardware.HardwareMap
  *
  * @param hwMap The HardwareMap from an OpMode, used to initialize the intake motor.
  */
-class Intake(val hwMap: HardwareMap) {
+class Intake(opMode: OpMode): SubsystemBase() {
+    val hwMap: HardwareMap = opMode.hardwareMap
+    val telemetry: Telemetry = opMode.telemetry
+
     private val motor by lazy { hwMap["intake"] as DcMotorEx }
 
     /**

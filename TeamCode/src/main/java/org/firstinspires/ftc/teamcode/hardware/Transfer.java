@@ -1,9 +1,14 @@
 package org.firstinspires.ftc.teamcode.hardware;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.seattlesolvers.solverslib.command.SubsystemBase;
+import com.seattlesolvers.solverslib.util.TelemetryData;
+
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.util.PIDController;
 
 /**
@@ -14,10 +19,11 @@ import org.firstinspires.ftc.teamcode.util.PIDController;
  * The [update] method must be called in a loop to drive the motor to its target position.
  */
 @Config
-public class Transfer {
+public class Transfer extends SubsystemBase {
     private final DcMotorEx motor;
     private boolean transferring;
     private final String configName = "transfer";
+
     // 1150rpm motor, so
     private final double TICKS_PER_REVOLUTION = 103.8;
     private double targetPosition = 0;
@@ -31,11 +37,15 @@ public class Transfer {
     public static double kD = 0;
     private final PIDController controller = new PIDController(kP, kI, kD, 0, 0, 1, -1);
 
-    public Transfer(HardwareMap hwMap) {
-        motor = hwMap.get(DcMotorEx.class, configName);
+    private final Telemetry telemetry;
+
+    public Transfer(OpMode opMode) {
+        motor = opMode.hardwareMap.get(DcMotorEx.class, configName);
         motor.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
         motor.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        telemetry = opMode.telemetry;
     }
 
     private void setMotorTarget(double ticks) {
@@ -77,7 +87,8 @@ public class Transfer {
     /**
      * Updates the transfer mechanism. This method should be called in a loop.
      */
-    public void update() {
+    @Override
+    public void periodic() {
         double pidOutput = controller.calculate(getCurrentPosition(), targetPosition);
         motor.setPower(pidOutput);
         controller.setSetPointTolerance(10);
