@@ -1,3 +1,5 @@
+package org.firstinspires.ftc.teamcode;
+
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
@@ -9,8 +11,12 @@ public class IfOpMode2 extends OpMode {
 
     @Override
     public void loop() {
-        if(gamepad1.a){
-            telemetry.addData("A Button", "pressed");
+        if(gamepad1.a) {
+            telemetry.addData("A button", "pressed");
+        }
+        else {
+            telemetry.addData("A button", "is not pressed");
+        }
 
         if(gamepad1.left_stick_y < 0) {
             telemetry.addData("Left stick", "is negative");
@@ -23,4 +29,4 @@ public class IfOpMode2 extends OpMode {
         }
 
     }
-}
+

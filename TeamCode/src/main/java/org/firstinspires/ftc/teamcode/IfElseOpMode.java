@@ -1,3 +1,5 @@
+package org.firstinspires.ftc.teamcode;
+
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
@@ -20,14 +22,16 @@ public class IfElseOpMode extends OpMode {
         }
         telemetry.addData("Left stick y", gamepad1.left_stick_y);
 
-        while(angle > 180) {
-            angle -= 360; // x = x - 360?
-        }
-        while(angle < -180) {
-            angle += 360; // x = x + 360?
-        }
-        for(int i = 0; i < 4; i++) {
-            //this code will happen four times = i starts as 0 and gets one added at the end of each time
-        }
-    }
-}
+
+//        while(angle > 180) {
+//            angle -= 360; // x = x - 360?
+//        }
+//        while(angle < -180) {
+        //         angle += 360; // x = x + 360?
+        //       }
+        //    for(int i = 0; i < 4; i++) {
+        //this code will happen four times = i starts as 0 and gets one added at the end of each time
+//        }
+//    }
+//}
+    }}

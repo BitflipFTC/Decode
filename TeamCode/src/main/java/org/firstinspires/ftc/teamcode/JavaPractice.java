@@ -1,11 +1,12 @@
-// package org. firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode;// package org.firstinspires.ftc.teamcode;
 // Explains where file is located
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 // Bring in code from FTC SDK
 
+@Disabled
 @TeleOp()  // Shows up on Driver Station as OpMode -- @ is an annotation (@ Teleop or @ Autonomous, or @Disabled (compile but won't be shown in list of OpModes))
 public class JavaPractice extends OpMode {  // public required for OpModes, class defines class, extends makes whatever comes after a child of OpMode
     @Override // tells compiler we are replacing functionality in parent class
