@@ -25,8 +25,8 @@ class Turret(opMode: OpMode) {
     val hwMap: HardwareMap = opMode.hardwareMap
     val telemetry: Telemetry = opMode.telemetry
 
-    val servoL : CRServoImplEx by lazy { hwMap["turretR"] as CRServoImplEx }
-    val servoR : CRServoImplEx by lazy { hwMap["turretL"] as CRServoImplEx }
+    val servoL : CRServoImplEx by lazy { hwMap["turretL"] as CRServoImplEx }
+    val servoR : CRServoImplEx by lazy { hwMap["turretR"] as CRServoImplEx }
     val controller = PIDController(kP, kI, kD, 0.0, kS)
 
     init {
