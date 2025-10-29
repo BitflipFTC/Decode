@@ -13,7 +13,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry
 import kotlin.math.cos
 import kotlin.math.sin
 
-class Drivetrain(opMode: OpMode): SubsystemBase() {
+class Drivetrain(opMode: OpMode) {
     class DrivePowers(val fl: Double, val fr: Double, val bl: Double, val br: Double) {
         @SuppressLint("DefaultLocale")
         override fun toString(): String {

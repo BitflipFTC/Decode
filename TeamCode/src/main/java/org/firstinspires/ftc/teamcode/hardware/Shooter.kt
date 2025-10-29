@@ -30,7 +30,7 @@ import org.firstinspires.ftc.teamcode.util.PIDController
  * @param hwMap The HardwareMap from your OpMode, used to initialize the motors and servos.
  */
 @Config
-class Shooter(opMode: OpMode): SubsystemBase() {
+class Shooter(opMode: OpMode) {
     companion object {
         const val FLYWHEEL_PPR = 28
         const val LOW_PASS = 0.05

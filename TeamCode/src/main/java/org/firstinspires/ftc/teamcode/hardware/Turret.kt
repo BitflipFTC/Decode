@@ -10,7 +10,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry
 import org.firstinspires.ftc.teamcode.util.PIDController
 
 @Config
-class Turret(opMode: OpMode): SubsystemBase() {
+class Turret(opMode: OpMode) {
     companion object {
         @JvmField
         var kP = 0.0
@@ -40,6 +40,6 @@ class Turret(opMode: OpMode): SubsystemBase() {
         servoL.power = pow
     }
 
-    override fun periodic() {
+    fun periodic() {
     }
 }

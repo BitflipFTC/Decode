@@ -23,7 +23,7 @@ import org.firstinspires.ftc.teamcode.util.PIDController
  */
 @Config
 @Configurable
-class Spindexer(opMode: OpMode): SubsystemBase() {
+class Spindexer(opMode: OpMode) {
     companion object {
         const val GEAR_RATIO: Double = 1.375 // 22t out to 16t in
         const val TICKS_PER_REVOLUTION: Double = 537.7 * GEAR_RATIO
@@ -107,9 +107,9 @@ class Spindexer(opMode: OpMode): SubsystemBase() {
      * Updates the spindexer's motor power based on the PID controller.
      * This method must be called in a loop for the spindexer to move to its target.
      */
-    override fun periodic() {
         controller.setCoeffs(kP,kI,kD)
         val currentPosition: Double = motor.currentPosition.toDouble()
+    fun periodic() {
 
         // creates a "fake" target to ensure the spindexer always takes the shortest path
         ticksTarget = (targetAngle / 360) * TICKS_PER_REVOLUTION
