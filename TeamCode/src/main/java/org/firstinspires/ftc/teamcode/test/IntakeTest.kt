@@ -8,37 +8,38 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import com.qualcomm.robotcore.hardware.DcMotorEx
 import org.firstinspires.ftc.teamcode.hardware.Intake
 import org.firstinspires.ftc.teamcode.hardware.Spindexer
+import org.firstinspires.ftc.teamcode.hardware.Transfer
 
 @TeleOp(name = "Test: Intake", group = "Test")
 class IntakeTest : LinearOpMode() {
-    val intake by lazy { hardwareMap["intake"] as DcMotorEx }
-    val transferMotor by lazy { hardwareMap["transfer"] as DcMotorEx }
-
-
     override fun runOpMode() {
         telemetry = JoinedTelemetry(PanelsTelemetry.ftcTelemetry, FtcDashboard.getInstance().telemetry, telemetry)
-        val intake = Intake(this)
         val spindexer = Spindexer(this)
+        val intake = Intake(this)
+        val transfer = Transfer(this)
 
         waitForStart()
 
         while(opModeIsActive()) {
             spindexer.periodic()
-            telemetry.addData("Current spindexer position", spindexer.currentTicks)
-            telemetry.addData("Target spindexer position", spindexer.targetTicks)
-            telemetry.addData("Name spindexer position", spindexer.state.name)
+            telemetry.addData("Current spindexer position", spindexer.currentAngle)
+            telemetry.addData("Target spindexer position", spindexer.targetAngle)
+            telemetry.addData("Named spindexer position", spindexer.state.name)
 
-            transferMotor.power = -gamepad1.right_stick_y.toDouble()
+            if (gamepad1.dpadUpWasPressed()) {
+                transfer.transferArtifact()
+            }
+
+            if (gamepad1.dpadDownWasPressed()) {
+                transfer.undoTransfer()
+            }
+
             if (gamepad1.crossWasPressed()) {
                 spindexer.setTargetState(Spindexer.States.INTAKE_ZERO)
             }
 
-            if (gamepad1.squareWasPressed()) {
-                spindexer.setTargetState(Spindexer.States.INTAKE_TWO)
-            }
-
             if (gamepad1.triangleWasPressed()) {
-                spindexer.setTargetState(Spindexer.States.OUTTAKE_ONE)
+                spindexer.setTargetState(Spindexer.States.OUTTAKE_ZERO)
             }
 
             if (gamepad1.circleWasPressed()) {
@@ -46,7 +47,18 @@ class IntakeTest : LinearOpMode() {
                 gamepad1.rumble(500)
             }
 
-            intake.power = if (gamepad1.right_trigger >= 0.25) Intake.State.INTAKE else Intake.State.OFF
+            if (gamepad1.rightBumperWasPressed()) {
+                spindexer.toNextOuttakePosition()
+            }
+
+            if (gamepad1.leftBumperWasPressed()) {
+                spindexer.toNextIntakePosition()
+            }
+
+            if (gamepad1.squareWasPressed()) {
+                intake.toggle()
+            }
+
             telemetry.addData("Intake Power", intake.power)
             telemetry.update()
         }

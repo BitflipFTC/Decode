@@ -42,25 +42,6 @@ object AprilTagAutoPID {
     @JvmField var targetTagPos : Double = 320.0
 }
 
-@Configurable
-@Config
-object FlywheelTestPID {
-    @JvmField var kP : Double = 0.0007
-    @JvmField var kI : Double = 0.0
-    @JvmField var kD : Double = 0.0
-    @JvmField var kV : Double = 0.00018
-    @JvmField var kS : Double = 0.0
-
-    @JvmField var maxIntegral: Double = 1.0
-    @JvmField var minIntegral: Double = -1.0
-    @JvmField var targetRPM : Double = 3000.0
-    @JvmField var hoodPosition : Double = 0.3
-    @JvmField var totPower : Double = 0.0
-    @JvmField var rawPower : Boolean = false
-
-    @JvmField var lowPassCoeff : Double = 0.1
-}
-
 fun Boolean.toInt(): Int {
     return if(this) 1 else 0
 }
