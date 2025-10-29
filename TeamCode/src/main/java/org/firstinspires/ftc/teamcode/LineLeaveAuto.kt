@@ -15,10 +15,10 @@ class LineLeaveAuto: LinearOpMode() {
     }
 
     enum class Start (val strafe: Float, val forward: Float, val instructions: String) {
-        RED_NEAR(-1f, 0.5f, "Place back of robot against the wall, about 6in from goal"),
-        RED_FAR(1f, 0f, "Place back of robot against the wall on outermost corner of far launch line"),
-        BLUE_NEAR(1f, 0.5f, "Place back of robot against the wall, about 6in from goal"),
-        BLUE_FAR(-1f, 0f, "Place back of robot against the wall on outermost corner of far launch line"),
+        RED_NEAR(-0.5f, 0.25f, "Place back of robot against the wall, about 6in from goal"),
+        RED_FAR(0.5f, 0f, "Place back of robot against the wall on outermost corner of far launch line"),
+        BLUE_NEAR(0.5f, 0.25f, "Place back of robot against the wall, about 6in from goal"),
+        BLUE_FAR(-0.5f, 0f, "Place back of robot against the wall on outermost corner of far launch line"),
         NONE(0f, 0f, "NO POSITION SELECTED")
     }
 
