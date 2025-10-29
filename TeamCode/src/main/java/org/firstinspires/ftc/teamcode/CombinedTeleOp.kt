@@ -42,9 +42,9 @@ class CombinedTeleOp : LinearOpMode() {
     lateinit var camera: OV9281
 
     var distanceToGoal = -1.0
-    var currentTagPosition = 320.0
-    var targetTagPosition = 320.0
     var rbeDistance = -1.0
+    var currentTagBearing = 0.0
+    val targetTagBearing = 0.0
     // for dashboard purposes
 
     override fun runOpMode() {
@@ -129,7 +129,7 @@ class CombinedTeleOp : LinearOpMode() {
             shooter.periodic()
             intake.periodic()
             updateCamera()
-            turret.periodic(currentTagPosition)
+            turret.periodic(currentTagBearing)
 
             if (distanceToGoal >= 0.0) {
                 gamepad1.setLedColor(255.0, 136.0, 30.0, Gamepad.LED_DURATION_CONTINUOUS)
@@ -168,8 +168,8 @@ class CombinedTeleOp : LinearOpMode() {
             telemetry.addData("Distance to goal", distanceToGoal)
             telemetry.addData("RANGE Distance", rbeDistance)
             telemetry.addLine("-------------------------------------")
-            telemetry.addData("April tag current position", currentTagPosition)
-            telemetry.addData("April tag target position", targetTagPosition)
+            telemetry.addData("April tag current bearing", currentTagBearing)
+            telemetry.addData("April tag target bearing", targetTagBearing)
             telemetry.addData("Turret power", turret.getPower())
 
             telemetry.update()
@@ -219,7 +219,8 @@ class CombinedTeleOp : LinearOpMode() {
                     )
                     // END DISTANCE CALCS
 
-                    currentTagPosition = detection.center.x
+                    // negative b/c default: left positive, right negative
+                    currentTagBearing = -detection.ftcPose.bearing
                 }
             } else {
                 telemetry.addData("Current tag", "NO metadata")

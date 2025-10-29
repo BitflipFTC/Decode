@@ -75,7 +75,7 @@ object TurretTestPID {
     @JvmField var setPointTolerance : Double = 25.toDouble()
     @JvmField var tuneKs : Boolean = false
     @JvmField var exposure : Int = 4
-    @JvmField var targetTagPos : Double = 320.0
+    @JvmField var targetTagPos : Double = 0.0
 
 }
 

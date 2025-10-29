@@ -63,22 +63,18 @@ class TurretTest : LinearOpMode() {
 
             currentTagPos = when {
                 currentDetections.isEmpty() -> targetTagPos
-                else                        -> currentDetections[0].center.x
+                else                        -> -currentDetections[0].ftcPose.bearing
             }
 
             controller.setCoeffs(kP, kI, kD, kV, kS)
             controller.setPointTolerance = setPointTolerance
             
-            var pidOutput = controller.calculate(currentTagPos, targetTagPos)
-
-            if (!controller.atSetPoint()) {
-                pidOutput += sign(pidOutput) * kS
-            }
+            val pidOutput = controller.calculate(currentTagPos, targetTagPos)
 
             turret.setPower(pidOutput)
 
-            telemetry.addData("current tag pos", currentTagPos)
-            telemetry.addData(" target tag pos", targetTagPos)
+            telemetry.addData("current tag bearing", currentTagPos)
+            telemetry.addData(" target tag bearing", targetTagPos)
             telemetry.addData("turret power", pidOutput)
             telemetry.addData("At Setpoint?", controller.atSetPoint())
 

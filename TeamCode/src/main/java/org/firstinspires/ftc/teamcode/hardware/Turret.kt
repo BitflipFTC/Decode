@@ -5,18 +5,14 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode
 import com.qualcomm.robotcore.hardware.CRServoImplEx
 import com.qualcomm.robotcore.hardware.HardwareMap
 import com.qualcomm.robotcore.hardware.PwmControl
-import com.seattlesolvers.solverslib.command.SubsystemBase
 import org.firstinspires.ftc.robotcore.external.Telemetry
 import org.firstinspires.ftc.teamcode.util.PIDController
-import org.firstinspires.ftc.teamcode.util.TurretTestPID
-import org.firstinspires.ftc.teamcode.util.TurretTestPID.targetTagPos
-import kotlin.math.sign
 
 @Config
 class Turret(opMode: OpMode) {
     companion object {
         @JvmField
-        var kP = 0.0003
+        var kP = 0.001
         @JvmField
         var kI = 0.0
         @JvmField
@@ -24,7 +20,7 @@ class Turret(opMode: OpMode) {
         @JvmField
         var kS = 0.0275
         @JvmField
-        var setPointTolerance : Double = 25.toDouble()
+        var setPointTolerance : Double = 3.toDouble() // degrees
     }
 
     val hwMap: HardwareMap = opMode.hardwareMap
@@ -48,17 +44,8 @@ class Turret(opMode: OpMode) {
         servoL.power = pow
     }
 
-    fun periodic(tagPos: Double) {
-        pidOutput = controller.calculate(tagPos, 320.0)
-
-        if (!controller.atSetPoint()) {
-            // idk why kS is added again
-            // but it worked in turret test so uhhhh leave it
-            // trust
-            // signed,
-            // 10/28/25
-            pidOutput += sign(pidOutput) * TurretTestPID.kS
-        }
+    fun periodic(tagBearing: Double) {
+        pidOutput = controller.calculate(tagBearing, 0.0) // bearing approaches 0
 
         setPower(pidOutput)
     }
