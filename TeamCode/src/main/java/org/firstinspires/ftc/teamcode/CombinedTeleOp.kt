@@ -98,16 +98,14 @@ class CombinedTeleOp : LinearOpMode() {
 //            if (gamepad1.rightBumperWasPressed()) {
 //                spindexer.toNextOuttakePosition()
 //                gamepad1.rumble(100)
-//                spindexer.resetIntegral()
-//            }z
+//            }
 //
 //            if (gamepad1.leftBumperWasPressed()) {
 //                spindexer.toNextIntakePosition()
 //                gamepad1.rumble(100)
-//                spindexer.resetIntegral()
 //            }
 
-            spindexer.setPower(gamepad1.right_bumper.toInt().toDouble() * 0.25 - gamepad1.left_bumper.toInt().toDouble() * 0.25)
+            spindexer.power = gamepad1.right_bumper.toInt().toDouble() * 0.25 - gamepad1.left_bumper.toInt().toDouble() * 0.25
 
             if (gamepad1.dpad_up) {
                 flywheelRPM = 4500.0
@@ -159,9 +157,9 @@ class CombinedTeleOp : LinearOpMode() {
             telemetry.addData("Transfer Target Ticks", transfer.targetPosition)
             telemetry.addData("Transfer Current Ticks", transfer.currentPosition)
             telemetry.addLine("-------------------------------------")
-            telemetry.addData("Spindexer target position", spindexer.position.name)
-            telemetry.addData("Spindexer target ticks", spindexer.getTargetAngle())
-            telemetry.addData("Spindexer current ticks", spindexer.getAngle())
+            telemetry.addData("Spindexer target position", spindexer.state.name)
+            telemetry.addData("Spindexer target angle", spindexer.targetAngle)
+            telemetry.addData("Spindexer current angle", spindexer.currentAngle)
             telemetry.addLine("-------------------------------------")
             telemetry.addData("Flywheel target RPM", shooter.targetFlywheelRPM)
             telemetry.addData("FLywheel current RPM", shooter.flywheelRPM)

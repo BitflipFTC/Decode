@@ -7,7 +7,6 @@ import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.DcMotorEx
 import com.qualcomm.robotcore.hardware.DcMotorSimple
 import com.qualcomm.robotcore.hardware.HardwareMap
-import com.seattlesolvers.solverslib.command.SubsystemBase
 import org.firstinspires.ftc.robotcore.external.Telemetry
 import org.firstinspires.ftc.teamcode.util.Artifact
 import org.firstinspires.ftc.teamcode.util.PIDController
@@ -37,16 +36,26 @@ class Spindexer(opMode: OpMode) {
         var kD = 0.0
         @JvmField
         var kS = 0.07
+        @JvmField
+        var setpointTolerance = 1.0
     }
 
     val hwMap: HardwareMap = opMode.hardwareMap
     val telemetry: Telemetry = opMode.telemetry
 
+    // ------------------ DATA STRUCTURES ------------------
+    enum class MotifPattern {
+        GPP,
+        PGP,
+        PPG,
+        NONE
+    }
+
     /**
      * Defines the named angular positions for the spindexer, used for both intake and outtake.
      * Each position corresponds to a reference angle in degrees.
      */
-    enum class Positions(val referenceAngle: Double) {
+    enum class States(val referenceAngle: Double) {
         INTAKE_ZERO(0.0),
         INTAKE_ONE(120.0),
         INTAKE_TWO(240.0),
@@ -55,26 +64,31 @@ class Spindexer(opMode: OpMode) {
         OUTTAKE_TWO(60.0);
     }
 
-    val positionsToSlotsMap = mapOf(
-        Positions.INTAKE_ZERO to 0,
-        Positions.OUTTAKE_ZERO to 0,
-        Positions.INTAKE_ONE to 1,
-        Positions.OUTTAKE_ONE to 1,
-        Positions.INTAKE_TWO to 2,
-        Positions.OUTTAKE_TWO to 2,
+    // specifies the focus slot of each preset (intake / outtake slot)
+    val statesToSlotsMap = mapOf(
+        States.INTAKE_ZERO to 0,
+        States.OUTTAKE_ZERO to 0,
+        States.INTAKE_ONE to 1,
+        States.OUTTAKE_ONE to 1,
+        States.INTAKE_TWO to 2,
+        States.OUTTAKE_TWO to 2,
     )
 
+    // allows you to iterate through outtakes or intakes
+    // index is the focus slot
     val slotsToOuttakes = listOf(
-        Positions.OUTTAKE_ZERO,
-        Positions.OUTTAKE_ONE,
-        Positions.OUTTAKE_TWO,
+        States.OUTTAKE_ZERO,
+        States.OUTTAKE_ONE,
+        States.OUTTAKE_TWO,
     )
 
     val slotsToIntakes = listOf(
-        Positions.INTAKE_ZERO,
-        Positions.INTAKE_ONE,
-        Positions.INTAKE_TWO,
+        States.INTAKE_ZERO,
+        States.INTAKE_ONE,
+        States.INTAKE_TWO,
     )
+
+    val allStates = States.entries.toList()
 
     // models physical slots. slots themselves rotate with the spindexer
     private val collectedArtifacts = mutableListOf(
@@ -83,18 +97,102 @@ class Spindexer(opMode: OpMode) {
         Artifact.NONE,
     )
 
-    var ticksTarget: Double = 0.0
-        private set
 
-    fun getArtifactString() = collectedArtifacts.joinToString("") { it.firstLetter().toString() }
+    // ------------------ EXPOSED FUNCTIONS AND VARIABLES ------------------
+
+    // --------- gettable values ---------
+
+    var state = States.INTAKE_ZERO
+        private set
+    var targetAngle = state.referenceAngle
+        private set
+    val targetTicks // no backing
+        get() = (targetAngle / 360) * TICKS_PER_REVOLUTION
+    val currentTicks: Double  // no backing
+        get() = motor.currentPosition.toDouble()
+    val currentAngle
+        get() = (currentTicks / TICKS_PER_REVOLUTION) * 360
+    var power: Double
+        get() = motor.power
+        set(power) { motor.power = power }
+
+    var motifPattern: MotifPattern = MotifPattern.NONE
+
+    fun getArtifactString(): String = collectedArtifacts.joinToString("") { it.firstLetter().toString() }
+    fun atSetPoint() = controller.atSetPoint()
+
+
+    // --------- functions that do things ---------
+
+    /** used when setting a new target */
+    fun resetIntegral(): Unit = controller.resetTotalError()
+
+    /**
+     * Records that an artifact of a certain color has been collected in the current slot.
+     */
+    fun recordIntake(color: Artifact) = collectedArtifacts.set(statesToSlotsMap.getValue(state), color)
+
+    /**
+     * Records that an artifact has been removed from the current slot.
+     */
+    fun recordOuttake() = collectedArtifacts.set(statesToSlotsMap.getValue(state), Artifact.NONE)
+
+    /**
+     * Sets the spindexer's target position.
+     * The spindexer will begin moving towards this position on the next [periodic] call.
+     */
+    fun setTargetState(newState: States) {
+        state = newState
+
+        // find the current "revolution"
+        val errorInRevolutions = (currentAngle - state.referenceAngle) / 360.0
+        val nearestRevolution = errorInRevolutions.roundToInt()
+
+        // add that to the existing target to ensure it takes the shortest path
+        targetAngle = state.referenceAngle + (nearestRevolution * 360.0)
+
+        resetIntegral()
+    }
+
+
+    // --------- functions that control hardware ---------
+
+    private var allStatesIndex = 0
+    private var intakePositionsIndex = 0
+    private var outtakePositionsIndex = 0
+
+    /**
+     * Cycles to the next position in the [allStates] list.
+     */
+    fun toNextPosition() {
+        allStatesIndex = if (allStatesIndex == allStates.size - 1) 0 else allStatesIndex + 1
+
+        setTargetState(allStates[allStatesIndex])
+    }
+
+    /**
+     * Cycles to the next intake position.
+     */
+    fun toNextIntakePosition() {
+        intakePositionsIndex = if (intakePositionsIndex == slotsToIntakes.size - 1) 0 else intakePositionsIndex + 1
+
+        setTargetState(slotsToIntakes[intakePositionsIndex])
+    }
+
+    /**
+     * Cycles to the next outtake position.
+     */
+    fun toNextOuttakePosition() {
+        outtakePositionsIndex = if (outtakePositionsIndex == slotsToOuttakes.size - 1) 0 else outtakePositionsIndex + 1
+
+        setTargetState(slotsToOuttakes[outtakePositionsIndex])
+    }
+
+
+    // ------------------ INTERNAL HARDWARE CONTROL ------------------
 
     private val motor by lazy { hwMap["spindexer"] as DcMotorEx }
-
-    private val controller = PIDController(kP,kI,kD)
-
-    var position = Positions.INTAKE_ZERO
-        private set
-    private var targetAngle = position.referenceAngle
+    private val controller = PIDController(kP, kI, kD)
 
     init {
         motor.mode = DcMotor.RunMode.STOP_AND_RESET_ENCODER
@@ -102,15 +200,8 @@ class Spindexer(opMode: OpMode) {
         motor.zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE
         motor.direction = DcMotorSimple.Direction.FORWARD
 
-        controller.setPointTolerance = 1.toDouble()
+        controller.setPointTolerance = setpointTolerance
     }
-
-    fun resetIntegral() {
-        controller.resetTotalError()
-    }
-
-    fun getAngle() = ( (motor.currentPosition / TICKS_PER_REVOLUTION) * 360 )
-    fun getTargetAngle() = ( (ticksTarget / TICKS_PER_REVOLUTION) * 360)
 
     /**
      * Updates the spindexer's motor power based on the PID controller.
@@ -118,89 +209,16 @@ class Spindexer(opMode: OpMode) {
      */
     fun periodic() {
         controller.setCoeffs(kP, kI, kD, 0.0, kS)
-        val currentTicks = motor.currentPosition.toDouble()
 
-        // Convert the target angle (0-360) to a raw, "unwrapped" tick value.
-        // TODO: test this logic, it's garbage
-        val targetTicksUnwrapped = (targetAngle / 360) * TICKS_PER_REVOLUTION
-
-        // To find the shortest path, we find the equivalent target position that is closest
-        // to the motor's current position. We do this by calculating the error in terms of
-        // revolutions, rounding to the nearest whole number of revolutions, and then adding
-        // that to the unwrapped target to get it onto the same "lap" as the current position.
-        val errorInRevolutions = (currentTicks - targetTicksUnwrapped) / TICKS_PER_REVOLUTION
-        val nearestRevolution = errorInRevolutions.roundToInt()
-        val closestTargetTicks = targetTicksUnwrapped + nearestRevolution * TICKS_PER_REVOLUTION
-
-        // This is the tick value the PID controller will drive towards.
-        ticksTarget = closestTargetTicks
-
-        val pidOutput = controller.calculate(currentTicks, ticksTarget)
+        val pidOutput = controller.calculate(currentAngle, targetAngle)
         motor.power = pidOutput
     }
 
-    fun setPower(power: Double) {
-        motor.power = power
-    }
+
+    // ------------------ INNER HELPER FUNCTIONS ------------------
 
     private fun findFirstFullSlot()   = collectedArtifacts.indexOfFirst { it != Artifact.NONE }
     private fun findFirstEmptySlot()  = collectedArtifacts.indexOf(Artifact.NONE)
     private fun findFirstGreenSlot()  = collectedArtifacts.indexOf(Artifact.GREEN)
     private fun findFirstPurpleSlot() = collectedArtifacts.indexOf(Artifact.PURPLE)
-
-    /**
-     * Records that an artifact of a certain color has been collected in the current slot.
-     */
-    fun recordIntake(color: Artifact) = collectedArtifacts.set(positionsToSlotsMap.getValue(position), color)
-
-    /**
-     * Records that an artifact has been removed from the current slot.
-     */
-    fun recordOuttake() = collectedArtifacts.set(positionsToSlotsMap.getValue(position), Artifact.NONE)
-
-    /**
-     * Sets the spindexer's target position.
-     * The spindexer will begin moving towards this position on the next [update] call.
-     */
-    fun setPosition(newPosition: Positions) {
-        position = newPosition
-        targetAngle = position.referenceAngle
-    }
-
-    fun getNamedPosition() = position.name
-    fun getPosition() = motor.currentPosition
-
-    val allPositions = Positions.entries.toTypedArray()
-    var allPositionsIndex = 0
-
-    /**
-     * Cycles to the next position in the [allPositions] list.
-     */
-    fun toNextPosition() {
-        allPositionsIndex = if (allPositionsIndex == allPositions.size - 1) 0 else allPositionsIndex + 1
-
-        setPosition(allPositions[allPositionsIndex])
-    }
-
-    var intakePositionsIndex = 0
-    /**
-     * Cycles to the next intake position.
-     */
-    fun toNextIntakePosition() {
-        intakePositionsIndex = if (intakePositionsIndex == slotsToIntakes.size - 1) 0 else intakePositionsIndex + 1
-
-        setPosition(slotsToIntakes[intakePositionsIndex])
-    }
-
-    var outtakePositionsIndex = 0
-    /**
-     * Cycles to the next outtake position.
-     */
-    fun toNextOuttakePosition() {
-        outtakePositionsIndex = if (outtakePositionsIndex == slotsToOuttakes.size - 1) 0 else outtakePositionsIndex + 1
-
-        setPosition(slotsToOuttakes[outtakePositionsIndex])
-    }
-
-    fun atSetPoint() = controller.atSetPoint()
 }
