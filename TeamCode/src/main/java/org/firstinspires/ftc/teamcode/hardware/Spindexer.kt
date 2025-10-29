@@ -11,6 +11,7 @@ import com.seattlesolvers.solverslib.command.SubsystemBase
 import org.firstinspires.ftc.robotcore.external.Telemetry
 import org.firstinspires.ftc.teamcode.util.Artifact
 import org.firstinspires.ftc.teamcode.util.PIDController
+import kotlin.math.roundToInt
 
 /**
  * Manages the "spindexer" mechanism, a rotating drum with multiple slots for holding artifacts.
@@ -29,11 +30,13 @@ class Spindexer(opMode: OpMode) {
         const val TICKS_PER_REVOLUTION: Double = 537.7 * GEAR_RATIO
 
         @JvmField
-        var kP = 0.001
+        var kP = 0.0025
         @JvmField
-        var kI = 0.09
+        var kI = 0.0
         @JvmField
         var kD = 0.0
+        @JvmField
+        var kS = 0.07
     }
 
     val hwMap: HardwareMap = opMode.hardwareMap
@@ -91,29 +94,48 @@ class Spindexer(opMode: OpMode) {
 
     var position = Positions.INTAKE_ZERO
         private set
-    var targetAngle = position.referenceAngle
-        private set
+    private var targetAngle = position.referenceAngle
 
     init {
         motor.mode = DcMotor.RunMode.STOP_AND_RESET_ENCODER
         motor.mode = DcMotor.RunMode.RUN_WITHOUT_ENCODER
         motor.zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE
         motor.direction = DcMotorSimple.Direction.FORWARD
+
+        controller.setPointTolerance = 1.toDouble()
     }
 
-    fun getAngle() = ( (motor.currentPosition / TICKS_PER_REVOLUTION) * 360 ) % 360
+    fun resetIntegral() {
+        controller.resetTotalError()
+    }
+
+    fun getAngle() = ( (motor.currentPosition / TICKS_PER_REVOLUTION) * 360 )
+    fun getTargetAngle() = ( (ticksTarget / TICKS_PER_REVOLUTION) * 360)
 
     /**
      * Updates the spindexer's motor power based on the PID controller.
      * This method must be called in a loop for the spindexer to move to its target.
      */
-        controller.setCoeffs(kP,kI,kD)
-        val currentPosition: Double = motor.currentPosition.toDouble()
     fun periodic() {
+        controller.setCoeffs(kP, kI, kD, 0.0, kS)
+        val currentTicks = motor.currentPosition.toDouble()
 
-        // creates a "fake" target to ensure the spindexer always takes the shortest path
-        ticksTarget = (targetAngle / 360) * TICKS_PER_REVOLUTION
-        val pidOutput = controller.calculate(currentPosition, ticksTarget)
+        // Convert the target angle (0-360) to a raw, "unwrapped" tick value.
+        // TODO: test this logic, it's garbage
+        val targetTicksUnwrapped = (targetAngle / 360) * TICKS_PER_REVOLUTION
+
+        // To find the shortest path, we find the equivalent target position that is closest
+        // to the motor's current position. We do this by calculating the error in terms of
+        // revolutions, rounding to the nearest whole number of revolutions, and then adding
+        // that to the unwrapped target to get it onto the same "lap" as the current position.
+        val errorInRevolutions = (currentTicks - targetTicksUnwrapped) / TICKS_PER_REVOLUTION
+        val nearestRevolution = errorInRevolutions.roundToInt()
+        val closestTargetTicks = targetTicksUnwrapped + nearestRevolution * TICKS_PER_REVOLUTION
+
+        // This is the tick value the PID controller will drive towards.
+        ticksTarget = closestTargetTicks
+
+        val pidOutput = controller.calculate(currentTicks, ticksTarget)
         motor.power = pidOutput
     }
 
