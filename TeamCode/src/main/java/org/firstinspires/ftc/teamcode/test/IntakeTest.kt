@@ -49,7 +49,7 @@ class IntakeTest : LinearOpMode() {
                 gamepad1.rumble(500)
             }
 
-            intake.power = gamepad1.right_trigger.toDouble() - gamepad1.left_trigger.toDouble()
+            intake.power = if (gamepad1.right_trigger >= 0.25) Intake.State.INTAKE else Intake.State.OFF
             telemetry.addData("Intake Power", intake.power)
             telemetry.update()
         }

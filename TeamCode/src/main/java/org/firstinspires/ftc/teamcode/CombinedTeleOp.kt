@@ -85,7 +85,7 @@ class CombinedTeleOp : LinearOpMode() {
 
 
             // intake
-            if (gamepad1.xWasPressed()) intake.toggle()
+            if (gamepad1.squareWasPressed()) intake.toggle()
 
             // transfer
             if (gamepad1.right_trigger >= 0.25) transfer.transferArtifact(); gamepad1.rumble(500)
@@ -135,6 +135,8 @@ class CombinedTeleOp : LinearOpMode() {
             telemetry.addData("", "-------------------------------------")
             telemetry.addData("Intake Power", intake.power)
             telemetry.addData("", "-------------------------------------")
+            telemetry.addData("Intake Power", intake.power.value)
+            telemetry.addData("Intake State", intake.power)
             telemetry.addData("Transfer Target Ticks", transfer.targetPosition)
             telemetry.addData("Transfer Current Ticks", transfer.currentPosition)
             telemetry.addData("", "-------------------------------------")

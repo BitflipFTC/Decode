@@ -17,6 +17,12 @@ import org.firstinspires.ftc.robotcore.external.Telemetry
  * @param hwMap The HardwareMap from an OpMode, used to initialize the intake motor.
  */
 class Intake(opMode: OpMode): SubsystemBase() {
+    enum class State (val value: Double) {
+        OFF(0.0),
+        INTAKE(0.9),
+        OUTTAKE(-0.9)
+    }
+
     val hwMap: HardwareMap = opMode.hardwareMap
     val telemetry: Telemetry = opMode.telemetry
 
@@ -25,9 +31,7 @@ class Intake(opMode: OpMode): SubsystemBase() {
     /**
      * The current power of the intake motor. Can be set to any value between -1.0 and 1.0.
      */
-    var power: Double
-        get() = motor.power
-        set(power) { motor.power = power }
+    var power: State = State.OFF
 
     init {
         motor.zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE
@@ -39,6 +43,22 @@ class Intake(opMode: OpMode): SubsystemBase() {
      * Toggles the intake motor's power between full forward (1.0) and off (0.0).
      */
     fun toggle () {
-        power = if (power == 0.0) 1.0 else 0.0
+        power = if (power == State.INTAKE) State.OFF else State.INTAKE
+    }
+
+    fun on () {
+        power = State.INTAKE
+    }
+
+    fun off () {
+        power = State.OFF
+    }
+
+    fun reverse () {
+        power = State.OUTTAKE
+    }
+
+    override fun periodic() {
+        motor.power = power.value
     }
 }
