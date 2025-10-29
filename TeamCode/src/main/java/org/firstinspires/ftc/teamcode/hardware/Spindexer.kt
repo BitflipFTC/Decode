@@ -217,8 +217,8 @@ class Spindexer(opMode: OpMode) {
 
     // ------------------ INNER HELPER FUNCTIONS ------------------
 
-    private fun findFirstFullSlot()   = collectedArtifacts.indexOfFirst { it != Artifact.NONE }
-    private fun findFirstEmptySlot()  = collectedArtifacts.indexOf(Artifact.NONE)
-    private fun findFirstGreenSlot()  = collectedArtifacts.indexOf(Artifact.GREEN)
-    private fun findFirstPurpleSlot() = collectedArtifacts.indexOf(Artifact.PURPLE)
+    private fun findFullSlots()   = collectedArtifacts.filter { it != Artifact.NONE }
+    private fun findEmptySlots()  = collectedArtifacts.filter { it == Artifact.NONE }
+    private fun findGreenSlots()  = collectedArtifacts.filter { it == Artifact.GREEN }
+    private fun findPurpleSlots() = collectedArtifacts.filter { it == Artifact.PURPLE }
 }
