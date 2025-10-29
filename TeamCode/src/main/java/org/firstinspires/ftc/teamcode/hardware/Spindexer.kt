@@ -147,8 +147,13 @@ class Spindexer(opMode: OpMode) {
     /**
      * Records that an artifact of a certain color has been collected in the current slot.
      */
-    fun recordIntake(color: Artifact) =
-        collectedArtifacts.set(statesToSlotsMap.getValue(state), color)
+    fun recordIntake(color: Artifact) {
+        collectedArtifacts[statesToSlotsMap.getValue(state)] = color
+    }
+
+    fun recordIntake(color: Artifact, slot: Int) {
+        collectedArtifacts[slot] = color
+    }
 
     /**
      * Records that an artifact has been removed from the current slot.
@@ -176,8 +181,6 @@ class Spindexer(opMode: OpMode) {
     // --------- functions that control hardware ---------
 
     private var allStatesIndex = 0
-    private var intakePositionsIndex = 0
-    private var outtakePositionsIndex = 0
 
     /**
      * Cycles to the next position in the [allStates] list.
@@ -189,23 +192,35 @@ class Spindexer(opMode: OpMode) {
     }
 
     /**
-     * Cycles to the next intake position.
+     * Cycles to the next intake position. Turns to 0 if current position is not an intake.
      */
     fun toNextIntakePosition() {
-        intakePositionsIndex =
-            if (intakePositionsIndex == slotsToIntakes.size - 1) 0 else intakePositionsIndex + 1
+        var targetIndex = 0
 
-        setTargetState(slotsToIntakes[intakePositionsIndex])
+        // if current state is an outtake, go to next outtake
+        if (slotsToIntakes.indexOf(state) != -1) {
+            val currentIndex = slotsToIntakes.indexOf(state)
+            targetIndex = if (currentIndex == 2) 0 else currentIndex + 1
+        }
+        // otherwise, go to OUTTAKE_ZERO
+
+        setTargetState(slotsToIntakes[targetIndex])
     }
 
     /**
-     * Cycles to the next outtake position.
+     * Cycles to the next outtake position. Turns to 0 if current position is not an outtake.
      */
     fun toNextOuttakePosition() {
-        outtakePositionsIndex =
-            if (outtakePositionsIndex == slotsToOuttakes.size - 1) 0 else outtakePositionsIndex + 1
+        var targetIndex = 0
 
-        setTargetState(slotsToOuttakes[outtakePositionsIndex])
+        // if current state is an outtake, go to next outtake
+        if (slotsToOuttakes.indexOf(state) != -1) {
+            val currentIndex = slotsToOuttakes.indexOf(state)
+            targetIndex = if (currentIndex == 2) 0 else currentIndex + 1
+        }
+        // otherwise, go to OUTTAKE_ZERO
+
+        setTargetState(slotsToOuttakes[targetIndex])
     }
 
     fun toMotifOuttakePosition() {

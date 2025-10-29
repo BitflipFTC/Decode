@@ -8,8 +8,12 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple
 import com.qualcomm.robotcore.hardware.HardwareMap
 import com.qualcomm.robotcore.hardware.PwmControl
 import com.qualcomm.robotcore.hardware.ServoImplEx
-import com.seattlesolvers.solverslib.command.SubsystemBase
 import org.firstinspires.ftc.robotcore.external.Telemetry
+import org.firstinspires.ftc.teamcode.hardware.Shooter.Companion.kD
+import org.firstinspires.ftc.teamcode.hardware.Shooter.Companion.kI
+import org.firstinspires.ftc.teamcode.hardware.Shooter.Companion.kP
+import org.firstinspires.ftc.teamcode.hardware.Shooter.Companion.kV
+import org.firstinspires.ftc.teamcode.util.InterpolatedLookupTable
 import org.firstinspires.ftc.teamcode.util.PIDController
 
 /**
@@ -97,5 +101,16 @@ class Shooter(opMode: OpMode) {
         hoodServo.position = hoodPosition
     }
 
+    fun setState(state: ShooterState) {
+        hoodPosition = state.angle
+        targetFlywheelRPM = state.rpm
+    }
+
     fun atSetPoint() = flywheelController.atSetPoint()
 }
+
+class ShooterState (
+    val angle: Double,
+    val rpm: Double,
+    val estimatedShotTime: Double
+)
