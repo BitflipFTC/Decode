@@ -1,10 +1,12 @@
 package org.firstinspires.ftc.teamcode
 
 import com.acmerobotics.dashboard.FtcDashboard
+import com.acmerobotics.dashboard.config.Config
 import com.bylazar.telemetry.JoinedTelemetry
 import com.bylazar.telemetry.PanelsTelemetry
 import com.qualcomm.hardware.lynx.LynxModule
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import com.qualcomm.robotcore.hardware.Gamepad
 import com.qualcomm.robotcore.util.ElapsedTime
 import gay.zharel.fateweaver.flight.FlightRecorder
@@ -20,20 +22,29 @@ import org.firstinspires.ftc.teamcode.hardware.OV9281
 import org.firstinspires.ftc.teamcode.hardware.Shooter
 import org.firstinspires.ftc.teamcode.hardware.Spindexer
 import org.firstinspires.ftc.teamcode.hardware.Transfer
+import org.firstinspires.ftc.teamcode.hardware.Turret
+import org.firstinspires.ftc.teamcode.util.toInt
 import kotlin.math.pow
 import kotlin.math.sqrt
 
+@Config
+@TeleOp(name = "Combined", group = "TeleOp")
 class CombinedTeleOp : LinearOpMode() {
     companion object {
         @JvmField
-        var flywheelRPM = 3000.0
+        var flywheelRPM = 0.0
         @JvmField
-        var hoodPosition = 0.3
+        var hoodPosition = 0.2
     }
     // Drivetrain
     private var fieldCentric : Boolean = false
     private val driveSpeed = 0.8
     lateinit var camera: OV9281
+
+    var distanceToGoal = -1.0
+    var currentTagPosition = 320.0
+    var targetTagPosition = 320.0
+    // for dashboard purposes
 
     override fun runOpMode() {
         telemetry = JoinedTelemetry(PanelsTelemetry.ftcTelemetry, telemetry, FtcDashboard.getInstance().telemetry)
@@ -43,14 +54,8 @@ class CombinedTeleOp : LinearOpMode() {
         val transfer = Transfer(this)
         val spindexer = Spindexer(this)
         val shooter = Shooter(this)
+        val turret = Turret(this)
 
-        val subsystems = listOf(
-            drivetrain,
-            intake,
-            transfer,
-            spindexer,
-            shooter
-        )
         camera = OV9281(this)
 
         val timer = ElapsedTime()
@@ -58,8 +63,6 @@ class CombinedTeleOp : LinearOpMode() {
         val hoodPositionRecorder = FlightRecorder.createChannel("HOOD POSITION", Double::class.java)
         val flywheelRPMRecorder = FlightRecorder.createChannel("FLYWHEEL RPM", Double::class.java)
         val distanceRecorder = FlightRecorder.createChannel("DISTANCE (IN)", Double::class.java)
-
-        var distanceToGoal: Double = -1.0
 
         // bulk caching
         val allHubs = hardwareMap.getAll(LynxModule::class.java)
@@ -72,7 +75,7 @@ class CombinedTeleOp : LinearOpMode() {
             allHubs.forEach { hub -> hub.clearBulkCache() }
 
             // drrivetrain
-            if (gamepad1.bWasPressed()) fieldCentric = !fieldCentric
+            if (gamepad1.circleWasPressed()) fieldCentric = !fieldCentric
             if (gamepad1.yWasPressed()) drivetrain.resetYaw()
 
             drivetrain.driveSpeed = driveSpeed
@@ -83,22 +86,39 @@ class CombinedTeleOp : LinearOpMode() {
                 -gamepad1.left_stick_y,
                 gamepad1.right_stick_x))
 
-
             // intake
             if (gamepad1.squareWasPressed()) intake.toggle()
 
             // transfer
-            if (gamepad1.right_trigger >= 0.25) transfer.transferArtifact(); gamepad1.rumble(500)
+//            if (gamepad1.right_trigger >= 0.25) { transfer.transferArtifact(); gamepad1.rumble(500) }
+//            if (gamepad1.left_trigger >= 0.25) { transfer.undoTransfer(); gamepad1.rumble(500) }
+            transfer.setPower((gamepad1.right_trigger - gamepad1.left_trigger).toDouble());
 
             // spindexer
-            if (gamepad1.rightBumperWasPressed()) {
-                spindexer.toNextOuttakePosition()
-                gamepad1.rumble(500)
-            }
+//            if (gamepad1.rightBumperWasPressed()) {
+//                spindexer.toNextOuttakePosition()
+//                gamepad1.rumble(100)
+//                spindexer.resetIntegral()
+//            }z
+//
+//            if (gamepad1.leftBumperWasPressed()) {
+//                spindexer.toNextIntakePosition()
+//                gamepad1.rumble(100)
+//                spindexer.resetIntegral()
+//            }
 
-            if (gamepad1.leftBumperWasPressed()) {
-                spindexer.toNextIntakePosition()
-                gamepad1.rumble(500)
+            spindexer.setPower(gamepad1.right_bumper.toInt().toDouble() * 0.25 - gamepad1.left_bumper.toInt().toDouble() * 0.25)
+
+            if (gamepad1.dpad_up) {
+                flywheelRPM = 4500.0
+                hoodPosition = 0.2
+            }
+            if (gamepad1.dpad_down) {
+                flywheelRPM = 0.0
+            }
+            if (gamepad1.dpad_right) {
+                flywheelRPM = 3000.0
+                hoodPosition = 0.5
             }
 
             // shooter stuff
@@ -106,11 +126,11 @@ class CombinedTeleOp : LinearOpMode() {
             shooter.targetFlywheelRPM = flywheelRPM
 
             // update all mechanisms
-            subsystems.forEach {
-                it.periodic()
-            }
-
-            distanceToGoal = getDistanceToGoal()
+//            transfer.periodic()
+            shooter.periodic()
+            intake.periodic()
+            updateCamera()
+            turret.periodic(currentTagPosition)
 
             if (distanceToGoal >= 0.0) {
                 gamepad1.setLedColor(255.0, 136.0, 30.0, Gamepad.LED_DURATION_CONTINUOUS)
@@ -133,78 +153,79 @@ class CombinedTeleOp : LinearOpMode() {
             telemetry.addData("Heading", drivetrain.heading)
             telemetry.addData("Field Centric? ", drivetrain.fieldCentric)
             telemetry.addData("", "-------------------------------------")
-            telemetry.addData("Intake Power", intake.power)
             telemetry.addData("Intake Power", intake.power.value)
             telemetry.addData("Intake State", intake.power)
             telemetry.addLine("-------------------------------------")
             telemetry.addData("Transfer Target Ticks", transfer.targetPosition)
             telemetry.addData("Transfer Current Ticks", transfer.currentPosition)
-            telemetry.addData("", "-------------------------------------")
             telemetry.addLine("-------------------------------------")
             telemetry.addData("Spindexer target position", spindexer.position.name)
-            telemetry.addData("Spindexer target angle", spindexer.targetAngle)
-            telemetry.addData("Spindexer current angle", spindexer.getAngle())
-            telemetry.addData("", "-------------------------------------")
+            telemetry.addData("Spindexer target ticks", spindexer.getTargetAngle())
+            telemetry.addData("Spindexer current ticks", spindexer.getAngle())
             telemetry.addLine("-------------------------------------")
             telemetry.addData("Flywheel target RPM", shooter.targetFlywheelRPM)
             telemetry.addData("FLywheel current RPM", shooter.flywheelRPM)
             telemetry.addData("Hood position", shooter.hoodPosition)
             telemetry.addData("Distance to goal", distanceToGoal)
+            telemetry.addLine("-------------------------------------")
+            telemetry.addData("April tag current position", currentTagPosition)
+            telemetry.addData("April tag target position", targetTagPosition)
+            telemetry.addData("Turret power", turret.getPower())
 
             telemetry.update()
         }
     }
 
-    /**
-     * @return -1.0 if there is no detected goal april tag. Otherwise, it returns the distance from the robot to the apriltag in inches.
-     */
-    fun getDistanceToGoal(): Double {
+    fun updateCamera() {
         val currentDetections = camera.aprilTag.detections
 
         if (!currentDetections.isEmpty()) {
             telemetry.addData("Detected april tags", currentDetections.size)
-            var dist = -1.0
 
-            currentDetections.forEach { detection ->
-                {
-                    telemetry.addData("TAG NAME", detection.metadata.name)
+            val detection = currentDetections[0]
+            if (detection.metadata != null) {
+                telemetry.addData("TAG NAME", detection.metadata.name)
 
-                    if (!detection.metadata.name.contains("Obelisk")) {
-                        val tagPos = Pose2D(
-                            DistanceUnit.INCH,
-                            detection.metadata.fieldPosition.get(0).toDouble(),
-                            detection.metadata.fieldPosition.get(1).toDouble(),
-                            AngleUnit.DEGREES,
-                            detection.metadata.fieldOrientation.toOrientation(
-                                AxesReference.EXTRINSIC,
-                                AxesOrder.XYZ,
-                                AngleUnit.DEGREES
-                            ).secondAngle.toDouble()
-                        ) // given north is 0, clockwise
+                if (!detection.metadata.name.contains("Obelisk")) {
 
-                        val robotPos = Pose2D(
-                            detection.robotPose.getPosition().unit,
-                            detection.robotPose.getPosition().x,
-                            detection.robotPose.getPosition().y,
-                            AngleUnit.DEGREES,
-                            detection.robotPose.getOrientation().getYaw(AngleUnit.DEGREES)
+                    // DISTANCE CALCULATIONS
+                    val tagPos = Pose2D(
+                        DistanceUnit.INCH,
+                        detection.metadata.fieldPosition.get(0).toDouble(),
+                        detection.metadata.fieldPosition.get(1).toDouble(),
+                        AngleUnit.DEGREES,
+                        detection.metadata.fieldOrientation.toOrientation(
+                            AxesReference.EXTRINSIC,
+                            AxesOrder.XYZ,
+                            AngleUnit.DEGREES
+                        ).secondAngle.toDouble()
+                    ) // given north is 0, clockwise
+
+                    val robotPos = Pose2D(
+                        detection.robotPose.getPosition().unit,
+                        detection.robotPose.getPosition().x,
+                        detection.robotPose.getPosition().y,
+                        AngleUnit.DEGREES,
+                        detection.robotPose.getOrientation().getYaw(AngleUnit.DEGREES)
+                    )
+
+                    distanceToGoal = sqrt(
+                        (tagPos.getX(DistanceUnit.INCH) - robotPos.getX(DistanceUnit.INCH)).pow(
+                            2.0
+                        ) + (tagPos.getY(DistanceUnit.INCH) - robotPos.getY(DistanceUnit.INCH)).pow(
+                            2.0
                         )
+                    )
+                    // END DISTANCE CALCS
 
-                        dist = sqrt(
-                            (tagPos.getX(DistanceUnit.INCH) - robotPos.getX(DistanceUnit.INCH)).pow(
-                                2.0
-                            ) + (tagPos.getY(DistanceUnit.INCH) - robotPos.getY(DistanceUnit.INCH)).pow(
-                                2.0
-                            )
-                        )
-                    }
+                    currentTagPosition = detection.center.x
                 }
+            } else {
+                telemetry.addData("Current tag", "NO metadata")
             }
-
-            return dist
         } else { // no detections
             telemetry.addData("Detected april tags", 0)
-            return -1.0
         }
+
     }
 }

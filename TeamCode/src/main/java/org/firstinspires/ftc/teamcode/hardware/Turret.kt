@@ -8,18 +8,23 @@ import com.qualcomm.robotcore.hardware.PwmControl
 import com.seattlesolvers.solverslib.command.SubsystemBase
 import org.firstinspires.ftc.robotcore.external.Telemetry
 import org.firstinspires.ftc.teamcode.util.PIDController
+import org.firstinspires.ftc.teamcode.util.TurretTestPID
+import org.firstinspires.ftc.teamcode.util.TurretTestPID.targetTagPos
+import kotlin.math.sign
 
 @Config
 class Turret(opMode: OpMode) {
     companion object {
         @JvmField
-        var kP = 0.0
+        var kP = 0.0003
         @JvmField
         var kI = 0.0
         @JvmField
         var kD = 0.0
         @JvmField
-        var kS = 0.0
+        var kS = 0.0275
+        @JvmField
+        var setPointTolerance : Double = 25.toDouble()
     }
 
     val hwMap: HardwareMap = opMode.hardwareMap
@@ -29,10 +34,13 @@ class Turret(opMode: OpMode) {
     val servoR : CRServoImplEx by lazy { hwMap["turretR"] as CRServoImplEx }
     val controller = PIDController(kP, kI, kD, 0.0, kS)
 
+    var pidOutput: Double = 0.0
     init {
         // defaults to 600,2400 - this gives full range
         servoR.pwmRange = PwmControl.PwmRange(500.0, 2500.0)
         servoL.pwmRange = PwmControl.PwmRange(500.0, 2500.0)
+
+        controller.setPointTolerance = setPointTolerance
     }
 
     fun setPower (pow : Double) {
@@ -40,6 +48,20 @@ class Turret(opMode: OpMode) {
         servoL.power = pow
     }
 
-    fun periodic() {
+    fun periodic(tagPos: Double) {
+        pidOutput = controller.calculate(tagPos, 320.0)
+
+        if (!controller.atSetPoint()) {
+            // idk why kS is added again
+            // but it worked in turret test so uhhhh leave it
+            // trust
+            // signed,
+            // 10/28/25
+            pidOutput += sign(pidOutput) * TurretTestPID.kS
+        }
+
+        setPower(pidOutput)
     }
+
+    fun getPower() = pidOutput
 }
