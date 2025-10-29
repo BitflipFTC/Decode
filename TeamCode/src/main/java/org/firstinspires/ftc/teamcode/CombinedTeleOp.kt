@@ -44,6 +44,7 @@ class CombinedTeleOp : LinearOpMode() {
     var distanceToGoal = -1.0
     var currentTagPosition = 320.0
     var targetTagPosition = 320.0
+    var rbeDistance = -1.0
     // for dashboard purposes
 
     override fun runOpMode() {
@@ -165,6 +166,7 @@ class CombinedTeleOp : LinearOpMode() {
             telemetry.addData("FLywheel current RPM", shooter.flywheelRPM)
             telemetry.addData("Hood position", shooter.hoodPosition)
             telemetry.addData("Distance to goal", distanceToGoal)
+            telemetry.addData("RANGE Distance", rbeDistance)
             telemetry.addLine("-------------------------------------")
             telemetry.addData("April tag current position", currentTagPosition)
             telemetry.addData("April tag target position", targetTagPosition)
@@ -185,6 +187,7 @@ class CombinedTeleOp : LinearOpMode() {
                 telemetry.addData("TAG NAME", detection.metadata.name)
 
                 if (!detection.metadata.name.contains("Obelisk")) {
+                    rbeDistance = detection.ftcPose.range
 
                     // DISTANCE CALCULATIONS
                     val tagPos = Pose2D(
