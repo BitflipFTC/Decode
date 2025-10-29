@@ -19,7 +19,16 @@ import kotlin.math.roundToInt
  * It tracks the contents of each slot and provides methods for cycling through intake and outtake positions.
  * The [periodic] method must be called in a loop to drive the motor to its target.
  *
- * @param hwMap The HardwareMap from an OpMode, used to initialize the motor.
+ * It stores artifact positions internally thusly
+ *
+ *  \      /
+ *   \  0 /
+ *    \  /
+ *     \/
+ *  1  |   2
+ *     |
+ *
+ * @param opMode The OpMode from an OpMode, (this)
  */
 @Config
 @Configurable
@@ -30,14 +39,18 @@ class Spindexer(opMode: OpMode) {
 
         @JvmField
         var kP = 0.0025
+
         @JvmField
         var kI = 0.0
+
         @JvmField
         var kD = 0.0
+
         @JvmField
         var kS = 0.07
+
         @JvmField
-        var setpointTolerance = 1.0
+        var setpointTolerance = 1.0 // in degrees
     }
 
     val hwMap: HardwareMap = opMode.hardwareMap
@@ -114,11 +127,15 @@ class Spindexer(opMode: OpMode) {
         get() = (currentTicks / TICKS_PER_REVOLUTION) * 360
     var power: Double
         get() = motor.power
-        set(power) { motor.power = power }
+        set(power) {
+            motor.power = power
+        }
 
     var motifPattern: MotifPattern = MotifPattern.NONE
 
-    fun getArtifactString(): String = collectedArtifacts.joinToString("") { it.firstLetter().toString() }
+    fun getArtifactString(): String =
+        collectedArtifacts.joinToString("") { it.firstLetter().toString() }
+
     fun atSetPoint() = controller.atSetPoint()
 
 
@@ -130,7 +147,8 @@ class Spindexer(opMode: OpMode) {
     /**
      * Records that an artifact of a certain color has been collected in the current slot.
      */
-    fun recordIntake(color: Artifact) = collectedArtifacts.set(statesToSlotsMap.getValue(state), color)
+    fun recordIntake(color: Artifact) =
+        collectedArtifacts.set(statesToSlotsMap.getValue(state), color)
 
     /**
      * Records that an artifact has been removed from the current slot.
@@ -174,7 +192,8 @@ class Spindexer(opMode: OpMode) {
      * Cycles to the next intake position.
      */
     fun toNextIntakePosition() {
-        intakePositionsIndex = if (intakePositionsIndex == slotsToIntakes.size - 1) 0 else intakePositionsIndex + 1
+        intakePositionsIndex =
+            if (intakePositionsIndex == slotsToIntakes.size - 1) 0 else intakePositionsIndex + 1
 
         setTargetState(slotsToIntakes[intakePositionsIndex])
     }
@@ -183,9 +202,36 @@ class Spindexer(opMode: OpMode) {
      * Cycles to the next outtake position.
      */
     fun toNextOuttakePosition() {
-        outtakePositionsIndex = if (outtakePositionsIndex == slotsToOuttakes.size - 1) 0 else outtakePositionsIndex + 1
+        outtakePositionsIndex =
+            if (outtakePositionsIndex == slotsToOuttakes.size - 1) 0 else outtakePositionsIndex + 1
 
         setTargetState(slotsToOuttakes[outtakePositionsIndex])
+    }
+
+    fun toMotifOuttakePosition() {
+        val purpleSlots = findPurpleSlots()
+        val greenSlots = findGreenSlots()
+
+        // if we have the correct config of balls
+        if (purpleSlots.size == 2 && greenSlots.size == 1) {
+            val greenIndex = greenSlots[0]
+
+            // decide which slot should be set to outtake
+            // assuming the spindexer will be moving clockwise
+            // while shooting
+            // If the pattern is GPP, green should be shot first
+            // If it's PGP, green should be shot second, etc
+            val targetOuttakeIndex = when (motifPattern) {
+                MotifPattern.GPP  -> greenIndex
+                MotifPattern.PGP  -> if (greenIndex == 0) 2 else greenIndex - 1
+                MotifPattern.PPG  -> if (greenIndex == 2) 0 else greenIndex + 1
+                MotifPattern.NONE -> null
+            }
+
+            if (targetOuttakeIndex != null) {
+                setTargetState(slotsToOuttakes[targetOuttakeIndex])
+            }
+        }
     }
 
 
@@ -200,7 +246,8 @@ class Spindexer(opMode: OpMode) {
         motor.zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE
         motor.direction = DcMotorSimple.Direction.FORWARD
 
-        controller.setPointTolerance = setpointTolerance
+        // convert from degrees to ticks
+        controller.setPointTolerance = (setpointTolerance / 360) * TICKS_PER_REVOLUTION
     }
 
     /**
@@ -210,15 +257,23 @@ class Spindexer(opMode: OpMode) {
     fun periodic() {
         controller.setCoeffs(kP, kI, kD, 0.0, kS)
 
-        val pidOutput = controller.calculate(currentAngle, targetAngle)
+        val pidOutput = controller.calculate(currentTicks, targetTicks)
         motor.power = pidOutput
     }
 
 
     // ------------------ INNER HELPER FUNCTIONS ------------------
 
-    private fun findFullSlots()   = collectedArtifacts.filter { it != Artifact.NONE }
-    private fun findEmptySlots()  = collectedArtifacts.filter { it == Artifact.NONE }
-    private fun findGreenSlots()  = collectedArtifacts.filter { it == Artifact.GREEN }
-    private fun findPurpleSlots() = collectedArtifacts.filter { it == Artifact.PURPLE }
+    private fun findFullSlots() =
+        collectedArtifacts.mapIndexedNotNull { index, artifact -> if (artifact != Artifact.NONE) index else null }
+
+    private fun findEmptySlots() =
+        collectedArtifacts.mapIndexedNotNull { index, artifact -> if (artifact == Artifact.NONE) index else null }
+
+    private fun findGreenSlots() =
+        collectedArtifacts.mapIndexedNotNull { index, artifact -> if (artifact == Artifact.GREEN) index else null }
+
+    private fun findPurpleSlots() =
+        collectedArtifacts.mapIndexedNotNull { index, artifact -> if (artifact == Artifact.PURPLE) index else null }
+
 }
