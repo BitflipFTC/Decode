@@ -28,7 +28,7 @@ import kotlin.math.pow
 import kotlin.math.sqrt
 
 @Config
-@TeleOp(name = "Combined", group = "TeleOp")
+@TeleOp(name = "Combined TeleOp", group = "TeleOp")
 class CombinedTeleOp : LinearOpMode() {
     companion object {
         @JvmField
