@@ -35,10 +35,10 @@ class Shooter(opMode: OpMode) {
         const val FLYWHEEL_PPR = 28
         const val LOW_PASS = 0.05
         
-        @JvmField
-        var SERVO_LOWER_LIMIT = 0.0
-        @JvmField
-        var SERVO_UPPER_LIMIT = 1.0
+//        @JvmField
+//        var SERVO_LOWER_LIMIT = 0.0
+//        @JvmField
+//        var SERVO_UPPER_LIMIT = 1.0
         @JvmField
         var kP = 0.0007
         @JvmField
@@ -71,7 +71,7 @@ class Shooter(opMode: OpMode) {
 
     init {
         hoodServo.pwmRange = PwmControl.PwmRange(500.0, 2500.0)
-        hoodServo.scaleRange(SERVO_LOWER_LIMIT, SERVO_UPPER_LIMIT)
+//        hoodServo.scaleRange(SERVO_LOWER_LIMIT, SERVO_UPPER_LIMIT)
         hoodServo.position = hoodPosition
 
         flywheelMotor.direction = DcMotorSimple.Direction.REVERSE
@@ -82,7 +82,7 @@ class Shooter(opMode: OpMode) {
         flywheelController.setPointTolerance = 85.toDouble()
     }
     
-    override fun periodic() {
+    fun periodic() {
         lastFlywheelRPM = flywheelRPM
         flywheelRPM = (flywheelMotor.velocity / FLYWHEEL_PPR) * 60
         filteredFlywheelRPM = flywheelRPM * LOW_PASS + lastFlywheelRPM * (1 - LOW_PASS)
@@ -93,7 +93,7 @@ class Shooter(opMode: OpMode) {
         flywheelMotor.power = if (flywheelController.error <= -750) 0.0 else pidOutput
 
         // hood stuff
-        hoodServo.scaleRange(SERVO_LOWER_LIMIT, SERVO_UPPER_LIMIT)
+//        hoodServo.scaleRange(SERVO_LOWER_LIMIT, SERVO_UPPER_LIMIT)
         hoodServo.position = hoodPosition
     }
 }

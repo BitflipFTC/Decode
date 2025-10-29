@@ -75,15 +75,7 @@ class TurretTest : LinearOpMode() {
                 pidOutput += sign(pidOutput) * kS
             }
 
-            if (tuneKs) {
-                if (gamepad1.right_bumper) {
-                    turret.setPower(kS)
-                } else {
-                    turret.setPower(0.0)
-                }
-            } else {
-                turret.setPower(pidOutput)
-            }
+            turret.setPower(pidOutput)
 
             telemetry.addData("current tag pos", currentTagPos)
             telemetry.addData(" target tag pos", targetTagPos)
