@@ -14,7 +14,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 public class Constants {
     public static FollowerConstants followerConstants = new FollowerConstants()
-            .mass(5); // todo
+            .mass(9); // todo
 
     public static MecanumConstants driveConstants = new MecanumConstants()
             .maxPower(1)
