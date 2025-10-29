@@ -39,6 +39,10 @@ public class Transfer {
 
     private final Telemetry telemetry;
 
+    public void setPower (double power) {
+        motor.setPower(power);
+    }
+
     public Transfer(OpMode opMode) {
         motor = opMode.hardwareMap.get(DcMotorEx.class, configName);
         motor.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
@@ -74,6 +78,11 @@ public class Transfer {
      */
     public void transferArtifact() {
         setMotorTarget(getCurrentPosition() + MOTOR_TURNS * TICKS_PER_REVOLUTION);
+        transferring = true;
+    }
+
+    public void undoTransfer() {
+        setMotorTarget(getCurrentPosition() - TICKS_PER_REVOLUTION * MOTOR_TURNS);
         transferring = true;
     }
 
