@@ -7,11 +7,6 @@ import com.pedropathing.geometry.Pose
 import com.pedropathing.paths.PathChain
 import com.pedropathing.util.Timer
 import com.qualcomm.robotcore.eventloop.opmode.OpMode
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit
-import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder
-import org.firstinspires.ftc.robotcore.external.navigation.AxesReference
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit
-import org.firstinspires.ftc.robotcore.external.navigation.Pose2D
 import org.firstinspires.ftc.teamcode.hardware.Intake
 import org.firstinspires.ftc.teamcode.hardware.OV9281
 import org.firstinspires.ftc.teamcode.hardware.Shooter
@@ -21,8 +16,6 @@ import org.firstinspires.ftc.teamcode.hardware.Turret
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants
 import org.firstinspires.ftc.teamcode.util.Artifact
 import org.firstinspires.ftc.teamcode.util.InterpolatedLookupTable
-import kotlin.math.pow
-import kotlin.math.sqrt
 
 
 class PedroPathing12RedAuto: OpMode() {
@@ -45,8 +38,8 @@ class PedroPathing12RedAuto: OpMode() {
     )
 
     private var pathState = -1
-    private var currentTagPosition: Double = 320.0
-    private val targetTagPosition: Double = 320.0
+    private var currentTagBearing: Double = 0.0
+    private val targetTagBearing: Double = 0.0
     private var distanceToGoal: Double = -1.0
 
     var justFired = false
@@ -83,8 +76,8 @@ class PedroPathing12RedAuto: OpMode() {
         telemetry.addData("x", follower.pose.x);
         telemetry.addData("y", follower.pose.y);
         telemetry.addData("heading", follower.pose.heading);
-        telemetry.addData("Current Red Goal Position", currentTagPosition)
-        telemetry.addData("Target Red Goal Position", targetTagPosition)
+        telemetry.addData("Current Red Goal Position", currentTagBearing)
+        telemetry.addData("Target Red Goal Position", targetTagBearing)
         telemetry.addData("Distance to goal (in)", distanceToGoal)
 
         telemetry.update();
@@ -233,26 +226,34 @@ class PedroPathing12RedAuto: OpMode() {
             1 -> {
                 if (!follower.isBusy) {
                     shooter.setState(lookupTable.calculate(distanceToGoal))
+                    turret.periodic(currentTagBearing)
 
-                    if (justFired) {
-                        if (transfer.atSetPoint()) {
-                            justFired = false
+                    // if aimed
+                    if (turret.atSetPoint()) {
+                        // if we should wait for the transfer + flywheel to reset
+                        if (justFired) {
+                            if (transfer.atSetPoint()) {
+                                justFired = false
 
-                            if (spindexer.getArtifactString() != "NNN") {
-                                spindexer.toNextOuttakePosition()
+                                // if there are still balls to shoot, cycle
+                                if (spindexer.getArtifactString() != "NNN") {
+                                    spindexer.toNextOuttakePosition()
+                                }
                             }
+                            // if the flywheel is right
+                        } else if (shooter.atSetPoint()) {
+                            transfer.transferArtifact()
+                            spindexer.recordOuttake()
+                            justFired = true
                         }
-                    } else if (shooter.atSetPoint()) {
-                        transfer.transferArtifact()
-                        spindexer.recordOuttake()
-                        justFired = true
-                    }
 
-                    if (spindexer.getArtifactString() == "NNN" && !justFired) {
-                        justFired = false
-                        spindexer.toNextIntakePosition() // zero
-                        follower.followPath(intake1)
-                        setPathState(2)
+                        // if the balls are all shot and transfer has returned to rest
+                        if (spindexer.getArtifactString() == "NNN" && !justFired) {
+                            justFired = false
+                            spindexer.toNextIntakePosition() // zero
+                            follower.followPath(intake1)
+                            setPathState(2)
+                        }
                     }
                 }
             }
@@ -297,38 +298,8 @@ class PedroPathing12RedAuto: OpMode() {
                 telemetry.addData("TAG NAME", detection.metadata.name)
 
                 if (detection.metadata.name.contains("RedTarget")) {
-
-                    // DISTANCE CALCULATIONS
-                    val tagPos = Pose2D(
-                        DistanceUnit.INCH,
-                        detection.metadata.fieldPosition.get(0).toDouble(),
-                        detection.metadata.fieldPosition.get(1).toDouble(),
-                        AngleUnit.DEGREES,
-                        detection.metadata.fieldOrientation.toOrientation(
-                            AxesReference.EXTRINSIC,
-                            AxesOrder.XYZ,
-                            AngleUnit.DEGREES
-                        ).secondAngle.toDouble()
-                    ) // given north is 0, clockwise
-
-                    val robotPos = Pose2D(
-                        detection.robotPose.getPosition().unit,
-                        detection.robotPose.getPosition().x,
-                        detection.robotPose.getPosition().y,
-                        AngleUnit.DEGREES,
-                        detection.robotPose.getOrientation().getYaw(AngleUnit.DEGREES)
-                    )
-
-                    distanceToGoal = sqrt(
-                        (tagPos.getX(DistanceUnit.INCH) - robotPos.getX(DistanceUnit.INCH)).pow(
-                            2.0
-                        ) + (tagPos.getY(DistanceUnit.INCH) - robotPos.getY(DistanceUnit.INCH)).pow(
-                            2.0
-                        )
-                    )
-                    // END DISTANCE CALCS
-
-                    currentTagPosition = detection.center.x
+                    distanceToGoal = detection.ftcPose.range
+                    currentTagBearing = -detection.ftcPose.bearing
                 }
             } else {
                 telemetry.addData("Current tag", "NO metadata")
