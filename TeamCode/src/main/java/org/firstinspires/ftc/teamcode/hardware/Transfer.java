@@ -106,4 +106,8 @@ public class Transfer {
             transferring = false;
         }
     }
+
+    public boolean atSetPoint() {
+        return controller.atSetPoint();
+    }
 }

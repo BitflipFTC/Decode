@@ -201,4 +201,6 @@ class Spindexer(opMode: OpMode) {
 
         setPosition(slotsToOuttakes[outtakePositionsIndex])
     }
+
+    fun atSetPoint() = controller.atSetPoint()
 }

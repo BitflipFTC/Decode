@@ -64,4 +64,6 @@ class Turret(opMode: OpMode) {
     }
 
     fun getPower() = pidOutput
+
+    fun atSetPoint() = controller.atSetPoint()
 }

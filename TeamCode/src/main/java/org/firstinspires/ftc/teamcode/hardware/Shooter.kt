@@ -96,4 +96,6 @@ class Shooter(opMode: OpMode) {
 //        hoodServo.scaleRange(SERVO_LOWER_LIMIT, SERVO_UPPER_LIMIT)
         hoodServo.position = hoodPosition
     }
+
+    fun atSetPoint() = flywheelController.atSetPoint()
 }
