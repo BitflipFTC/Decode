@@ -173,16 +173,17 @@ class ShootPreloadsAuto: LinearOpMode() {
             if (turret.atSetPoint()) {
                 // if we should wait for the transfer + flywheel to reset
                 if (justFired) {
+                    // wait until the ball is clear until you move the spindexer
                     if (transfer.atSetPoint()) {
                         justFired = false
 
                         // if there are still balls to shoot, cycle
-                        if (spindexer.getArtifactString() != "NNN") {
+                        if (!spindexer.isEmpty) {
                             spindexer.toNextOuttakePosition()
                         }
                     }
-                    // if the flywheel is right
-                } else if (shooter.atSetPoint()) {
+                    // if the flywheel is spun up
+                } else if (shooter.atSetPoint() && spindexer.atSetPoint()) {
                     // shoot, record shoot, let it recover
                     transfer.transferArtifact()
                     spindexer.recordOuttake()
@@ -190,7 +191,7 @@ class ShootPreloadsAuto: LinearOpMode() {
                 }
 
                 // if the balls are all shot and transfer has returned to rest
-                if (spindexer.getArtifactString() == "NNN" && !justFired) {
+                if (spindexer.isEmpty && !justFired) {
                     doneShooting = true
                 }
             }

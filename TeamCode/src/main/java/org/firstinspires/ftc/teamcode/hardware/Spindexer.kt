@@ -117,6 +117,10 @@ class Spindexer(opMode: OpMode) {
 
     var state = States.INTAKE_ZERO
         private set
+    val isEmpty: Boolean
+        get() = getArtifactString() == "NNN"
+    val isFull: Boolean
+        get() = !getArtifactString().contains("N")
     var targetAngle = state.referenceAngle
         private set
     val targetTicks // no backing
