@@ -161,6 +161,7 @@ class ShootPreloadsAuto: LinearOpMode() {
         var justFired = false
 
         while (!doneShooting) {
+            // update pids and get new camera readings
             updateCamera(startingPosition.targetTag)
             shooter.setState(lookupTable.calculate(currentTagDistance))
             turret.periodic(currentTagBearing)
@@ -182,6 +183,7 @@ class ShootPreloadsAuto: LinearOpMode() {
                     }
                     // if the flywheel is right
                 } else if (shooter.atSetPoint()) {
+                    // shoot, record shoot, let it recover
                     transfer.transferArtifact()
                     spindexer.recordOuttake()
                     justFired = true
