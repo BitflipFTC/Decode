@@ -93,17 +93,23 @@ class ShootPreloadsAuto: LinearOpMode() {
                     gamepad1.rumble(100)
                     confirmed = true
                 }
+
             } else if (preloadIndex <= 2) {
                 // once position is confirmed, go ahead and preload
+                telemetry.addData("Starting position", "<strong>%s</strong>", startingPosition.name)
+                telemetry.addLine()
                 telemetry.addData("PRELOAD Configuration", artifactOrder.joinToString("") { it.firstLetter().toString() })
                 telemetry.addData("Current Preload", artifactOrder[preloadIndex].name)
                 telemetry.addData("Current Slot", spindexer.statesToSlotsMap.getValue(spindexer.state))
-                telemetry.addLine("Press CROSS once green ball is in place.")
+                telemetry.addLine()
+                telemetry.addLine("Put ${artifactOrder[preloadIndex].name} artifact in current slot (${spindexer.statesToSlotsMap.getValue(spindexer.state)})")
+                telemetry.addLine("Press CROSS once artifact is in place.")
 
                 if (gamepad1.crossWasPressed()) {
                     spindexer.recordIntake(artifactOrder[preloadIndex])
                     preloadIndex++
                     spindexer.toNextIntakePosition()
+                    gamepad1.rumble(300)
                 }
             } else {
                 telemetry.addLine("Configuration complete.")
