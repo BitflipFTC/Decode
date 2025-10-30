@@ -11,6 +11,7 @@ import com.qualcomm.robotcore.hardware.IMU
 import com.seattlesolvers.solverslib.command.SubsystemBase
 import org.firstinspires.ftc.robotcore.external.Telemetry
 import kotlin.math.cos
+import kotlin.math.max
 import kotlin.math.sin
 
 class Drivetrain(opMode: OpMode) {
@@ -18,6 +19,23 @@ class Drivetrain(opMode: OpMode) {
         @SuppressLint("DefaultLocale")
         override fun toString(): String {
             return String.format("FL: %.2f, FR: %.2f, BL: %.2f, BR: %.2f", fl, fr, bl, br)
+        }
+
+        fun normalized(): DrivePowers {
+            val max = max(
+                max(fl, fr),
+                max(bl,br)
+            )
+
+            if (max > 1.00) {
+                return DrivePowers(
+                    fl / max, fr / max, bl / max, br / max
+                )
+            } else {
+                return DrivePowers(
+                    fl, fr, bl, br
+                )
+            }
         }
     }
 
@@ -82,7 +100,7 @@ class Drivetrain(opMode: OpMode) {
                 (forward - strafe - yaw.toDouble()) * driveSpeed,
                 (forward - strafe + yaw.toDouble()) * driveSpeed,
                 (forward + strafe - yaw.toDouble()) * driveSpeed
-            )
+            ).normalized()
         } else {
             val rotStrafe = strafe * cos(Math.toRadians(heading)) - forward * sin(Math.toRadians(heading))
             val rotForward = strafe * sin(Math.toRadians(heading)) + forward * sin(Math.toRadians(heading))
@@ -92,7 +110,7 @@ class Drivetrain(opMode: OpMode) {
                 (rotForward - rotStrafe - yaw.toDouble()) * driveSpeed,
                 (rotForward - rotStrafe + yaw.toDouble()) * driveSpeed,
                 (rotForward + rotStrafe - yaw.toDouble()) * driveSpeed
-            )
+            ).normalized()
         }
     }
 
