@@ -35,11 +35,11 @@ class IntakeTest : LinearOpMode() {
             }
 
             if (gamepad1.crossWasPressed()) {
-                spindexer.setTargetState(Spindexer.States.INTAKE_ZERO)
+                spindexer.state = Spindexer.States.INTAKE_ZERO
             }
 
             if (gamepad1.triangleWasPressed()) {
-                spindexer.setTargetState(Spindexer.States.OUTTAKE_ZERO)
+                spindexer.state = Spindexer.States.OUTTAKE_ZERO
             }
 
             if (gamepad1.circleWasPressed()) {

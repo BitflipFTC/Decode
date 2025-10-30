@@ -88,7 +88,7 @@ class PedroPathing12RedAuto: OpMode() {
         spindexer.motifPattern = getMotif()
 
         intake.on()
-        spindexer.setTargetState(Spindexer.States.INTAKE_ZERO)
+        spindexer.state = Spindexer.States.INTAKE_ZERO
 
         spindexer.recordIntake(Artifact.GREEN, 0)
         spindexer.recordIntake(Artifact.PURPLE, 1)

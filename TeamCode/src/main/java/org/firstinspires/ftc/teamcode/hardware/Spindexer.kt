@@ -116,7 +116,19 @@ class Spindexer(opMode: OpMode) {
     // --------- gettable values ---------
 
     var state = States.INTAKE_ZERO
-        private set
+        set(newState) {
+            // assign it to the backing field. if you assign it to state, infinite loop
+            field = newState
+
+            // get current revolution or something
+            val errorInRevolutions = (currentAngle - field.referenceAngle) / 360.0
+            val nearestRevolution = errorInRevolutions.roundToInt()
+
+            // add that to the existing target to ensure it takes the shortest path
+            targetAngle = field.referenceAngle + (nearestRevolution * 360.0)
+
+            resetIntegral()
+        }
     val isEmpty: Boolean
         get() = getArtifactString() == "NNN"
     val isFull: Boolean
@@ -164,24 +176,6 @@ class Spindexer(opMode: OpMode) {
      */
     fun recordOuttake() = collectedArtifacts.set(statesToSlotsMap.getValue(state), Artifact.NONE)
 
-    /**
-     * Sets the spindexer's target position.
-     * The spindexer will begin moving towards this position on the next [periodic] call.
-     */
-    fun setTargetState(newState: States) {
-        state = newState
-
-        // find the current "revolution"
-        val errorInRevolutions = (currentAngle - state.referenceAngle) / 360.0
-        val nearestRevolution = errorInRevolutions.roundToInt()
-
-        // add that to the existing target to ensure it takes the shortest path
-        targetAngle = state.referenceAngle + (nearestRevolution * 360.0)
-
-        resetIntegral()
-    }
-
-
     // --------- functions that control hardware ---------
 
     private var allStatesIndex = 0
@@ -192,7 +186,7 @@ class Spindexer(opMode: OpMode) {
     fun toNextPosition() {
         allStatesIndex = if (allStatesIndex == allStates.size - 1) 0 else allStatesIndex + 1
 
-        setTargetState(allStates[allStatesIndex])
+        state = allStates[allStatesIndex]
     }
 
     /**
@@ -208,7 +202,7 @@ class Spindexer(opMode: OpMode) {
         }
         // otherwise, go to OUTTAKE_ZERO
 
-        setTargetState(slotsToIntakes[targetIndex])
+        state = slotsToIntakes[targetIndex]
     }
 
     /**
@@ -224,7 +218,7 @@ class Spindexer(opMode: OpMode) {
         }
         // otherwise, go to OUTTAKE_ZERO
 
-        setTargetState(slotsToOuttakes[targetIndex])
+        state = slotsToOuttakes[targetIndex]
     }
 
     fun toMotifOuttakePosition() {
@@ -248,7 +242,7 @@ class Spindexer(opMode: OpMode) {
             }
 
             if (targetOuttakeIndex != null) {
-                setTargetState(slotsToOuttakes[targetOuttakeIndex])
+                state = slotsToOuttakes[targetOuttakeIndex]
             }
         }
     }
