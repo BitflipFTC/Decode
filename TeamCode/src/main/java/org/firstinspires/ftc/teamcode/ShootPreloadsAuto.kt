@@ -120,7 +120,7 @@ class ShootPreloadsAuto: LinearOpMode() {
         if (startingPosition == Start.RED_NEAR || startingPosition == Start.BLUE_NEAR) {
             drivetrain.setDrivetrainPowers(drivetrain.calculateDrivetrainPowers(0f, -0.5f, 0f))
             // wait for driveTime milliseconds
-            while (timer.milliseconds() <= backupTime) {
+            while (timer.milliseconds() <= backupTime && opModeIsActive()) {
                 telemetry.addData("Backing Up", "...")
                 telemetry.update()
             }
@@ -129,7 +129,7 @@ class ShootPreloadsAuto: LinearOpMode() {
 
             // then turn right or left
             drivetrain.setDrivetrainPowers(drivetrain.calculateDrivetrainPowers(0f, 0f, if(startingPosition == Start.RED_NEAR) 0.5f else -0.5f))
-            while (timer.milliseconds() <= rotateTime) {
+            while (timer.milliseconds() <= rotateTime && opModeIsActive()) {
                 telemetry.addData("Rotating", "...")
                 telemetry.update()
             }
@@ -138,7 +138,7 @@ class ShootPreloadsAuto: LinearOpMode() {
         }
 
         // ok now get the motif
-        while (spindexer.motifPattern == MotifPattern.NONE) {
+        while (spindexer.motifPattern == MotifPattern.NONE && opModeIsActive()) {
             spindexer.motifPattern = camera.getMotif()
         }
 
@@ -148,7 +148,7 @@ class ShootPreloadsAuto: LinearOpMode() {
         if (startingPosition == Start.RED_NEAR || startingPosition == Start.BLUE_NEAR) {
             // then turn right or left
             drivetrain.setDrivetrainPowers(drivetrain.calculateDrivetrainPowers(0f, 0f, if(startingPosition == Start.RED_NEAR) -0.5f else 0.5f))
-            while (timer.milliseconds() <= rotateTime) {
+            while (timer.milliseconds() <= rotateTime && opModeIsActive()) {
                 spindexer.periodic()
                 telemetry.addData("Rotating", "...")
                 telemetry.update()
@@ -161,7 +161,7 @@ class ShootPreloadsAuto: LinearOpMode() {
         var doneShooting = false
         var justFired = false
 
-        while (!doneShooting) {
+        while (!doneShooting && opModeIsActive()) {
             // update pids and get new camera readings
             updateCamera(startingPosition.targetTag)
             shooter.calculateTargetState(currentTagDistance)
@@ -219,7 +219,7 @@ class ShootPreloadsAuto: LinearOpMode() {
         // now move off / out of zones
 
         drivetrain.setDrivetrainPowers(drivetrain.calculateDrivetrainPowers(if(startingPosition == Start.RED_NEAR || startingPosition == Start.RED_FAR) 0.5f else -0.5f, 0f,  0f))
-        while (timer.milliseconds() <= offLineTime) {
+        while (timer.milliseconds() <= offLineTime && opModeIsActive()) {
             telemetry.addData("Leaving", "...")
             telemetry.update()
         }

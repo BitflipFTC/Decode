@@ -63,7 +63,7 @@ class LineLeaveAuto: LinearOpMode() {
         drivetrain.setDrivetrainPowers(drivetrain.calculateDrivetrainPowers(startingPosition.strafe, startingPosition.forward, 0f))
 
         // wait for driveTime milliseconds
-        while (timer.milliseconds() <= driveTime) {
+        while (timer.milliseconds() <= driveTime && opModeIsActive()) {
             telemetry.addData("Moving","...")
         }
 
