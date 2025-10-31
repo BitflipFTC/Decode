@@ -14,6 +14,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D
+import org.firstinspires.ftc.teamcode.ShootPreloadsAuto.Start
 import org.firstinspires.ftc.teamcode.hardware.Drivetrain
 import org.firstinspires.ftc.teamcode.hardware.Intake
 import org.firstinspires.ftc.teamcode.hardware.OV9281
@@ -46,6 +47,14 @@ class CombinedTeleOp : LinearOpMode() {
     val targetTagBearing = 0.0
     // for dashboard purposes
 
+    enum class Alliance (val atagTarget: String) {
+        RED("RedTarget"),
+        BLUE("BlueTarget"),
+        NONE("NONE")
+    }
+
+    var alliance: Alliance = Alliance.NONE
+
     override fun runOpMode() {
         telemetry = JoinedTelemetry(PanelsTelemetry.ftcTelemetry, telemetry, FtcDashboard.getInstance().telemetry)
         telemetry.setDisplayFormat(Telemetry.DisplayFormat.MONOSPACE)
@@ -58,11 +67,31 @@ class CombinedTeleOp : LinearOpMode() {
 
         camera = OV9281(this)
 
+        while (opModeInInit()) {
+            telemetry.addData("Drivetrain", "initialized")
+            telemetry.addLine("Press CIRCLE for Red  alliance")
+            telemetry.addLine("Press CROSS  for Blue alliance")
+            telemetry.addLine()
+            telemetry.addData("Selected alliance", "<strong>%s</strong>", alliance.name)
+            telemetry.addData("Selected goal", alliance.atagTarget)
+
+            alliance = if (gamepad1.crossWasPressed()) {
+                Alliance.BLUE
+            } else if (gamepad1.circleWasPressed()) {
+                Alliance.RED
+            } else {
+                alliance
+            }
+
+            telemetry.update()
+        }
+
         // bulk caching
         val allHubs = hardwareMap.getAll(LynxModule::class.java)
         allHubs.forEach { hub -> hub.bulkCachingMode = LynxModule.BulkCachingMode.MANUAL }
 
-        waitForStart()
+//        waitForStart()
+        // todo i dont think we need wait for start???
 
         while (opModeIsActive()) {
             // more bulk caching
@@ -141,7 +170,7 @@ class CombinedTeleOp : LinearOpMode() {
 
             shooter.periodic()
             intake.periodic()
-            updateCamera()
+            updateCamera(alliance.atagTarget)
 
             if (abs(gamepad2.right_stick_x) >= 0.15) {
                 spindexer.power = gamepad2.right_stick_x.toDouble()
@@ -187,7 +216,7 @@ class CombinedTeleOp : LinearOpMode() {
         }
     }
 
-    fun updateCamera() {
+    fun updateCamera(target: String) {
         val currentDetections = camera.aprilTag.detections
 
         if (!currentDetections.isEmpty()) {
@@ -197,8 +226,11 @@ class CombinedTeleOp : LinearOpMode() {
             if (detection.metadata != null) {
                 telemetry.addData("TAG NAME", detection.metadata.name)
 
-                if (!detection.metadata.name.contains("Obelisk")) {
+                // if the atag seen is the current target's atag
+                if (detection.metadata.name.contains(target)) {
                     rangeDistanceToGoal = detection.ftcPose.range
+                    // negative b/c default: left positive, right negative
+                    currentTagBearing = -detection.ftcPose.bearing
 
                     // DISTANCE CALCULATIONS
                     val tagPos = Pose2D(
@@ -229,9 +261,6 @@ class CombinedTeleOp : LinearOpMode() {
                         )
                     )
                     // END DISTANCE CALCS
-
-                    // negative b/c default: left positive, right negative
-                    currentTagBearing = -detection.ftcPose.bearing
                 }
             } else {
                 telemetry.addData("Current tag", "NO metadata")
@@ -239,6 +268,5 @@ class CombinedTeleOp : LinearOpMode() {
         } else { // no detections
             telemetry.addData("Detected april tags", 0)
         }
-
     }
 }
