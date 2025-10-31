@@ -58,14 +58,6 @@ public class Transfer {
         targetPosition = ticks;
     }
 
-    private void returnToStart() {
-        double motorAngle = getTransferMotorAngle();
-        double error = Math.abs(motorAngle);
-        double targetTicksRel = (error / 360) * TICKS_PER_REVOLUTION;
-        double targetTicks = getCurrentPosition() + targetTicksRel;
-        setMotorTarget(targetTicks);
-    }
-
     public double getCurrentPosition() {
         return motor.getCurrentPosition();
     }
@@ -75,12 +67,27 @@ public class Transfer {
     }
 
     /**
-     * Initiates the transfer of an artifact. The motor will turn a specified number of times
-     * and then return to its starting position.
+     * Initiates the transfer of an artifact. The motor will turn at least a specified number of times,
+     * turning (at most) one additional time in order to return to the nearest rotation
+     * and always return to the same spot.
      */
     public void transferArtifact() {
-        setMotorTarget(getCurrentPosition() + MOTOR_TURNS * TICKS_PER_REVOLUTION);
-        transferring = true;
+        // set the initial target position (the current position + MOTOR_TURNS rotations)
+        double targetPosition = getCurrentPosition() + MOTOR_TURNS * TICKS_PER_REVOLUTION; // ticks
+
+        // convert to revolutions
+        double targetRevolutions = targetPosition / TICKS_PER_REVOLUTION; // revolutions
+
+        // determine the difference between where the current target position is and where it should be
+        // positive if it is too short of a full revolution
+        // ceil ensures that the transfer always does AT LEAST MOTOR_TURNS rotations
+        double targetPositionErrorFromRotation = Math.ceil(targetRevolutions) - targetRevolutions;
+
+        // then set a new target that snaps to the nearest rotation
+        // adds the difference between the current target and the nearest revolution
+        // to ensure the rotation always ends at the same spot
+        double targetPositionToNearestRotation = targetPosition + targetPositionErrorFromRotation * TICKS_PER_REVOLUTION;
+        setMotorTarget(targetPositionToNearestRotation);
     }
 
     public void undoTransfer() {
@@ -103,10 +110,6 @@ public class Transfer {
         motor.setPower(Range.clip(pidOutput, -maxPower, maxPower));
         controller.setSetPointTolerance(10);
         controller.setCoeffs(kP, kI, kD, 0.0, 0.0);
-        if (controller.atSetPoint() && transferring) {
-            returnToStart();
-            transferring = false;
-        }
     }
 
     public boolean atSetPoint() {
