@@ -11,14 +11,15 @@ import org.firstinspires.ftc.teamcode.util.PIDController
 @Config
 class Turret(opMode: OpMode) {
     companion object {
+        // todo retune this
         @JvmField
-        var kP = 0.001
+        var kP = 0.01
         @JvmField
         var kI = 0.0
         @JvmField
-        var kD = 0.0
+        var kD = 0.003
         @JvmField
-        var kS = 0.0275
+        var kS = 0.0
         @JvmField
         var setPointTolerance : Double = 3.toDouble() // degrees
     }
@@ -47,7 +48,11 @@ class Turret(opMode: OpMode) {
     fun periodic(tagBearing: Double) {
         pidOutput = controller.calculate(tagBearing, 0.0) // bearing approaches 0
 
-        setPower(pidOutput)
+        if (!atSetPoint()) {
+            setPower(pidOutput)
+        }
+
+        controller.setCoeffs(kP, kI, kD, 0.0, kS)
     }
 
     fun getPower() = pidOutput
