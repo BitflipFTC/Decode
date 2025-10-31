@@ -163,7 +163,7 @@ class CombinedTeleOp : LinearOpMode() {
             telemetry.addData("Spindexer current angle", spindexer.currentAngle)
             telemetry.addLine("-------------------------------------")
             telemetry.addData("Flywheel target RPM", shooter.targetFlywheelRPM)
-            telemetry.addData("FLywheel current RPM", shooter.flywheelRPM)
+            telemetry.addData("Flywheel current RPM", shooter.flywheelRPM)
             telemetry.addData("Hood position", shooter.hoodPosition)
             telemetry.addData("Distance to goal", distanceToGoal)
             telemetry.addData("RANGE Distance", rbeDistance)
