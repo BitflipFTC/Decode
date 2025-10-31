@@ -30,13 +30,6 @@ class PedroPathing12RedAuto: OpMode() {
     lateinit var shooter: Shooter
     lateinit var transfer: Transfer
 
-    private val lookupTable = InterpolatedLookupTable(
-            doubleArrayOf(),
-            doubleArrayOf(),
-            doubleArrayOf(),
-        doubleArrayOf()
-    )
-
     private var pathState = -1
     private var currentTagBearing: Double = 0.0
     private val targetTagBearing: Double = 0.0
@@ -94,7 +87,7 @@ class PedroPathing12RedAuto: OpMode() {
         spindexer.recordIntake(Artifact.PURPLE, 1)
         spindexer.recordIntake(Artifact.PURPLE, 2)
 
-        shooter.setState(lookupTable.calculate(distanceToGoal))
+        shooter.calculateTargetState(distanceToGoal)
         setPathState(0)
     }
 
@@ -225,7 +218,7 @@ class PedroPathing12RedAuto: OpMode() {
 
             1 -> {
                 if (!follower.isBusy) {
-                    shooter.setState(lookupTable.calculate(distanceToGoal))
+                    shooter.calculateTargetState(distanceToGoal)
                     turret.periodic(currentTagBearing)
 
                     // if aimed
@@ -249,7 +242,6 @@ class PedroPathing12RedAuto: OpMode() {
 
                         // if the balls are all shot and transfer has returned to rest
                         if (spindexer.getArtifactString() == "NNN" && !justFired) {
-                            justFired = false
                             spindexer.toNextIntakePosition() // zero
                             follower.followPath(intake1)
                             setPathState(2)

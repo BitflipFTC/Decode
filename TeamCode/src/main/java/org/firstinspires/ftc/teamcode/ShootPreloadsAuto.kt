@@ -43,13 +43,6 @@ class ShootPreloadsAuto: LinearOpMode() {
     var currentTagBearing = 0.0
     var currentTagDistance = 0.0
 
-    private val lookupTable = InterpolatedLookupTable(
-        doubleArrayOf(),
-        doubleArrayOf(),
-        doubleArrayOf(),
-        doubleArrayOf()
-    )
-
     override fun runOpMode() {
         val drivetrain = Drivetrain(this)
         val transfer = Transfer(this)
@@ -172,7 +165,7 @@ class ShootPreloadsAuto: LinearOpMode() {
         while (!doneShooting) {
             // update pids and get new camera readings
             updateCamera(startingPosition.targetTag)
-            shooter.setState(lookupTable.calculate(currentTagDistance))
+            shooter.calculateTargetState(currentTagDistance)
             turret.periodic(currentTagBearing)
             shooter.periodic()
             spindexer.periodic()

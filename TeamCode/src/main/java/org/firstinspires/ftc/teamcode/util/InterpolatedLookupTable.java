@@ -1,6 +1,6 @@
 package org.firstinspires.ftc.teamcode.util;
 
-import org.firstinspires.ftc.teamcode.hardware.ShooterState;
+import org.firstinspires.ftc.teamcode.hardware.Shooter;
 
 /**
  * Implements a lookup table that uses linear interpolation to estimate output values
@@ -54,8 +54,6 @@ public class InterpolatedLookupTable {
         double[] angleTable;
         /** The second dependent variable array (Velocity). */
         double[] velocityTable;
-        /** The third dependent variable array (Estimated shot time) */
-        double[] estimatedShotTimeTable;
 
 
         /**
@@ -64,11 +62,10 @@ public class InterpolatedLookupTable {
          * @param angleTable The array of angles corresponding to the distances.
          * @param velocityTable The array of velocities corresponding to the distances.
          */
-        protected Dataset(double[] distanceTable, double[] angleTable, double[] velocityTable, double[] estimatedShotTimeTable) {
+        protected Dataset(double[] distanceTable, double[] angleTable, double[] velocityTable) {
             this.distanceTable = distanceTable;
             this.angleTable = angleTable;
             this.velocityTable = velocityTable;
-            this.estimatedShotTimeTable = estimatedShotTimeTable;
         }
     }
 
@@ -82,11 +79,10 @@ public class InterpolatedLookupTable {
      * <li>dataset[0]: Distance
      * <li>dataset[1]: Angle
      * <li>dataset[2]: Velocity
-     * <li>dataset[3]: Estimated Shot Time</li>
      * </ul>
      */
-    public InterpolatedLookupTable(double[] distanceTable, double[] angleTable, double[] velocityTable, double[] estimatedShotTimeTable) {
-        this.dataset = new Dataset(distanceTable, angleTable, velocityTable, estimatedShotTimeTable);
+    public InterpolatedLookupTable(double[] distanceTable, double[] angleTable, double[] velocityTable) {
+        this.dataset = new Dataset(distanceTable, angleTable, velocityTable);
     }
 
     /**
@@ -97,15 +93,15 @@ public class InterpolatedLookupTable {
      * * @param input The distance value to look up.
      * @return new FlywheelState() containing angle, velocity, and estimated shot time
      */
-    public ShooterState calculate(double input) {
+    public Shooter.ShooterState calculate(double input) {
         double[] distanceTable = dataset.distanceTable;
         double[] angleTable = dataset.angleTable;
         double[] velocityTable = dataset.velocityTable;
-        double[] estimatedShotTimeTable = dataset.estimatedShotTimeTable;
+//        double[] estimatedShotTimeTable = dataset.estimatedShotTimeTable;
 
         double angle;
         double velocity;
-        double estimatedShotTime;
+//        double estimatedShotTime;
 
         Bounds bounds = new Bounds();
 
@@ -140,9 +136,9 @@ public class InterpolatedLookupTable {
         // 3. Interpolate Output Values
         angle = interpolate(index, (int) bounds.lowerIndex, (int) bounds.upperIndex, angleTable);
         velocity = interpolate(index, (int) bounds.lowerIndex, (int) bounds.upperIndex, velocityTable);
-        estimatedShotTime = interpolate(index, (int) bounds.lowerIndex, (int) bounds.upperIndex, estimatedShotTimeTable);
+//        estimatedShotTime = interpolate(index, (int) bounds.lowerIndex, (int) bounds.upperIndex, estimatedShotTimeTable);
 
-        return new ShooterState(angle, velocity, estimatedShotTime);
+        return new Shooter.ShooterState(angle, velocity);
     }
 
     /**

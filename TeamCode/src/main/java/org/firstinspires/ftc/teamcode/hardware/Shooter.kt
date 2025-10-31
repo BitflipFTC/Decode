@@ -53,12 +53,28 @@ class Shooter(opMode: OpMode) {
         var kV = 0.00018
     }
 
+    class ShooterState (
+        val angle: Double,
+        val rpm: Double,
+//        val estimatedShotTime: Double
+    )
+
     val hwMap: HardwareMap = opMode.hardwareMap
     val telemetry: Telemetry = opMode.telemetry
 
     private val hoodServo by lazy { hwMap["hood"] as ServoImplEx }
     private val flywheelMotor by lazy { hwMap["flywheel"] as DcMotorEx }
     private val flywheelController = PIDController(kP, kI, kD, kV)
+    private val lookupTable = InterpolatedLookupTable(
+        doubleArrayOf(),
+        doubleArrayOf(),
+        doubleArrayOf()
+    )
+    // TODO populate this table asap.
+
+    // main two adjustable params
+    var targetFlywheelRPM = 3000.0
+    var hoodPosition = 0.3
 
     var flywheelRPM = 0.0
         private set
@@ -68,10 +84,12 @@ class Shooter(opMode: OpMode) {
         private set
     var pidOutput = 0.0
         private set
-    
-    // main two adjustable params
-    var targetFlywheelRPM = 3000.0
-    var hoodPosition = 0.3
+    var state = ShooterState(targetFlywheelRPM,hoodPosition)
+        set(state) {
+            field = state
+            targetFlywheelRPM = state.rpm
+            hoodPosition = state.angle
+        }
 
     init {
         hoodServo.pwmRange = PwmControl.PwmRange(500.0, 2500.0)
@@ -94,23 +112,19 @@ class Shooter(opMode: OpMode) {
         pidOutput = flywheelController.calculate(filteredFlywheelRPM, targetFlywheelRPM)
         
         // allow it to stop SLOWLY when target is 0
-        flywheelMotor.power = if (flywheelController.error <= -750) 0.0 else pidOutput
+        flywheelMotor.power = if (flywheelController.error <= -500) 0.0 else pidOutput
 
         // hood stuff
 //        hoodServo.scaleRange(SERVO_LOWER_LIMIT, SERVO_UPPER_LIMIT)
         hoodServo.position = hoodPosition
     }
 
-    fun setState(state: ShooterState) {
-        hoodPosition = state.angle
-        targetFlywheelRPM = state.rpm
-    }
-
     fun atSetPoint() = flywheelController.atSetPoint()
-}
 
-class ShooterState (
-    val angle: Double,
-    val rpm: Double,
-    val estimatedShotTime: Double
-)
+    fun calculateTargetState(distance: Double) {
+        // ensure the parameter distance is actually based on an apriltag reading
+        if (distance > 0.0) {
+            state = lookupTable.calculate(distance)
+        }
+    }
+}
