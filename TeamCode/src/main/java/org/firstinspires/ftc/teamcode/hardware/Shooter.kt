@@ -66,9 +66,24 @@ class Shooter(opMode: OpMode) {
     private val flywheelMotor by lazy { hwMap["flywheel"] as DcMotorEx }
     private val flywheelController = PIDController(kP, kI, kD, kV)
     private val lookupTable = InterpolatedLookupTable(
-        doubleArrayOf(),
-        doubleArrayOf(),
-        doubleArrayOf()
+        doubleArrayOf(32.0,
+            45.0,
+            60.0,
+            84.0,
+            115.0,
+            ),
+        doubleArrayOf(0.5,
+            0.5,
+            0.3,
+            0.25,
+            0.01,
+            ),
+        doubleArrayOf(3000.0,
+            3250.0,
+            3500.0,
+            4500.0,
+            4750.0,
+        )
     )
     // TODO populate this table asap.
 
