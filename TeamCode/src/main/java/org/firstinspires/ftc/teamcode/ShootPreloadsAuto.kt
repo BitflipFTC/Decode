@@ -12,11 +12,10 @@ import org.firstinspires.ftc.teamcode.hardware.Spindexer
 import org.firstinspires.ftc.teamcode.hardware.Transfer
 import org.firstinspires.ftc.teamcode.hardware.Turret
 import org.firstinspires.ftc.teamcode.util.Artifact
-import org.firstinspires.ftc.teamcode.util.InterpolatedLookupTable
 import org.firstinspires.ftc.teamcode.util.MotifPattern
 
 @Config
-@Autonomous(name = "Line Leave Auto")
+@Autonomous(name = "Shoot Preloads Auto", group = "Autonomous", preselectTeleOp = "Combined TeleOp")
 class ShootPreloadsAuto: LinearOpMode() {
     companion object {
         @JvmField var backupTime: Int = 2000

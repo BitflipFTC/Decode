@@ -128,7 +128,8 @@ class Spindexer(opMode: OpMode) {
     val isFull: Boolean
         get() = !getArtifactString().contains("N")
     var targetAngle = state.referenceAngle
-        private set
+//        private set
+    // todo readd private set when spindexer is fully functional automatically
     val targetTicks // no backing
         get() = (targetAngle / 360) * TICKS_PER_REVOLUTION
     val currentTicks: Double  // no backing

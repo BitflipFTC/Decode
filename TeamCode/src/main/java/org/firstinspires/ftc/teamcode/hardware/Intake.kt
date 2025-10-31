@@ -20,8 +20,9 @@ class Intake(opMode: OpMode): SubsystemBase() {
     enum class State (val value: Double) {
         OFF(0.0),
         INTAKE(0.9),
-        OUTTAKE(-0.9)
     }
+
+    var reversed = false
 
     val hwMap: HardwareMap = opMode.hardwareMap
     val telemetry: Telemetry = opMode.telemetry
@@ -46,19 +47,22 @@ class Intake(opMode: OpMode): SubsystemBase() {
         power = if (power == State.INTAKE) State.OFF else State.INTAKE
     }
 
-    fun on () {
+    fun intake () {
         power = State.INTAKE
+        reversed = false
     }
 
     fun off () {
         power = State.OFF
+        reversed = false
     }
 
-    fun reverse () {
-        power = State.OUTTAKE
+    fun outtake () {
+        power = State.INTAKE
+        reversed = true
     }
 
     override fun periodic() {
-        motor.power = power.value
+        motor.power = if (reversed) -power.value else power.value
     }
 }

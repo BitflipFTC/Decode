@@ -80,7 +80,7 @@ class PedroPathing12RedAuto: OpMode() {
         opmodeTimer.resetTimer()
         spindexer.motifPattern = camera.getMotif()
 
-        intake.on()
+        intake.intake()
         spindexer.state = Spindexer.States.INTAKE_ZERO
 
         spindexer.recordIntake(Artifact.GREEN, 0)

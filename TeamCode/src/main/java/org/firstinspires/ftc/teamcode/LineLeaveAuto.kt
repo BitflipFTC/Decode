@@ -8,7 +8,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry
 import org.firstinspires.ftc.teamcode.hardware.Drivetrain
 
 @Config
-@Autonomous(name = "Line Leave Auto")
+@Autonomous(name = "Line Leave Auto", group = "Autonomous", preselectTeleOp = "Combined TeleOp")
 class LineLeaveAuto: LinearOpMode() {
     companion object {
         @JvmField var driveTime: Int = 1500

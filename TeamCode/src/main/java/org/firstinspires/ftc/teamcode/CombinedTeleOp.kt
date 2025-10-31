@@ -8,8 +8,6 @@ import com.qualcomm.hardware.lynx.LynxModule
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import com.qualcomm.robotcore.hardware.Gamepad
-import com.qualcomm.robotcore.util.ElapsedTime
-import gay.zharel.fateweaver.flight.FlightRecorder
 import org.firstinspires.ftc.robotcore.external.Telemetry
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder
@@ -23,7 +21,9 @@ import org.firstinspires.ftc.teamcode.hardware.Shooter
 import org.firstinspires.ftc.teamcode.hardware.Spindexer
 import org.firstinspires.ftc.teamcode.hardware.Transfer
 import org.firstinspires.ftc.teamcode.hardware.Turret
+import org.firstinspires.ftc.teamcode.util.dpadToInts
 import org.firstinspires.ftc.teamcode.util.toInt
+import kotlin.math.abs
 import kotlin.math.pow
 import kotlin.math.sqrt
 
@@ -42,7 +42,7 @@ class CombinedTeleOp : LinearOpMode() {
     lateinit var camera: OV9281
 
     var distanceToGoal = -1.0
-    var rbeDistance = -1.0
+    var rangeDistanceToGoal = -1.0
     var currentTagBearing = 0.0
     val targetTagBearing = 0.0
     // for dashboard purposes
@@ -59,12 +59,6 @@ class CombinedTeleOp : LinearOpMode() {
 
         camera = OV9281(this)
 
-        val timer = ElapsedTime()
-        val timestampRecorder = FlightRecorder.createChannel("TIMESTAMP", Double::class.java)
-        val hoodPositionRecorder = FlightRecorder.createChannel("HOOD POSITION", Double::class.java)
-        val flywheelRPMRecorder = FlightRecorder.createChannel("FLYWHEEL RPM", Double::class.java)
-        val distanceRecorder = FlightRecorder.createChannel("DISTANCE (IN)", Double::class.java)
-
         // bulk caching
         val allHubs = hardwareMap.getAll(LynxModule::class.java)
         allHubs.forEach { hub -> hub.bulkCachingMode = LynxModule.BulkCachingMode.MANUAL }
@@ -75,77 +69,95 @@ class CombinedTeleOp : LinearOpMode() {
             // more bulk caching
             allHubs.forEach { hub -> hub.clearBulkCache() }
 
-            // drrivetrain
-            if (gamepad1.circleWasPressed()) fieldCentric = !fieldCentric
-            if (gamepad1.yWasPressed()) drivetrain.resetYaw()
+            // see https://www.padcrafter.com/?templates=Driver+1%7CDriver+2&plat=1%7C1&col=%23242424%2C%23606A6E%2C%23FFFFFF&leftStick=Drivetrain+translation%7CTurret+Manual+Control&rightStick=Drivetrain+rotation%7CSpindexer+Manual+Control&yButton=Actuate+Transfer&xButton=Toggle+intake&rightTrigger=Reverse+Intake%7CTransfer+forward&rightBumper=Spindexer%3A+Next+Outtake&leftBumper=Spindexer%3A+Next+Intake&leftTrigger=Auto-align+turret+%2B+Auto+adjust+shooter%7CTransfer+backward&bButton=Reset+yaw+%28TO+BE+REMOVED%29&backButton=Toggle+field+centric&dpadLeft=%7CHoodPosition+-+0.05&dpadRight=%7CHoodPosition+%2B+0.05&dpadUp=%7CFlywheel+RPM+%2B+500&dpadDown=%7CFlywheel+RPM+-+500&aButton=Move+transfer+back+down+if+stuck%7C
+            // for gamepad layouts
 
-            drivetrain.driveSpeed = driveSpeed
-            drivetrain.fieldCentric = fieldCentric
-
+            // drivetrain
+            if (gamepad1.touchpadWasPressed()) fieldCentric = !fieldCentric
+            if (gamepad1.circleWasPressed()) drivetrain.resetYaw()
             drivetrain.setDrivetrainPowers(drivetrain.calculateDrivetrainPowers(
                 gamepad1.left_stick_x,
                 -gamepad1.left_stick_y,
                 gamepad1.right_stick_x))
 
+            drivetrain.driveSpeed = driveSpeed
+            drivetrain.fieldCentric = fieldCentric
+
+
             // intake
             if (gamepad1.squareWasPressed()) intake.toggle()
 
+            // while held, reversed
+            if (gamepad1.right_trigger >= 0.25) {
+                intake.reversed = true
+            } else { intake.reversed = false }
+
             // transfer
-//            if (gamepad1.right_trigger >= 0.25) { transfer.transferArtifact(); gamepad1.rumble(500) }
-//            if (gamepad1.left_trigger >= 0.25) { transfer.undoTransfer(); gamepad1.rumble(500) }
-            transfer.setPower((gamepad1.right_trigger - gamepad1.left_trigger).toDouble());
+            if (gamepad1.triangleWasPressed()) { transfer.transferArtifact(); gamepad1.rumble(500) }
+            if (gamepad1.crossWasPressed())    { transfer.undoTransfer(); gamepad1.rumble(500) }
+//            transfer.setPower((gamepad1.right_trigger - gamepad1.left_trigger).toDouble());
 
             // spindexer
-//            if (gamepad1.rightBumperWasPressed()) {
-//                spindexer.toNextOuttakePosition()
-//                gamepad1.rumble(100)
-//            }
-//
-//            if (gamepad1.leftBumperWasPressed()) {
-//                spindexer.toNextIntakePosition()
-//                gamepad1.rumble(100)
-//            }
-
-            spindexer.power = gamepad1.right_bumper.toInt().toDouble() * 0.25 - gamepad1.left_bumper.toInt().toDouble() * 0.25
-
-            if (gamepad1.dpad_up) {
-                flywheelRPM = 4500.0
-                hoodPosition = 0.2
+            if (gamepad1.rightBumperWasPressed()) {
+                spindexer.toNextOuttakePosition()
+                gamepad1.rumble(100)
             }
-            if (gamepad1.dpad_down) {
-                flywheelRPM = 0.0
+
+            if (gamepad1.leftBumperWasPressed()) {
+                spindexer.toNextIntakePosition()
+                gamepad1.rumble(100)
             }
-            if (gamepad1.dpad_right) {
-                flywheelRPM = 3000.0
-                hoodPosition = 0.5
+
+//            spindexer.power = gamepad1.right_bumper.toInt().toDouble() * 0.25 - gamepad1.left_bumper.toInt().toDouble() * 0.25
+
+            // map autoaim behind left trigger
+            if (gamepad1.left_trigger >= 0.25) {
+                turret.periodic(currentTagBearing)
+
+                // todo uncomment this when the ILUT is populated
+//                shooter.calculateTargetState(rangeDistanceToGoal)
+            } else {
+                turret.setPower(gamepad2.left_stick_x.toDouble())
             }
 
             // shooter stuff
+            // use these to configure ILUT
+            // todo move these controls to the else block of autoaim when ilut done
             shooter.hoodPosition = hoodPosition
             shooter.targetFlywheelRPM = flywheelRPM
 
+            // todo move these controls to gamepad2
+            val (dpadX, dpadY) = gamepad1.dpadToInts()
+            flywheelRPM += dpadY * 250.0
+            hoodPosition += dpadX * 0.05
+
             // update all mechanisms
-//            transfer.periodic()
+
+            // allow gamepad2 to have manual transfer control
+            if (abs(gamepad2.right_trigger - gamepad2.left_trigger) >= 0.15) {
+                transfer.setPower((gamepad2.right_trigger - gamepad2.left_trigger).toDouble())
+            } else {
+                transfer.periodic()
+            }
+
             shooter.periodic()
             intake.periodic()
             updateCamera()
-            turret.periodic(currentTagBearing)
 
-            if (distanceToGoal >= 0.0) {
-                gamepad1.setLedColor(255.0, 136.0, 30.0, Gamepad.LED_DURATION_CONTINUOUS)
+            if (abs(gamepad2.right_stick_x) >= 0.15) {
+                spindexer.power = gamepad2.right_stick_x.toDouble()
+
+                // prevent from periodic() resetting to a preset
+                spindexer.targetAngle = spindexer.currentAngle
             } else {
-                gamepad1.setLedColor(255.0, 255.0, 255.0, Gamepad.LED_DURATION_CONTINUOUS)
+                spindexer.periodic()
             }
 
-            // for logging optimal flywheel / hood
-            if (gamepad1.touchpadWasPressed()) {
-                gamepad1.rumble(500)
-                gamepad1.setLedColor(255.0, 136.0, 30.0, 500)
-
-                timestampRecorder.put(timer.milliseconds())
-                hoodPositionRecorder.put(hoodPosition)
-                flywheelRPMRecorder.put(flywheelRPM)
-                distanceRecorder.put(distanceToGoal)
+            // if we have a detection, green; otherwise, red
+            if (distanceToGoal > 0.0) {
+                gamepad1.setLedColor(0.0, 255.0, 0.0, Gamepad.LED_DURATION_CONTINUOUS)
+            } else {
+                gamepad1.setLedColor(255.0, 0.0, 0.0, Gamepad.LED_DURATION_CONTINUOUS)
             }
 
             telemetry.addData("Drivetrain Powers", drivetrain.currentDrivePowers.toString())
@@ -166,7 +178,7 @@ class CombinedTeleOp : LinearOpMode() {
             telemetry.addData("Flywheel current RPM", shooter.flywheelRPM)
             telemetry.addData("Hood position", shooter.hoodPosition)
             telemetry.addData("Distance to goal", distanceToGoal)
-            telemetry.addData("RANGE Distance", rbeDistance)
+            telemetry.addData("RANGE Distance", rangeDistanceToGoal)
             telemetry.addLine("-------------------------------------")
             telemetry.addData("April tag current bearing", currentTagBearing)
             telemetry.addData("April tag target bearing", targetTagBearing)
@@ -187,7 +199,7 @@ class CombinedTeleOp : LinearOpMode() {
                 telemetry.addData("TAG NAME", detection.metadata.name)
 
                 if (!detection.metadata.name.contains("Obelisk")) {
-                    rbeDistance = detection.ftcPose.range
+                    rangeDistanceToGoal = detection.ftcPose.range
 
                     // DISTANCE CALCULATIONS
                     val tagPos = Pose2D(
