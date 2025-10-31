@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple
 import com.qualcomm.robotcore.hardware.HardwareMap
 import org.firstinspires.ftc.robotcore.external.Telemetry
 import org.firstinspires.ftc.teamcode.util.Artifact
+import org.firstinspires.ftc.teamcode.util.MotifPattern
 import org.firstinspires.ftc.teamcode.util.PIDController
 import kotlin.math.roundToInt
 
@@ -57,13 +58,6 @@ class Spindexer(opMode: OpMode) {
     val telemetry: Telemetry = opMode.telemetry
 
     // ------------------ DATA STRUCTURES ------------------
-    enum class MotifPattern {
-        GPP,
-        PGP,
-        PPG,
-        NONE
-    }
-
     /**
      * Defines the named angular positions for the spindexer, used for both intake and outtake.
      * Each position corresponds to a reference angle in degrees.

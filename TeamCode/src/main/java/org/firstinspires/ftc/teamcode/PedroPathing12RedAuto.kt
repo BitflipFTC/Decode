@@ -16,6 +16,7 @@ import org.firstinspires.ftc.teamcode.hardware.Turret
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants
 import org.firstinspires.ftc.teamcode.util.Artifact
 import org.firstinspires.ftc.teamcode.util.InterpolatedLookupTable
+import org.firstinspires.ftc.teamcode.util.getMotif
 
 
 class PedroPathing12RedAuto: OpMode() {
@@ -85,7 +86,7 @@ class PedroPathing12RedAuto: OpMode() {
 
     override fun start() {
         opmodeTimer.resetTimer()
-        spindexer.motifPattern = getMotif()
+        spindexer.motifPattern = getMotif(camera)
 
         intake.on()
         spindexer.state = Spindexer.States.INTAKE_ZERO
@@ -308,20 +309,5 @@ class PedroPathing12RedAuto: OpMode() {
             telemetry.addData("Detected april tags", 0)
         }
 
-    }
-
-    fun getMotif(): Spindexer.MotifPattern {
-        val currentDetections = camera.aprilTag.detections
-        var pattern: Spindexer.MotifPattern = Spindexer.MotifPattern.NONE
-        for (detection in currentDetections) {
-            when (detection.metadata.name) {
-                "Obelisk_GPP" -> pattern = Spindexer.MotifPattern.GPP
-                "Obelisk_PGP" -> pattern = Spindexer.MotifPattern.PGP
-                "Obelisk_PPG" -> pattern = Spindexer.MotifPattern.PPG
-                else          -> {}
-            }
-        }
-
-        return pattern
     }
 }

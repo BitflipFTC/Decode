@@ -13,6 +13,8 @@ import org.firstinspires.ftc.teamcode.hardware.Transfer
 import org.firstinspires.ftc.teamcode.hardware.Turret
 import org.firstinspires.ftc.teamcode.util.Artifact
 import org.firstinspires.ftc.teamcode.util.InterpolatedLookupTable
+import org.firstinspires.ftc.teamcode.util.MotifPattern
+import org.firstinspires.ftc.teamcode.util.getMotif
 
 @Config
 @Autonomous(name = "Line Leave Auto")
@@ -145,9 +147,11 @@ class ShootPreloadsAuto: LinearOpMode() {
         }
 
         // ok now get the motif
-        spindexer.motifPattern = getMotif()
-        spindexer.toMotifOuttakePosition()
+        while (spindexer.motifPattern == MotifPattern.NONE) {
+            spindexer.motifPattern = getMotif(camera)
+        }
 
+        spindexer.toMotifOuttakePosition()
 
         // turn back
         if (startingPosition == Start.RED_NEAR || startingPosition == Start.BLUE_NEAR) {
@@ -253,20 +257,5 @@ class ShootPreloadsAuto: LinearOpMode() {
         } else { // no detections
             telemetry.addData("Detected april tags", 0)
         }
-    }
-
-    fun getMotif(): Spindexer.MotifPattern {
-        val currentDetections = camera.aprilTag.detections
-        var pattern: Spindexer.MotifPattern = Spindexer.MotifPattern.NONE
-        for (detection in currentDetections) {
-            when (detection.metadata.name) {
-                "Obelisk_GPP" -> pattern = Spindexer.MotifPattern.GPP
-                "Obelisk_PGP" -> pattern = Spindexer.MotifPattern.PGP
-                "Obelisk_PPG" -> pattern = Spindexer.MotifPattern.PPG
-                else          -> {}
-            }
-        }
-
-        return pattern
     }
 }
