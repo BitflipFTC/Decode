@@ -11,12 +11,16 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
+import org.firstinspires.ftc.teamcode.util.MotifPattern;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.VisionProcessor;
+import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagGameDatabase;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
+import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import dev.frozenmilk.util.modifier.BiModifier;
 
@@ -126,5 +130,29 @@ public class OV9281 {
 
     public void resumeStreaming() {
         visionPortal.resumeStreaming();
+    }
+
+    public MotifPattern getMotif() {
+        ArrayList<AprilTagDetection> currentDetections = this.aprilTag.getDetections();
+        ArrayList<AprilTagDetection> obeliskDetections = currentDetections.stream().filter((detection) -> detection.metadata.name.contains("Obelisk")).collect(Collectors.toCollection(ArrayList::new));
+        MotifPattern pattern = MotifPattern.NONE;
+
+        if (!obeliskDetections.isEmpty()) {
+            for (AprilTagDetection detection : obeliskDetections) {
+                switch (detection.metadata.name) {
+                    case "Obelisk_GPP":
+                        pattern = MotifPattern.GPP;
+                        break;
+                    case "Obelisk_PGP":
+                        pattern = MotifPattern.PGP;
+                        break;
+                    case "Obelisk_PPG":
+                        pattern = MotifPattern.PPG;
+                        break;
+                }
+            }
+        }
+
+        return pattern;
     }
 }

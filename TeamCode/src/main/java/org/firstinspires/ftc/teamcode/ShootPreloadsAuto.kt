@@ -14,7 +14,6 @@ import org.firstinspires.ftc.teamcode.hardware.Turret
 import org.firstinspires.ftc.teamcode.util.Artifact
 import org.firstinspires.ftc.teamcode.util.InterpolatedLookupTable
 import org.firstinspires.ftc.teamcode.util.MotifPattern
-import org.firstinspires.ftc.teamcode.util.getMotif
 
 @Config
 @Autonomous(name = "Line Leave Auto")
@@ -148,7 +147,7 @@ class ShootPreloadsAuto: LinearOpMode() {
 
         // ok now get the motif
         while (spindexer.motifPattern == MotifPattern.NONE) {
-            spindexer.motifPattern = getMotif(camera)
+            spindexer.motifPattern = camera.getMotif()
         }
 
         spindexer.toMotifOuttakePosition()

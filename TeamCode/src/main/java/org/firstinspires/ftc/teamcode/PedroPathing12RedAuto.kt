@@ -16,7 +16,6 @@ import org.firstinspires.ftc.teamcode.hardware.Turret
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants
 import org.firstinspires.ftc.teamcode.util.Artifact
 import org.firstinspires.ftc.teamcode.util.InterpolatedLookupTable
-import org.firstinspires.ftc.teamcode.util.getMotif
 
 
 class PedroPathing12RedAuto: OpMode() {
@@ -86,7 +85,7 @@ class PedroPathing12RedAuto: OpMode() {
 
     override fun start() {
         opmodeTimer.resetTimer()
-        spindexer.motifPattern = getMotif(camera)
+        spindexer.motifPattern = camera.getMotif()
 
         intake.on()
         spindexer.state = Spindexer.States.INTAKE_ZERO

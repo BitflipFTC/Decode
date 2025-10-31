@@ -21,19 +21,3 @@ enum class MotifPattern {
     PPG,
     NONE
 }
-
-fun getMotif(camera: OV9281): MotifPattern {
-    val currentDetections = camera.aprilTag.detections
-    val obeliskDetections = currentDetections.filter { it.metadata.name.contains("Obelisk") }
-    var pattern: MotifPattern = MotifPattern.NONE
-    for (detection in obeliskDetections) {
-        when (detection.metadata.name) {
-            "Obelisk_GPP" -> pattern = MotifPattern.GPP
-            "Obelisk_PGP" -> pattern = MotifPattern.PGP
-            "Obelisk_PPG" -> pattern = MotifPattern.PPG
-            else          -> {}
-        }
-    }
-
-    return pattern
-}
