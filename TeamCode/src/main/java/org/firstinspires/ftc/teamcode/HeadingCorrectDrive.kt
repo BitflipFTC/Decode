@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode
 
 import com.acmerobotics.dashboard.FtcDashboard
+import com.acmerobotics.dashboard.config.Config
+import com.bylazar.configurables.annotations.Configurable
 import com.bylazar.gamepad.PanelsGamepad
 import com.bylazar.telemetry.JoinedTelemetry
 import com.bylazar.telemetry.PanelsTelemetry
@@ -14,17 +16,23 @@ import com.qualcomm.robotcore.hardware.DcMotorEx
 import com.qualcomm.robotcore.hardware.DcMotorSimple
 import com.qualcomm.robotcore.hardware.IMU
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit
-import org.firstinspires.ftc.teamcode.util.HeadingCorrectPID.kD
-import org.firstinspires.ftc.teamcode.util.HeadingCorrectPID.kI
-import org.firstinspires.ftc.teamcode.util.HeadingCorrectPID.kP
-import org.firstinspires.ftc.teamcode.util.HeadingCorrectPID.targetImuPos
 import org.firstinspires.ftc.teamcode.util.PIDController
 import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.sin
 
+@Config
+@Configurable
 @TeleOp(name = "Heading Correct Drive", group = "TeleOp")
 class HeadingCorrectDrive : LinearOpMode() {
+    companion object {
+        @JvmField var kP: Double = 0.022
+
+        @JvmField var kI: Double = 0.11
+
+        @JvmField var kD: Double = 0.0015
+        @JvmField var targetImuPos : Double = 0.0
+    }
     private val frontLeft  by lazy { hardwareMap["frontleft"]  as DcMotorEx }
     private val frontRight by lazy { hardwareMap["frontright"] as DcMotorEx }
     private val backLeft   by lazy { hardwareMap["backleft"]   as DcMotorEx }

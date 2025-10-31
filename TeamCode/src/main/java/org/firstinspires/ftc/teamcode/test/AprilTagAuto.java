@@ -29,13 +29,11 @@
 
 package org.firstinspires.ftc.teamcode.test;
 
-import static org.firstinspires.ftc.teamcode.util.AprilTagAutoPID.targetTagPos;
-
-import static java.lang.Math.abs;
 
 import android.annotation.SuppressLint;
 
 import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.config.Config;
 import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.JoinedTelemetry;
 import com.bylazar.telemetry.PanelsTelemetry;
@@ -51,13 +49,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
-import org.firstinspires.ftc.teamcode.util.AprilTagAutoPID;
-import static org.firstinspires.ftc.teamcode.util.AprilTagAutoPID.max;
-import static org.firstinspires.ftc.teamcode.util.AprilTagAutoPID.min;
-import static org.firstinspires.ftc.teamcode.util.AprilTagAutoPID.kD;
-import static org.firstinspires.ftc.teamcode.util.AprilTagAutoPID.kI;
-import static org.firstinspires.ftc.teamcode.util.AprilTagAutoPID.kP;
-
 import org.firstinspires.ftc.teamcode.hardware.OV9281;
 import org.firstinspires.ftc.teamcode.util.PIDController;
 import org.firstinspires.ftc.teamcode.util.SquidController;
@@ -65,6 +56,7 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
 import java.util.List;
 
+@Config
 @Configurable
 @TeleOp(name = "Concept: AprilTag Auto", group = "Concept")
 public class AprilTagAuto extends LinearOpMode {
@@ -76,6 +68,14 @@ public class AprilTagAuto extends LinearOpMode {
     DcMotorEx back_right;
     double driveSpeed = 1;
     public static double currentTagPos;
+
+    public static double kP = 0.011;
+    public static double kI = 0.0;
+    public static double kD = 0.000003;
+    public static double min  = -10.0;
+    public static double max  = 10.0;
+    public static double targetTagPos  = 320.0;
+
 
     private PIDController controller;
 
@@ -145,13 +145,13 @@ public class AprilTagAuto extends LinearOpMode {
             telemetry.addData("Loop time","%dms",loopTimer.getMs());
 
             controller.setCoeffs(kP, kI, kD,0,0);
-            controller.setIntegrationBounds(AprilTagAutoPID.min, AprilTagAutoPID.max);
+            controller.setIntegrationBounds(min, max);
 
             double pidError = controller.calculate(currentTagPos, targetTagPos);
 
             telemetry.addData("pid Error", pidError);
 
-            if (abs(pidError) > 0.05) {
+            if (Math.abs(pidError) > 0.05) {
                 front_left.setPower(-pidError);
                 front_right.setPower(pidError);
                 back_left.setPower(-pidError);

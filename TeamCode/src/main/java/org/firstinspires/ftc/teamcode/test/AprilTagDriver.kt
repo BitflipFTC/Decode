@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.test
 import android.util.Log
 import android.util.Size
 import com.acmerobotics.dashboard.FtcDashboard
+import com.acmerobotics.dashboard.config.Config
 import com.bylazar.configurables.annotations.Configurable
 import com.bylazar.telemetry.JoinedTelemetry
 import com.bylazar.telemetry.PanelsTelemetry
@@ -25,8 +26,17 @@ import kotlin.math.pow
 import kotlin.math.sqrt
 
 @Configurable
+@Config
 @TeleOp(name = "Concept: AprilTag Driver", group = "Concept")
 class AprilTagDriver : LinearOpMode() {
+    companion object {
+        @JvmField var kP: Double = 0.0025
+        @JvmField var kI: Double = 0.0
+        @JvmField var kD: Double = 0.0
+        @JvmField var min : Double = -10.0
+        @JvmField var max : Double = 10.0
+        @JvmField var driveSpeed: Double = 0.5
+    }
     private val frontLeft  by lazy { hardwareMap["frontleft"]  as DcMotorEx }
     private val frontRight by lazy { hardwareMap["frontright"] as DcMotorEx }
     private val backLeft   by lazy { hardwareMap["backleft"]   as DcMotorEx }
@@ -44,11 +54,6 @@ class AprilTagDriver : LinearOpMode() {
 
     val distArr = ArrayList<Double>()
     var filteredDist = 0.0
-
-    companion object {
-        @JvmField
-        var driveSpeed: Double = 0.5
-    }
 
 //    val controller = PIDController(
 //        kP,kI,kD, 0.0, 0.0, max,
