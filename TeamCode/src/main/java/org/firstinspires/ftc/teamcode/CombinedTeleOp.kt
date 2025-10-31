@@ -21,8 +21,7 @@ import org.firstinspires.ftc.teamcode.hardware.Shooter
 import org.firstinspires.ftc.teamcode.hardware.Spindexer
 import org.firstinspires.ftc.teamcode.hardware.Transfer
 import org.firstinspires.ftc.teamcode.hardware.Turret
-import org.firstinspires.ftc.teamcode.util.dpadToInts
-import org.firstinspires.ftc.teamcode.util.toInt
+import org.firstinspires.ftc.teamcode.util.dpadToAxes
 import kotlin.math.abs
 import kotlin.math.pow
 import kotlin.math.sqrt
@@ -127,7 +126,7 @@ class CombinedTeleOp : LinearOpMode() {
             shooter.targetFlywheelRPM = flywheelRPM
 
             // todo move these controls to gamepad2
-            val (dpadX, dpadY) = gamepad1.dpadToInts()
+            val (dpadX, dpadY) = gamepad1.dpadToAxes()
             flywheelRPM += dpadY * 250.0
             hoodPosition += dpadX * 0.05
 

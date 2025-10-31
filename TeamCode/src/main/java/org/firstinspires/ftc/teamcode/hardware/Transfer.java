@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.util.Range;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
 import com.seattlesolvers.solverslib.util.TelemetryData;
 
@@ -24,7 +25,7 @@ public class Transfer {
     private boolean transferring;
     private final String configName = "transfer";
 
-    // 1150rpm motor, so
+    // 1620rpm motor, so
     private final double TICKS_PER_REVOLUTION = 103.8;
     private double targetPosition = 0;
 
@@ -35,6 +36,7 @@ public class Transfer {
     public static double kP = 0;
     public static double kI = 0;
     public static double kD = 0;
+    public static double maxPower = 0.75;
     private final PIDController controller = new PIDController(kP, kI, kD, 0, 0, 1, -1);
 
     private final Telemetry telemetry;
@@ -98,7 +100,7 @@ public class Transfer {
      */
     public void periodic() {
         double pidOutput = controller.calculate(getCurrentPosition(), targetPosition);
-        motor.setPower(pidOutput);
+        motor.setPower(Range.clip(pidOutput, -maxPower, maxPower));
         controller.setSetPointTolerance(10);
         controller.setCoeffs(kP, kI, kD, 0.0, 0.0);
         if (controller.atSetPoint() && transferring) {

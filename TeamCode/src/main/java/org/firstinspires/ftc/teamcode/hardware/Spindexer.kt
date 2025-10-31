@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.DcMotorEx
 import com.qualcomm.robotcore.hardware.DcMotorSimple
 import com.qualcomm.robotcore.hardware.HardwareMap
+import com.qualcomm.robotcore.util.Range
 import org.firstinspires.ftc.robotcore.external.Telemetry
 import org.firstinspires.ftc.teamcode.util.Artifact
 import org.firstinspires.ftc.teamcode.util.MotifPattern
@@ -52,6 +53,9 @@ class Spindexer(opMode: OpMode) {
 
         @JvmField
         var setpointTolerance = 1.0 // in degrees
+
+        @JvmField
+        var maxPower = 0.5
     }
 
     val hwMap: HardwareMap = opMode.hardwareMap
@@ -266,7 +270,7 @@ class Spindexer(opMode: OpMode) {
         controller.setCoeffs(kP, kI, kD, 0.0, kS)
 
         val pidOutput = controller.calculate(currentTicks, targetTicks)
-        motor.power = pidOutput
+        motor.power = Range.clip(pidOutput, -maxPower, maxPower)
     }
 
 
