@@ -26,7 +26,7 @@ public class InterpolatedLookupTable {
 
         /**
          * Constructs a Bounds object with specified values and indices.
-         * * @param lowerValue The value at the lower index.
+         * @param lowerValue The value at the lower index.
          * @param upperValue The value at the upper index.
          * @param lowerIndex The array index of the lower value.
          * @param upperIndex The array index of the upper value.

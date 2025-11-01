@@ -76,7 +76,7 @@ class Shooter(opMode: OpMode) {
             0.5,
             0.3,
             0.25,
-            0.01,
+            0.1,
             ),
         doubleArrayOf(3000.0,
             3250.0,
