@@ -33,10 +33,10 @@ public class Transfer {
     // artifact to the flywheel
     public static int MOTOR_TURNS = 5;
 
-    public static double kP = 0;
-    public static double kI = 0;
-    public static double kD = 0;
-    public static double maxPower = 0.75;
+    public static double kP = 0.007;
+    public static double kI = 0.03;
+    public static double kD = 0.0002;
+    public static double maxPower = 1;
     private final PIDController controller = new PIDController(kP, kI, kD, 0, 0, 1, -1);
 
     private final Telemetry telemetry;
