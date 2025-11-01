@@ -55,6 +55,29 @@ class CombinedTeleOp : LinearOpMode() {
 
     var alliance: Alliance = Alliance.NONE
 
+    // shooter logic is as follows
+    // when right trigger is held on gp1, if there is an apriltag visible
+    // it auto sets rpm and hood.
+    // when a preset is pressed on gp2, it auto sets to those UNLESS right
+    // trigger is being held down
+    // when manual adjustments are made on gp2, it adjusts the targets UNLESS
+    // right trigger is held, amd keeps those adjustments UNTIL a preset is assigned
+    // OR the right trigger is held
+
+    // spindexer logic is as follows
+    // when r1 / l1 is pressed, it snaps to that preset
+    // HOWEVER, when right stick is moved on gp2, it sets the new target to that
+    // and keeps it there until a new preset is selected or further input
+    // is detected
+
+    // turret logic is as follows
+    // turret is entirely controlled by gp2 left stick
+    // UNLESS gp2 left bumper is held AND apriltag is seen
+
+    // transfer logic
+    // uhhhhhhhhhhhhhh
+    // triangle shoots and returns to nearest rotation
+    // gp2 right + left triggers move it manually
     override fun runOpMode() {
         telemetry = JoinedTelemetry(PanelsTelemetry.ftcTelemetry, telemetry, FtcDashboard.getInstance().telemetry)
         telemetry.setDisplayFormat(Telemetry.DisplayFormat.MONOSPACE)
@@ -96,7 +119,7 @@ class CombinedTeleOp : LinearOpMode() {
             // more bulk caching
             allHubs.forEach { hub -> hub.clearBulkCache() }
 
-            // see https://www.padcrafter.com/?templates=Driver+1%7CDriver+2&plat=1%7C1&col=%23242424%2C%23606A6E%2C%23FFFFFF&leftStick=Drivetrain+translation%7CTurret+Manual+Control&rightStick=Drivetrain+rotation%7CSpindexer+Manual+Control&yButton=Actuate+Transfer&xButton=Toggle+intake&rightTrigger=Reverse+Intake%7CTransfer+forward&rightBumper=Spindexer%3A+Next+Outtake&leftBumper=Spindexer%3A+Next+Intake&leftTrigger=Auto-align+turret+%2B+Auto+adjust+shooter%7CTransfer+backward&bButton=Reset+yaw+%28TO+BE+REMOVED%29&backButton=Toggle+field+centric&dpadLeft=%7CHoodPosition+-+0.05&dpadRight=%7CHoodPosition+%2B+0.05&dpadUp=%7CFlywheel+RPM+%2B+500&dpadDown=%7CFlywheel+RPM+-+500&aButton=Move+transfer+back+down+if+stuck%7C
+            // see https://www.padcrafter.com/?templates=Driver+1%7CDriver+2&plat=1%7C1&col=%23242424%2C%23606A6E%2C%23FFFFFF&leftStick=Drivetrain+translation%7CTurret+Manual+Control&rightStick=Drivetrain+rotation%7CSpindexer+Manual+Control&yButton=Actuate+Transfer&xButton=Toggle+intake&rightTrigger=Auto+adjust+shooter%7CTransfer+forward&rightBumper=Spindexer%3A+Next+Outtake&leftBumper=Spindexer%3A+Next+Intake%7CAutoaim+turret&leftTrigger=Reverse+Intake%7CTransfer+backward&bButton=Reset+yaw+%28TO+BE+REMOVED%29%7CLong+shooting+preset&backButton=Toggle+field+centric&dpadLeft=%7CHoodPosition+-+0.05&dpadRight=%7CHoodPosition+%2B+0.05&dpadUp=%7CFlywheel+RPM+%2B+250&dpadDown=%7CFlywheel+RPM+-+250&aButton=%7CClose+shooting+preset
             // for gamepad layouts
 
             // drivetrain
@@ -114,11 +137,11 @@ class CombinedTeleOp : LinearOpMode() {
             if (gamepad1.squareWasPressed()) intake.toggle()
 
             // while held, reversed
-            intake.reversed = (gamepad1.dpad_down)
+            intake.reversed = (gamepad1.left_trigger >= 0.25)
 
             // transfer
             if (gamepad1.triangleWasPressed()) { transfer.transferArtifact(); gamepad1.rumble(500) }
-            if (gamepad1.crossWasPressed())    { transfer.undoTransfer(); gamepad1.rumble(500) }
+//            if (gamepad1.crossWasPressed())    { transfer.undoTransfer(); gamepad1.rumble(500) }
 
             // spindexer
             if (gamepad1.rightBumperWasPressed()) {
@@ -131,8 +154,8 @@ class CombinedTeleOp : LinearOpMode() {
                 gamepad1.rumble(100)
             }
 
-            // map autoaim behind left trigger
-            if (gamepad1.left_trigger >= 0.25) {
+            // map autoaim behind left bumper
+            if (gamepad2.left_bumper) {
                 turret.setBearing(currentTagBearing)
                 turret.periodic()
             } else {

@@ -22,7 +22,6 @@ import org.firstinspires.ftc.teamcode.util.PIDController;
 @Config
 public class Transfer {
     private final DcMotorEx motor;
-    private boolean transferring;
     private final String configName = "transfer";
 
     // 1620rpm motor, so
@@ -92,7 +91,6 @@ public class Transfer {
 
     public void undoTransfer() {
         setMotorTarget(getCurrentPosition() - TICKS_PER_REVOLUTION * MOTOR_TURNS);
-        transferring = true;
     }
 
     public double getTransferMotorAngle() {
