@@ -47,10 +47,6 @@ class Turret(opMode: OpMode) {
         servoL.power = pow
     }
 
-    fun setBearing(bearing: Double) {
-        this.bearing = bearing
-    }
-
     fun periodic() {
         pidOutput = controller.calculate(bearing, 0.0) // bearing approaches 0
 

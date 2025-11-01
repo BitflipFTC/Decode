@@ -156,7 +156,7 @@ class CombinedTeleOp : LinearOpMode() {
 
             // map autoaim behind left bumper
             if (gamepad2.left_bumper) {
-                turret.setBearing(currentTagBearing)
+                turret.bearing = currentTagBearing
                 turret.periodic()
             } else {
                 turret.setPower(-gamepad2.left_stick_x.toDouble() * 0.25)

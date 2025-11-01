@@ -55,7 +55,8 @@ class TurretTest : LinearOpMode() {
                 else                        -> -targetDetections[0].ftcPose.bearing
             }
 
-            turret.periodic(currentTagBearing)
+            turret.bearing = currentTagBearing
+            turret.periodic()
 
             telemetry.addData("current tag bearing", currentTagBearing)
             telemetry.addData(" target tag bearing", targetTagBearing)

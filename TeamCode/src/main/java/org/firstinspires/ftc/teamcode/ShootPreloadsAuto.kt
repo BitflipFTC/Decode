@@ -167,7 +167,7 @@ class ShootPreloadsAuto: LinearOpMode() {
             // update pids and get new camera readings
             updateCamera(startingPosition.targetTag)
             shooter.calculateTargetState(currentTagDistance)
-            turret.setBearing(currentTagBearing)
+            turret.bearing = currentTagBearing
             turret.periodic()
             shooter.periodic()
             spindexer.periodic()

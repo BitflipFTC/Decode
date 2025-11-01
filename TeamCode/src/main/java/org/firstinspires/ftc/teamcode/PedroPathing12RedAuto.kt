@@ -219,7 +219,8 @@ class PedroPathing12RedAuto: OpMode() {
             1 -> {
                 if (!follower.isBusy) {
                     shooter.calculateTargetState(distanceToGoal)
-                    turret.periodic(currentTagBearing)
+                    turret.bearing = currentTagBearing
+                    turret.periodic()
 
                     // if aimed
                     if (turret.atSetPoint()) {
