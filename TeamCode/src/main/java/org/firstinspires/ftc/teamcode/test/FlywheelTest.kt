@@ -20,28 +20,31 @@ class FlywheelTest : LinearOpMode() {
         allHubs.forEach { hub -> hub.bulkCachingMode = LynxModule.BulkCachingMode.MANUAL }
 
         waitForStart()
-        shooter.hoodPosition = 0.2
+//        shooter.hoodPosition = 0.2
 
         while (opModeIsActive()) {
             // more bulk caching
             allHubs.forEach { hub -> hub.clearBulkCache() }
 
-            // reset the target rpm
-            if (gamepad1.dpadDownWasPressed()) {
-                shooter.targetFlywheelRPM = 3000.0
-            }
+//            // reset the target rpm
+//            if (gamepad1.dpadDownWasPressed()) {
+//                shooter.targetFlywheelRPM = 3000.0
+//            }
+//
+//            if (gamepad1.dpadUpWasPressed()) {
+//                shooter.targetFlywheelRPM = 4500.0
+//            }
+//
+//            if (gamepad1.dpadRightWasPressed()) {
+//                shooter.hoodPosition = 0.05
+//            }
+//
+//            if (gamepad1.dpadLeftWasPressed()) {
+//                shooter.hoodPosition = 0.5
+//            }
 
-            if (gamepad1.dpadUpWasPressed()) {
-                shooter.targetFlywheelRPM = 4500.0
-            }
 
-            if (gamepad1.dpadRightWasPressed()) {
-                shooter.hoodPosition = 0.2
-            }
-
-            if (gamepad1.dpadLeftWasPressed()) {
-                shooter.hoodPosition = 0.6
-            }
+            shooter.periodic()
 
             telemetry.addData("Current RPM", shooter.flywheelRPM)
             telemetry.addData("Target RPM", shooter.targetFlywheelRPM)

@@ -80,7 +80,7 @@ class CombinedTeleOp : LinearOpMode() {
     // gp2 right + left triggers move it manually
     override fun runOpMode() {
         telemetry = JoinedTelemetry(PanelsTelemetry.ftcTelemetry, telemetry, FtcDashboard.getInstance().telemetry)
-        telemetry.setDisplayFormat(Telemetry.DisplayFormat.MONOSPACE)
+        telemetry.setDisplayFormat(Telemetry.DisplayFormat.HTML)
         val drivetrain = Drivetrain(this)
         val intake = Intake(this)
         val transfer = Transfer(this)
@@ -115,6 +115,7 @@ class CombinedTeleOp : LinearOpMode() {
 
         val timer= LoopTimer()
         timer.start()
+        intake.slow()
         while (opModeIsActive()) {
             // more bulk caching
             allHubs.forEach { hub -> hub.clearBulkCache() }
@@ -133,11 +134,6 @@ class CombinedTeleOp : LinearOpMode() {
             drivetrain.driveSpeed = driveSpeed
             drivetrain.fieldCentric = fieldCentric
 
-            // intake
-            if (gamepad1.squareWasPressed()) intake.toggle()
-
-            // while held, reversed
-            intake.reversed = (gamepad1.left_trigger >= 0.25)
 
             // transfer
             if (gamepad1.triangleWasPressed()) { transfer.transferArtifact(); gamepad1.rumble(500) }
@@ -154,13 +150,19 @@ class CombinedTeleOp : LinearOpMode() {
                 gamepad1.rumble(100)
             }
 
+            // intake
+            if (gamepad1.squareWasPressed()) intake.toggle()
+
+            // while held, reversed
+            intake.reversed = (gamepad1.left_trigger >= 0.25)
+
             // map autoaim behind left bumper
-            // todo move to gp2 lb
+            // todo change
             if (gamepad1.left_trigger >= 0.25) {
                 turret.bearing = currentTagBearing
                 turret.periodic()
             } else {
-                turret.setPower(-gamepad2.left_stick_x.toDouble() * 0.25)
+                turret.setPower(gamepad2.left_stick_x.toDouble() * 0.15)
             }
 
             // map auto adjust behind right trigger
@@ -196,7 +198,7 @@ class CombinedTeleOp : LinearOpMode() {
             updateCamera(alliance.atagTarget)
 
             if (abs(gamepad2.right_stick_x) >= 0.15) {
-                spindexer.power = gamepad2.right_stick_x.toDouble()
+                spindexer.power = gamepad2.right_stick_x.toDouble() * 0.1
 
                 // prevent from periodic() resetting to a preset
                 spindexer.targetAngle = spindexer.currentAngle
@@ -251,11 +253,12 @@ class CombinedTeleOp : LinearOpMode() {
                     telemetry.addData("TAG NAME", detection.metadata.name)
 
                     // if the atag seen is the current target's atag
-                    if (detection.metadata.name.contains(target)) {
+                    // todo replate "Obelisk" with target
+                    if (detection.metadata.name.contains("Obelisk")) {
                         rangeDistanceToGoal = detection.ftcPose.range
                         
                         // negative b/c default: left positive, right negative
-                        currentTagBearing = -detection.ftcPose.bearing
+                        currentTagBearing = detection.ftcPose.bearing
 
                     } else {
                         rangeDistanceToGoal = 0.0

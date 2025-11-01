@@ -47,13 +47,17 @@ class Shooter(opMode: OpMode) {
 //        @JvmField
 //        var SERVO_UPPER_LIMIT = 1.0
         @JvmField
-        var kP = 0.0007
+        var kP = 0.00085
         @JvmField
         var kI = 0.0
         @JvmField
         var kD = 0.0
         @JvmField
-        var kV = 0.00018
+        var kV = 0.00019
+//        @JvmField
+//        var targetFlywheelRPM = 3000.0
+//        @JvmField
+//        var hoodPosition = 0.3
     }
 
     class ShooterState (
@@ -85,15 +89,16 @@ class Shooter(opMode: OpMode) {
             ),
         doubleArrayOf(
             3100.0,
-            3300.0,
-            3500.0,
-            4100.0,
-            4500.0,
+            3350.0,
+            3600.0,
+            4250.0,
+            4650.0,
         )
     )
-    // TODO populate this table asap.
 
     // main two adjustable params
+
+    //todo uncomment
     var targetFlywheelRPM = 3000.0
     var hoodPosition = 0.3
 
@@ -129,6 +134,7 @@ class Shooter(opMode: OpMode) {
         lastFlywheelRPM = flywheelRPM
         flywheelRPM = (flywheelMotor.velocity / FLYWHEEL_PPR) * 60
         filteredFlywheelRPM = flywheelRPM * LOW_PASS + lastFlywheelRPM * (1 - LOW_PASS)
+        flywheelController.setCoeffs(kP, kI, kD, kV, 0.0)
         
         pidOutput = flywheelController.calculate(filteredFlywheelRPM, targetFlywheelRPM)
         

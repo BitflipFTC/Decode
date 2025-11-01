@@ -11,13 +11,13 @@ import org.firstinspires.ftc.teamcode.hardware.Drivetrain
 @Autonomous(name = "Line Leave Auto", group = "Autonomous", preselectTeleOp = "Combined TeleOp")
 class LineLeaveAuto: LinearOpMode() {
     companion object {
-        @JvmField var driveTime: Int = 1500
+        @JvmField var driveTime: Int = 3000
     }
 
     enum class Start (val strafe: Float, val forward: Float, val instructions: String) {
-        RED_NEAR(-0.5f, 0.25f, "Place back of robot against the wall, about 6in from goal"),
+        RED_NEAR(1f, 1f, "Place back of robot against the wall, about 6in from goal"),
         RED_FAR(0.5f, 0f, "Place back of robot against the wall on outermost corner of far launch line"),
-        BLUE_NEAR(0.5f, 0.25f, "Place back of robot against the wall, about 6in from goal"),
+        BLUE_NEAR(-0.5f, 0.25f, "Place back of robot against the wall, about 6in from goal"),
         BLUE_FAR(-0.5f, 0f, "Place back of robot against the wall on outermost corner of far launch line"),
         NONE(0f, 0f, "NO POSITION SELECTED")
     }
@@ -65,6 +65,10 @@ class LineLeaveAuto: LinearOpMode() {
         // wait for driveTime milliseconds
         while (timer.milliseconds() <= driveTime && opModeIsActive()) {
             telemetry.addData("Moving","...")
+            telemetry.addData("forward",startingPosition.forward)
+            telemetry.addData("strafe", startingPosition.strafe)
+            telemetry.update()
+
         }
 
         drivetrain.setDrivetrainPowers(drivetrain.calculateDrivetrainPowers(0f,0f,0f))

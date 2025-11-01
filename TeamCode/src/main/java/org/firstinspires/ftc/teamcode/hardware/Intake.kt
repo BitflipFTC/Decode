@@ -20,11 +20,13 @@ class Intake(opMode: OpMode): SubsystemBase() {
     enum class State (val value: Double) {
         OFF(0.0),
         INTAKE(0.9),
+        DEFAULT(0.2)
     }
 
     var reversed = false
 
-    val hwMap: HardwareMap = opMode.hardwareMap
+    val hwMap: HardwareMap = opMode.            // todo move to gp2 lb
+hardwareMap
     val telemetry: Telemetry = opMode.telemetry
 
     private val motor by lazy { hwMap["intake"] as DcMotorEx }
@@ -44,7 +46,8 @@ class Intake(opMode: OpMode): SubsystemBase() {
      * Toggles the intake motor's power between full forward (1.0) and off (0.0).
      */
     fun toggle () {
-        power = if (power == State.INTAKE) State.OFF else State.INTAKE
+        power = if (power == State.INTAKE) State.DEFAULT else State.INTAKE
+        reversed = false
     }
 
     fun intake () {
@@ -52,14 +55,19 @@ class Intake(opMode: OpMode): SubsystemBase() {
         reversed = false
     }
 
-    fun off () {
-        power = State.OFF
-        reversed = false
-    }
+//    fun off () {
+//        power = State.OFF
+//        reversed = false
+//    }
 
     fun outtake () {
         power = State.INTAKE
         reversed = true
+    }
+
+    fun slow() {
+        power = State.DEFAULT
+        reversed = false
     }
 
     override fun periodic() {

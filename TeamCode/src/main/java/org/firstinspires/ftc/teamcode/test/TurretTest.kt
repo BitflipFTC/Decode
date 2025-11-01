@@ -52,7 +52,7 @@ class TurretTest : LinearOpMode() {
 
             currentTagBearing = when {
                 targetDetections.isEmpty() -> targetTagBearing
-                else                        -> -targetDetections[0].ftcPose.bearing
+                else                        -> targetDetections[0].ftcPose.bearing
             }
 
             turret.bearing = currentTagBearing

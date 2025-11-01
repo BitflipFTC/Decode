@@ -42,8 +42,8 @@ class Turret(opMode: OpMode) {
     }
 
     fun setPower (pow : Double) {
-        servoR.power = pow
-        servoL.power = pow
+        servoR.power = -pow
+        servoL.power = -pow
     }
 
     fun periodic() {
@@ -56,7 +56,7 @@ class Turret(opMode: OpMode) {
         controller.setCoeffs(kP, kI, kD, 0.0, kS)
     }
 
-    fun getPower() = pidOutput
+    fun getPower() = -pidOutput
 
     fun atSetPoint() = controller.atSetPoint()
 }
