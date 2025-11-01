@@ -155,7 +155,8 @@ class CombinedTeleOp : LinearOpMode() {
             }
 
             // map autoaim behind left bumper
-            if (gamepad2.left_bumper) {
+            // todo move to gp2 lb
+            if (gamepad1.left_trigger >= 0.25) {
                 turret.bearing = currentTagBearing
                 turret.periodic()
             } else {
@@ -231,6 +232,9 @@ class CombinedTeleOp : LinearOpMode() {
             telemetry.addLine("-------------------------------------")
             telemetry.addData("April tag current bearing", currentTagBearing)
             telemetry.addData("April tag target bearing", targetTagBearing)
+            telemetry.addLine("-------------------------------------")
+            telemetry.addData("Turret current", turret.bearing)
+            telemetry.addData("Turret target", 0.0)
 
             telemetry.update()
         }
@@ -253,13 +257,20 @@ class CombinedTeleOp : LinearOpMode() {
                         // negative b/c default: left positive, right negative
                         currentTagBearing = -detection.ftcPose.bearing
 
+                    } else {
+                        rangeDistanceToGoal = 0.0
+                        currentTagBearing = 0.0
                     }
                 } else {
+                    rangeDistanceToGoal = 0.0
+                    currentTagBearing = 0.0
                     telemetry.addData("Current tag", "NO metadata")
                 }
             }
         } else { // no detections
             telemetry.addData("Detected april tags", 0)
+            rangeDistanceToGoal = 0.0
+            currentTagBearing = 0.0
         }
     }
 }
