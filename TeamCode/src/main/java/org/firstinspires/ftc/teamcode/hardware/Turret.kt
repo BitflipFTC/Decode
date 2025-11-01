@@ -31,7 +31,9 @@ class Turret(opMode: OpMode) {
     val servoR : CRServoImplEx by lazy { hwMap["turretR"] as CRServoImplEx }
     val controller = PIDController(kP, kI, kD, 0.0, kS)
 
+    var bearing = 0.0
     var pidOutput: Double = 0.0
+
     init {
         // defaults to 600,2400 - this gives full range
         servoR.pwmRange = PwmControl.PwmRange(500.0, 2500.0)
@@ -45,8 +47,12 @@ class Turret(opMode: OpMode) {
         servoL.power = pow
     }
 
-    fun periodic(tagBearing: Double) {
-        pidOutput = controller.calculate(tagBearing, 0.0) // bearing approaches 0
+    fun setBearing(bearing: Double) {
+        this.bearing = bearing
+    }
+
+    fun periodic() {
+        pidOutput = controller.calculate(bearing, 0.0) // bearing approaches 0
 
         if (!atSetPoint()) {
             setPower(pidOutput)

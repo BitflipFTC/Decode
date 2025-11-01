@@ -90,9 +90,6 @@ class CombinedTeleOp : LinearOpMode() {
         val allHubs = hardwareMap.getAll(LynxModule::class.java)
         allHubs.forEach { hub -> hub.bulkCachingMode = LynxModule.BulkCachingMode.MANUAL }
 
-//        waitForStart()
-        // todo i dont think we need wait for start???
-
         val timer= LoopTimer()
         timer.start()
         while (opModeIsActive()) {
@@ -117,7 +114,7 @@ class CombinedTeleOp : LinearOpMode() {
             if (gamepad1.squareWasPressed()) intake.toggle()
 
             // while held, reversed
-            intake.reversed = (gamepad1.right_trigger >= 0.25)
+            intake.reversed = (gamepad1.dpad_down)
 
             // transfer
             if (gamepad1.triangleWasPressed()) { transfer.transferArtifact(); gamepad1.rumble(500) }
@@ -136,13 +133,17 @@ class CombinedTeleOp : LinearOpMode() {
 
             // map autoaim behind left trigger
             if (gamepad1.left_trigger >= 0.25) {
-                turret.periodic(currentTagBearing)
-
-                shooter.calculateTargetState(rangeDistanceToGoal)
+                turret.setBearing(currentTagBearing)
+                turret.periodic()
             } else {
                 turret.setPower(-gamepad2.left_stick_x.toDouble() * 0.25)
-                shooter.hoodPosition = hoodPosition
-                shooter.targetFlywheelRPM = flywheelRPM
+            }
+
+            // map auto adjust behind right trigger
+            if (gamepad1.right_trigger >= 0.25) {
+                shooter.calculateTargetState(rangeDistanceToGoal)
+            } else {
+                shooter.state = Shooter.ShooterState(hoodPosition, flywheelRPM)
             }
 
             // shooter stuff
@@ -189,19 +190,17 @@ class CombinedTeleOp : LinearOpMode() {
             telemetry.addData("Transfer Target Ticks", transfer.targetPosition)
             telemetry.addData("Transfer Current Ticks", transfer.currentPosition)
             telemetry.addLine("-------------------------------------")
-            telemetry.addData("Spindexer target position", spindexer.state.name)
+            telemetry.addData("Spindexer current state", spindexer.state.name)
             telemetry.addData("Spindexer target angle", spindexer.targetAngle)
             telemetry.addData("Spindexer current angle", spindexer.currentAngle)
             telemetry.addLine("-------------------------------------")
             telemetry.addData("Flywheel target RPM", shooter.targetFlywheelRPM)
             telemetry.addData("Flywheel current RPM", shooter.flywheelRPM)
             telemetry.addData("Hood position", shooter.hoodPosition)
-            telemetry.addData("RANGE Distance", rangeDistanceToGoal)
+            telemetry.addData("Distance (in)", rangeDistanceToGoal)
             telemetry.addLine("-------------------------------------")
             telemetry.addData("April tag current bearing", currentTagBearing)
             telemetry.addData("April tag target bearing", targetTagBearing)
-            telemetry.addData("Turret power", turret.getPower())
-            telemetry.addData("Loop rate", timer.ms)
 
             telemetry.update()
         }
@@ -213,19 +212,21 @@ class CombinedTeleOp : LinearOpMode() {
         if (!currentDetections.isEmpty()) {
             telemetry.addData("Detected april tags", currentDetections.size)
 
-            val detection = currentDetections[0]
-            if (detection.metadata != null) {
-                telemetry.addData("TAG NAME", detection.metadata.name)
+            for (detection in currentDetections) {
+                if (detection.metadata != null) {
+                    telemetry.addData("TAG NAME", detection.metadata.name)
 
-                // if the atag seen is the current target's atag
-                if (detection.metadata.name.contains(target)) {
-                    rangeDistanceToGoal = detection.ftcPose.range
-                    // negative b/c default: left positive, right negative
-                    currentTagBearing = -detection.ftcPose.bearing
+                    // if the atag seen is the current target's atag
+                    if (detection.metadata.name.contains(target)) {
+                        rangeDistanceToGoal = detection.ftcPose.range
+                        
+                        // negative b/c default: left positive, right negative
+                        currentTagBearing = -detection.ftcPose.bearing
 
+                    }
+                } else {
+                    telemetry.addData("Current tag", "NO metadata")
                 }
-            } else {
-                telemetry.addData("Current tag", "NO metadata")
             }
         } else { // no detections
             telemetry.addData("Detected april tags", 0)
