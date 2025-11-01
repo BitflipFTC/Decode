@@ -51,6 +51,8 @@ class Turret(opMode: OpMode) {
 
         if (!atSetPoint()) {
             setPower(pidOutput)
+        } else {
+            setPower(0.0)
         }
 
         controller.setCoeffs(kP, kI, kD, 0.0, kS)
