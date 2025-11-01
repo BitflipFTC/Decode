@@ -109,6 +109,8 @@ class ShootPreloadsAuto: LinearOpMode() {
                 telemetry.addLine("Press START to run Autonomous.")
             }
 
+            spindexer.periodic()
+
             telemetry.update()
         }
 
@@ -165,7 +167,8 @@ class ShootPreloadsAuto: LinearOpMode() {
             // update pids and get new camera readings
             updateCamera(startingPosition.targetTag)
             shooter.calculateTargetState(currentTagDistance)
-            turret.periodic(currentTagBearing)
+            turret.setBearing(currentTagBearing)
+            turret.periodic()
             shooter.periodic()
             spindexer.periodic()
             transfer.periodic()
