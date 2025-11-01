@@ -5,6 +5,7 @@ import com.acmerobotics.dashboard.config.Config
 import com.bylazar.configurables.annotations.Configurable
 import com.bylazar.telemetry.JoinedTelemetry
 import com.bylazar.telemetry.PanelsTelemetry
+import com.bylazar.utils.LoopTimer
 import com.qualcomm.hardware.lynx.LynxModule
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
@@ -12,8 +13,6 @@ import org.firstinspires.ftc.teamcode.hardware.OV9281
 import org.firstinspires.ftc.teamcode.hardware.Turret
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection
 
-@Config
-@Configurable
 @TeleOp(name = "Test: Turret", group = "Test")
 class TurretTest : LinearOpMode() {
     var currentTagBearing: Double = 0.0
@@ -36,6 +35,9 @@ class TurretTest : LinearOpMode() {
         telemetry.update()
 
         waitForStart()
+        val timer = LoopTimer()
+        timer.start()
+
 
         while (opModeIsActive()) {
             // more bulk caching
@@ -46,9 +48,11 @@ class TurretTest : LinearOpMode() {
             val currentDetections: ArrayList<AprilTagDetection> =
                 camera.aprilTag.detections
 
+            val targetDetections = currentDetections.filter { it.metadata.name.contains("RedTarget") }
+
             currentTagBearing = when {
-                currentDetections.isEmpty() -> targetTagBearing
-                else                        -> -currentDetections[0].ftcPose.bearing
+                targetDetections.isEmpty() -> targetTagBearing
+                else                        -> -targetDetections[0].ftcPose.bearing
             }
 
             turret.periodic(currentTagBearing)
@@ -57,6 +61,8 @@ class TurretTest : LinearOpMode() {
             telemetry.addData(" target tag bearing", targetTagBearing)
             telemetry.addData("turret power", turret.getPower())
             telemetry.addData("At Setpoint?", turret.atSetPoint())
+            telemetry.addData("Loop rate", timer.ms)
+
 
             telemetry.update()
         }
