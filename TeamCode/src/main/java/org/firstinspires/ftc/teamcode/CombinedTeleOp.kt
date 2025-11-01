@@ -151,6 +151,13 @@ class CombinedTeleOp : LinearOpMode() {
             flywheelRPM += dpadY * 250.0
             hoodPosition += dpadX * 0.05
 
+            if (gamepad2.aWasPressed()) {
+                shooter.calculateTargetState(Shooter.CLOSE_SHOOTING)
+            }
+            if (gamepad2.bWasPressed()) {
+                shooter.calculateTargetState(Shooter.PEAK_NEAR_LAUNCH_ZONE)
+            }
+
             // update all mechanisms
 
             // allow gamepad2 to have manual transfer control

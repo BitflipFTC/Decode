@@ -38,6 +38,9 @@ class Shooter(opMode: OpMode) {
     companion object {
         const val FLYWHEEL_PPR = 28
         const val LOW_PASS = 0.05
+
+        const val PEAK_NEAR_LAUNCH_ZONE = 83.0
+        const val CLOSE_SHOOTING = 32.1
         
 //        @JvmField
 //        var SERVO_LOWER_LIMIT = 0.0
