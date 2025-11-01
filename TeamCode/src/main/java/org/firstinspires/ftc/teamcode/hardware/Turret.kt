@@ -11,13 +11,12 @@ import org.firstinspires.ftc.teamcode.util.PIDController
 @Config
 class Turret(opMode: OpMode) {
     companion object {
-        // todo retune this
         @JvmField
-        var kP = 0.01
+        var kP = 0.005
         @JvmField
         var kI = 0.0
         @JvmField
-        var kD = 0.003
+        var kD = 0.002
         @JvmField
         var kS = 0.0
         @JvmField
