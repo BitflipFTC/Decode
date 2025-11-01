@@ -4,6 +4,7 @@ import com.acmerobotics.dashboard.FtcDashboard
 import com.acmerobotics.dashboard.config.Config
 import com.bylazar.telemetry.JoinedTelemetry
 import com.bylazar.telemetry.PanelsTelemetry
+import com.bylazar.utils.LoopTimer
 import com.qualcomm.hardware.lynx.LynxModule
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
@@ -41,7 +42,6 @@ class CombinedTeleOp : LinearOpMode() {
     private val driveSpeed = 0.8
     lateinit var camera: OV9281
 
-    var distanceToGoal = -1.0
     var rangeDistanceToGoal = -1.0
     var currentTagBearing = 0.0
     val targetTagBearing = 0.0
@@ -93,6 +93,8 @@ class CombinedTeleOp : LinearOpMode() {
 //        waitForStart()
         // todo i dont think we need wait for start???
 
+        val timer= LoopTimer()
+        timer.start()
         while (opModeIsActive()) {
             // more bulk caching
             allHubs.forEach { hub -> hub.clearBulkCache() }
@@ -111,19 +113,15 @@ class CombinedTeleOp : LinearOpMode() {
             drivetrain.driveSpeed = driveSpeed
             drivetrain.fieldCentric = fieldCentric
 
-
             // intake
             if (gamepad1.squareWasPressed()) intake.toggle()
 
             // while held, reversed
-            if (gamepad1.right_trigger >= 0.25) {
-                intake.reversed = true
-            } else { intake.reversed = false }
+            intake.reversed = (gamepad1.right_trigger >= 0.25)
 
             // transfer
             if (gamepad1.triangleWasPressed()) { transfer.transferArtifact(); gamepad1.rumble(500) }
             if (gamepad1.crossWasPressed())    { transfer.undoTransfer(); gamepad1.rumble(500) }
-//            transfer.setPower((gamepad1.right_trigger - gamepad1.left_trigger).toDouble());
 
             // spindexer
             if (gamepad1.rightBumperWasPressed()) {
@@ -136,26 +134,19 @@ class CombinedTeleOp : LinearOpMode() {
                 gamepad1.rumble(100)
             }
 
-//            spindexer.power = gamepad1.right_bumper.toInt().toDouble() * 0.25 - gamepad1.left_bumper.toInt().toDouble() * 0.25
-
             // map autoaim behind left trigger
             if (gamepad1.left_trigger >= 0.25) {
                 turret.periodic(currentTagBearing)
 
-                // todo uncomment this when the ILUT is populated
-//                shooter.calculateTargetState(rangeDistanceToGoal)
+                shooter.calculateTargetState(rangeDistanceToGoal)
             } else {
-                turret.setPower(gamepad2.left_stick_x.toDouble())
+                turret.setPower(-gamepad2.left_stick_x.toDouble() * 0.25)
+                shooter.hoodPosition = hoodPosition
+                shooter.targetFlywheelRPM = flywheelRPM
             }
 
             // shooter stuff
-            // use these to configure ILUT
-            // todo move these controls to the else block of autoaim when ilut done
-            shooter.hoodPosition = hoodPosition
-            shooter.targetFlywheelRPM = flywheelRPM
-
-            // todo move these controls to gamepad2
-            val (dpadX, dpadY) = gamepad1.dpadToAxes()
+            val (dpadX, dpadY) = gamepad2.dpadToAxes()
             flywheelRPM += dpadY * 250.0
             hoodPosition += dpadX * 0.05
 
@@ -163,7 +154,7 @@ class CombinedTeleOp : LinearOpMode() {
 
             // allow gamepad2 to have manual transfer control
             if (abs(gamepad2.right_trigger - gamepad2.left_trigger) >= 0.15) {
-                transfer.setPower((gamepad2.right_trigger - gamepad2.left_trigger).toDouble())
+                transfer.setPower((gamepad2.right_trigger - gamepad2.left_trigger) * 1.0)
             } else {
                 transfer.periodic()
             }
@@ -182,7 +173,7 @@ class CombinedTeleOp : LinearOpMode() {
             }
 
             // if we have a detection, green; otherwise, red
-            if (distanceToGoal > 0.0) {
+            if (rangeDistanceToGoal > 0.0) {
                 gamepad1.setLedColor(0.0, 255.0, 0.0, Gamepad.LED_DURATION_CONTINUOUS)
             } else {
                 gamepad1.setLedColor(255.0, 0.0, 0.0, Gamepad.LED_DURATION_CONTINUOUS)
@@ -190,8 +181,8 @@ class CombinedTeleOp : LinearOpMode() {
 
             telemetry.addData("Drivetrain Powers", drivetrain.currentDrivePowers.toString())
             telemetry.addData("Heading", drivetrain.heading)
-            telemetry.addData("Field Centric? ", drivetrain.fieldCentric)
-            telemetry.addData("", "-------------------------------------")
+            telemetry.addData("Field Centric?", drivetrain.fieldCentric)
+            telemetry.addLine("-------------------------------------")
             telemetry.addData("Intake Power", intake.power.value)
             telemetry.addData("Intake State", intake.power)
             telemetry.addLine("-------------------------------------")
@@ -205,12 +196,12 @@ class CombinedTeleOp : LinearOpMode() {
             telemetry.addData("Flywheel target RPM", shooter.targetFlywheelRPM)
             telemetry.addData("Flywheel current RPM", shooter.flywheelRPM)
             telemetry.addData("Hood position", shooter.hoodPosition)
-            telemetry.addData("Distance to goal", distanceToGoal)
             telemetry.addData("RANGE Distance", rangeDistanceToGoal)
             telemetry.addLine("-------------------------------------")
             telemetry.addData("April tag current bearing", currentTagBearing)
             telemetry.addData("April tag target bearing", targetTagBearing)
             telemetry.addData("Turret power", turret.getPower())
+            telemetry.addData("Loop rate", timer.ms)
 
             telemetry.update()
         }
@@ -232,35 +223,6 @@ class CombinedTeleOp : LinearOpMode() {
                     // negative b/c default: left positive, right negative
                     currentTagBearing = -detection.ftcPose.bearing
 
-                    // DISTANCE CALCULATIONS
-                    val tagPos = Pose2D(
-                        DistanceUnit.INCH,
-                        detection.metadata.fieldPosition.get(0).toDouble(),
-                        detection.metadata.fieldPosition.get(1).toDouble(),
-                        AngleUnit.DEGREES,
-                        detection.metadata.fieldOrientation.toOrientation(
-                            AxesReference.EXTRINSIC,
-                            AxesOrder.XYZ,
-                            AngleUnit.DEGREES
-                        ).secondAngle.toDouble()
-                    ) // given north is 0, clockwise
-
-                    val robotPos = Pose2D(
-                        detection.robotPose.getPosition().unit,
-                        detection.robotPose.getPosition().x,
-                        detection.robotPose.getPosition().y,
-                        AngleUnit.DEGREES,
-                        detection.robotPose.getOrientation().getYaw(AngleUnit.DEGREES)
-                    )
-
-                    distanceToGoal = sqrt(
-                        (tagPos.getX(DistanceUnit.INCH) - robotPos.getX(DistanceUnit.INCH)).pow(
-                            2.0
-                        ) + (tagPos.getY(DistanceUnit.INCH) - robotPos.getY(DistanceUnit.INCH)).pow(
-                            2.0
-                        )
-                    )
-                    // END DISTANCE CALCS
                 }
             } else {
                 telemetry.addData("Current tag", "NO metadata")
