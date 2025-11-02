@@ -34,15 +34,13 @@ class CombinedTeleOp : LinearOpMode() {
     private val driveSpeed = 0.8
     lateinit var camera: OV9281
 
-    var rangeDistanceToGoal = -1.0
-    var currentTagBearing = 0.0
     val targetTagBearing = 0.0
     // for dashboard purposes
 
-    enum class Alliance (val atagTarget: String) {
-        RED("RedTarget"),
-        BLUE("BlueTarget"),
-        NONE("NONE")
+    enum class Alliance (val aprilTagID: Int) {
+        RED(24),
+        BLUE(20),
+        NONE(0)
     }
 
     var alliance: Alliance = Alliance.NONE
@@ -88,7 +86,7 @@ class CombinedTeleOp : LinearOpMode() {
             telemetry.addLine("Press CROSS  for Blue alliance")
             telemetry.addLine()
             telemetry.addData("Selected alliance", "<strong>%s</strong>", alliance.name)
-            telemetry.addData("Selected goal", alliance.atagTarget)
+            telemetry.addData("Selected goal", alliance.aprilTagID)
 
             alliance = if (gamepad1.crossWasPressed()) {
                 Alliance.BLUE
@@ -108,6 +106,9 @@ class CombinedTeleOp : LinearOpMode() {
         val timer= LoopTimer()
         timer.start()
         intake.slow()
+
+        camera.targetID = alliance.aprilTagID
+
         while (opModeIsActive()) {
             // more bulk caching
             allHubs.forEach { hub -> hub.clearBulkCache() }
@@ -119,9 +120,9 @@ class CombinedTeleOp : LinearOpMode() {
             if (gamepad1.touchpadWasPressed()) fieldCentric = !fieldCentric
             if (gamepad1.circleWasPressed()) drivetrain.resetYaw()
             drivetrain.setDrivetrainPowers(drivetrain.calculateDrivetrainPowers(
-                gamepad1.left_stick_x,
-                -gamepad1.left_stick_y,
-                gamepad1.right_stick_x))
+                gamepad1.left_stick_x.toDouble(),
+                -gamepad1.left_stick_y.toDouble(),
+                gamepad1.right_stick_x.toDouble()))
 
             drivetrain.driveSpeed = driveSpeed
             drivetrain.fieldCentric = fieldCentric
@@ -145,11 +146,13 @@ class CombinedTeleOp : LinearOpMode() {
             if (gamepad1.squareWasPressed()) intake.toggle()
 
             // while held, reversed
-            intake.reversed = (gamepad1.cross)
+            if (gamepad1.crossWasPressed()) {
+                intake.outtake()
+            }
 
             // map autoaim behind left trigger
             if (gamepad1.left_trigger >= 0.25) {
-                turret.bearing = currentTagBearing
+                turret.bearing = camera.currentTagBearing
                 turret.periodic()
             } else {
                 turret.setPower(gamepad2.left_stick_x.toDouble() * 0.15)
@@ -161,7 +164,7 @@ class CombinedTeleOp : LinearOpMode() {
 
             // map auto adjust behind right trigger
             if (gamepad1.right_trigger >= 0.25) {
-                shooter.calculateTargetState(rangeDistanceToGoal)
+                shooter.calculateTargetState(camera.distanceToGoal)
             } else {
                 shooter.state = Shooter.ShooterState(hoodPosition, flywheelRPM)
             }
@@ -189,7 +192,6 @@ class CombinedTeleOp : LinearOpMode() {
 
             shooter.periodic()
             intake.periodic()
-            updateCamera(alliance.atagTarget)
 
             if (abs(gamepad2.right_stick_x) >= 0.15) {
                 spindexer.power = gamepad2.right_stick_x.toDouble() * 0.1
@@ -201,7 +203,7 @@ class CombinedTeleOp : LinearOpMode() {
             }
 
             // if we have a detection, green; otherwise, red
-            if (rangeDistanceToGoal > 0.0) {
+            if (camera.distanceToGoal > 0.0) {
                 gamepad1.setLedColor(0.0, 255.0, 0.0, Gamepad.LED_DURATION_CONTINUOUS)
             } else {
                 gamepad1.setLedColor(255.0, 0.0, 0.0, Gamepad.LED_DURATION_CONTINUOUS)
@@ -224,50 +226,15 @@ class CombinedTeleOp : LinearOpMode() {
             telemetry.addData("Flywheel target RPM", shooter.targetFlywheelRPM)
             telemetry.addData("Flywheel current RPM", shooter.flywheelRPM)
             telemetry.addData("Hood position", shooter.hoodPosition)
-            telemetry.addData("Distance (in)", rangeDistanceToGoal)
+            telemetry.addData("Distance (in)", camera.distanceToGoal)
             telemetry.addLine("-------------------------------------")
-            telemetry.addData("April tag current bearing", currentTagBearing)
+            telemetry.addData("April tag current bearing", camera.currentTagBearing)
             telemetry.addData("April tag target bearing", targetTagBearing)
             telemetry.addLine("-------------------------------------")
             telemetry.addData("Turret current", turret.bearing)
             telemetry.addData("Turret target", 0.0)
 
             telemetry.update()
-        }
-    }
-
-    fun updateCamera(target: String) {
-        val currentDetections = camera.aprilTag.detections
-
-        if (!currentDetections.isEmpty()) {
-            telemetry.addData("Detected april tags", currentDetections.size)
-
-            for (detection in currentDetections) {
-                if (detection.metadata != null) {
-                    telemetry.addData("TAG NAME", detection.metadata.name)
-
-                    // if the atag seen is the current target's atag
-                    // todo replate "Obelisk" with target
-                    if (detection.metadata.name.contains("Obelisk")) {
-                        rangeDistanceToGoal = detection.ftcPose.range
-                        
-                        // negative b/c default: left positive, right negative
-                        currentTagBearing = detection.ftcPose.bearing
-
-                    } else {
-                        rangeDistanceToGoal = 0.0
-                        currentTagBearing = 0.0
-                    }
-                } else {
-                    rangeDistanceToGoal = 0.0
-                    currentTagBearing = 0.0
-                    telemetry.addData("Current tag", "NO metadata")
-                }
-            }
-        } else { // no detections
-            telemetry.addData("Detected april tags", 0)
-            rangeDistanceToGoal = 0.0
-            currentTagBearing = 0.0
         }
     }
 }

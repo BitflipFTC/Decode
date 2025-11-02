@@ -30,9 +30,7 @@ class PedroPathing12RedAuto: OpMode() {
     lateinit var transfer: Transfer
 
     private var pathState = -1
-    private var currentTagBearing: Double = 0.0
     private val targetTagBearing: Double = 0.0
-    private var distanceToGoal: Double = -1.0
 
     var justFired = false
 
@@ -47,6 +45,7 @@ class PedroPathing12RedAuto: OpMode() {
         shooter = Shooter(this)
         transfer = Transfer(this)
         camera = OV9281(this, 4, 7)
+        camera.targetID = 24
 
         follower = Constants.createFollower(hardwareMap)
         buildPaths()
@@ -55,7 +54,7 @@ class PedroPathing12RedAuto: OpMode() {
 
     override fun loop() {
         follower.update()    // update pathing
-        updateCamera()       // update tag position + distance to tag
+        camera.periodic()       // update tag position + distance to tag
         autonomousUpdate()   // FSM control
 
         spindexer.periodic() // rotate spindexer as needed
@@ -68,9 +67,9 @@ class PedroPathing12RedAuto: OpMode() {
         telemetry.addData("x", follower.pose.x);
         telemetry.addData("y", follower.pose.y);
         telemetry.addData("heading", follower.pose.heading);
-        telemetry.addData("Current Red Goal Position", currentTagBearing)
+        telemetry.addData("Current Red Goal Position", camera.currentTagBearing)
         telemetry.addData("Target Red Goal Position", targetTagBearing)
-        telemetry.addData("Distance to goal (in)", distanceToGoal)
+        telemetry.addData("Distance to goal (in)", camera.distanceToGoal)
 
         telemetry.update();
     }
@@ -217,8 +216,8 @@ class PedroPathing12RedAuto: OpMode() {
 
             1 -> {
                 if (!follower.isBusy) {
-                    shooter.calculateTargetState(distanceToGoal)
-                    turret.bearing = currentTagBearing
+                    shooter.calculateTargetState(camera.distanceToGoal)
+                    turret.bearing = camera.currentTagBearing
                     turret.periodic()
 
                     // if aimed
@@ -259,46 +258,5 @@ class PedroPathing12RedAuto: OpMode() {
     fun setPathState (state: Int) {
         pathState = state
         pathTimer.resetTimer()
-    }
-
-    fun updateCamera() {
-        /*
-            public static AprilTagLibrary getDecodeTagLibrary(){
-                return new AprilTagLibrary.Builder()
-                        .addTag(20, "BlueTarget",
-                                6.5, new VectorF(-58.3727f, -55.6425f, 29.5f), DistanceUnit.INCH,
-                                new Quaternion(0.2182149f, -0.2182149f, -0.6725937f, 0.6725937f, 0))
-                        .addTag(21, "Obelisk_GPP",
-                                6.5, DistanceUnit.INCH)
-                        .addTag(22, "Obelisk_PGP",
-                                6.5, DistanceUnit.INCH)
-                        .addTag(23, "Obelisk_PPG",
-                                6.5, DistanceUnit.INCH)
-                        .addTag(24, "RedTarget",
-                                6.5, new VectorF(-58.3727f, 55.6425f, 29.5f), DistanceUnit.INCH,
-                                new Quaternion(0.6725937f, -0.6725937f, -0.2182149f, 0.2182149f, 0))
-                        .build();
-            }
-         */
-        val currentDetections = camera.aprilTag.detections
-
-        if (!currentDetections.isEmpty()) {
-            telemetry.addData("Detected april tags", currentDetections.size)
-
-            val detection = currentDetections[0]
-            if (detection.metadata != null) {
-                telemetry.addData("TAG NAME", detection.metadata.name)
-
-                if (detection.metadata.name.contains("RedTarget")) {
-                    distanceToGoal = detection.ftcPose.range
-                    currentTagBearing = -detection.ftcPose.bearing
-                }
-            } else {
-                telemetry.addData("Current tag", "NO metadata")
-            }
-        } else { // no detections
-            telemetry.addData("Detected april tags", 0)
-        }
-
     }
 }

@@ -3,7 +3,9 @@ package org.firstinspires.ftc.teamcode.hardware;
 import android.util.Size;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.seattlesolvers.solverslib.command.SubsystemBase;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.ExposureControl;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.GainControl;
@@ -25,7 +27,7 @@ import java.util.stream.Collectors;
 import dev.frozenmilk.util.modifier.BiModifier;
 
 
-public class OV9281 {
+public class OV9281 extends SubsystemBase {
 
     private final AprilTagProcessor aprilTag;
     private final VisionPortal visionPortal;
@@ -52,9 +54,19 @@ public class OV9281 {
         return visionPortal;
     }
 
+    private double currentTagBearing = 0;
+    private double distanceToGoal = 0;
+    private int targetID = 0;
+    // 20: Blue
+    // 24: Red
+
+    private Telemetry telemetry = null;
+
     // exposure: 1-7
     // gain: 1-6
     public OV9281 (OpMode opMode, int exposureMS, int gain) {
+        telemetry = opMode.telemetry;
+
         aprilTag = new AprilTagProcessor.Builder()
                 .setTagLibrary(AprilTagGameDatabase.getDecodeTagLibrary())
                 .setDrawTagOutline(true)
@@ -154,5 +166,53 @@ public class OV9281 {
         }
 
         return pattern;
+    }
+
+    @Override
+    public void periodic() {
+        ArrayList<AprilTagDetection> currentDetections = aprilTag.getDetections();
+
+        if (!currentDetections.isEmpty()) {
+            telemetry.addData("Detected April Tags", currentDetections.size());
+
+            for (AprilTagDetection detection : currentDetections) {
+                if (detection.metadata != null) {
+                    telemetry.addData("TAG NAME", detection.metadata.name);
+
+                    if (detection.id == targetID) {
+                        distanceToGoal = detection.ftcPose.range;
+                        currentTagBearing = detection.ftcPose.bearing;
+                    } else {
+                        distanceToGoal = -1.0;
+                        currentTagBearing = -1.0;
+                    }
+
+                } else {
+                    distanceToGoal = -1.0;
+                    currentTagBearing = -1.0;
+                    telemetry.addData("Current tag", "No metadata");
+                }
+            }
+        } else {
+            telemetry.addData("Detected April Tags", 0);
+            distanceToGoal = -1.0;
+            currentTagBearing = -1.0;
+        }
+    }
+
+    public void setTargetID (int id) {
+        targetID = id;
+    }
+
+    public int getTargetID() {
+        return targetID;
+    }
+
+    public double getCurrentTagBearing() {
+        return currentTagBearing;
+    }
+
+    public double getDistanceToGoal() {
+        return distanceToGoal;
     }
 }

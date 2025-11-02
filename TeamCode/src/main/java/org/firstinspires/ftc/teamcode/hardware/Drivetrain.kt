@@ -14,7 +14,7 @@ import kotlin.math.cos
 import kotlin.math.max
 import kotlin.math.sin
 
-class Drivetrain(opMode: OpMode) {
+class Drivetrain(opMode: OpMode): SubsystemBase() {
     class DrivePowers(val fl: Double, val fr: Double, val bl: Double, val br: Double) {
         @SuppressLint("DefaultLocale")
         override fun toString(): String {
@@ -27,12 +27,12 @@ class Drivetrain(opMode: OpMode) {
                 max(bl,br)
             )
 
-            if (max > 1.00) {
-                return DrivePowers(
+            return if (max > 1.00) {
+                DrivePowers(
                     fl / max, fr / max, bl / max, br / max
                 )
             } else {
-                return DrivePowers(
+                DrivePowers(
                     fl, fr, bl, br
                 )
             }
@@ -91,7 +91,7 @@ class Drivetrain(opMode: OpMode) {
         currentDrivePowers = powers
     }
 
-    fun calculateDrivetrainPowers (strafe: Float, forward: Float, yaw: Float): DrivePowers {
+    fun calculateDrivetrainPowers (strafe: Double, forward: Double, yaw: Double): DrivePowers {
         heading = imu.robotYawPitchRollAngles.yaw
 
         if (!fieldCentric) {
@@ -102,8 +102,8 @@ class Drivetrain(opMode: OpMode) {
                 (forward + strafe - yaw.toDouble()) * driveSpeed
             ).normalized()
         } else {
-            val rotStrafe = strafe * cos(Math.toRadians(heading)) - forward * sin(Math.toRadians(heading))
-            val rotForward = strafe * sin(Math.toRadians(heading)) + forward * sin(Math.toRadians(heading))
+            val rotStrafe = strafe * cos(Math.toRadians(-heading)) - forward * sin(Math.toRadians(-heading))
+            val rotForward = strafe * sin(Math.toRadians(-heading)) + forward * sin(Math.toRadians(-heading))
 
             return DrivePowers(
                 (rotForward + rotStrafe + yaw.toDouble()) * driveSpeed,

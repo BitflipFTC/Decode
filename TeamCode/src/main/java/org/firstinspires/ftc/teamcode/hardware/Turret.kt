@@ -19,7 +19,7 @@ class Turret(opMode: OpMode): SubsystemBase() {
         @JvmField
         var kS = 0.0272
         @JvmField
-        var setPointTolerance : Double = 3.toDouble() // degrees
+        var setPointTolerance : Double = 5.toDouble() // degrees
     }
 
     val hwMap: HardwareMap = opMode.hardwareMap
@@ -49,11 +49,7 @@ class Turret(opMode: OpMode): SubsystemBase() {
     override fun periodic() {
         pidOutput = controller.calculate(bearing, 0.0) // bearing approaches 0
 
-        if (!atSetPoint()) {
-            setPower(pidOutput)
-        } else {
-            setPower(0.0)
-        }
+        setPower(pidOutput)
 
         controller.setCoeffs(kP, 0.0, kD, 0.0, kS)
     }

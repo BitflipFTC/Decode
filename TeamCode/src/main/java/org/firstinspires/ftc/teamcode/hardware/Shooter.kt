@@ -128,7 +128,7 @@ class Shooter(opMode: OpMode): SubsystemBase() {
         flywheelMotor.mode = DcMotor.RunMode.RUN_WITHOUT_ENCODER
         flywheelMotor.zeroPowerBehavior = DcMotor.ZeroPowerBehavior.FLOAT
 
-        flywheelController.setPointTolerance = 85.toDouble()
+        flywheelController.setPointTolerance = 65.toDouble()
     }
     
     override fun periodic() {
