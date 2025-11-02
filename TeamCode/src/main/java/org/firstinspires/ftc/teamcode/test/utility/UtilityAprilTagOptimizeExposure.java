@@ -27,7 +27,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.firstinspires.ftc.teamcode.test;
+package org.firstinspires.ftc.teamcode.test.utility;
 
 import android.util.Size;
 

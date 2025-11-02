@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.test
+package org.firstinspires.ftc.teamcode.test.tuning
 
 import com.acmerobotics.dashboard.FtcDashboard
 import com.bylazar.battery.PanelsBattery

@@ -1,11 +1,10 @@
-package org.firstinspires.ftc.teamcode.test
+package org.firstinspires.ftc.teamcode.test.tuning
 
 import com.acmerobotics.dashboard.FtcDashboard
 import com.bylazar.telemetry.JoinedTelemetry
 import com.bylazar.telemetry.PanelsTelemetry
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
-import com.qualcomm.robotcore.hardware.DcMotorEx
 import org.firstinspires.ftc.teamcode.hardware.Intake
 import org.firstinspires.ftc.teamcode.hardware.Spindexer
 import org.firstinspires.ftc.teamcode.hardware.Transfer

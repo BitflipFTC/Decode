@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode
+package org.firstinspires.ftc.teamcode.opmodes
 
 import com.acmerobotics.dashboard.config.Config
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous
@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.util.ElapsedTime
 import org.firstinspires.ftc.robotcore.external.Telemetry
 import org.firstinspires.ftc.teamcode.hardware.Drivetrain
+import org.firstinspires.ftc.teamcode.hardware.Intake
 import org.firstinspires.ftc.teamcode.hardware.OV9281
 import org.firstinspires.ftc.teamcode.hardware.Shooter
 import org.firstinspires.ftc.teamcode.hardware.Spindexer
@@ -48,6 +49,7 @@ class ShootPreloadsAuto: LinearOpMode() {
         val shooter = Shooter(this)
         val spindexer = Spindexer(this)
         val turret = Turret(this)
+        val intake = Intake(this)
         camera = OV9281(this, 4, 6)
         val timer = ElapsedTime()
 
@@ -98,6 +100,7 @@ class ShootPreloadsAuto: LinearOpMode() {
                 telemetry.addLine("Put ${artifactOrder[preloadIndex].name} artifact in current slot (${spindexer.statesToSlotsMap.getValue(spindexer.state)})")
                 telemetry.addLine("Press CROSS once artifact is in place.")
 
+                intake.intake()
                 if (gamepad1.crossWasPressed()) {
                     spindexer.recordIntake(artifactOrder[preloadIndex])
                     preloadIndex++
@@ -105,59 +108,64 @@ class ShootPreloadsAuto: LinearOpMode() {
                     gamepad1.rumble(300)
                 }
             } else {
+                intake.slow()
                 telemetry.addLine("Configuration complete.")
                 telemetry.addLine("Press START to run Autonomous.")
             }
 
+            intake.periodic()
             spindexer.periodic()
 
             telemetry.update()
         }
 
         waitForStart()
-        timer.reset()
-
-
-        // if you are near, back up for like a second or so
-        if (startingPosition == Start.RED_NEAR || startingPosition == Start.BLUE_NEAR) {
-            drivetrain.setDrivetrainPowers(drivetrain.calculateDrivetrainPowers(0f, -0.5f, 0f))
-            // wait for driveTime milliseconds
-            while (timer.milliseconds() <= backupTime && opModeIsActive()) {
-                telemetry.addData("Backing Up", "...")
-                telemetry.update()
-            }
-            drivetrain.setDrivetrainPowers(drivetrain.calculateDrivetrainPowers(0f, 0f, 0f))
-            timer.reset()
+//        timer.reset()
+        intake.slow()
+        intake.periodic()
+//
+//
+//         if you are near, back up for like a second or so
+//        if (startingPosition == Start.RED_NEAR || startingPosition == Start.BLUE_NEAR) {
+//            drivetrain.setDrivetrainPowers(drivetrain.calculateDrivetrainPowers(0f, -0.5f, 0f))
+//             wait for driveTime milliseconds
+//            while (timer.milliseconds() <= backupTime && opModeIsActive()) {
+//                telemetry.addData("Backing Up", "...")
+//                telemetry.update()
+//            }
+//            drivetrain.setDrivetrainPowers(drivetrain.calculateDrivetrainPowers(0f, 0f, 0f))
+//            timer.reset()
 
             // then turn right or left
-            drivetrain.setDrivetrainPowers(drivetrain.calculateDrivetrainPowers(0f, 0f, if(startingPosition == Start.RED_NEAR) 0.5f else -0.5f))
-            while (timer.milliseconds() <= rotateTime && opModeIsActive()) {
-                telemetry.addData("Rotating", "...")
-                telemetry.update()
-            }
-            drivetrain.setDrivetrainPowers(drivetrain.calculateDrivetrainPowers(0f, 0f, 0f))
-            timer.reset()
-        }
+//            drivetrain.setDrivetrainPowers(drivetrain.calculateDrivetrainPowers(0f, 0f, if(startingPosition == Start.RED_NEAR) 0.5f else -0.5f))
+//            while (timer.milliseconds() <= rotateTime && opModeIsActive()) {
+//                telemetry.addData("Rotating", "...")
+//                telemetry.update()
+//            }
+//            drivetrain.setDrivetrainPowers(drivetrain.calculateDrivetrainPowers(0f, 0f, 0f))
+//            timer.reset()
+//        }
 
         // ok now get the motif
-        while (spindexer.motifPattern == MotifPattern.NONE && opModeIsActive()) {
-            spindexer.motifPattern = camera.getMotif()
-        }
+//        while (spindexer.motifPattern == MotifPattern.NONE && opModeIsActive()) {
+//            spindexer.motifPattern = camera.getMotif()
+//        }
 
+        spindexer.motifPattern = MotifPattern.PPG
         spindexer.toMotifOuttakePosition()
 
         // turn back
-        if (startingPosition == Start.RED_NEAR || startingPosition == Start.BLUE_NEAR) {
-            // then turn right or left
-            drivetrain.setDrivetrainPowers(drivetrain.calculateDrivetrainPowers(0f, 0f, if(startingPosition == Start.RED_NEAR) -0.5f else 0.5f))
-            while (timer.milliseconds() <= rotateTime && opModeIsActive()) {
-                spindexer.periodic()
-                telemetry.addData("Rotating", "...")
-                telemetry.update()
-            }
-            drivetrain.setDrivetrainPowers(drivetrain.calculateDrivetrainPowers(0f, 0f, 0f))
-            timer.reset()
-        }
+//        if (startingPosition == Start.RED_NEAR || startingPosition == Start.BLUE_NEAR) {
+//             then turn right or left
+//            drivetrain.setDrivetrainPowers(drivetrain.calculateDrivetrainPowers(0f, 0f, if(startingPosition == Start.RED_NEAR) -0.5f else 0.5f))
+//            while (timer.milliseconds() <= rotateTime && opModeIsActive()) {
+//                spindexer.periodic()
+//                telemetry.addData("Rotating", "...")
+//                telemetry.update()
+//            }
+//            drivetrain.setDrivetrainPowers(drivetrain.calculateDrivetrainPowers(0f, 0f, 0f))
+//            timer.reset()
+//        }
 
         // ok so now we can start shooting
         var doneShooting = false
@@ -173,6 +181,7 @@ class ShootPreloadsAuto: LinearOpMode() {
             spindexer.periodic()
             transfer.periodic()
 
+            intake.periodic()
             // if aimed
             if (turret.atSetPoint()) {
                 // if we should wait for the transfer + flywheel to reset
@@ -221,13 +230,16 @@ class ShootPreloadsAuto: LinearOpMode() {
         // ok shooting over
         // now move off / out of zones
 
-        drivetrain.setDrivetrainPowers(drivetrain.calculateDrivetrainPowers(if(startingPosition == Start.RED_NEAR || startingPosition == Start.RED_FAR) 0.5f else -0.5f, 0f,  0f))
-        while (timer.milliseconds() <= offLineTime && opModeIsActive()) {
-            telemetry.addData("Leaving", "...")
-            telemetry.update()
-        }
-        drivetrain.setDrivetrainPowers(drivetrain.calculateDrivetrainPowers(0f, 0f, 0f))
-        timer.reset()
+//        drivetrain.setDrivetrainPowers(drivetrain.calculateDrivetrainPowers(if(startingPosition == Start.RED_NEAR || startingPosition == Start.RED_FAR) 0.5f else -0.5f, 0f,  0f))
+//        while (timer.milliseconds() <= offLineTime && opModeIsActive()) {
+//            telemetry.addData("Leaving", "...")
+//            telemetry.update()
+//        }
+//        drivetrain.setDrivetrainPowers(drivetrain.calculateDrivetrainPowers(0f, 0f, 0f))
+//        timer.reset()
+
+        intake.off()
+        intake.periodic()
     }
 
     fun updateCamera(targetTag: String) {
@@ -240,9 +252,10 @@ class ShootPreloadsAuto: LinearOpMode() {
                 if (detection.metadata != null) {
                     telemetry.addData("TAG NAME", detection.metadata.name)
 
-                    if (detection.metadata.name.contains(targetTag)) {
+                    // todo change
+                    if (detection.metadata.name.contains("Obelisk")) {
                         currentTagDistance = detection.ftcPose.range
-                        currentTagBearing = -detection.ftcPose.bearing
+                        currentTagBearing = detection.ftcPose.bearing
                     }
                 } else {
                     telemetry.addData("Current tag", "NO metadata")

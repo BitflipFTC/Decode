@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode
+package org.firstinspires.ftc.teamcode.opmodes
 
 import com.pedropathing.follower.Follower
 import com.pedropathing.geometry.BezierCurve
@@ -15,7 +15,6 @@ import org.firstinspires.ftc.teamcode.hardware.Transfer
 import org.firstinspires.ftc.teamcode.hardware.Turret
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants
 import org.firstinspires.ftc.teamcode.util.Artifact
-import org.firstinspires.ftc.teamcode.util.InterpolatedLookupTable
 
 
 class PedroPathing12RedAuto: OpMode() {

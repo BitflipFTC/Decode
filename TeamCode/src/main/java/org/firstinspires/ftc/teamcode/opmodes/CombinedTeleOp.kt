@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode
+package org.firstinspires.ftc.teamcode.opmodes
 
 import com.acmerobotics.dashboard.FtcDashboard
 import com.acmerobotics.dashboard.config.Config
@@ -10,12 +10,6 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import com.qualcomm.robotcore.hardware.Gamepad
 import org.firstinspires.ftc.robotcore.external.Telemetry
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit
-import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder
-import org.firstinspires.ftc.robotcore.external.navigation.AxesReference
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit
-import org.firstinspires.ftc.robotcore.external.navigation.Pose2D
-import org.firstinspires.ftc.teamcode.ShootPreloadsAuto.Start
 import org.firstinspires.ftc.teamcode.hardware.Drivetrain
 import org.firstinspires.ftc.teamcode.hardware.Intake
 import org.firstinspires.ftc.teamcode.hardware.OV9281
@@ -25,8 +19,6 @@ import org.firstinspires.ftc.teamcode.hardware.Transfer
 import org.firstinspires.ftc.teamcode.hardware.Turret
 import org.firstinspires.ftc.teamcode.util.dpadToAxes
 import kotlin.math.abs
-import kotlin.math.pow
-import kotlin.math.sqrt
 
 @Config
 @TeleOp(name = "Combined TeleOp", group = "TeleOp")
@@ -137,7 +129,6 @@ class CombinedTeleOp : LinearOpMode() {
 
             // transfer
             if (gamepad1.triangleWasPressed()) { transfer.transferArtifact(); gamepad1.rumble(500) }
-//            if (gamepad1.crossWasPressed())    { transfer.undoTransfer(); gamepad1.rumble(500) }
 
             // spindexer
             if (gamepad1.rightBumperWasPressed()) {
@@ -154,15 +145,18 @@ class CombinedTeleOp : LinearOpMode() {
             if (gamepad1.squareWasPressed()) intake.toggle()
 
             // while held, reversed
-            intake.reversed = (gamepad1.left_trigger >= 0.25)
+            intake.reversed = (gamepad1.cross)
 
-            // map autoaim behind left bumper
-            // todo change
+            // map autoaim behind left trigger
             if (gamepad1.left_trigger >= 0.25) {
                 turret.bearing = currentTagBearing
                 turret.periodic()
             } else {
                 turret.setPower(gamepad2.left_stick_x.toDouble() * 0.15)
+            }
+
+            if (gamepad1.dpadDownWasPressed()) {
+                intake.off()
             }
 
             // map auto adjust behind right trigger

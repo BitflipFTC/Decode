@@ -1,8 +1,6 @@
-package org.firstinspires.ftc.teamcode.test
+package org.firstinspires.ftc.teamcode.test.tuning
 
 import com.acmerobotics.dashboard.FtcDashboard
-import com.acmerobotics.dashboard.config.Config
-import com.bylazar.configurables.annotations.Configurable
 import com.bylazar.telemetry.JoinedTelemetry
 import com.bylazar.telemetry.PanelsTelemetry
 import com.bylazar.utils.LoopTimer
