@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple
 import com.qualcomm.robotcore.hardware.HardwareMap
 import com.qualcomm.robotcore.hardware.PwmControl
 import com.qualcomm.robotcore.hardware.ServoImplEx
+import com.seattlesolvers.solverslib.command.SubsystemBase
 import org.firstinspires.ftc.robotcore.external.Telemetry
 import org.firstinspires.ftc.teamcode.hardware.Shooter.Companion.kD
 import org.firstinspires.ftc.teamcode.hardware.Shooter.Companion.kI
@@ -34,7 +35,7 @@ import org.firstinspires.ftc.teamcode.util.PIDController
  * @param hwMap The HardwareMap from your OpMode, used to initialize the motors and servos.
  */
 @Config
-class Shooter(opMode: OpMode) {
+class Shooter(opMode: OpMode): SubsystemBase() {
     companion object {
         const val FLYWHEEL_PPR = 28
         const val LOW_PASS = 0.05
@@ -130,7 +131,7 @@ class Shooter(opMode: OpMode) {
         flywheelController.setPointTolerance = 85.toDouble()
     }
     
-    fun periodic() {
+    override fun periodic() {
         lastFlywheelRPM = flywheelRPM
         flywheelRPM = (flywheelMotor.velocity / FLYWHEEL_PPR) * 60
         filteredFlywheelRPM = flywheelRPM * LOW_PASS + lastFlywheelRPM * (1 - LOW_PASS)

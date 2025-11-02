@@ -5,20 +5,19 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode
 import com.qualcomm.robotcore.hardware.CRServoImplEx
 import com.qualcomm.robotcore.hardware.HardwareMap
 import com.qualcomm.robotcore.hardware.PwmControl
+import com.seattlesolvers.solverslib.command.SubsystemBase
 import org.firstinspires.ftc.robotcore.external.Telemetry
 import org.firstinspires.ftc.teamcode.util.PIDController
 
 @Config
-class Turret(opMode: OpMode) {
+class Turret(opMode: OpMode): SubsystemBase() {
     companion object {
         @JvmField
-        var kP = 0.005
+        var kP = 0.006
         @JvmField
-        var kI = 0.0
+        var kD = 0.0012
         @JvmField
-        var kD = 0.002
-        @JvmField
-        var kS = 0.0
+        var kS = 0.0272
         @JvmField
         var setPointTolerance : Double = 3.toDouble() // degrees
     }
@@ -28,7 +27,8 @@ class Turret(opMode: OpMode) {
 
     val servoL : CRServoImplEx by lazy { hwMap["turretL"] as CRServoImplEx }
     val servoR : CRServoImplEx by lazy { hwMap["turretR"] as CRServoImplEx }
-    val controller = PIDController(kP, kI, kD, 0.0, kS)
+    val controller = PIDController(kP, 0.0, kD, 0.0, kS)
+
 
     var bearing = 0.0
     var pidOutput: Double = 0.0
@@ -46,7 +46,7 @@ class Turret(opMode: OpMode) {
         servoL.power = -pow
     }
 
-    fun periodic() {
+    override fun periodic() {
         pidOutput = controller.calculate(bearing, 0.0) // bearing approaches 0
 
         if (!atSetPoint()) {
@@ -55,10 +55,10 @@ class Turret(opMode: OpMode) {
             setPower(0.0)
         }
 
-        controller.setCoeffs(kP, kI, kD, 0.0, kS)
+        controller.setCoeffs(kP, 0.0, kD, 0.0, kS)
     }
 
-    fun getPower() = -pidOutput
+    fun getPower() = servoR.power
 
     fun atSetPoint() = controller.atSetPoint()
 }

@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx
 import com.qualcomm.robotcore.hardware.DcMotorSimple
 import com.qualcomm.robotcore.hardware.HardwareMap
 import com.qualcomm.robotcore.util.Range
+import com.seattlesolvers.solverslib.command.SubsystemBase
 import org.firstinspires.ftc.robotcore.external.Telemetry
 import org.firstinspires.ftc.teamcode.util.Artifact
 import org.firstinspires.ftc.teamcode.util.MotifPattern
@@ -34,16 +35,16 @@ import kotlin.math.roundToInt
  */
 @Config
 @Configurable
-class Spindexer(opMode: OpMode) {
+class Spindexer(opMode: OpMode): SubsystemBase() {
     companion object {
         const val GEAR_RATIO: Double = 1.375 // 22t out to 16t in
         const val TICKS_PER_REVOLUTION: Double = 537.7 * GEAR_RATIO
 
         @JvmField
-        var kP = 0.0025
+        var kP = 0.0035
 
         @JvmField
-        var kI = 0.0
+        var kI = 0.03
 
         @JvmField
         var kD = 0.0
@@ -266,7 +267,7 @@ class Spindexer(opMode: OpMode) {
      * Updates the spindexer's motor power based on the PID controller.
      * This method must be called in a loop for the spindexer to move to its target.
      */
-    fun periodic() {
+    override fun periodic() {
         controller.setCoeffs(kP, kI, kD, 0.0, kS)
 
         val pidOutput = controller.calculate(currentTicks, targetTicks)

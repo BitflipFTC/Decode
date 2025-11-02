@@ -55,10 +55,10 @@ hardwareMap
         reversed = false
     }
 
-//    fun off () {
-//        power = State.OFF
-//        reversed = false
-//    }
+    fun off () {
+        power = State.OFF
+        reversed = false
+    }
 
     fun outtake () {
         power = State.INTAKE

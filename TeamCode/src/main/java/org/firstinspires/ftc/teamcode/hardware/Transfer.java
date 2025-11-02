@@ -20,7 +20,7 @@ import org.firstinspires.ftc.teamcode.util.PIDController;
  * The [update] method must be called in a loop to drive the motor to its target position.
  */
 @Config
-public class Transfer {
+public class Transfer extends SubsystemBase {
     private final DcMotorEx motor;
     private final String configName = "transfer";
 
@@ -103,6 +103,7 @@ public class Transfer {
     /**
      * Updates the transfer mechanism. This method should be called in a loop.
      */
+    @Override
     public void periodic() {
         double pidOutput = controller.calculate(getCurrentPosition(), targetPosition);
         motor.setPower(Range.clip(pidOutput, -maxPower, maxPower));
