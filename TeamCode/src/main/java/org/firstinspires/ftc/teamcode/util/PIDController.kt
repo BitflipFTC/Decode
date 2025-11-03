@@ -87,8 +87,7 @@ open class PIDController(
         totalError += timePeriod * error
         totalError = min(maxIntegral, max(minIntegral, totalError))
 
-        var feedforward = setpoint * kV
-        feedforward = if (atSetPoint()) feedforward else feedforward + sign(error) * kS
+        val feedforward = setpoint * kV + sign(error) * kS
         var feedback = kP * error + kD * velError
         feedback = if (abs(feedback + feedforward) >= 1) feedback else feedback + kI * totalError
         return feedforward + feedback
