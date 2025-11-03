@@ -44,13 +44,13 @@ class Spindexer(opMode: OpMode): SubsystemBase() {
         var kP = 0.0035
 
         @JvmField
-        var kI = 0.03
+        var kI = 0.032
 
         @JvmField
-        var kD = 0.0
+        var kD = 0.00012
 
         @JvmField
-        var kS = 0.07
+        var kS = 0.035
 
         @JvmField
         var setpointTolerance = 1.0 // in degrees
@@ -150,6 +150,8 @@ class Spindexer(opMode: OpMode): SubsystemBase() {
         set(power) {
             motor.power = power
         }
+    val hasMotifAssortment: Boolean
+        get() = findPurpleSlots().size == 2 && findGreenSlots().size == 1
 
     var motifPattern: MotifPattern = MotifPattern.NONE
 
@@ -251,6 +253,26 @@ class Spindexer(opMode: OpMode): SubsystemBase() {
         }
     }
 
+    fun toFirstFullOuttakePosition() {
+        val fullSlots = findFullSlots()
+
+        if (!fullSlots.isEmpty()) {
+            var targetSlot = 0
+            when (fullSlots.size) {
+                // if 3, go to first
+                2 -> {
+                    val emptySlot = findEmptySlots()[0]
+                    targetSlot = if (emptySlot == 2) 0 else emptySlot + 1
+                }
+                1 -> {
+                    targetSlot = fullSlots[0]
+                }
+            }
+
+            state = slotsToOuttakes[targetSlot]
+        }
+    }
+
 
     // ------------------ INTERNAL HARDWARE CONTROL ------------------
 
@@ -282,6 +304,7 @@ class Spindexer(opMode: OpMode): SubsystemBase() {
         telemetry.addData("Spindexer current state", state.name)
         telemetry.addData("Spindexer atSetPoint", atSetPoint())
         telemetry.addData("Spindexer indexed artifacts", getArtifactString())
+        telemetry.addData("Spindexer has motif assortment", hasMotifAssortment)
         telemetry.addLine("---------------------------")
     }
 

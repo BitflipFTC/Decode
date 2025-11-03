@@ -78,12 +78,15 @@ public class OV9281 extends SubsystemBase {
                 .setOutputUnits(DistanceUnit.INCH, AngleUnit.DEGREES)
                 .build();
 
+        aprilTag.setDecimation(3f);
+        aprilTag.setPoseSolver(AprilTagProcessor.PoseSolver.OPENCV_SOLVEPNP_EPNP);
+
         visionPortal = new VisionPortal.Builder()
                 .setCamera(opMode.hardwareMap.get(WebcamName.class, "camera"))
                 .setCameraResolution(new Size(640,480))
                 .setShowStatsOverlay(true)
                 .setStreamFormat(VisionPortal.StreamFormat.MJPEG)
-                .enableLiveView(true)
+                .enableLiveView(false)
                 .addProcessor(aprilTag)
                 .setAutoStopLiveView(true)
                 .build();

@@ -44,22 +44,14 @@ class Shooter(opMode: OpMode): SubsystemBase() {
         const val PEAK_NEAR_LAUNCH_ZONE = 83.0
         const val CLOSE_SHOOTING = 32.1
         
-//        @JvmField
-//        var SERVO_LOWER_LIMIT = 0.0
-//        @JvmField
-//        var SERVO_UPPER_LIMIT = 1.0
         @JvmField
-        var kP = 0.0008
+        var kP = 0.003
         @JvmField
         var kI = 0.0
         @JvmField
         var kD = 0.0
         @JvmField
-        var kV = 0.00019
-//        @JvmField
-//        var targetFlywheelRPM = 3000.0
-//        @JvmField
-//        var hoodPosition = 0.3
+        var kV = 0.00234
     }
 
     class ShooterState (
@@ -71,7 +63,7 @@ class Shooter(opMode: OpMode): SubsystemBase() {
     val hwMap: HardwareMap = opMode.hardwareMap
     val telemetry: Telemetry = opMode.telemetry
 
-    private val vSensor by lazy { hwMap.voltageSensor as VoltageSensor }
+    private var vSensor: VoltageSensor = hwMap.get(VoltageSensor::class.java, "Control Hub")
     private val hoodServo by lazy { hwMap["hood"] as ServoImplEx }
     private val flywheelMotor by lazy { hwMap["flywheel"] as DcMotorEx }
     private val flywheelController = PIDController(kP, kI, kD, kV)
@@ -143,7 +135,7 @@ class Shooter(opMode: OpMode): SubsystemBase() {
         pidOutput = flywheelController.calculate(filteredFlywheelRPM, targetFlywheelRPM)
         
         // allow it to stop SLOWLY when target is 0
-        flywheelMotor.power = if (flywheelController.error <= -500) 0.0 else pidOutput * (12 / vSensor.voltage)
+        flywheelMotor.power = if (flywheelController.error <= -500) 0.0 else pidOutput / vSensor.voltage
 
         // hood stuff
 //        hoodServo.scaleRange(SERVO_LOWER_LIMIT, SERVO_UPPER_LIMIT)

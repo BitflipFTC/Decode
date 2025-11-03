@@ -21,7 +21,7 @@ class Intake(opMode: OpMode): SubsystemBase() {
         OFF(0.0),
         INTAKE(0.9),
         REVERSE(-0.9),
-        DEFAULT(0.2)
+        DEFAULT(0.3)
     }
 
     val hwMap: HardwareMap = opMode.hardwareMap

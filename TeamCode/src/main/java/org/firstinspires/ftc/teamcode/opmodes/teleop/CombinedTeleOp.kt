@@ -9,6 +9,7 @@ import com.qualcomm.hardware.lynx.LynxModule
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import com.qualcomm.robotcore.hardware.Gamepad
+import com.qualcomm.robotcore.util.ElapsedTime
 import org.firstinspires.ftc.robotcore.external.Telemetry
 import org.firstinspires.ftc.teamcode.hardware.Drivetrain
 import org.firstinspires.ftc.teamcode.hardware.Intake
@@ -40,7 +41,7 @@ class CombinedTeleOp : LinearOpMode() {
     enum class Alliance (val aprilTagID: Int) {
         RED(24),
         BLUE(20),
-        NONE(0)
+        NONE(21)
     }
 
     var alliance: Alliance = Alliance.NONE
@@ -103,8 +104,7 @@ class CombinedTeleOp : LinearOpMode() {
         val allHubs = hardwareMap.getAll(LynxModule::class.java)
         allHubs.forEach { hub -> hub.bulkCachingMode = LynxModule.BulkCachingMode.MANUAL }
 
-        val timer= LoopTimer()
-        timer.start()
+        val timer= ElapsedTime()
         intake.slow()
 
         camera.targetID = alliance.aprilTagID
@@ -126,6 +126,8 @@ class CombinedTeleOp : LinearOpMode() {
 
             drivetrain.driveSpeed = driveSpeed
             drivetrain.fieldCentric = fieldCentric
+
+            camera.periodic()
 
 
             // transfer
@@ -234,6 +236,8 @@ class CombinedTeleOp : LinearOpMode() {
             telemetry.addData("Turret current", turret.bearing)
             telemetry.addData("Turret target", 0.0)
 
+            telemetry.addData("Loop time", timer.milliseconds())
+            timer.reset()
             telemetry.update()
         }
     }
