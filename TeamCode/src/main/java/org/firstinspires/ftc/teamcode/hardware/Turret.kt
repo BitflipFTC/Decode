@@ -52,6 +52,8 @@ class Turret(opMode: OpMode): SubsystemBase() {
         setPower(pidOutput)
 
         controller.setCoeffs(kP, 0.0, kD, 0.0, kS)
+
+        telemetry.addData("Turret at set point", atSetPoint())
     }
 
     fun getPower() = servoR.power

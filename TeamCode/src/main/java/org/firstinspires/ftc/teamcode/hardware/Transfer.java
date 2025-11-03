@@ -109,6 +109,10 @@ public class Transfer extends SubsystemBase {
         motor.setPower(Range.clip(pidOutput, -maxPower, maxPower));
         controller.setSetPointTolerance(10);
         controller.setCoeffs(kP, kI, kD, 0.0, 0.0);
+
+        telemetry.addData("Transfer current ticks", getCurrentPosition());
+        telemetry.addData("Transfer target ticks", targetPosition);
+        telemetry.addData("Transfer at set point", atSetPoint());
     }
 
     public boolean atSetPoint() {

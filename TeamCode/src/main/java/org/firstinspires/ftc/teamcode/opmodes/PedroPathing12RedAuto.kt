@@ -85,7 +85,7 @@ class PedroPathing12RedAuto: OpMode() {
         spindexer.recordIntake(Artifact.PURPLE, 1)
         spindexer.recordIntake(Artifact.PURPLE, 2)
 
-        shooter.calculateTargetState(distanceToGoal)
+        shooter.calculateTargetState(camera.distanceToGoal)
         setPathState(0)
     }
 

@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple
 import com.qualcomm.robotcore.hardware.HardwareMap
 import com.qualcomm.robotcore.hardware.PwmControl
 import com.qualcomm.robotcore.hardware.ServoImplEx
+import com.qualcomm.robotcore.hardware.VoltageSensor
 import com.seattlesolvers.solverslib.command.SubsystemBase
 import org.firstinspires.ftc.robotcore.external.Telemetry
 import org.firstinspires.ftc.teamcode.hardware.Shooter.Companion.kD
@@ -48,7 +49,7 @@ class Shooter(opMode: OpMode): SubsystemBase() {
 //        @JvmField
 //        var SERVO_UPPER_LIMIT = 1.0
         @JvmField
-        var kP = 0.00085
+        var kP = 0.0008
         @JvmField
         var kI = 0.0
         @JvmField
@@ -70,6 +71,7 @@ class Shooter(opMode: OpMode): SubsystemBase() {
     val hwMap: HardwareMap = opMode.hardwareMap
     val telemetry: Telemetry = opMode.telemetry
 
+    private val vSensor by lazy { hwMap.voltageSensor as VoltageSensor }
     private val hoodServo by lazy { hwMap["hood"] as ServoImplEx }
     private val flywheelMotor by lazy { hwMap["flywheel"] as DcMotorEx }
     private val flywheelController = PIDController(kP, kI, kD, kV)
@@ -140,11 +142,16 @@ class Shooter(opMode: OpMode): SubsystemBase() {
         pidOutput = flywheelController.calculate(filteredFlywheelRPM, targetFlywheelRPM)
         
         // allow it to stop SLOWLY when target is 0
-        flywheelMotor.power = if (flywheelController.error <= -500) 0.0 else pidOutput
+        flywheelMotor.power = if (flywheelController.error <= -500) 0.0 else pidOutput * (12 / vSensor.voltage)
 
         // hood stuff
 //        hoodServo.scaleRange(SERVO_LOWER_LIMIT, SERVO_UPPER_LIMIT)
         hoodServo.position = hoodPosition
+
+        telemetry.addData("Flywheel target RPM", targetFlywheelRPM)
+        telemetry.addData("Flywheel current RPM", flywheelRPM)
+        telemetry.addData("Flywheel at set point", atSetPoint())
+        telemetry.addData("Hood position", hoodPosition)
     }
 
     fun atSetPoint() = flywheelController.atSetPoint()

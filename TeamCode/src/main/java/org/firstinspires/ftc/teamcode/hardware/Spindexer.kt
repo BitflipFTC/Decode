@@ -115,7 +115,7 @@ class Spindexer(opMode: OpMode): SubsystemBase() {
     // --------- gettable values ---------
 
     var state = States.INTAKE_ZERO
-        set(newState) {
+        set (newState) {
             // assign it to the backing field. if you assign it to state, infinite loop
             field = newState
 
@@ -126,6 +126,9 @@ class Spindexer(opMode: OpMode): SubsystemBase() {
             // add that to the existing target to ensure it takes the shortest path
             targetAngle = field.referenceAngle + (nearestRevolution * 360.0)
 
+            // resets atSetPoint() for commands
+            controller.calculate(currentTicks, targetTicks)
+
             resetIntegral()
         }
     val isEmpty: Boolean
@@ -134,7 +137,6 @@ class Spindexer(opMode: OpMode): SubsystemBase() {
         get() = !getArtifactString().contains("N")
     var targetAngle = state.referenceAngle
 //        private set
-    // todo readd private set when spindexer is fully functional automatically
     val targetTicks // no backing
         get() = (targetAngle / 360) * TICKS_PER_REVOLUTION
     val currentTicks: Double  // no backing
@@ -272,6 +274,11 @@ class Spindexer(opMode: OpMode): SubsystemBase() {
 
         val pidOutput = controller.calculate(currentTicks, targetTicks)
         motor.power = Range.clip(pidOutput, -maxPower, maxPower)
+
+        telemetry.addData("Spindexer target angle", targetAngle)
+        telemetry.addData("Spindexer current angle", currentAngle)
+        telemetry.addData("Spindexer current state", state.name)
+        telemetry.addData("Spindexer atSetPoint", atSetPoint())
     }
 
 

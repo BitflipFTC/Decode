@@ -14,12 +14,12 @@ class LineLeaveAuto: LinearOpMode() {
         @JvmField var driveTime: Int = 3000
     }
 
-    enum class Start (val strafe: Float, val forward: Float, val instructions: String) {
-        RED_NEAR(1f, 1f, "Place back of robot against the wall, about 6in from goal"),
-        RED_FAR(0.5f, 0f, "Place back of robot against the wall on outermost corner of far launch line"),
-        BLUE_NEAR(-0.5f, 0.25f, "Place back of robot against the wall, about 6in from goal"),
-        BLUE_FAR(-0.5f, 0f, "Place back of robot against the wall on outermost corner of far launch line"),
-        NONE(0f, 0f, "NO POSITION SELECTED")
+    enum class Start (val strafe: Double, val forward: Double, val instructions: String) {
+        RED_NEAR(1.0, 1.0, "Place back of robot against the wall, about 6in from goal"),
+        RED_FAR(0.5, 0.0, "Place back of robot against the wall on outermost corner of far launch line"),
+        BLUE_NEAR(-0.5, 0.25, "Place back of robot against the wall, about 6in from goal"),
+        BLUE_FAR(-0.5, 0.0, "Place back of robot against the wall on outermost corner of far launch line"),
+        NONE(0.0, 0.0, "NO POSITION SELECTED")
     }
 
     var startingPosition = Start.NONE
@@ -60,7 +60,7 @@ class LineLeaveAuto: LinearOpMode() {
         waitForStart()
         timer.reset()
 
-        drivetrain.setDrivetrainPowers(drivetrain.calculateDrivetrainPowers(startingPosition.strafe, startingPosition.forward, 0f))
+        drivetrain.setDrivetrainPowers(drivetrain.calculateDrivetrainPowers(startingPosition.strafe, startingPosition.forward, 0.0))
 
         // wait for driveTime milliseconds
         while (timer.milliseconds() <= driveTime && opModeIsActive()) {
@@ -71,6 +71,6 @@ class LineLeaveAuto: LinearOpMode() {
 
         }
 
-        drivetrain.setDrivetrainPowers(drivetrain.calculateDrivetrainPowers(0f,0f,0f))
+        drivetrain.setDrivetrainPowers(drivetrain.calculateDrivetrainPowers(0.0,0.0,0.0))
     }
 }
