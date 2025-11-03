@@ -1,26 +1,20 @@
-package org.firstinspires.ftc.teamcode.opmodes
+package org.firstinspires.ftc.teamcode.opmodes.teleop
 
-import android.graphics.Paint
 import com.acmerobotics.dashboard.FtcDashboard
 import com.bylazar.telemetry.JoinedTelemetry
 import com.bylazar.telemetry.PanelsTelemetry
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import com.seattlesolvers.solverslib.command.CommandOpMode
-import com.seattlesolvers.solverslib.command.CommandScheduler
-import com.seattlesolvers.solverslib.command.ConditionalCommand
 import com.seattlesolvers.solverslib.command.FunctionalCommand
 import com.seattlesolvers.solverslib.command.InstantCommand
 import com.seattlesolvers.solverslib.command.ParallelCommandGroup
-import com.seattlesolvers.solverslib.command.PerpetualCommand
 import com.seattlesolvers.solverslib.command.RepeatCommand
 import com.seattlesolvers.solverslib.command.RetryCommand
 import com.seattlesolvers.solverslib.command.RunCommand
 import com.seattlesolvers.solverslib.command.SequentialCommandGroup
-import com.seattlesolvers.solverslib.command.WaitCommand
 import com.seattlesolvers.solverslib.command.WaitUntilCommand
 import com.seattlesolvers.solverslib.gamepad.GamepadEx
 import com.seattlesolvers.solverslib.gamepad.GamepadKeys
-import org.firstinspires.ftc.robotcore.external.Func
 import org.firstinspires.ftc.teamcode.hardware.Drivetrain
 import org.firstinspires.ftc.teamcode.hardware.Intake
 import org.firstinspires.ftc.teamcode.hardware.OV9281
