@@ -135,6 +135,8 @@ class Spindexer(opMode: OpMode): SubsystemBase() {
         get() = getArtifactString() == "NNN"
     val isFull: Boolean
         get() = !getArtifactString().contains("N")
+    val fullSlotNumber: Int
+        get() = findFullSlots().size
     var targetAngle = state.referenceAngle
 //        private set
     val targetTicks // no backing
