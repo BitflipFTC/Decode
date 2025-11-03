@@ -279,6 +279,8 @@ class Spindexer(opMode: OpMode): SubsystemBase() {
         telemetry.addData("Spindexer current angle", currentAngle)
         telemetry.addData("Spindexer current state", state.name)
         telemetry.addData("Spindexer atSetPoint", atSetPoint())
+        telemetry.addData("Spindexer indexed artifacts", getArtifactString())
+        telemetry.addLine("---------------------------")
     }
 
 

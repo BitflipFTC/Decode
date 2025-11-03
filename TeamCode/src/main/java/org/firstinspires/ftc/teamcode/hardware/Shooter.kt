@@ -119,6 +119,7 @@ class Shooter(opMode: OpMode): SubsystemBase() {
             targetFlywheelRPM = state.rpm
             hoodPosition = state.angle
         }
+    var distance = 0.0
 
     init {
         hoodServo.pwmRange = PwmControl.PwmRange(500.0, 2500.0)
@@ -152,6 +153,8 @@ class Shooter(opMode: OpMode): SubsystemBase() {
         telemetry.addData("Flywheel current RPM", flywheelRPM)
         telemetry.addData("Flywheel at set point", atSetPoint())
         telemetry.addData("Hood position", hoodPosition)
+        telemetry.addData("Distance to goal", distance)
+        telemetry.addLine("---------------------------")
     }
 
     fun atSetPoint() = flywheelController.atSetPoint()
@@ -161,5 +164,7 @@ class Shooter(opMode: OpMode): SubsystemBase() {
         if (distance > 0.0) {
             state = lookupTable.calculate(distance)
         }
+
+        this.distance = distance
     }
 }

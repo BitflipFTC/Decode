@@ -113,6 +113,7 @@ public class Transfer extends SubsystemBase {
         telemetry.addData("Transfer current ticks", getCurrentPosition());
         telemetry.addData("Transfer target ticks", targetPosition);
         telemetry.addData("Transfer at set point", atSetPoint());
+        telemetry.addLine("---------------------------");
     }
 
     public boolean atSetPoint() {

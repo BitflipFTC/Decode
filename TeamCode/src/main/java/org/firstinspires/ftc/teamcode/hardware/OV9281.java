@@ -198,6 +198,8 @@ public class OV9281 extends SubsystemBase {
             distanceToGoal = -1.0;
             currentTagBearing = -1.0;
         }
+
+        telemetry.addLine("---------------------------");
     }
 
     public void setTargetID (int id) {

@@ -54,6 +54,8 @@ class Turret(opMode: OpMode): SubsystemBase() {
         controller.setCoeffs(kP, 0.0, kD, 0.0, kS)
 
         telemetry.addData("Turret at set point", atSetPoint())
+        telemetry.addData("Apriltag bearing", bearing)
+        telemetry.addLine("---------------------------")
     }
 
     fun getPower() = servoR.power

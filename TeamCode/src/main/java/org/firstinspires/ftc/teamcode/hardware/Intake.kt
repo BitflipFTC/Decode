@@ -66,5 +66,6 @@ class Intake(opMode: OpMode): SubsystemBase() {
     override fun periodic() {
         motor.power = power.value
         telemetry.addData("Intake state", power.name)
+        telemetry.addLine("---------------------------")
     }
 }
