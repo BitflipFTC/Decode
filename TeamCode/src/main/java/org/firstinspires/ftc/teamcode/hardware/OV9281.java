@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode.hardware;
 
 import android.util.Size;
 
+import androidx.annotation.NonNull;
+
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
 
@@ -36,6 +38,8 @@ public class OV9281 extends SubsystemBase {
     private long defaultExposure;
     private int defaultGain;
 
+    private final ArrayList<AprilTagDetection> detectionsBuffer = new ArrayList<>();
+
     private final Position cameraPosition = new Position(DistanceUnit.INCH,
             0, 0, 0, 0);
     private final YawPitchRollAngles cameraOrientation = new YawPitchRollAngles(AngleUnit.DEGREES,
@@ -64,7 +68,7 @@ public class OV9281 extends SubsystemBase {
 
     // exposure: 1-7
     // gain: 1-6
-    public OV9281 (OpMode opMode, int exposureMS, int gain) {
+    public OV9281 (@NonNull OpMode opMode, int exposureMS, int gain) {
         telemetry = opMode.telemetry;
 
         aprilTag = new AprilTagProcessor.Builder()
@@ -152,19 +156,13 @@ public class OV9281 extends SubsystemBase {
         ArrayList<AprilTagDetection> obeliskDetections = currentDetections.stream().filter((detection) -> detection.metadata.name.contains("Obelisk")).collect(Collectors.toCollection(ArrayList::new));
         MotifPattern pattern = MotifPattern.NONE;
 
-        if (!obeliskDetections.isEmpty()) {
-            for (AprilTagDetection detection : obeliskDetections) {
-                switch (detection.metadata.name) {
-                    case "Obelisk_GPP":
-                        pattern = MotifPattern.GPP;
-                        break;
-                    case "Obelisk_PGP":
-                        pattern = MotifPattern.PGP;
-                        break;
-                    case "Obelisk_PPG":
-                        pattern = MotifPattern.PPG;
-                        break;
-                }
+        if (obeliskDetections.isEmpty()) return pattern;
+
+        for (AprilTagDetection detection : obeliskDetections) {
+            switch (detection.metadata.name) {
+                case "Obelisk_GPP": pattern = MotifPattern.GPP; break;
+                case "Obelisk_PGP": pattern = MotifPattern.PGP; break;
+                case "Obelisk_PPG": pattern = MotifPattern.PPG; break;
             }
         }
 
@@ -173,35 +171,36 @@ public class OV9281 extends SubsystemBase {
 
     @Override
     public void periodic() {
-        ArrayList<AprilTagDetection> currentDetections = aprilTag.getDetections();
+        detectionsBuffer.clear();
+        detectionsBuffer.addAll(aprilTag.getDetections());
+        int count = detectionsBuffer.size();
 
-        if (!currentDetections.isEmpty()) {
-            telemetry.addData("Detected April Tags", currentDetections.size());
-
-            for (AprilTagDetection detection : currentDetections) {
-                if (detection.metadata != null) {
-                    telemetry.addData("TAG NAME", detection.metadata.name);
-
-                    if (detection.id == targetID) {
-                        distanceToGoal = detection.ftcPose.range;
-                        currentTagBearing = detection.ftcPose.bearing;
-                    } else {
-                        distanceToGoal = -1.0;
-                        currentTagBearing = -1.0;
-                    }
-
-                } else {
-                    distanceToGoal = -1.0;
-                    currentTagBearing = -1.0;
-                    telemetry.addData("Current tag", "No metadata");
-                }
-            }
-        } else {
+        if (count == 0) {
             telemetry.addData("Detected April Tags", 0);
             distanceToGoal = -1.0;
             currentTagBearing = -1.0;
+            return;
         }
 
+        telemetry.addData("Detected April Tags", detectionsBuffer.size());
+        for (AprilTagDetection detection : detectionsBuffer) {
+            if (detection.metadata == null) {
+                distanceToGoal = -1.0;
+                currentTagBearing = -1.0;
+                telemetry.addData("Current tag", "No metadata");
+                continue;
+            }
+
+            telemetry.addData("TAG NAME", detection.metadata.name);
+
+            if (detection.id == targetID) {
+                distanceToGoal = detection.ftcPose.range;
+                currentTagBearing = detection.ftcPose.bearing;
+            } else {
+                distanceToGoal = -1.0;
+                currentTagBearing = -1.0;
+            }
+        }
         telemetry.addLine("---------------------------");
     }
 
