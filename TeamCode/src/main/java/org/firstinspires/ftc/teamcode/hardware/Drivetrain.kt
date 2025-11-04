@@ -47,7 +47,7 @@ class Drivetrain(opMode: OpMode): SubsystemBase() {
     var heading = 0.0
         private set
 
-    var fieldCentric = true
+    var fieldCentric = false
     var driveSpeed = 0.8
 
     private val imu by lazy { hwMap["imu"] as IMU }

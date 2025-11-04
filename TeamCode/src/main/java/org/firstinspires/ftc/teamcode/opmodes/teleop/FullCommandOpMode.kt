@@ -21,7 +21,7 @@ import com.seattlesolvers.solverslib.command.WaitUntilCommand
 import com.seattlesolvers.solverslib.command.button.Trigger
 import com.seattlesolvers.solverslib.gamepad.GamepadEx
 import com.seattlesolvers.solverslib.gamepad.GamepadKeys
-import com.seattlesolvers.solverslib.gamepad.toggleWhenActive
+import com.seattlesolvers.solverslib.gamepad.whileActiveOnce
 import org.firstinspires.ftc.teamcode.hardware.Drivetrain
 import org.firstinspires.ftc.teamcode.hardware.Intake
 import org.firstinspires.ftc.teamcode.hardware.OV9281
@@ -49,6 +49,7 @@ class FullCommandOpMode: CommandOpMode() {
         telemetry.msTransmissionInterval = 500
         drivetrain = Drivetrain(this)
         drivetrain.fieldCentric = false
+
         intake     = Intake(this)
         camera     = OV9281(this, 4, 6)
         shooter    = Shooter(this)
@@ -56,16 +57,9 @@ class FullCommandOpMode: CommandOpMode() {
         transfer   = Transfer(this)
         turret     = Turret(this)
         val g1 = GamepadEx(gamepad1)
-        val g2 = GamepadEx(gamepad2)
-        val runIntake = RunCommand(intake::intake, intake)
-        val stopIntake = RunCommand(intake::off, intake)
-        val slowIntake = RunCommand(intake::slow, intake)
-        val outtake = RunCommand(intake::outtake, intake)
 
         camera.targetID = 21
         spindexer.motifPattern = MotifPattern.GPP
-
-        intake.defaultCommand = slowIntake
 
         g1.getGamepadButton(GamepadKeys.Button.SQUARE).toggleWhenPressed(intake.stopIntake())
         g1.getGamepadButton(GamepadKeys.Button.CROSS).whileHeld(intake.runOuttake()).whenReleased(ConditionalCommand(
@@ -82,21 +76,23 @@ class FullCommandOpMode: CommandOpMode() {
             shooter.calculateTargetState(camera.distanceToGoal)
         }, shooter)
 
-        val disableAutoaim = Trigger { g1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) >= 0.25 }
-        disableAutoaim.whileActiveContinuous(
-            InstantCommand(
-                {
-                    turret.bearing = 0.0
-                    shooter.targetFlywheelRPM = 0.0
-                }, turret, shooter
-            )
-        )
+//        val disableAutoaim = Trigger { g1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) >= 0.25 }
+//        disableAutoaim.whenActive(
+//            RunCommand(
+//                {
+//                    turret.bearing = 0.0
+//                    shooter.targetFlywheelRPM = 0.0
+//                }, turret, shooter
+//            )
+//        )
 
-        val aprilTagSeen = Trigger { camera.distanceToGoal <= 0.0 }
-        aprilTagSeen.toggleWhenActive(
+        // todo test led logic
+        val aprilTagSeen = Trigger { camera.distanceToGoal > 0.0 }
+        aprilTagSeen.whenActive(
             InstantCommand({
                 gamepad1.setLedColor(0.0,255.0,0.0,Gamepad.LED_DURATION_CONTINUOUS)
-            }),
+            })
+        ).whenInactive(
             InstantCommand({
                 gamepad1.setLedColor(255.0,0.0,0.0, Gamepad.LED_DURATION_CONTINUOUS)
             })
@@ -109,13 +105,6 @@ class FullCommandOpMode: CommandOpMode() {
                 g1.rightX
             ))
         }, drivetrain)
-
-        val shootBall = FunctionalCommand(
-            transfer::transferArtifact,
-            {}, { interrupted -> {} },
-            transfer::atSetPoint,
-            transfer
-        )
 
         val waitThenShootBall = SequentialCommandGroup(
             WaitUntilCommand(shooter::atSetPoint),
@@ -145,11 +134,10 @@ class FullCommandOpMode: CommandOpMode() {
 
         // returns to intake if it's empty
         val shootAllArtifacts = SequentialCommandGroup(
-            RetryCommand(
             spindexer.tryMotifOuttake(),
+            RepeatCommand(
                 shootCycle,
-                { spindexer.fullSlotNumber == 0 },
-                3
+                spindexer::isEmpty
             )
         )
 
@@ -170,6 +158,17 @@ class FullCommandOpMode: CommandOpMode() {
                 spindexer
             )
         )
+
+//        g1.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).toggleWhenPressed(
+//            StartEndCommand(
+//                {
+//                    camera.visionPortal.setProcessorEnabled(camera.aprilTag, false)
+//                    camera.resetAprilTagData()
+//                },
+//                { camera.visionPortal.setProcessorEnabled(camera.aprilTag, true) },
+//                camera
+//            )
+//        )
 
         CommandScheduler.getInstance().setBulkReading(hardwareMap, LynxModule.BulkCachingMode.MANUAL)
     }
