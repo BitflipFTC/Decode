@@ -23,6 +23,7 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagGameDatabase;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
 import java.util.ArrayList;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -172,7 +173,8 @@ public class OV9281 extends SubsystemBase {
     @Override
     public void periodic() {
         detectionsBuffer.clear();
-        detectionsBuffer.addAll(aprilTag.getDetections());
+        Optional.ofNullable(aprilTag.getDetections()).ifPresent(detectionsBuffer::addAll);
+
         int count = detectionsBuffer.size();
 
         if (count == 0) {
@@ -214,6 +216,11 @@ public class OV9281 extends SubsystemBase {
 
     public double getCurrentTagBearing() {
         return currentTagBearing;
+    }
+
+    public void resetAprilTagData() {
+        currentTagBearing = 0.0;
+        distanceToGoal = 0.0;
     }
 
     public double getDistanceToGoal() {
