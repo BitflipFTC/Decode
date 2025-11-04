@@ -8,6 +8,8 @@ import com.qualcomm.robotcore.hardware.DcMotorEx
 import com.qualcomm.robotcore.hardware.DcMotorSimple
 import com.qualcomm.robotcore.hardware.HardwareMap
 import com.qualcomm.robotcore.util.Range
+import com.seattlesolvers.solverslib.command.ConditionalCommand
+import com.seattlesolvers.solverslib.command.FunctionalCommand
 import com.seattlesolvers.solverslib.command.SubsystemBase
 import org.firstinspires.ftc.robotcore.external.Telemetry
 import org.firstinspires.ftc.teamcode.util.Artifact
@@ -44,19 +46,22 @@ class Spindexer(opMode: OpMode): SubsystemBase() {
         var kP = 0.0035
 
         @JvmField
-        var kI = 0.032
+        var kI = 0.075
 
         @JvmField
         var kD = 0.00012
 
         @JvmField
-        var kS = 0.035
+        var kS = 0.01
 
         @JvmField
         var setpointTolerance = 1.0 // in degrees
 
         @JvmField
         var maxPower = 0.5
+
+        @JvmField
+        var tuning = false
     }
 
     val hwMap: HardwareMap = opMode.hardwareMap
@@ -135,7 +140,7 @@ class Spindexer(opMode: OpMode): SubsystemBase() {
         get() = getArtifactString() == "NNN"
     val isFull: Boolean
         get() = !getArtifactString().contains("N")
-    val fullSlotNumber: Int
+    val totalFullSlots: Int
         get() = findFullSlots().size
     var targetAngle = state.referenceAngle
 //        private set
@@ -257,15 +262,24 @@ class Spindexer(opMode: OpMode): SubsystemBase() {
         val fullSlots = findFullSlots()
 
         if (!fullSlots.isEmpty()) {
-            var targetSlot = 0
+            var targetSlot: Int
             when (fullSlots.size) {
-                // if 3, go to first
                 2 -> {
-                    val emptySlot = findEmptySlots()[0]
+                    val emptySlot = findEmptySlots().first()
+
+                    // for slots [0,2]
+                    // empty = 1, so targets 2, then can go 2 -> 0
+                    // for [1,2]
+                    // empty = 1, so targets 1, then can go 1 -> 2
+                    // for [0,1]
+                    // empty = 2, so targets 0, then can go 0 -> 1
                     targetSlot = if (emptySlot == 2) 0 else emptySlot + 1
                 }
                 1 -> {
                     targetSlot = fullSlots[0]
+                }
+                else -> {
+                    targetSlot = 0
                 }
             }
 
@@ -277,7 +291,7 @@ class Spindexer(opMode: OpMode): SubsystemBase() {
     // ------------------ INTERNAL HARDWARE CONTROL ------------------
 
     private val motor by lazy { hwMap["spindexer"] as DcMotorEx }
-    private val controller = PIDController(kP, kI, kD)
+    private val controller = PIDController(kP, kI, kD, 0.0, kS)
 
     init {
         motor.mode = DcMotor.RunMode.STOP_AND_RESET_ENCODER
@@ -294,7 +308,9 @@ class Spindexer(opMode: OpMode): SubsystemBase() {
      * This method must be called in a loop for the spindexer to move to its target.
      */
     override fun periodic() {
-        controller.setCoeffs(kP, kI, kD, 0.0, kS)
+        if (tuning) {
+            controller.setCoeffs(kP, kI, kD, 0.0, kS)
+        }
 
         val pidOutput = controller.calculate(currentTicks, targetTicks)
         motor.power = Range.clip(pidOutput, -maxPower, maxPower)
@@ -305,6 +321,7 @@ class Spindexer(opMode: OpMode): SubsystemBase() {
         telemetry.addData("Spindexer atSetPoint", atSetPoint())
         telemetry.addData("Spindexer indexed artifacts", getArtifactString())
         telemetry.addData("Spindexer has motif assortment", hasMotifAssortment)
+        telemetry.addData("Times to shoot", totalFullSlots)
         telemetry.addLine("---------------------------")
     }
 
@@ -323,4 +340,39 @@ class Spindexer(opMode: OpMode): SubsystemBase() {
     private fun findPurpleSlots() =
         collectedArtifacts.mapIndexedNotNull { index, artifact -> if (artifact == Artifact.PURPLE) index else null }
 
+    // COMMANDS
+
+    fun goToNextIntake() = FunctionalCommand(
+        this::toNextIntakePosition,
+        {}, { interrupted -> {} },
+        this::atSetPoint,
+        this
+    )
+
+    fun goToNextOuttake() = FunctionalCommand(
+        this::toNextOuttakePosition,
+        {}, { interrupted -> {}},
+        this::atSetPoint,
+        this
+    )
+
+    fun goToFirstFullOuttake() = FunctionalCommand(
+        this::toFirstFullOuttakePosition,
+        {}, { interrupted -> {} },
+        this::atSetPoint,
+        this
+    )
+
+    fun goToMotifOuttake() = FunctionalCommand(
+        this::toMotifOuttakePosition,
+        {}, { interrupted -> {} },
+        this::atSetPoint,
+        this
+    )
+
+    fun tryMotifOuttake() = ConditionalCommand(
+        goToMotifOuttake(),
+        goToFirstFullOuttake(),
+        this::hasMotifAssortment
+    )
 }

@@ -20,6 +20,8 @@ class Turret(opMode: OpMode): SubsystemBase() {
         var kS = 0.0272
         @JvmField
         var setPointTolerance : Double = 5.toDouble() // degrees
+        @JvmField
+        var tuning = false
     }
 
     val hwMap: HardwareMap = opMode.hardwareMap
@@ -51,7 +53,9 @@ class Turret(opMode: OpMode): SubsystemBase() {
 
         setPower(pidOutput)
 
-        controller.setCoeffs(kP, 0.0, kD, 0.0, kS)
+        if (tuning) {
+            controller.setCoeffs(kP, 0.0, kD, 0.0, kS)
+        }
 
         telemetry.addData("Turret at set point", atSetPoint())
         telemetry.addData("Apriltag bearing", bearing)

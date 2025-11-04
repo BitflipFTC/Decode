@@ -52,6 +52,9 @@ class Shooter(opMode: OpMode): SubsystemBase() {
         var kD = 0.0
         @JvmField
         var kV = 0.00234
+
+        @JvmField
+        var tuning = false
     }
 
     class ShooterState (
@@ -130,7 +133,10 @@ class Shooter(opMode: OpMode): SubsystemBase() {
         lastFlywheelRPM = flywheelRPM
         flywheelRPM = (flywheelMotor.velocity / FLYWHEEL_PPR) * 60
         filteredFlywheelRPM = flywheelRPM * LOW_PASS + lastFlywheelRPM * (1 - LOW_PASS)
-        flywheelController.setCoeffs(kP, kI, kD, kV, 0.0)
+
+        if (tuning) {
+            flywheelController.setCoeffs(kP, kI, kD, kV, 0.0)
+        }
         
         pidOutput = flywheelController.calculate(filteredFlywheelRPM, targetFlywheelRPM)
         

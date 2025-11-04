@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.Range;
+import com.seattlesolvers.solverslib.command.FunctionalCommand;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
 import com.seattlesolvers.solverslib.util.TelemetryData;
 
@@ -36,6 +37,7 @@ public class Transfer extends SubsystemBase {
     public static double kI = 0.03;
     public static double kD = 0.0002;
     public static double maxPower = 1;
+    public static boolean tuning = false;
     private final PIDController controller = new PIDController(kP, kI, kD, 0, 0, 1, -1);
 
     private final Telemetry telemetry;
@@ -49,6 +51,8 @@ public class Transfer extends SubsystemBase {
         motor.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
         motor.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        controller.setSetPointTolerance(10);
 
         telemetry = opMode.telemetry;
     }
@@ -107,8 +111,10 @@ public class Transfer extends SubsystemBase {
     public void periodic() {
         double pidOutput = controller.calculate(getCurrentPosition(), targetPosition);
         motor.setPower(Range.clip(pidOutput, -maxPower, maxPower));
-        controller.setSetPointTolerance(10);
-        controller.setCoeffs(kP, kI, kD, 0.0, 0.0);
+
+        if (tuning) {
+            controller.setCoeffs(kP, kI, kD, 0.0, 0.0);
+        }
 
         telemetry.addData("Transfer current ticks", getCurrentPosition());
         telemetry.addData("Transfer target ticks", targetPosition);
@@ -118,5 +124,14 @@ public class Transfer extends SubsystemBase {
 
     public boolean atSetPoint() {
         return controller.atSetPoint();
+    }
+
+    public FunctionalCommand getShootArtifact() {
+        return new FunctionalCommand(
+                this::transferArtifact,
+                () -> {}, (interrupted) -> {},
+                this::atSetPoint,
+                this
+        );
     }
 }
