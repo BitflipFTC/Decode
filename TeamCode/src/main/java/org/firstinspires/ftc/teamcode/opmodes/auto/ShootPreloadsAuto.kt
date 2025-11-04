@@ -108,7 +108,7 @@ class ShootPreloadsAuto: LinearOpMode() {
                     gamepad1.rumble(300)
                 }
             } else {
-                intake.slow()
+                intake.off()
                 telemetry.addLine("Configuration complete.")
                 telemetry.addLine("Press START to run Autonomous.")
             }
@@ -121,7 +121,7 @@ class ShootPreloadsAuto: LinearOpMode() {
 
         waitForStart()
 //        timer.reset()
-        intake.slow()
+        intake.intake()
         intake.periodic()
 //
 //
