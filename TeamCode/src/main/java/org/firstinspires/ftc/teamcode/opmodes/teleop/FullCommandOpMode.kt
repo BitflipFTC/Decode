@@ -12,9 +12,11 @@ import com.seattlesolvers.solverslib.command.CommandScheduler
 import com.seattlesolvers.solverslib.command.ConditionalCommand
 import com.seattlesolvers.solverslib.command.FunctionalCommand
 import com.seattlesolvers.solverslib.command.InstantCommand
+import com.seattlesolvers.solverslib.command.RepeatCommand
 import com.seattlesolvers.solverslib.command.RetryCommand
 import com.seattlesolvers.solverslib.command.RunCommand
 import com.seattlesolvers.solverslib.command.SequentialCommandGroup
+import com.seattlesolvers.solverslib.command.StartEndCommand
 import com.seattlesolvers.solverslib.command.WaitUntilCommand
 import com.seattlesolvers.solverslib.command.button.Trigger
 import com.seattlesolvers.solverslib.gamepad.GamepadEx
@@ -29,7 +31,6 @@ import org.firstinspires.ftc.teamcode.hardware.Transfer
 import org.firstinspires.ftc.teamcode.hardware.Turret
 import org.firstinspires.ftc.teamcode.util.Artifact
 import org.firstinspires.ftc.teamcode.util.MotifPattern
-import java.util.stream.IntStream
 
 @TeleOp(name = "Command Drive", group = "TeleOp")
 class FullCommandOpMode: CommandOpMode() {
@@ -47,6 +48,7 @@ class FullCommandOpMode: CommandOpMode() {
         telemetry = JoinedTelemetry(telemetry, PanelsTelemetry.ftcTelemetry, FtcDashboard.getInstance().telemetry)
         telemetry.msTransmissionInterval = 500
         drivetrain = Drivetrain(this)
+        drivetrain.fieldCentric = false
         intake     = Intake(this)
         camera     = OV9281(this, 4, 6)
         shooter    = Shooter(this)
@@ -65,9 +67,12 @@ class FullCommandOpMode: CommandOpMode() {
 
         intake.defaultCommand = slowIntake
 
-        g1.getGamepadButton(GamepadKeys.Button.SQUARE).toggleWhenPressed(runIntake)
-        g1.getGamepadButton(GamepadKeys.Button.CROSS).whenHeld(outtake)
-        g1.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenPressed(stopIntake)
+        g1.getGamepadButton(GamepadKeys.Button.SQUARE).toggleWhenPressed(intake.stopIntake())
+        g1.getGamepadButton(GamepadKeys.Button.CROSS).whileHeld(intake.runOuttake()).whenReleased(ConditionalCommand(
+            intake.runIntake(),
+            intake.stopIntake(),
+            { intake.power == Intake.State.INTAKE }
+        ))
 
         turret.defaultCommand = RunCommand({
             turret.bearing = camera.currentTagBearing
@@ -114,7 +119,7 @@ class FullCommandOpMode: CommandOpMode() {
 
         val waitThenShootBall = SequentialCommandGroup(
             WaitUntilCommand(shooter::atSetPoint),
-            shootBall
+            transfer.shootArtifact
         )
 
         val shootBallRetry = RetryCommand(
@@ -126,55 +131,22 @@ class FullCommandOpMode: CommandOpMode() {
         // so !shooter.atSetPoint() will have the same value when polled in the .whenFinished{} bloc
         // and when polled in the success condition
 
-        val goToNextIntake = FunctionalCommand(
-            spindexer::toNextIntakePosition,
-            {}, { interrupted -> {} },
-            spindexer::atSetPoint,
-            spindexer
-        )
-
-        val goToNextOuttake = FunctionalCommand(
-            spindexer::toNextOuttakePosition,
-            {}, { interrupted -> {}},
-            spindexer::atSetPoint,
-            spindexer
-        )
-
-        val goToFirstFullOuttake = FunctionalCommand(
-            spindexer::toFirstFullOuttakePosition,
-            {}, { interrupted -> {} },
-            spindexer::atSetPoint,
-            spindexer, intake
-        )
-
-        val goToMotifOuttake = FunctionalCommand(
-            spindexer::toMotifOuttakePosition,
-            {}, { interrupted -> {} },
-            spindexer::atSetPoint,
-            spindexer
-        )
-
-        val tryMotifOuttake = ConditionalCommand(
-            goToMotifOuttake,
-            goToFirstFullOuttake,
-            spindexer::hasMotifAssortment
-        )
-
         val shootCycle = SequentialCommandGroup(
             WaitUntilCommand(turret::atSetPoint).withTimeout(1000),
             shootBallRetry,
+
             // if the spindexer is empty, return to intake 0.
             ConditionalCommand(
-                goToNextIntake,
-                goToNextOuttake,
+                spindexer.goToNextIntake(),
+                spindexer.goToNextOuttake(),
                 spindexer::isEmpty
             )
         )
 
         // returns to intake if it's empty
         val shootAllArtifacts = SequentialCommandGroup(
-            tryMotifOuttake,
             RetryCommand(
+            spindexer.tryMotifOuttake(),
                 shootCycle,
                 { spindexer.fullSlotNumber == 0 },
                 3
@@ -206,12 +178,6 @@ class FullCommandOpMode: CommandOpMode() {
         super.run()
         totalLoops++
         telemetry.addData("Avg loop time", timer.milliseconds() / totalLoops)
-        if (totalLoops == 500) {
-            timer.reset()
-            totalLoops = 0
-        }
-
-        telemetry.addData("Times to shoot", spindexer.fullSlotNumber)
 
         telemetry.update()
     }
