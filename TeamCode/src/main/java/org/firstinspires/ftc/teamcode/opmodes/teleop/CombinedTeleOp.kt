@@ -105,7 +105,7 @@ class CombinedTeleOp : LinearOpMode() {
         allHubs.forEach { hub -> hub.bulkCachingMode = LynxModule.BulkCachingMode.MANUAL }
 
         val timer= ElapsedTime()
-        intake.slow()
+        intake.intake()
 
         camera.targetID = alliance.aprilTagID
 
@@ -149,7 +149,11 @@ class CombinedTeleOp : LinearOpMode() {
 
             // while held, reversed
             if (gamepad1.crossWasPressed()) {
-                intake.outtake()
+                intake.reversed = true
+            }
+
+            if (gamepad1.crossWasReleased()) {
+                intake.reversed = false
             }
 
             // map autoaim behind left trigger

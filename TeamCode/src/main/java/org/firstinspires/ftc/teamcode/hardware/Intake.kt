@@ -5,6 +5,11 @@ import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.DcMotorEx
 import com.qualcomm.robotcore.hardware.DcMotorSimple
 import com.qualcomm.robotcore.hardware.HardwareMap
+import com.seattlesolvers.solverslib.command.Command
+import com.seattlesolvers.solverslib.command.FunctionalCommand
+import com.seattlesolvers.solverslib.command.InstantCommand
+import com.seattlesolvers.solverslib.command.RunCommand
+import com.seattlesolvers.solverslib.command.StartEndCommand
 import com.seattlesolvers.solverslib.command.SubsystemBase
 import org.firstinspires.ftc.robotcore.external.Telemetry
 
@@ -20,8 +25,6 @@ class Intake(opMode: OpMode): SubsystemBase() {
     enum class State (val value: Double) {
         OFF(0.0),
         INTAKE(0.9),
-        REVERSE(-0.9),
-        DEFAULT(0.3)
     }
 
     val hwMap: HardwareMap = opMode.hardwareMap
@@ -29,22 +32,29 @@ class Intake(opMode: OpMode): SubsystemBase() {
 
     private val motor by lazy { hwMap["intake"] as DcMotorEx }
 
+    var reversed = false
+
     /**
      * The current power of the intake motor. Can be set to any value between -1.0 and 1.0.
      */
     var power: State = State.OFF
 
+    fun runIntake()  = RunCommand(this::intake, this)
+    fun stopIntake() = RunCommand(this::off, this)
+    fun runOuttake() = StartEndCommand({ reversed = true }, { reversed = false }, this)
+
     init {
         motor.zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE
         motor.mode = DcMotor.RunMode.RUN_WITHOUT_ENCODER
         motor.direction = DcMotorSimple.Direction.REVERSE
+        this.defaultCommand = runIntake()
     }
 
     /**
      * Toggles the intake motor's power between full forward (1.0) and off (0.0).
      */
     fun toggle () {
-        power = if (power == State.INTAKE) State.DEFAULT else State.INTAKE
+        power = if (power == State.INTAKE) State.OFF else State.INTAKE
     }
 
     fun intake () {
@@ -55,17 +65,10 @@ class Intake(opMode: OpMode): SubsystemBase() {
         power = State.OFF
     }
 
-    fun outtake () {
-        power = State.REVERSE
-    }
-
-    fun slow() {
-        power = State.DEFAULT
-    }
-
     override fun periodic() {
-        motor.power = power.value
+        motor.power = if (reversed) -power.value else power.value
         telemetry.addData("Intake state", power.name)
+        telemetry.addData("Reversed", reversed)
         telemetry.addLine("---------------------------")
     }
 }
