@@ -69,6 +69,10 @@ public class Transfer extends SubsystemBase {
         return targetPosition;
     }
 
+    public void setTargetPosition(double t) {
+        targetPosition = t;
+    }
+
     /**
      * Initiates the transfer of an artifact. The motor will turn at least a specified number of times,
      * turning (at most) one additional time in order to return to the nearest rotation
@@ -126,7 +130,7 @@ public class Transfer extends SubsystemBase {
         return controller.atSetPoint();
     }
 
-    public FunctionalCommand getShootArtifact() {
+    public FunctionalCommand shootArtifact() {
         return new FunctionalCommand(
                 this::transferArtifact,
                 () -> {}, (interrupted) -> {},

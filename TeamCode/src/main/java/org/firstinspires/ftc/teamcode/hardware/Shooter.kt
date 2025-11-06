@@ -45,13 +45,13 @@ class Shooter(opMode: OpMode): SubsystemBase() {
         const val CLOSE_SHOOTING = 32.1
         
         @JvmField
-        var kP = 0.003
+        var kP = 0.005
         @JvmField
         var kI = 0.0
         @JvmField
         var kD = 0.0
         @JvmField
-        var kV = 0.00234
+        var kV = 0.00255
 
         @JvmField
         var tuning = false
@@ -126,7 +126,7 @@ class Shooter(opMode: OpMode): SubsystemBase() {
         flywheelMotor.mode = DcMotor.RunMode.RUN_WITHOUT_ENCODER
         flywheelMotor.zeroPowerBehavior = DcMotor.ZeroPowerBehavior.FLOAT
 
-        flywheelController.setPointTolerance = 65.toDouble()
+        flywheelController.setPointTolerance = 155.toDouble()
     }
     
     override fun periodic() {

@@ -173,7 +173,9 @@ public class OV9281 extends SubsystemBase {
     @Override
     public void periodic() {
         detectionsBuffer.clear();
-        Optional.ofNullable(aprilTag.getDetections()).ifPresent(detectionsBuffer::addAll);
+        if (aprilTag.getDetections() != null) {
+            detectionsBuffer.addAll(aprilTag.getDetections());
+        }
 
         int count = detectionsBuffer.size();
 
@@ -225,5 +227,9 @@ public class OV9281 extends SubsystemBase {
 
     public double getDistanceToGoal() {
         return distanceToGoal;
+    }
+
+    public int getDetectionsAmount() {
+        return detectionsBuffer.size();
     }
 }

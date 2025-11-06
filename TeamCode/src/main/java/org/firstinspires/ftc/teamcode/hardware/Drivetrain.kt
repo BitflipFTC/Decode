@@ -10,6 +10,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap
 import com.qualcomm.robotcore.hardware.IMU
 import com.seattlesolvers.solverslib.command.SubsystemBase
 import org.firstinspires.ftc.robotcore.external.Telemetry
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit
 import kotlin.math.cos
 import kotlin.math.max
 import kotlin.math.sin
@@ -96,20 +97,20 @@ class Drivetrain(opMode: OpMode): SubsystemBase() {
 
         if (!fieldCentric) {
             return DrivePowers(
-                (forward + strafe + yaw.toDouble()) * driveSpeed,
-                (forward - strafe - yaw.toDouble()) * driveSpeed,
-                (forward - strafe + yaw.toDouble()) * driveSpeed,
-                (forward + strafe - yaw.toDouble()) * driveSpeed
+                (forward + strafe + yaw) * driveSpeed,
+                (forward - strafe - yaw) * driveSpeed,
+                (forward - strafe + yaw) * driveSpeed,
+                (forward + strafe - yaw) * driveSpeed
             ).normalized()
         } else {
-            val rotStrafe = strafe * cos(Math.toRadians(-heading)) - forward * sin(Math.toRadians(-heading))
-            val rotForward = strafe * sin(Math.toRadians(-heading)) + forward * sin(Math.toRadians(-heading))
+            val rotStrafe = strafe * cos(-heading) - forward * sin(-heading)
+            val rotForward = strafe * sin(-heading) + forward * sin(-heading)
 
             return DrivePowers(
-                (rotForward + rotStrafe + yaw.toDouble()) * driveSpeed,
-                (rotForward - rotStrafe - yaw.toDouble()) * driveSpeed,
-                (rotForward - rotStrafe + yaw.toDouble()) * driveSpeed,
-                (rotForward + rotStrafe - yaw.toDouble()) * driveSpeed
+                (rotForward + rotStrafe + yaw) * driveSpeed,
+                (rotForward - rotStrafe - yaw) * driveSpeed,
+                (rotForward - rotStrafe + yaw) * driveSpeed,
+                (rotForward + rotStrafe - yaw) * driveSpeed
             ).normalized()
         }
     }

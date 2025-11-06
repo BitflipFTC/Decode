@@ -216,6 +216,34 @@ class Spindexer(opMode: OpMode): SubsystemBase() {
         state = slotsToIntakes[targetIndex]
     }
 
+    fun toFirstEmptyIntakePosition() {
+        var targetIndex = 0
+
+        val emptySlots = findEmptySlots()
+        if (!emptySlots.isEmpty()) {
+            when (emptySlots.size) {
+                2 -> {
+                    val emptySlot = findEmptySlots().first()
+
+                    // for slots [0,2]
+                    // full = 1, so targets 2, then can go 2 -> 0
+                    // for [1,2]
+                    // full = 1, so targets 1, then can go 1 -> 2
+                    // for [0,1]
+                    // full = 2, so targets 0, then can go 0 -> 1
+                    targetIndex = if (emptySlot == 2) 0 else emptySlot + 1
+                }
+
+                1 -> {
+                    targetIndex = emptySlots[0]
+                }
+
+                else -> targetIndex = 0
+            }
+        }
+        state = slotsToIntakes[targetIndex]
+    }
+
     /**
      * Cycles to the next outtake position. Turns to 0 if current position is not an outtake.
      */
@@ -349,6 +377,13 @@ class Spindexer(opMode: OpMode): SubsystemBase() {
         this
     )
 
+    fun goToFirstEmptyIntake() = FunctionalCommand(
+        this::toFirstEmptyIntakePosition,
+        {}, { interrupted -> {} },
+        this::atSetPoint,
+        this
+    )
+
     fun goToNextOuttake() = FunctionalCommand(
         this::toNextOuttakePosition,
         {}, { interrupted -> {}},
@@ -373,6 +408,6 @@ class Spindexer(opMode: OpMode): SubsystemBase() {
     fun tryMotifOuttake() = ConditionalCommand(
         goToMotifOuttake(),
         goToFirstFullOuttake(),
-        this::hasMotifAssortment
+        this::hasMotifAssortment,
     )
 }

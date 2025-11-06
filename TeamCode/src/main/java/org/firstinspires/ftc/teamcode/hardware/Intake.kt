@@ -39,15 +39,15 @@ class Intake(opMode: OpMode): SubsystemBase() {
      */
     var power: State = State.OFF
 
-    fun runIntake()  = RunCommand(this::intake, this)
-    fun stopIntake() = RunCommand(this::off, this)
+    fun runIntake()  = InstantCommand(this::intake, this)
+    fun stopIntake() = InstantCommand(this::off, this)
     fun runOuttake() = StartEndCommand({ reversed = true }, { reversed = false }, this)
 
     init {
         motor.zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE
         motor.mode = DcMotor.RunMode.RUN_WITHOUT_ENCODER
         motor.direction = DcMotorSimple.Direction.REVERSE
-        this.defaultCommand = runIntake()
+        this.defaultCommand = runIntake().perpetually()
     }
 
     /**

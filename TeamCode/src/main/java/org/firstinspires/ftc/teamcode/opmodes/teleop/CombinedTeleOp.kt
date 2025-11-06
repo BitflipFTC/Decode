@@ -192,6 +192,7 @@ class CombinedTeleOp : LinearOpMode() {
             // allow gamepad2 to have manual transfer control
             if (abs(gamepad2.right_trigger - gamepad2.left_trigger) >= 0.15) {
                 transfer.setPower((gamepad2.right_trigger - gamepad2.left_trigger) * 1.0)
+                transfer.targetPosition = transfer.currentPosition
             } else {
                 transfer.periodic()
             }
@@ -200,7 +201,7 @@ class CombinedTeleOp : LinearOpMode() {
             intake.periodic()
 
             if (abs(gamepad2.right_stick_x) >= 0.15) {
-                spindexer.power = gamepad2.right_stick_x.toDouble() * 0.1
+                spindexer.power = gamepad2.right_stick_x.toDouble() * 0.75
 
                 // prevent from periodic() resetting to a preset
                 spindexer.targetAngle = spindexer.currentAngle
