@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.hardware.PwmControl
 import dev.nextftc.core.subsystems.Subsystem
 import dev.nextftc.ftc.ActiveOpMode
 import org.firstinspires.ftc.teamcode.util.PIDController
+import org.firstinspires.ftc.teamcode.util.hardware.CRServoEx
 
 @Config
 class Turret(): Subsystem {
@@ -24,8 +25,8 @@ class Turret(): Subsystem {
         var tuning = false
     }
 
-    private lateinit var servoL: CRServoImplEx
-    private lateinit var servoR: CRServoImplEx
+    private lateinit var servoL: CRServoEx
+    private lateinit var servoR: CRServoEx
     private val controller = PIDController(kP, 0.0, kD, 0.0, kS)
 
     var bearing = 0.0
@@ -34,13 +35,8 @@ class Turret(): Subsystem {
         private set
 
     override fun initialize() {
-        servoL = ActiveOpMode.hardwareMap.get(CRServoImplEx::class.java, "turretL").apply{
-            pwmRange = PwmControl.PwmRange(500.0, 2500.0)
-        }
-
-        servoR = ActiveOpMode.hardwareMap.get(CRServoImplEx::class.java, "turretR").apply {
-            pwmRange = PwmControl.PwmRange(500.0, 2500.0)
-        }
+        servoL = CRServoEx("turretL")
+        servoR = CRServoEx("turretR")
 
         controller.setPointTolerance = setPointTolerance
     }

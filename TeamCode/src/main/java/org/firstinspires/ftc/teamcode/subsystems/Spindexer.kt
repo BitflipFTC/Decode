@@ -13,6 +13,7 @@ import org.firstinspires.ftc.teamcode.util.Artifact
 import org.firstinspires.ftc.teamcode.util.commands.IfElseCommand
 import org.firstinspires.ftc.teamcode.util.MotifPattern
 import org.firstinspires.ftc.teamcode.util.PIDController
+import org.firstinspires.ftc.teamcode.util.hardware.MotorEx
 import kotlin.math.roundToInt
 
 /**
@@ -318,17 +319,11 @@ class Spindexer(): Subsystem {
 
     // ------------------ INTERNAL HARDWARE CONTROL ------------------
 
-    private lateinit var motor: DcMotorEx
+    private lateinit var motor: MotorEx
     private val controller = PIDController(kP, kI, kD, 0.0, kS)
 
     override fun initialize() {
-        motor = ActiveOpMode.hardwareMap.get(DcMotorEx::class.java, "spindexer").apply {
-            mode = DcMotor.RunMode.STOP_AND_RESET_ENCODER
-            mode = DcMotor.RunMode.RUN_WITHOUT_ENCODER
-            zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE
-            direction = DcMotorSimple.Direction.FORWARD
-        }
-
+        motor = MotorEx("spindexer").zeroed().brake()
         // convert from degrees to ticks
         controller.setPointTolerance = (setpointTolerance / 360) * TICKS_PER_REVOLUTION
     }

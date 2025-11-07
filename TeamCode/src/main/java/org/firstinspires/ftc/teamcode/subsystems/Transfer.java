@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.teamcode.util.PIDController;
+import org.firstinspires.ftc.teamcode.util.hardware.MotorEx;
 
 import dev.nextftc.core.commands.utility.LambdaCommand;
 import dev.nextftc.core.subsystems.Subsystem;
@@ -34,18 +35,14 @@ public class Transfer implements Subsystem {
     public static double maxPower = 1;
     public static boolean tuning = false;
 
-    private DcMotorEx motor = null;
+    private MotorEx motor = null;
 
     private final PIDController controller = new PIDController(kP, kI, kD, 0, 0, 1, -1);
 
     @Override
     public void initialize() {
         controller.setSetPointTolerance(10);
-
-        motor = ActiveOpMode.hardwareMap().get(DcMotorEx.class, "transfer");
-        motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        motor = new MotorEx("transfer", 0.01).zeroed().brake();
     }
 
     public void setPower (double power) {

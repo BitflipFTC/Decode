@@ -15,6 +15,8 @@ import org.firstinspires.ftc.teamcode.subsystems.Shooter.Companion.kP
 import org.firstinspires.ftc.teamcode.subsystems.Shooter.Companion.kV
 import org.firstinspires.ftc.teamcode.util.InterpolatedLookupTable
 import org.firstinspires.ftc.teamcode.util.PIDController
+import org.firstinspires.ftc.teamcode.util.hardware.MotorEx
+import org.firstinspires.ftc.teamcode.util.hardware.ServoEx
 
 /**
  * Manages the robot's shooter mechanism, controlling a flywheel and an adjustable hood servo.
@@ -58,8 +60,8 @@ class Shooter(): Subsystem {
     )
 
     private lateinit var vSensor: VoltageSensor
-    private lateinit var hoodServo: ServoImplEx
-    private lateinit var flywheelMotor: DcMotorEx // reversed().zeroed().floatMode()
+    private lateinit var hoodServo: ServoEx
+    private lateinit var flywheelMotor: MotorEx // reversed().zeroed().floatMode()
     private val flywheelController = PIDController(kP, kI, kD, kV)
     private val lookupTable = InterpolatedLookupTable(
         doubleArrayOf(
@@ -108,16 +110,9 @@ class Shooter(): Subsystem {
     var distance = 0.0
 
     override fun initialize() {
-        flywheelMotor = ActiveOpMode.hardwareMap.get(DcMotorEx::class.java, "flywheel").apply {
-            mode = DcMotor.RunMode.STOP_AND_RESET_ENCODER
-            mode = DcMotor.RunMode.RUN_WITHOUT_ENCODER
-            zeroPowerBehavior = DcMotor.ZeroPowerBehavior.FLOAT
-            direction = DcMotorSimple.Direction.REVERSE
-        }
+        flywheelMotor = MotorEx("flywheel").zeroed().float().reverse()
 
-        hoodServo = ActiveOpMode.hardwareMap.get(ServoImplEx::class.java, "hood").apply{
-            pwmRange = PwmControl.PwmRange(500.0, 2500.0)
-        }
+        hoodServo = ServoEx("hood")
 
         hoodServo.position = hoodPosition
         flywheelController.setPointTolerance = 155.toDouble()

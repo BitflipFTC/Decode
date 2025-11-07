@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.hardware.IMU
 import dev.nextftc.core.subsystems.Subsystem
 import dev.nextftc.ftc.ActiveOpMode
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit
+import org.firstinspires.ftc.teamcode.util.hardware.MotorEx
 import kotlin.math.cos
 import kotlin.math.max
 import kotlin.math.sin
@@ -47,37 +48,16 @@ class Drivetrain(): Subsystem {
     var driveSpeed = 0.8
 
     private lateinit var imu: IMU
-    private lateinit var frontLeft : DcMotorEx
-    private lateinit var frontRight: DcMotorEx
-    private lateinit var backLeft  : DcMotorEx
-    private lateinit var backRight : DcMotorEx
+    private lateinit var frontLeft : MotorEx
+    private lateinit var frontRight: MotorEx
+    private lateinit var backLeft  : MotorEx
+    private lateinit var backRight : MotorEx
 
     override fun initialize() {
-        frontLeft = ActiveOpMode.hardwareMap.get(DcMotorEx::class.java, "frontleft").apply {
-            direction = DcMotorSimple.Direction.REVERSE
-            mode = DcMotor.RunMode.STOP_AND_RESET_ENCODER
-            mode = DcMotor.RunMode.RUN_WITHOUT_ENCODER
-            zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE
-        }
-
-        frontRight = ActiveOpMode.hardwareMap.get(DcMotorEx::class.java, "frontright").apply {
-            mode = DcMotor.RunMode.STOP_AND_RESET_ENCODER
-            mode = DcMotor.RunMode.RUN_WITHOUT_ENCODER
-            zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE
-        }
-
-        backLeft = ActiveOpMode.hardwareMap.get(DcMotorEx::class.java, "backleft").apply {
-            direction = DcMotorSimple.Direction.REVERSE
-            mode = DcMotor.RunMode.STOP_AND_RESET_ENCODER
-            mode = DcMotor.RunMode.RUN_WITHOUT_ENCODER
-            zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE
-        }
-
-        backRight = ActiveOpMode.hardwareMap.get(DcMotorEx::class.java, "backright").apply {
-            mode = DcMotor.RunMode.STOP_AND_RESET_ENCODER
-            mode = DcMotor.RunMode.RUN_WITHOUT_ENCODER
-            zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE
-        }
+        frontLeft = MotorEx("frontleft").reverse().zeroed().brake()
+        frontRight = MotorEx("frontright").brake().zeroed()
+        backLeft = MotorEx("backleft").reverse().zeroed().brake()
+        backRight = MotorEx("backright").zeroed().brake()
 
         imu = ActiveOpMode.hardwareMap.get(IMU::class.java, "imu").apply {
             initialize(

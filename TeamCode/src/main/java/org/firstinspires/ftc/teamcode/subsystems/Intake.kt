@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple
 import dev.nextftc.core.commands.utility.LambdaCommand
 import dev.nextftc.core.subsystems.Subsystem
 import dev.nextftc.ftc.ActiveOpMode
+import org.firstinspires.ftc.teamcode.util.hardware.MotorEx
 
 /**
  * Manages the robot's intake mechanism.
@@ -19,7 +20,7 @@ class Intake(): Subsystem {
         INTAKE(0.9),
     }
 
-    private lateinit var motor: DcMotorEx
+    private lateinit var motor: MotorEx
 
     var reversed = false
 
@@ -71,12 +72,7 @@ class Intake(): Subsystem {
         .setRequirements(this)
 
     override fun initialize() {
-        motor = ActiveOpMode.hardwareMap.get(DcMotorEx::class.java, "intake").apply{
-            direction = DcMotorSimple.Direction.REVERSE
-            zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE
-            mode = DcMotor.RunMode.STOP_AND_RESET_ENCODER
-            mode = DcMotor.RunMode.RUN_WITHOUT_ENCODER
-        }
+        motor = MotorEx("intake").reverse().brake().zeroed()
     }
 
     override fun periodic() {
