@@ -1,6 +1,6 @@
 package org.firstinspires.ftc.teamcode.util;
 
-import org.firstinspires.ftc.teamcode.hardware.Shooter;
+import org.firstinspires.ftc.teamcode.subsystems.Shooter;
 
 /**
  * Implements a lookup table that uses linear interpolation to estimate output values

@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.hardware
+package org.firstinspires.ftc.teamcode.subsystems
 
 import com.acmerobotics.dashboard.config.Config
 import com.qualcomm.robotcore.hardware.DcMotor
@@ -9,10 +9,10 @@ import com.qualcomm.robotcore.hardware.ServoImplEx
 import com.qualcomm.robotcore.hardware.VoltageSensor
 import dev.nextftc.core.subsystems.Subsystem
 import dev.nextftc.ftc.ActiveOpMode
-import org.firstinspires.ftc.teamcode.hardware.Shooter.Companion.kD
-import org.firstinspires.ftc.teamcode.hardware.Shooter.Companion.kI
-import org.firstinspires.ftc.teamcode.hardware.Shooter.Companion.kP
-import org.firstinspires.ftc.teamcode.hardware.Shooter.Companion.kV
+import org.firstinspires.ftc.teamcode.subsystems.Shooter.Companion.kD
+import org.firstinspires.ftc.teamcode.subsystems.Shooter.Companion.kI
+import org.firstinspires.ftc.teamcode.subsystems.Shooter.Companion.kP
+import org.firstinspires.ftc.teamcode.subsystems.Shooter.Companion.kV
 import org.firstinspires.ftc.teamcode.util.InterpolatedLookupTable
 import org.firstinspires.ftc.teamcode.util.PIDController
 
