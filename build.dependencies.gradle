@@ -25,6 +25,6 @@ dependencies {
         exclude group: 'com.acmerobotics.dashboard'
     }
     implementation 'com.pedropathing:telemetry:1.0.0'
-    implementation 'com.bylazar:fullpanels:1.0.8'
+    implementation 'com.bylazar:fullpanels:1.0.9'
 }
 
