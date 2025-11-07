@@ -5,7 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.util.ElapsedTime
 import org.firstinspires.ftc.robotcore.external.Telemetry
-import org.firstinspires.ftc.teamcode.hardware.Drivetrain
+import org.firstinspires.ftc.teamcode.subsystems.Drivetrain
 
 @Config
 @Autonomous(name = "Line Leave Auto", group = "Autonomous", preselectTeleOp = "Combined TeleOp")

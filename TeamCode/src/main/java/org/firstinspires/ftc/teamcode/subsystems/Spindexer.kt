@@ -10,7 +10,7 @@ import dev.nextftc.core.commands.utility.LambdaCommand
 import dev.nextftc.core.subsystems.Subsystem
 import dev.nextftc.ftc.ActiveOpMode
 import org.firstinspires.ftc.teamcode.util.Artifact
-import org.firstinspires.ftc.teamcode.util.IfElseCommand
+import org.firstinspires.ftc.teamcode.util.commands.IfElseCommand
 import org.firstinspires.ftc.teamcode.util.MotifPattern
 import org.firstinspires.ftc.teamcode.util.PIDController
 import kotlin.math.roundToInt

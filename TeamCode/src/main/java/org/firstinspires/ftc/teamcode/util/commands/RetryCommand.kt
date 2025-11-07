@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.util
+package org.firstinspires.ftc.teamcode.util.commands
 
 import dev.nextftc.core.commands.Command
 

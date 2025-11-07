@@ -7,7 +7,7 @@ import com.bylazar.telemetry.PanelsTelemetry
 import com.qualcomm.hardware.lynx.LynxModule
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
-import org.firstinspires.ftc.teamcode.hardware.Shooter
+import org.firstinspires.ftc.teamcode.subsystems.Shooter
 
 @TeleOp(name = "Test: Flywheel", group = "Test")
 class FlywheelTest : LinearOpMode() {

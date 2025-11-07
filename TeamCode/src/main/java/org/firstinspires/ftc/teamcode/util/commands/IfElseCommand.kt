@@ -16,7 +16,7 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.firstinspires.ftc.teamcode.util
+package org.firstinspires.ftc.teamcode.util.commands
 
 import dev.nextftc.core.commands.Command
 import dev.nextftc.core.commands.utility.NullCommand

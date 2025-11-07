@@ -5,9 +5,9 @@ import com.bylazar.telemetry.JoinedTelemetry
 import com.bylazar.telemetry.PanelsTelemetry
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
-import org.firstinspires.ftc.teamcode.hardware.Intake
-import org.firstinspires.ftc.teamcode.hardware.Spindexer
-import org.firstinspires.ftc.teamcode.hardware.Transfer
+import org.firstinspires.ftc.teamcode.subsystems.Intake
+import org.firstinspires.ftc.teamcode.subsystems.Spindexer
+import org.firstinspires.ftc.teamcode.subsystems.Transfer
 
 @TeleOp(name = "Test: Intake", group = "Test")
 class IntakeTest : LinearOpMode() {

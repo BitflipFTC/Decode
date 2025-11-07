@@ -7,8 +7,8 @@ import com.bylazar.utils.LoopTimer
 import com.qualcomm.hardware.lynx.LynxModule
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
-import org.firstinspires.ftc.teamcode.hardware.OV9281
-import org.firstinspires.ftc.teamcode.hardware.Turret
+import org.firstinspires.ftc.teamcode.subsystems.OV9281
+import org.firstinspires.ftc.teamcode.subsystems.Turret
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection
 
 @TeleOp(name = "Test: Turret", group = "Test")

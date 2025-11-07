@@ -7,12 +7,12 @@ import com.pedropathing.geometry.Pose
 import com.pedropathing.paths.PathChain
 import com.pedropathing.util.Timer
 import com.qualcomm.robotcore.eventloop.opmode.OpMode
-import org.firstinspires.ftc.teamcode.hardware.Intake
-import org.firstinspires.ftc.teamcode.hardware.OV9281
-import org.firstinspires.ftc.teamcode.hardware.Shooter
-import org.firstinspires.ftc.teamcode.hardware.Spindexer
-import org.firstinspires.ftc.teamcode.hardware.Transfer
-import org.firstinspires.ftc.teamcode.hardware.Turret
+import org.firstinspires.ftc.teamcode.subsystems.Intake
+import org.firstinspires.ftc.teamcode.subsystems.OV9281
+import org.firstinspires.ftc.teamcode.subsystems.Shooter
+import org.firstinspires.ftc.teamcode.subsystems.Spindexer
+import org.firstinspires.ftc.teamcode.subsystems.Transfer
+import org.firstinspires.ftc.teamcode.subsystems.Turret
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants
 import org.firstinspires.ftc.teamcode.util.Artifact
 

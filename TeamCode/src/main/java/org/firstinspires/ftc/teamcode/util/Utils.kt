@@ -2,8 +2,8 @@ package org.firstinspires.ftc.teamcode.util
 
 import com.qualcomm.robotcore.hardware.Gamepad
 
-fun Boolean.toInt(): Int {
-    return if(this) 1 else 0
+fun Boolean.toDouble(): Double {
+    return if (this) 1.0 else 0.0
 }
 
 enum class Artifact {
@@ -21,9 +21,9 @@ enum class MotifPattern {
     NONE
 }
 
-fun Gamepad.dpadToAxes(): Pair<Int, Int> {
-    val x = (this.dpadRightWasPressed().toInt() * 1) - (this.dpadLeftWasPressed().toInt())
-    val y = (this.dpadUpWasPressed().toInt() * 1) - (this.dpadDownWasPressed().toInt())
+fun Gamepad.dpadToAxes(): Pair<Double, Double> {
+    val x = (this.dpadRightWasPressed().toDouble()) - (this.dpadLeftWasPressed().toDouble())
+    val y = (this.dpadUpWasPressed().toDouble()) - (this.dpadDownWasPressed().toDouble())
 
     return Pair(x, y)
 }

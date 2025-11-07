@@ -5,13 +5,13 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.util.ElapsedTime
 import org.firstinspires.ftc.robotcore.external.Telemetry
-import org.firstinspires.ftc.teamcode.hardware.Drivetrain
-import org.firstinspires.ftc.teamcode.hardware.Intake
-import org.firstinspires.ftc.teamcode.hardware.OV9281
-import org.firstinspires.ftc.teamcode.hardware.Shooter
-import org.firstinspires.ftc.teamcode.hardware.Spindexer
-import org.firstinspires.ftc.teamcode.hardware.Transfer
-import org.firstinspires.ftc.teamcode.hardware.Turret
+import org.firstinspires.ftc.teamcode.subsystems.Drivetrain
+import org.firstinspires.ftc.teamcode.subsystems.Intake
+import org.firstinspires.ftc.teamcode.subsystems.OV9281
+import org.firstinspires.ftc.teamcode.subsystems.Shooter
+import org.firstinspires.ftc.teamcode.subsystems.Spindexer
+import org.firstinspires.ftc.teamcode.subsystems.Transfer
+import org.firstinspires.ftc.teamcode.subsystems.Turret
 import org.firstinspires.ftc.teamcode.util.Artifact
 import org.firstinspires.ftc.teamcode.util.MotifPattern
 

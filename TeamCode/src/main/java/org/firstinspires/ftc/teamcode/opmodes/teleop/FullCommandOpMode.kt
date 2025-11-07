@@ -5,7 +5,6 @@ import com.acmerobotics.dashboard.FtcDashboard
 import com.bylazar.telemetry.JoinedTelemetry
 import com.bylazar.telemetry.PanelsTelemetry
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
-import dev.nextftc.core.commands.CommandManager
 import dev.nextftc.core.commands.groups.ParallelGroup
 import dev.nextftc.core.commands.groups.SequentialGroup
 import dev.nextftc.core.commands.utility.InstantCommand
@@ -13,21 +12,20 @@ import dev.nextftc.core.commands.utility.LambdaCommand
 import dev.nextftc.core.components.BindingsComponent
 import dev.nextftc.core.components.SubsystemComponent
 import dev.nextftc.ftc.Gamepads
-import dev.nextftc.ftc.NextFTCOpMode
 import dev.nextftc.ftc.components.BulkReadComponent
 import dev.nextftc.ftc.components.LoopTimeComponent
-import org.firstinspires.ftc.teamcode.hardware.Drivetrain
-import org.firstinspires.ftc.teamcode.hardware.Intake
-import org.firstinspires.ftc.teamcode.hardware.OV9281
-import org.firstinspires.ftc.teamcode.hardware.Shooter
-import org.firstinspires.ftc.teamcode.hardware.Spindexer
-import org.firstinspires.ftc.teamcode.hardware.Transfer
-import org.firstinspires.ftc.teamcode.hardware.Turret
+import org.firstinspires.ftc.teamcode.subsystems.Drivetrain
+import org.firstinspires.ftc.teamcode.subsystems.Intake
+import org.firstinspires.ftc.teamcode.subsystems.OV9281
+import org.firstinspires.ftc.teamcode.subsystems.Shooter
+import org.firstinspires.ftc.teamcode.subsystems.Spindexer
+import org.firstinspires.ftc.teamcode.subsystems.Transfer
+import org.firstinspires.ftc.teamcode.subsystems.Turret
 import org.firstinspires.ftc.teamcode.util.Artifact
 import org.firstinspires.ftc.teamcode.util.BitflipOpMode
 import org.firstinspires.ftc.teamcode.util.MotifPattern
-import org.firstinspires.ftc.teamcode.util.RepeatCommand
-import org.firstinspires.ftc.teamcode.util.RetryCommand
+import org.firstinspires.ftc.teamcode.util.commands.RepeatCommand
+import org.firstinspires.ftc.teamcode.util.commands.RetryCommand
 import kotlin.time.Duration.Companion.milliseconds
 
 @TeleOp(name = "Command Drive", group = "TeleOp")
