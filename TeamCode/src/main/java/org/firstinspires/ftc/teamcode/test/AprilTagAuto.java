@@ -83,7 +83,7 @@ public class AprilTagAuto extends LinearOpMode {
     public void runOpMode() {
 
         telemetry = new JoinedTelemetry(PanelsTelemetry.INSTANCE.getFtcTelemetry(), telemetry, FtcDashboard.getInstance().getTelemetry());
-        camera = new OV9281(this,4,6);
+        camera = new OV9281();
 
         controller = new SquidController();
         loopTimer = new LoopTimer();

@@ -72,14 +72,14 @@ class CombinedTeleOp : LinearOpMode() {
     override fun runOpMode() {
         telemetry = JoinedTelemetry(PanelsTelemetry.ftcTelemetry, telemetry, FtcDashboard.getInstance().telemetry)
         telemetry.setDisplayFormat(Telemetry.DisplayFormat.HTML)
-        val drivetrain = Drivetrain(this)
-        val intake = Intake(this)
-        val transfer = Transfer(this)
-        val spindexer = Spindexer(this)
-        val shooter = Shooter(this)
-        val turret = Turret(this)
+        val drivetrain = Drivetrain()
+        val intake = Intake()
+        val transfer = Transfer()
+        val spindexer = Spindexer()
+        val shooter = Shooter()
+        val turret = Turret()
 
-        camera = OV9281(this)
+        camera = OV9281()
 
         while (opModeInInit()) {
             telemetry.addData("Drivetrain", "initialized")

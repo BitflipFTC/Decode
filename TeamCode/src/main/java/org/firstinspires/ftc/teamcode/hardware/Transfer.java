@@ -1,17 +1,15 @@
 package org.firstinspires.ftc.teamcode.hardware;
 
 import com.acmerobotics.dashboard.config.Config;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.Range;
-import com.seattlesolvers.solverslib.command.FunctionalCommand;
-import com.seattlesolvers.solverslib.command.SubsystemBase;
-import com.seattlesolvers.solverslib.util.TelemetryData;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.util.PIDController;
+
+import dev.nextftc.core.commands.utility.LambdaCommand;
+import dev.nextftc.core.subsystems.Subsystem;
+import dev.nextftc.ftc.ActiveOpMode;
 
 /**
  * Manages the transfer mechanism, which moves artifacts from the spindexer to the shooter.
@@ -21,10 +19,7 @@ import org.firstinspires.ftc.teamcode.util.PIDController;
  * The [update] method must be called in a loop to drive the motor to its target position.
  */
 @Config
-public class Transfer extends SubsystemBase {
-    private final DcMotorEx motor;
-    private final String configName = "transfer";
-
+public class Transfer implements Subsystem {
     // 1620rpm motor, so
     private final double TICKS_PER_REVOLUTION = 103.8;
     private double targetPosition = 0;
@@ -38,23 +33,23 @@ public class Transfer extends SubsystemBase {
     public static double kD = 0.0002;
     public static double maxPower = 1;
     public static boolean tuning = false;
+
+    private DcMotorEx motor = null;
+
     private final PIDController controller = new PIDController(kP, kI, kD, 0, 0, 1, -1);
 
-    private final Telemetry telemetry;
+    @Override
+    public void initialize() {
+        controller.setSetPointTolerance(10);
+
+        motor = ActiveOpMode.hardwareMap().get(DcMotorEx.class, "transfer");
+        motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+    }
 
     public void setPower (double power) {
         motor.setPower(power);
-    }
-
-    public Transfer(OpMode opMode) {
-        motor = opMode.hardwareMap.get(DcMotorEx.class, configName);
-        motor.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-        motor.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
-        motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
-        controller.setSetPointTolerance(10);
-
-        telemetry = opMode.telemetry;
     }
 
     private void setMotorTarget(double ticks) {
@@ -120,22 +115,22 @@ public class Transfer extends SubsystemBase {
             controller.setCoeffs(kP, kI, kD, 0.0, 0.0);
         }
 
-        telemetry.addData("Transfer current ticks", getCurrentPosition());
-        telemetry.addData("Transfer target ticks", targetPosition);
-        telemetry.addData("Transfer at set point", atSetPoint());
-        telemetry.addLine("---------------------------");
+        ActiveOpMode.telemetry().addData("Transfer current ticks", getCurrentPosition());
+        ActiveOpMode.telemetry().addData("Transfer target ticks", targetPosition);
+        ActiveOpMode.telemetry().addData("Transfer at set point", atSetPoint());
+        ActiveOpMode.telemetry().addLine("---------------------------");
     }
 
     public boolean atSetPoint() {
         return controller.atSetPoint();
     }
 
-    public FunctionalCommand shootArtifact() {
-        return new FunctionalCommand(
-                this::transferArtifact,
-                () -> {}, (interrupted) -> {},
-                this::atSetPoint,
-                this
-        );
+    public LambdaCommand shootArtifact() {
+        return new LambdaCommand()
+                .setStart(this::transferArtifact)
+                .setIsDone(this::atSetPoint)
+                .setName("Shoot artifact")
+                .setInterruptible(true)
+                .setRequirements(this);
     }
 }

@@ -2,20 +2,18 @@ package org.firstinspires.ftc.teamcode.hardware
 
 import android.annotation.SuppressLint
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot
-import com.qualcomm.robotcore.eventloop.opmode.OpMode
 import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.DcMotorEx
 import com.qualcomm.robotcore.hardware.DcMotorSimple
-import com.qualcomm.robotcore.hardware.HardwareMap
 import com.qualcomm.robotcore.hardware.IMU
-import com.seattlesolvers.solverslib.command.SubsystemBase
-import org.firstinspires.ftc.robotcore.external.Telemetry
+import dev.nextftc.core.subsystems.Subsystem
+import dev.nextftc.ftc.ActiveOpMode
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit
 import kotlin.math.cos
 import kotlin.math.max
 import kotlin.math.sin
 
-class Drivetrain(opMode: OpMode): SubsystemBase() {
+class Drivetrain(): Subsystem {
     class DrivePowers(val fl: Double, val fr: Double, val bl: Double, val br: Double) {
         @SuppressLint("DefaultLocale")
         override fun toString(): String {
@@ -40,9 +38,6 @@ class Drivetrain(opMode: OpMode): SubsystemBase() {
         }
     }
 
-    val hwMap: HardwareMap = opMode.hardwareMap
-    val telemetry: Telemetry = opMode.telemetry
-
     var currentDrivePowers = DrivePowers(0.0,0.0,0.0,0.0)
         private set
     var heading = 0.0
@@ -51,36 +46,52 @@ class Drivetrain(opMode: OpMode): SubsystemBase() {
     var fieldCentric = false
     var driveSpeed = 0.8
 
-    private val imu by lazy { hwMap["imu"] as IMU }
-    private val frontLeft  by lazy { hwMap["frontleft"]  as DcMotorEx }
-    private val frontRight by lazy { hwMap["frontright"] as DcMotorEx }
-    private val backLeft   by lazy { hwMap["backleft"]   as DcMotorEx }
-    private val backRight  by lazy { hwMap["backright"]  as DcMotorEx }
+    private lateinit var imu: IMU
+    private lateinit var frontLeft : DcMotorEx
+    private lateinit var frontRight: DcMotorEx
+    private lateinit var backLeft  : DcMotorEx
+    private lateinit var backRight : DcMotorEx
 
-    init {
-        frontLeft.direction = DcMotorSimple.Direction.REVERSE
-        backLeft.direction  = DcMotorSimple.Direction.REVERSE
+    override fun initialize() {
+        frontLeft = ActiveOpMode.hardwareMap.get(DcMotorEx::class.java, "frontleft").apply {
+            direction = DcMotorSimple.Direction.REVERSE
+            mode = DcMotor.RunMode.STOP_AND_RESET_ENCODER
+            mode = DcMotor.RunMode.RUN_WITHOUT_ENCODER
+            zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE
+        }
 
-        frontLeft.mode  = DcMotor.RunMode.STOP_AND_RESET_ENCODER
-        frontRight.mode = DcMotor.RunMode.STOP_AND_RESET_ENCODER
-        backLeft.mode   = DcMotor.RunMode.STOP_AND_RESET_ENCODER
-        backRight.mode  = DcMotor.RunMode.STOP_AND_RESET_ENCODER
+        frontRight = ActiveOpMode.hardwareMap.get(DcMotorEx::class.java, "frontright").apply {
+            mode = DcMotor.RunMode.STOP_AND_RESET_ENCODER
+            mode = DcMotor.RunMode.RUN_WITHOUT_ENCODER
+            zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE
+        }
 
-        frontLeft.zeroPowerBehavior  = DcMotor.ZeroPowerBehavior.BRAKE
-        frontRight.zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE
-        backLeft.zeroPowerBehavior   = DcMotor.ZeroPowerBehavior.BRAKE
-        backRight.zeroPowerBehavior  = DcMotor.ZeroPowerBehavior.BRAKE
+        backLeft = ActiveOpMode.hardwareMap.get(DcMotorEx::class.java, "backleft").apply {
+            direction = DcMotorSimple.Direction.REVERSE
+            mode = DcMotor.RunMode.STOP_AND_RESET_ENCODER
+            mode = DcMotor.RunMode.RUN_WITHOUT_ENCODER
+            zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE
+        }
 
-        frontLeft.mode  = DcMotor.RunMode.RUN_WITHOUT_ENCODER
-        frontRight.mode = DcMotor.RunMode.RUN_WITHOUT_ENCODER
-        backLeft.mode   = DcMotor.RunMode.RUN_WITHOUT_ENCODER
-        backRight.mode  = DcMotor.RunMode.RUN_WITHOUT_ENCODER
+        backRight = ActiveOpMode.hardwareMap.get(DcMotorEx::class.java, "backright").apply {
+            mode = DcMotor.RunMode.STOP_AND_RESET_ENCODER
+            mode = DcMotor.RunMode.RUN_WITHOUT_ENCODER
+            zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE
+        }
 
-        imu.initialize(IMU.Parameters(RevHubOrientationOnRobot(
-            RevHubOrientationOnRobot.LogoFacingDirection.LEFT,
-            RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD)))
-        imu.resetYaw()
-        heading = imu.robotYawPitchRollAngles.yaw
+        imu = ActiveOpMode.hardwareMap.get(IMU::class.java, "imu").apply {
+            initialize(
+                IMU.Parameters(
+                    RevHubOrientationOnRobot(
+                        RevHubOrientationOnRobot.LogoFacingDirection.LEFT,
+                        RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD
+                    )
+                )
+            )
+            resetYaw()
+        }
+
+        heading = imu.robotYawPitchRollAngles.getYaw(AngleUnit.RADIANS)
     }
 
     fun setDrivetrainPowers(powers: DrivePowers) {
@@ -93,7 +104,7 @@ class Drivetrain(opMode: OpMode): SubsystemBase() {
     }
 
     fun calculateDrivetrainPowers (strafe: Double, forward: Double, yaw: Double): DrivePowers {
-        heading = imu.robotYawPitchRollAngles.yaw
+        heading = imu.robotYawPitchRollAngles.getYaw(AngleUnit.DEGREES)
 
         if (!fieldCentric) {
             return DrivePowers(
@@ -103,8 +114,8 @@ class Drivetrain(opMode: OpMode): SubsystemBase() {
                 (forward + strafe - yaw) * driveSpeed
             ).normalized()
         } else {
-            val rotStrafe = strafe * cos(-heading) - forward * sin(-heading)
-            val rotForward = strafe * sin(-heading) + forward * sin(-heading)
+            val rotStrafe = strafe * cos(Math.toRadians(-heading)) - forward * sin(Math.toRadians(-heading))
+            val rotForward = strafe * sin(Math.toRadians(-heading)) + forward * cos(Math.toRadians(-heading))
 
             return DrivePowers(
                 (rotForward + rotStrafe + yaw) * driveSpeed,
@@ -117,5 +128,10 @@ class Drivetrain(opMode: OpMode): SubsystemBase() {
 
     fun resetYaw () {
         imu.resetYaw()
+    }
+
+    override fun periodic() {
+        ActiveOpMode.telemetry.addLine(currentDrivePowers.toString())
+        ActiveOpMode.telemetry.addData("Heading", heading)
     }
 }

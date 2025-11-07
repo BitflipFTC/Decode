@@ -12,7 +12,7 @@ import org.firstinspires.ftc.teamcode.hardware.Shooter
 @TeleOp(name = "Test: Flywheel", group = "Test")
 class FlywheelTest : LinearOpMode() {
     override fun runOpMode() {
-        val shooter = Shooter(this)
+        val shooter = Shooter()
         telemetry = JoinedTelemetry(PanelsTelemetry.ftcTelemetry, FtcDashboard.getInstance().telemetry, telemetry)
 
         // bulk caching

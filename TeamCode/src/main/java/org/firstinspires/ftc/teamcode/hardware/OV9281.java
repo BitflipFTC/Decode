@@ -5,7 +5,6 @@ import android.util.Size;
 import androidx.annotation.NonNull;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.seattlesolvers.solverslib.command.SubsystemBase;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
@@ -17,23 +16,21 @@ import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.teamcode.util.MotifPattern;
 import org.firstinspires.ftc.vision.VisionPortal;
-import org.firstinspires.ftc.vision.VisionProcessor;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagGameDatabase;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
 import java.util.ArrayList;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import dev.frozenmilk.util.modifier.BiModifier;
+import dev.nextftc.core.subsystems.Subsystem;
+import dev.nextftc.ftc.ActiveOpMode;
 
+public class OV9281 implements Subsystem {
 
-public class OV9281 extends SubsystemBase {
-
-    private final AprilTagProcessor aprilTag;
-    private final VisionPortal visionPortal;
+    private AprilTagProcessor aprilTag;
+    private VisionPortal visionPortal;
     private ExposureControl exposureControl;
     private GainControl gainControl;
     private long defaultExposure;
@@ -65,13 +62,10 @@ public class OV9281 extends SubsystemBase {
     // 20: Blue
     // 24: Red
 
-    private Telemetry telemetry = null;
-
     // exposure: 1-7
     // gain: 1-6
-    public OV9281 (@NonNull OpMode opMode, int exposureMS, int gain) {
-        telemetry = opMode.telemetry;
-
+    @Override
+    public void initialize () {
         aprilTag = new AprilTagProcessor.Builder()
                 .setTagLibrary(AprilTagGameDatabase.getDecodeTagLibrary())
                 .setDrawTagOutline(true)
@@ -87,7 +81,7 @@ public class OV9281 extends SubsystemBase {
         aprilTag.setPoseSolver(AprilTagProcessor.PoseSolver.OPENCV_SOLVEPNP_EPNP);
 
         visionPortal = new VisionPortal.Builder()
-                .setCamera(opMode.hardwareMap.get(WebcamName.class, "camera"))
+                .setCamera(ActiveOpMode.hardwareMap().get(WebcamName.class, "camera"))
                 .setCameraResolution(new Size(640,480))
                 .setShowStatsOverlay(true)
                 .setStreamFormat(VisionPortal.StreamFormat.MJPEG)
@@ -105,31 +99,21 @@ public class OV9281 extends SubsystemBase {
             }
         }
 
-        if (exposureMS != 0 && gain != 0) {
-            exposureControl = visionPortal.getCameraControl(ExposureControl.class);
-            gainControl = visionPortal.getCameraControl(GainControl.class);
-
-            while (visionPortal.getCameraState() != VisionPortal.CameraState.STREAMING) {
-                try {
-                    Thread.sleep(20);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    return;
-                }
+        exposureControl = visionPortal.getCameraControl(ExposureControl.class);
+        gainControl = visionPortal.getCameraControl(GainControl.class);
+        while (visionPortal.getCameraState() != VisionPortal.CameraState.STREAMING) {
+            try {
+                Thread.sleep(20);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return;
             }
-
-            exposureControl.setMode(ExposureControl.Mode.Manual);
-
-            defaultExposure = exposureControl.getExposure(TimeUnit.MILLISECONDS);
-            defaultGain = gainControl.getGain();
-
-            exposureControl.setExposure(exposureMS, TimeUnit.MILLISECONDS);
-            gainControl.setGain(gain);
         }
-    }
-
-    public OV9281(OpMode opMode) {
-        this(opMode,0,0);
+        exposureControl.setMode(ExposureControl.Mode.Manual);
+        defaultExposure = exposureControl.getExposure(TimeUnit.MILLISECONDS);
+        defaultGain = gainControl.getGain();
+        exposureControl.setExposure(4, TimeUnit.MILLISECONDS);
+        gainControl.setGain(6);
     }
 
     public void resetExposureGain () {
@@ -180,22 +164,22 @@ public class OV9281 extends SubsystemBase {
         int count = detectionsBuffer.size();
 
         if (count == 0) {
-            telemetry.addData("Detected April Tags", 0);
+            ActiveOpMode.telemetry().addData("Detected April Tags", 0);
             distanceToGoal = -1.0;
             currentTagBearing = -1.0;
             return;
         }
 
-        telemetry.addData("Detected April Tags", detectionsBuffer.size());
+        ActiveOpMode.telemetry().addData("Detected April Tags", detectionsBuffer.size());
         for (AprilTagDetection detection : detectionsBuffer) {
             if (detection.metadata == null) {
                 distanceToGoal = -1.0;
                 currentTagBearing = -1.0;
-                telemetry.addData("Current tag", "No metadata");
+                ActiveOpMode.telemetry().addData("Current tag", "No metadata");
                 continue;
             }
 
-            telemetry.addData("TAG NAME", detection.metadata.name);
+            ActiveOpMode.telemetry().addData("TAG NAME", detection.metadata.name);
 
             if (detection.id == targetID) {
                 distanceToGoal = detection.ftcPose.range;
@@ -205,7 +189,7 @@ public class OV9281 extends SubsystemBase {
                 currentTagBearing = -1.0;
             }
         }
-        telemetry.addLine("---------------------------");
+        ActiveOpMode.telemetry().addLine("---------------------------");
     }
 
     public void setTargetID (int id) {

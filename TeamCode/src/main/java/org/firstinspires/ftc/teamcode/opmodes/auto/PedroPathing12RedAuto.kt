@@ -39,12 +39,12 @@ class PedroPathing12RedAuto: OpMode() {
         opmodeTimer = Timer()
         opmodeTimer.resetTimer()
 
-        spindexer = Spindexer(this)
-        intake = Intake(this)
-        turret = Turret(this)
-        shooter = Shooter(this)
-        transfer = Transfer(this)
-        camera = OV9281(this, 4, 7)
+        spindexer = Spindexer()
+        intake = Intake()
+        turret = Turret()
+        shooter = Shooter()
+        transfer = Transfer()
+        camera = OV9281()
         camera.targetID = 24
 
         follower = Constants.createFollower(hardwareMap)

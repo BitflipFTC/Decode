@@ -2,17 +2,15 @@ package org.firstinspires.ftc.teamcode.hardware
 
 import com.acmerobotics.dashboard.config.Config
 import com.bylazar.configurables.annotations.Configurable
-import com.qualcomm.robotcore.eventloop.opmode.OpMode
 import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.DcMotorEx
 import com.qualcomm.robotcore.hardware.DcMotorSimple
-import com.qualcomm.robotcore.hardware.HardwareMap
 import com.qualcomm.robotcore.util.Range
-import com.seattlesolvers.solverslib.command.ConditionalCommand
-import com.seattlesolvers.solverslib.command.FunctionalCommand
-import com.seattlesolvers.solverslib.command.SubsystemBase
-import org.firstinspires.ftc.robotcore.external.Telemetry
+import dev.nextftc.core.commands.utility.LambdaCommand
+import dev.nextftc.core.subsystems.Subsystem
+import dev.nextftc.ftc.ActiveOpMode
 import org.firstinspires.ftc.teamcode.util.Artifact
+import org.firstinspires.ftc.teamcode.util.IfElseCommand
 import org.firstinspires.ftc.teamcode.util.MotifPattern
 import org.firstinspires.ftc.teamcode.util.PIDController
 import kotlin.math.roundToInt
@@ -33,11 +31,10 @@ import kotlin.math.roundToInt
  *  1  |   2
  *     |
  *
- * @param opMode The OpMode from an OpMode, (this)
  */
 @Config
 @Configurable
-class Spindexer(opMode: OpMode): SubsystemBase() {
+class Spindexer(): Subsystem {
     companion object {
         const val GEAR_RATIO: Double = 1.375 // 22t out to 16t in
         const val TICKS_PER_REVOLUTION: Double = 537.7 * GEAR_RATIO
@@ -55,6 +52,9 @@ class Spindexer(opMode: OpMode): SubsystemBase() {
         var kS = 0.01
 
         @JvmField
+        var turningFeedforward = 0.0
+
+        @JvmField
         var setpointTolerance = 1.0 // in degrees
 
         @JvmField
@@ -63,9 +63,6 @@ class Spindexer(opMode: OpMode): SubsystemBase() {
         @JvmField
         var tuning = false
     }
-
-    val hwMap: HardwareMap = opMode.hardwareMap
-    val telemetry: Telemetry = opMode.telemetry
 
     // ------------------ DATA STRUCTURES ------------------
     /**
@@ -120,7 +117,7 @@ class Spindexer(opMode: OpMode): SubsystemBase() {
     // --------- gettable values ---------
 
     var state = States.INTAKE_ZERO
-        set (newState) {
+        set(newState) {
             // assign it to the backing field. if you assign it to state, infinite loop
             field = newState
 
@@ -143,7 +140,8 @@ class Spindexer(opMode: OpMode): SubsystemBase() {
     val totalFullSlots: Int
         get() = findFullSlots().size
     var targetAngle = state.referenceAngle
-//        private set
+
+    //        private set
     val targetTicks // no backing
         get() = (targetAngle / 360) * TICKS_PER_REVOLUTION
     val currentTicks: Double  // no backing
@@ -157,6 +155,7 @@ class Spindexer(opMode: OpMode): SubsystemBase() {
         }
     val hasMotifAssortment: Boolean
         get() = findPurpleSlots().size == 2 && findGreenSlots().size == 1
+    var robotTurningPower: Double = 0.0
 
     var motifPattern: MotifPattern = MotifPattern.NONE
 
@@ -222,7 +221,7 @@ class Spindexer(opMode: OpMode): SubsystemBase() {
         val emptySlots = findEmptySlots()
         if (!emptySlots.isEmpty()) {
             when (emptySlots.size) {
-                2 -> {
+                2    -> {
                     val emptySlot = findEmptySlots().first()
 
                     // for slots [0,2]
@@ -234,10 +233,11 @@ class Spindexer(opMode: OpMode): SubsystemBase() {
                     targetIndex = if (emptySlot == 2) 0 else emptySlot + 1
                 }
 
-                1 -> {
+                1    -> {
                     targetIndex = emptySlots[0]
                 }
 
+                // if it's 0 or 3 just go nowhere
                 else -> targetIndex = 0
             }
         }
@@ -277,12 +277,10 @@ class Spindexer(opMode: OpMode): SubsystemBase() {
                 MotifPattern.GPP  -> greenIndex
                 MotifPattern.PGP  -> if (greenIndex == 0) 2 else greenIndex - 1
                 MotifPattern.PPG  -> if (greenIndex == 2) 0 else greenIndex + 1
-                MotifPattern.NONE -> null
+                MotifPattern.NONE -> 0
             }
 
-            if (targetOuttakeIndex != null) {
-                state = slotsToOuttakes[targetOuttakeIndex]
-            }
+            state = slotsToOuttakes[targetOuttakeIndex]
         }
     }
 
@@ -292,7 +290,7 @@ class Spindexer(opMode: OpMode): SubsystemBase() {
         if (!fullSlots.isEmpty()) {
             var targetSlot: Int
             when (fullSlots.size) {
-                2 -> {
+                2    -> {
                     val emptySlot = findEmptySlots().first()
 
                     // for slots [0,2]
@@ -303,11 +301,13 @@ class Spindexer(opMode: OpMode): SubsystemBase() {
                     // empty = 2, so targets 0, then can go 0 -> 1
                     targetSlot = if (emptySlot == 2) 0 else emptySlot + 1
                 }
-                1 -> {
+
+                1    -> {
                     targetSlot = fullSlots[0]
                 }
+
                 else -> {
-                    targetSlot = 0
+                    return toNextOuttakePosition()
                 }
             }
 
@@ -318,14 +318,16 @@ class Spindexer(opMode: OpMode): SubsystemBase() {
 
     // ------------------ INTERNAL HARDWARE CONTROL ------------------
 
-    private val motor by lazy { hwMap["spindexer"] as DcMotorEx }
+    private lateinit var motor: DcMotorEx
     private val controller = PIDController(kP, kI, kD, 0.0, kS)
 
-    init {
-        motor.mode = DcMotor.RunMode.STOP_AND_RESET_ENCODER
-        motor.mode = DcMotor.RunMode.RUN_WITHOUT_ENCODER
-        motor.zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE
-        motor.direction = DcMotorSimple.Direction.FORWARD
+    override fun initialize() {
+        motor = ActiveOpMode.hardwareMap.get(DcMotorEx::class.java, "spindexer").apply {
+            mode = DcMotor.RunMode.STOP_AND_RESET_ENCODER
+            mode = DcMotor.RunMode.RUN_WITHOUT_ENCODER
+            zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE
+            direction = DcMotorSimple.Direction.FORWARD
+        }
 
         // convert from degrees to ticks
         controller.setPointTolerance = (setpointTolerance / 360) * TICKS_PER_REVOLUTION
@@ -341,16 +343,17 @@ class Spindexer(opMode: OpMode): SubsystemBase() {
         }
 
         val pidOutput = controller.calculate(currentTicks, targetTicks)
-        motor.power = Range.clip(pidOutput, -maxPower, maxPower)
+        val motorPower = pidOutput + turningFeedforward * -robotTurningPower
+        motor.power = Range.clip(motorPower, -maxPower, maxPower)
 
-        telemetry.addData("Spindexer target angle", targetAngle)
-        telemetry.addData("Spindexer current angle", currentAngle)
-        telemetry.addData("Spindexer current state", state.name)
-        telemetry.addData("Spindexer atSetPoint", atSetPoint())
-        telemetry.addData("Spindexer indexed artifacts", getArtifactString())
-        telemetry.addData("Spindexer has motif assortment", hasMotifAssortment)
-        telemetry.addData("Times to shoot", totalFullSlots)
-        telemetry.addLine("---------------------------")
+        ActiveOpMode.telemetry.addData("Spindexer target angle", targetAngle)
+        ActiveOpMode.telemetry.addData("Spindexer current angle", currentAngle)
+        ActiveOpMode.telemetry.addData("Spindexer current state", state.name)
+        ActiveOpMode.telemetry.addData("Spindexer atSetPoint", atSetPoint())
+        ActiveOpMode.telemetry.addData("Spindexer indexed artifacts", getArtifactString())
+        ActiveOpMode.telemetry.addData("Spindexer has motif assortment", hasMotifAssortment)
+        ActiveOpMode.telemetry.addData("Times to shoot", totalFullSlots)
+        ActiveOpMode.telemetry.addLine("---------------------------")
     }
 
 
@@ -368,46 +371,46 @@ class Spindexer(opMode: OpMode): SubsystemBase() {
     private fun findPurpleSlots() =
         collectedArtifacts.mapIndexedNotNull { index, artifact -> if (artifact == Artifact.PURPLE) index else null }
 
-    // COMMANDS
+    // Commands
 
-    fun goToNextIntake() = FunctionalCommand(
-        this::toNextIntakePosition,
-        {}, { interrupted -> {} },
-        this::atSetPoint,
-        this
-    )
+    fun goToNextIntake() = LambdaCommand()
+        .setStart(this::toNextIntakePosition)
+        .setIsDone(this::atSetPoint)
+        .setRequirements(this)
+        .setName("To Next Intake")
+        .setInterruptible(true)
 
-    fun goToFirstEmptyIntake() = FunctionalCommand(
-        this::toFirstEmptyIntakePosition,
-        {}, { interrupted -> {} },
-        this::atSetPoint,
-        this
-    )
+    fun goToFirstEmptyIntake() = LambdaCommand()
+        .setStart(this::toFirstEmptyIntakePosition)
+        .setIsDone(this::atSetPoint)
+        .setRequirements(this)
+        .setName("To First Empty Intake")
+        .setInterruptible(true)
 
-    fun goToNextOuttake() = FunctionalCommand(
-        this::toNextOuttakePosition,
-        {}, { interrupted -> {}},
-        this::atSetPoint,
-        this
-    )
+    fun goToNextOuttake() = LambdaCommand()
+        .setStart(this::toNextOuttakePosition)
+        .setIsDone(this::atSetPoint)
+        .setRequirements(this)
+        .setName("To Next Outtake")
+        .setInterruptible(true)
 
-    fun goToFirstFullOuttake() = FunctionalCommand(
-        this::toFirstFullOuttakePosition,
-        {}, { interrupted -> {} },
-        this::atSetPoint,
-        this
-    )
+    fun goToFirstFullOuttake() = LambdaCommand()
+        .setStart(this::toFirstFullOuttakePosition)
+        .setIsDone(this::atSetPoint)
+        .setRequirements(this)
+        .setName("To Next Outtake")
+        .setInterruptible(true)
 
-    fun goToMotifOuttake() = FunctionalCommand(
-        this::toMotifOuttakePosition,
-        {}, { interrupted -> {} },
-        this::atSetPoint,
-        this
-    )
+    fun goToMotifOuttake() = LambdaCommand()
+        .setStart(this::toMotifOuttakePosition)
+        .setIsDone(this::atSetPoint)
+        .setRequirements(this)
+        .setName("To Motif Outtake")
+        .setInterruptible(true)
 
-    fun tryMotifOuttake() = ConditionalCommand(
-        goToMotifOuttake(),
-        goToFirstFullOuttake(),
+    fun tryMotifOuttake() = IfElseCommand(
         this::hasMotifAssortment,
+        goToMotifOuttake(),
+        goToFirstFullOuttake()
     )
 }

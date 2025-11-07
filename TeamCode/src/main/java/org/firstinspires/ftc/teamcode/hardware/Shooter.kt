@@ -1,16 +1,14 @@
 package org.firstinspires.ftc.teamcode.hardware
 
 import com.acmerobotics.dashboard.config.Config
-import com.qualcomm.robotcore.eventloop.opmode.OpMode
 import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.DcMotorEx
 import com.qualcomm.robotcore.hardware.DcMotorSimple
-import com.qualcomm.robotcore.hardware.HardwareMap
 import com.qualcomm.robotcore.hardware.PwmControl
 import com.qualcomm.robotcore.hardware.ServoImplEx
 import com.qualcomm.robotcore.hardware.VoltageSensor
-import com.seattlesolvers.solverslib.command.SubsystemBase
-import org.firstinspires.ftc.robotcore.external.Telemetry
+import dev.nextftc.core.subsystems.Subsystem
+import dev.nextftc.ftc.ActiveOpMode
 import org.firstinspires.ftc.teamcode.hardware.Shooter.Companion.kD
 import org.firstinspires.ftc.teamcode.hardware.Shooter.Companion.kI
 import org.firstinspires.ftc.teamcode.hardware.Shooter.Companion.kP
@@ -30,13 +28,10 @@ import org.firstinspires.ftc.teamcode.util.PIDController
  * hardware to match the targets.
  *
  * The flywheel speed is managed by a PID controller, and its constants ([kP], [kI], [kD], [kV])
- * can be tuned via the FTC-Dashboard. The hood servo's limits ([SERVO_LOWER_LIMIT],
- * [SERVO_UPPER_LIMIT]) are also tunable.
- *
- * @param hwMap The HardwareMap from your OpMode, used to initialize the motors and servos.
+ * can be tuned.
  */
 @Config
-class Shooter(opMode: OpMode): SubsystemBase() {
+class Shooter(): Subsystem {
     companion object {
         const val FLYWHEEL_PPR = 28
         const val LOW_PASS = 0.05
@@ -60,15 +55,11 @@ class Shooter(opMode: OpMode): SubsystemBase() {
     class ShooterState (
         val angle: Double,
         val rpm: Double,
-//        val estimatedShotTime: Double
     )
 
-    val hwMap: HardwareMap = opMode.hardwareMap
-    val telemetry: Telemetry = opMode.telemetry
-
-    private var vSensor: VoltageSensor = hwMap.get(VoltageSensor::class.java, "Control Hub")
-    private val hoodServo by lazy { hwMap["hood"] as ServoImplEx }
-    private val flywheelMotor by lazy { hwMap["flywheel"] as DcMotorEx }
+    private lateinit var vSensor: VoltageSensor
+    private lateinit var hoodServo: ServoImplEx
+    private lateinit var flywheelMotor: DcMotorEx // reversed().zeroed().floatMode()
     private val flywheelController = PIDController(kP, kI, kD, kV)
     private val lookupTable = InterpolatedLookupTable(
         doubleArrayOf(
@@ -97,7 +88,7 @@ class Shooter(opMode: OpMode): SubsystemBase() {
     // main two adjustable params
 
     //todo uncomment
-    var targetFlywheelRPM = 3000.0
+    var targetFlywheelRPM = 0.0
     var hoodPosition = 0.3
 
     var flywheelRPM = 0.0
@@ -116,19 +107,24 @@ class Shooter(opMode: OpMode): SubsystemBase() {
         }
     var distance = 0.0
 
-    init {
-        hoodServo.pwmRange = PwmControl.PwmRange(500.0, 2500.0)
-//        hoodServo.scaleRange(SERVO_LOWER_LIMIT, SERVO_UPPER_LIMIT)
+    override fun initialize() {
+        flywheelMotor = ActiveOpMode.hardwareMap.get(DcMotorEx::class.java, "flywheel").apply {
+            mode = DcMotor.RunMode.STOP_AND_RESET_ENCODER
+            mode = DcMotor.RunMode.RUN_WITHOUT_ENCODER
+            zeroPowerBehavior = DcMotor.ZeroPowerBehavior.FLOAT
+            direction = DcMotorSimple.Direction.REVERSE
+        }
+
+        hoodServo = ActiveOpMode.hardwareMap.get(ServoImplEx::class.java, "hood").apply{
+            pwmRange = PwmControl.PwmRange(500.0, 2500.0)
+        }
+
         hoodServo.position = hoodPosition
-
-        flywheelMotor.direction = DcMotorSimple.Direction.REVERSE
-        flywheelMotor.mode = DcMotor.RunMode.STOP_AND_RESET_ENCODER
-        flywheelMotor.mode = DcMotor.RunMode.RUN_WITHOUT_ENCODER
-        flywheelMotor.zeroPowerBehavior = DcMotor.ZeroPowerBehavior.FLOAT
-
         flywheelController.setPointTolerance = 155.toDouble()
+
+        vSensor = ActiveOpMode.hardwareMap.get(VoltageSensor::class.java, "Control Hub")
     }
-    
+
     override fun periodic() {
         lastFlywheelRPM = flywheelRPM
         flywheelRPM = (flywheelMotor.velocity / FLYWHEEL_PPR) * 60
@@ -143,16 +139,14 @@ class Shooter(opMode: OpMode): SubsystemBase() {
         // allow it to stop SLOWLY when target is 0
         flywheelMotor.power = if (flywheelController.error <= -500) 0.0 else pidOutput / vSensor.voltage
 
-        // hood stuff
-//        hoodServo.scaleRange(SERVO_LOWER_LIMIT, SERVO_UPPER_LIMIT)
         hoodServo.position = hoodPosition
 
-        telemetry.addData("Flywheel target RPM", targetFlywheelRPM)
-        telemetry.addData("Flywheel current RPM", flywheelRPM)
-        telemetry.addData("Flywheel at set point", atSetPoint())
-        telemetry.addData("Hood position", hoodPosition)
-        telemetry.addData("Distance to goal", distance)
-        telemetry.addLine("---------------------------")
+        ActiveOpMode.telemetry.addData("Flywheel target RPM", targetFlywheelRPM)
+        ActiveOpMode.telemetry.addData("Flywheel current RPM", flywheelRPM)
+        ActiveOpMode.telemetry.addData("Flywheel at set point", atSetPoint())
+        ActiveOpMode.telemetry.addData("Hood position", hoodPosition)
+        ActiveOpMode.telemetry.addData("Distance to goal", distance)
+        ActiveOpMode.telemetry.addLine("---------------------------")
     }
 
     fun atSetPoint() = flywheelController.atSetPoint()

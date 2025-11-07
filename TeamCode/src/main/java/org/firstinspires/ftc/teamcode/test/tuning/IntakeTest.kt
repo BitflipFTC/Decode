@@ -13,9 +13,9 @@ import org.firstinspires.ftc.teamcode.hardware.Transfer
 class IntakeTest : LinearOpMode() {
     override fun runOpMode() {
         telemetry = JoinedTelemetry(PanelsTelemetry.ftcTelemetry, FtcDashboard.getInstance().telemetry, telemetry)
-        val spindexer = Spindexer(this)
-        val intake = Intake(this)
-        val transfer = Transfer(this)
+        val spindexer = Spindexer()
+        val intake = Intake()
+        val transfer = Transfer()
 
         waitForStart()
 

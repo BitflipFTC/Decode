@@ -44,13 +44,13 @@ class ShootPreloadsAuto: LinearOpMode() {
     var currentTagDistance = 0.0
 
     override fun runOpMode() {
-        val drivetrain = Drivetrain(this)
-        val transfer = Transfer(this)
-        val shooter = Shooter(this)
-        val spindexer = Spindexer(this)
-        val turret = Turret(this)
-        val intake = Intake(this)
-        camera = OV9281(this, 4, 6)
+        val drivetrain = Drivetrain()
+        val transfer = Transfer()
+        val shooter = Shooter()
+        val spindexer = Spindexer()
+        val turret = Turret()
+        val intake = Intake()
+        camera = OV9281()
         val timer = ElapsedTime()
 
         telemetry.setDisplayFormat(Telemetry.DisplayFormat.HTML)

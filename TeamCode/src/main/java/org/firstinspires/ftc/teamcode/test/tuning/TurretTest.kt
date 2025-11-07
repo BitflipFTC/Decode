@@ -22,8 +22,8 @@ class TurretTest : LinearOpMode() {
             FtcDashboard.getInstance().telemetry
         )
 
-        val turret = Turret(this)
-        val camera = OV9281(this, 4, 6)
+        val turret = Turret()
+        val camera = OV9281()
 
         // bulk caching
         val allHubs = hardwareMap.getAll(LynxModule::class.java)
