@@ -42,7 +42,7 @@ public class Transfer implements Subsystem {
     @Override
     public void initialize() {
         controller.setSetPointTolerance(10);
-        motor = new MotorEx("transfer", 0.01).zeroed().brake();
+        motor = new MotorEx("transfer").zeroed().brake();
     }
 
     public void setPower (double power) {

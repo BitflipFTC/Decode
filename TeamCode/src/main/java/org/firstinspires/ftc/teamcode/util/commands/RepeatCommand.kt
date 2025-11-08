@@ -21,30 +21,33 @@ package org.firstinspires.ftc.teamcode.util.commands
 import dev.nextftc.core.commands.Command
 import dev.nextftc.core.commands.utility.NullCommand
 
+/**
+ * This command takes in a command and runs it exactly as many times as specified, unless interrupted.
+ * @param command the condition to run
+ * @param timesToRunLambada the amount of times to run the command, as a lambada. This allows you to pass in a method reference so you can have a variable number of repeats.
+ */
 class RepeatCommand (
-    private val command: () -> Command,
+    private val command: Command,
     private val timesToRunLambada: () -> Int
 ) : Command() {
     private var timesRun: Int = 0
-    private var mCommand: Command = NullCommand()
 
     var timesToRun = 0
 
     init {
-        requires(command.invoke().requirements)
+        requires(command.requirements)
         named("Repeat Command")
         setInterruptible(true)
     }
 
     override val isDone: Boolean
-        get() = mCommand.isDone && timesRun >= timesToRun
+        get() = command.isDone && timesRun >= timesToRun
 
     override fun start() {
-        mCommand = command.invoke()
         timesRun = 0
         timesToRun = timesToRunLambada.invoke()
 
-        mCommand.start()
+        command.start()
 
         if (timesToRun == 0) {
             this.stop(false)
@@ -54,15 +57,14 @@ class RepeatCommand (
     }
 
     override fun update() {
-        mCommand.update()
+        command.update()
 
-        if (mCommand.isDone && timesRun < timesToRun) {
-            mCommand.stop(false)
-            mCommand = command.invoke()
-            mCommand.start()
+        if (command.isDone && timesRun < timesToRun) {
+            command.stop(false)
+            command.start()
             timesRun++
         }
     }
 
-    override fun stop(interrupted: Boolean) = mCommand.stop(interrupted)
+    override fun stop(interrupted: Boolean) = command.stop(interrupted)
 }

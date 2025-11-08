@@ -5,6 +5,10 @@ import com.qualcomm.robotcore.hardware.PwmControl
 import dev.nextftc.ftc.ActiveOpMode
 import kotlin.math.abs
 
+/**
+ * @param servoName the configured name of the servo on the RobotController
+ * @param cacheTolerance the range in which a new power won't be sent
+ */
 class CRServoEx(
     servoName: String,
     var cacheTolerance: Double = 0.01
@@ -14,6 +18,10 @@ class CRServoEx(
     }
 
     private var lastPower = 0.0
+
+    /**
+     * @param power the power to set the servo to
+     */
     var power: Double
         get() = crServo.power
         set(power) {

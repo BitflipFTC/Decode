@@ -195,6 +195,9 @@ public class OV9281 implements Subsystem {
         return targetID;
     }
 
+    /**
+     * @return the bearing to the detected apriltag in degrees.
+     */
     public double getCurrentTagBearing() {
         return currentTagBearing;
     }
@@ -204,6 +207,9 @@ public class OV9281 implements Subsystem {
         distanceToGoal = 0.0;
     }
 
+    /**
+     * @return the distance to the detected apriltag in inches.
+     */
     public double getDistanceToGoal() {
         return distanceToGoal;
     }

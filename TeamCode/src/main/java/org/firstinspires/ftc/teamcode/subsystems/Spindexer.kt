@@ -308,7 +308,7 @@ class Spindexer(): Subsystem {
                 }
 
                 else -> {
-                    return toNextOuttakePosition()
+                    targetSlot = 0
                 }
             }
 
@@ -367,7 +367,9 @@ class Spindexer(): Subsystem {
         collectedArtifacts.mapIndexedNotNull { index, artifact -> if (artifact == Artifact.PURPLE) index else null }
 
     // Commands
-
+    /**
+     * Moves to the next intake, or intake 0 if not at an intake.
+     */
     fun goToNextIntake() = LambdaCommand()
         .setStart(this::toNextIntakePosition)
         .setIsDone(this::atSetPoint)
@@ -375,6 +377,9 @@ class Spindexer(): Subsystem {
         .setName("To Next Intake")
         .setInterruptible(true)
 
+    /**
+     * Moves to the first empty intake, or intake 0 if all intakes are full or empty.
+     */
     fun goToFirstEmptyIntake() = LambdaCommand()
         .setStart(this::toFirstEmptyIntakePosition)
         .setIsDone(this::atSetPoint)
@@ -382,6 +387,9 @@ class Spindexer(): Subsystem {
         .setName("To First Empty Intake")
         .setInterruptible(true)
 
+    /**
+     * Moves to the next outtake, or outtake 0 if not at an outtake.
+     */
     fun goToNextOuttake() = LambdaCommand()
         .setStart(this::toNextOuttakePosition)
         .setIsDone(this::atSetPoint)
@@ -389,6 +397,9 @@ class Spindexer(): Subsystem {
         .setName("To Next Outtake")
         .setInterruptible(true)
 
+    /**
+     * Moves to the first full outtake, or outtake 0 if all outtakes are full or empty.
+     */
     fun goToFirstFullOuttake() = LambdaCommand()
         .setStart(this::toFirstFullOuttakePosition)
         .setIsDone(this::atSetPoint)
@@ -396,6 +407,11 @@ class Spindexer(): Subsystem {
         .setName("To Next Outtake")
         .setInterruptible(true)
 
+    /**
+     * Moves to an orientation in which the robot can outtake three artifacts in motif order.
+     * If the spindexer does not have two purple artifacts and one green artifact, OR there is no motif pattern selected,
+     * it will rotate to outtake 0.
+     */
     fun goToMotifOuttake() = LambdaCommand()
         .setStart(this::toMotifOuttakePosition)
         .setIsDone(this::atSetPoint)
@@ -403,6 +419,10 @@ class Spindexer(): Subsystem {
         .setName("To Motif Outtake")
         .setInterruptible(true)
 
+    /**
+     * Tries to move to an orientation in which it can outtake artifacts in the motif order. If the spindexer
+     * does not have the correct assortment of artifacts, it instead goes to the first full outtake, or outtake 0 if all slots are full or empty.
+     */
     fun tryMotifOuttake() = IfElseCommand(
         this::hasMotifAssortment,
         goToMotifOuttake(),

@@ -61,7 +61,7 @@ class Shooter(): Subsystem {
 
     private lateinit var vSensor: VoltageSensor
     private lateinit var hoodServo: ServoEx
-    private lateinit var flywheelMotor: MotorEx // reversed().zeroed().floatMode()
+    private lateinit var flywheelMotor: MotorEx
     private val flywheelController = PIDController(kP, kI, kD, kV)
     private val lookupTable = InterpolatedLookupTable(
         doubleArrayOf(

@@ -73,12 +73,10 @@ public class InterpolatedLookupTable {
     Dataset dataset;
 
     /**
-     * Constructs the InterpolatedLookupTable from a 2D array.
-     * The 2D array is assumed to be structured as:
-     * <ul>
-     * <li>dataset[0]: Distance
-     * <li>dataset[1]: Angle
-     * <li>dataset[2]: Velocity
+     * Constructs the InterpolatedLookupTable from three arrays of any length
+     * @param distanceTable a {@code double[]}, sorted in an ascending order
+     * @param angleTable a {@code double[]}, sorted in any order
+     * @param velocityTable a {@code double[]}, sorted in any order
      * </ul>
      */
     public InterpolatedLookupTable(double[] distanceTable, double[] angleTable, double[] velocityTable) {
@@ -90,8 +88,8 @@ public class InterpolatedLookupTable {
      * * The input is first clamped to the range of the distanceTable.
      * A segment is found where the input lies, and linear interpolation is used
      * to estimate the corresponding output values.
-     * * @param input The distance value to look up.
-     * @return new FlywheelState() containing angle, velocity, and estimated shot time
+     * @param input The distance value to look up.
+     * @return new {@code FlywheelState()} containing angle, velocity, and estimated shot time
      */
     public Shooter.ShooterState calculate(double input) {
         double[] distanceTable = dataset.distanceTable;
