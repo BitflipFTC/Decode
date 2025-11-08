@@ -21,9 +21,11 @@ import org.firstinspires.ftc.teamcode.subsystems.Shooter
 import org.firstinspires.ftc.teamcode.subsystems.Spindexer
 import org.firstinspires.ftc.teamcode.subsystems.Transfer
 import org.firstinspires.ftc.teamcode.subsystems.Turret
+import org.firstinspires.ftc.teamcode.util.Alliance
 import org.firstinspires.ftc.teamcode.util.Artifact
 import org.firstinspires.ftc.teamcode.util.BitflipOpMode
 import org.firstinspires.ftc.teamcode.util.MotifPattern
+import org.firstinspires.ftc.teamcode.util.TelemetryComponent
 import org.firstinspires.ftc.teamcode.util.commands.RepeatCommand
 import org.firstinspires.ftc.teamcode.util.commands.RetryCommand
 import kotlin.time.Duration.Companion.milliseconds
@@ -38,6 +40,14 @@ class FullCommandOpMode: BitflipOpMode() {
     val transfer = Transfer()
     val turret = Turret()
 
+    var alliance = Alliance.NONE
+
+    fun retryShoot() = RetryCommand(
+        transfer.shootArtifact(),
+        { !shooter.atSetPoint() },
+        3
+    ).then(InstantCommand { if (!shooter.atSetPoint()) {spindexer.recordOuttake()}})
+
     init {
         addComponents(
             SubsystemComponent(
@@ -51,7 +61,9 @@ class FullCommandOpMode: BitflipOpMode() {
             ),
             BulkReadComponent,
             BindingsComponent,
-            LoopTimeComponent())
+            LoopTimeComponent(),
+            TelemetryComponent // updates telemetry during waitforstart and update
+        )
     }
 
     override fun onInit() {
@@ -59,76 +71,9 @@ class FullCommandOpMode: BitflipOpMode() {
         telemetry.msTransmissionInterval = 500
 
         drivetrain.fieldCentric = true
-        camera.targetID = 21
     }
 
-    fun retryShoot() = RetryCommand(
-        transfer.shootArtifact(),
-        { !shooter.atSetPoint() },
-        3
-    ).then(InstantCommand { if (!shooter.atSetPoint()) {spindexer.recordOuttake()}})
-
-    override fun onStartButtonPressed() {
-        spindexer.motifPattern = selectedMotif
-
-        val drive = LambdaCommand()
-            .setUpdate { drivetrain.setDrivetrainPowers(drivetrain.calculateDrivetrainPowers(
-                gamepad1.left_stick_x.toDouble(),
-                -gamepad1.left_stick_y.toDouble(),
-                gamepad1.right_stick_x.toDouble()
-            )) }
-            .setIsDone { false }
-            .setRequirements(drivetrain)
-            .setInterruptible(true)
-            .setName("Drive")
-
-        drive()
-
-
-
-        Gamepads.gamepad1.triangle.whenBecomesTrue(
-            SequentialGroup(
-                InstantCommand { Log.d("COMMAND_TIMER", "Start time: ${System.nanoTime()}ms")},
-                RepeatCommand(
-                    SequentialGroup(
-                        spindexer.tryMotifOuttake(),
-                        retryShoot().thenWait(200.milliseconds)
-                    ), spindexer::totalFullSlots
-                ).then(spindexer.goToFirstEmptyIntake()),
-                InstantCommand { Log.d("COMMAND_TIMER", "End time: ${System.nanoTime()}ms")}
-            )
-        )
-
-        Gamepads.gamepad1.rightBumper.whenBecomesTrue(
-            ParallelGroup (
-                InstantCommand { spindexer.recordIntake(Artifact.PURPLE) },
-                spindexer.goToFirstEmptyIntake(),
-            )
-        )
-
-        Gamepads.gamepad1.leftBumper.whenBecomesTrue(
-            ParallelGroup (
-                InstantCommand { spindexer.recordIntake(Artifact.GREEN) },
-                spindexer.goToFirstEmptyIntake(),
-            )
-        )
-
-        Gamepads.gamepad1.rightTrigger greaterThan 0.15 whenTrue {
-            turret.bearing = camera.currentTagBearing
-            turret.turningPower = gamepad1.right_stick_x.toDouble()
-        } whenFalse {
-            turret.bearing = 0.0
-            turret.turningPower = 0.0
-        }
-
-        Gamepads.gamepad1.leftTrigger greaterThan 0.15 whenTrue { shooter.targetFlywheelRPM = 0.0 } whenFalse { shooter.calculateTargetState(camera.distanceToGoal) }
-
-        Gamepads.gamepad1.square whenBecomesTrue intake.toggleRun()
-        Gamepads.gamepad1.cross  whenBecomesTrue intake.reverse()   whenBecomesFalse intake.forward()
-
-        Gamepads.gamepad1.circle whenBecomesTrue InstantCommand { drivetrain.resetYaw() }
-    }
-
+    /*
     enum class InitializeState {
         GET_MOTIF,
     }
@@ -136,9 +81,25 @@ class FullCommandOpMode: BitflipOpMode() {
     var initializeState = InitializeState.GET_MOTIF
     var selectedMotif = MotifPattern.NONE
     val allMotifs = MotifPattern.entries.toTypedArray()
+    */
 
     override fun onWaitForStart() {
-        when (initializeState) {
+        telemetry.addData("Subsystems", "initialized")
+        telemetry.addLine("Press CIRCLE for Red  alliance")
+        telemetry.addLine("Press CROSS  for Blue alliance")
+        telemetry.addLine()
+        telemetry.addData("Selected alliance", "%s", alliance.name)
+        telemetry.addData("Selected goal", alliance.aprilTagID)
+
+        alliance = if (gamepad1.crossWasPressed()) {
+            Alliance.BLUE
+        } else if (gamepad1.circleWasPressed()) {
+            Alliance.RED
+        } else {
+            alliance
+        }
+    /*
+    when (initializeState) {
             InitializeState.GET_MOTIF -> {
                 when (selectedMotif) {
                     MotifPattern.GPP  -> {
@@ -177,7 +138,67 @@ class FullCommandOpMode: BitflipOpMode() {
                 }
             }
         }
-
-        telemetry.update()
+        */
     }
+
+    override fun onStartButtonPressed() {
+        spindexer.motifPattern = camera.motif
+        camera.targetID = alliance.aprilTagID
+
+        val drive = LambdaCommand()
+            .setUpdate { drivetrain.setDrivetrainPowers(drivetrain.calculateDrivetrainPowers(
+                gamepad1.left_stick_x.toDouble(),
+                -gamepad1.left_stick_y.toDouble(),
+                gamepad1.right_stick_x.toDouble()
+            )) }
+            .setIsDone { false }
+            .setRequirements(drivetrain)
+            .setInterruptible(true)
+            .setName("Drive")
+
+        drive()
+
+        Gamepads.gamepad1.triangle.whenBecomesTrue(
+            SequentialGroup(
+                InstantCommand { Log.d("COMMAND_TIMER", "Start time: ${System.nanoTime() / 1000000}ms")},
+                RepeatCommand(
+                    SequentialGroup(
+                        spindexer.tryMotifOuttake(),
+                        retryShoot().thenWait(200.milliseconds)
+                    ), spindexer::totalFullSlots
+                ).then(spindexer.goToFirstEmptyIntake()),
+                InstantCommand { Log.d("COMMAND_TIMER", "End time: ${System.nanoTime() / 1000000}ms")}
+            )
+        )
+
+        Gamepads.gamepad1.rightBumper.whenBecomesTrue(
+            ParallelGroup (
+                InstantCommand { spindexer.recordIntake(Artifact.PURPLE) },
+                spindexer.goToFirstEmptyIntake(),
+            )
+        )
+
+        Gamepads.gamepad1.leftBumper.whenBecomesTrue(
+            ParallelGroup (
+                InstantCommand { spindexer.recordIntake(Artifact.GREEN) },
+                spindexer.goToFirstEmptyIntake(),
+            )
+        )
+
+        Gamepads.gamepad1.rightTrigger greaterThan 0.15 whenTrue {
+            turret.bearing = camera.currentTagBearing
+            turret.turningPower = gamepad1.right_stick_x.toDouble()
+        } whenFalse {
+            turret.bearing = 0.0
+            turret.turningPower = 0.0
+        }
+
+        Gamepads.gamepad1.leftTrigger greaterThan 0.15 whenTrue { shooter.targetFlywheelRPM = 0.0 } whenFalse { shooter.calculateTargetState(camera.distanceToGoal) }
+
+        Gamepads.gamepad1.square whenBecomesTrue intake.toggleRun()
+        Gamepads.gamepad1.cross  whenBecomesTrue intake.reverse()   whenBecomesFalse intake.forward()
+
+        Gamepads.gamepad1.circle whenBecomesTrue InstantCommand { drivetrain.resetYaw() }
+    }
+
 }

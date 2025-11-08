@@ -8,7 +8,6 @@ import java.lang.RuntimeException
 open class BitflipOpMode: NextFTCOpMode() {
     override fun runOpMode() {
         try {
-
             components.forEach { it.preInit() }
             onInit()
             components.reversed().forEach { it.postInit() }
@@ -31,7 +30,6 @@ open class BitflipOpMode: NextFTCOpMode() {
                     components.forEach { it.preUpdate() }
                     CommandManager.run()
                     onUpdate()
-                    ActiveOpMode.telemetry.update()
                     components.reversed().forEach { it.postUpdate() }
                 }
             }

@@ -18,6 +18,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Turret
 import org.firstinspires.ftc.teamcode.subsystems.Drivetrain
 import org.firstinspires.ftc.teamcode.subsystems.Intake
 import org.firstinspires.ftc.teamcode.subsystems.OV9281
+import org.firstinspires.ftc.teamcode.util.Alliance
 import org.firstinspires.ftc.teamcode.util.dpadToAxes
 import kotlin.math.abs
 
@@ -37,12 +38,6 @@ class CombinedTeleOp : LinearOpMode() {
 
     val targetTagBearing = 0.0
     // for dashboard purposes
-
-    enum class Alliance (val aprilTagID: Int) {
-        RED(24),
-        BLUE(20),
-        NONE(21)
-    }
 
     var alliance: Alliance = Alliance.NONE
 

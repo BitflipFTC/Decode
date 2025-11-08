@@ -21,6 +21,12 @@ enum class MotifPattern {
     NONE
 }
 
+enum class Alliance (val aprilTagID: Int) {
+    RED(24),
+    BLUE(20),
+    NONE(0)
+}
+
 fun Gamepad.dpadToAxes(): Pair<Double, Double> {
     val x = (this.dpadRightWasPressed().toDouble()) - (this.dpadLeftWasPressed().toDouble())
     val y = (this.dpadUpWasPressed().toDouble()) - (this.dpadDownWasPressed().toDouble())
