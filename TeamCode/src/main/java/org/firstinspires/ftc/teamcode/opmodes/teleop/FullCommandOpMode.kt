@@ -90,12 +90,10 @@ class FullCommandOpMode: BitflipOpMode() {
             SequentialGroup(
                 InstantCommand { Log.d("COMMAND_TIMER", "Start time: ${System.nanoTime()}ms")},
                 RepeatCommand(
-                    {
-                        SequentialGroup(
-                            spindexer.tryMotifOuttake(),
-                            retryShoot().thenWait(200.milliseconds)
-                        )
-                    }, spindexer::totalFullSlots
+                    SequentialGroup(
+                        spindexer.tryMotifOuttake(),
+                        retryShoot().thenWait(200.milliseconds)
+                    ), spindexer::totalFullSlots
                 ).then(spindexer.goToFirstEmptyIntake()),
                 InstantCommand { Log.d("COMMAND_TIMER", "End time: ${System.nanoTime()}ms")}
             )
