@@ -347,6 +347,7 @@ class Spindexer(): Subsystem {
         ActiveOpMode.telemetry.addData("Spindexer atSetPoint", atSetPoint())
         ActiveOpMode.telemetry.addData("Spindexer indexed artifacts", getArtifactString())
         ActiveOpMode.telemetry.addData("Spindexer has motif assortment", hasMotifAssortment)
+        ActiveOpMode.telemetry.addData("Motif Pattern", motifPattern.name)
         ActiveOpMode.telemetry.addData("Times to shoot", totalFullSlots)
         ActiveOpMode.telemetry.addLine("---------------------------")
     }
