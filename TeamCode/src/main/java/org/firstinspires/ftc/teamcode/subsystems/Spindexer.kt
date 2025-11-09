@@ -308,7 +308,7 @@ class Spindexer(): Subsystem {
                 }
 
                 else -> {
-                    targetSlot = 0
+                    return toNextOuttakePosition()
                 }
             }
 

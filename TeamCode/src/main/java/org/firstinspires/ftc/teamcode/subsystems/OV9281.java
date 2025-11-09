@@ -51,7 +51,10 @@ public class OV9281 implements Subsystem {
         return visionPortal;
     }
 
+    private final double lowPass = 0.075;
+
     private double currentTagBearing = 0;
+    private double lastDistanceToGoal = 0;
     private double distanceToGoal = 0;
     private int targetID = 0;
     // 20: Blue
@@ -151,6 +154,7 @@ public class OV9281 implements Subsystem {
 
     @Override
     public void periodic() {
+        lastDistanceToGoal = distanceToGoal < 0 ? lastDistanceToGoal : distanceToGoal;
         detectionsBuffer.clear();
         if (aprilTag.getDetections() != null) {
             detectionsBuffer.addAll(aprilTag.getDetections());
@@ -177,7 +181,7 @@ public class OV9281 implements Subsystem {
             ActiveOpMode.telemetry().addData("TAG NAME", detection.metadata.name);
 
             if (detection.id == targetID) {
-                distanceToGoal = detection.ftcPose.range;
+                distanceToGoal = detection.ftcPose.range * lowPass + (1 - lowPass) * lastDistanceToGoal;
                 currentTagBearing = detection.ftcPose.bearing;
             } else {
                 distanceToGoal = -1.0;

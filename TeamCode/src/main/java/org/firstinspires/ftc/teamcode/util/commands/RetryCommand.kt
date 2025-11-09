@@ -20,6 +20,8 @@ class RetryCommand(
 
     override fun start() {
         addRequirements(command.requirements)
+        timesRetried = 0
+        isDone = false
 
         command.start()
     }
