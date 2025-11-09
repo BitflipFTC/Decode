@@ -26,6 +26,7 @@ class ServoEx(
     var position: Double
         get() = servo.position
         set(position) {
+            lastPosition = servo.position
             if (abs(position - lastPosition) > cacheTolerance) {
                 servo.position = position
             }

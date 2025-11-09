@@ -16,6 +16,7 @@ open class BitflipOpMode: NextFTCOpMode() {
             while (opModeInInit()) {
 //                components.forEach { it.preWaitForStart() }
                 onWaitForStart()
+                telemetry.update()
 //                components.reversed().forEach { it.postWaitForStart() }
             }
 
@@ -31,6 +32,7 @@ open class BitflipOpMode: NextFTCOpMode() {
                     CommandManager.run()
                     onUpdate()
                     components.reversed().forEach { it.postUpdate() }
+                    telemetry.update()
                 }
             }
 

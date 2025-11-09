@@ -25,6 +25,7 @@ class CRServoEx(
     var power: Double
         get() = crServo.power
         set(power) {
+            lastPower = crServo.power
             if (abs(power - lastPower) > cacheTolerance) {
                 crServo.power = power
             }

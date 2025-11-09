@@ -20,7 +20,8 @@ class MotorEx @JvmOverloads constructor(
     var power: Double
         get() = motor.power
         set(power) {
-            if (abs(power - lastPower) > cacheTolerance) {
+            lastPower = motor.power
+            if (abs(power - lastPower) >= cacheTolerance) {
                 motor.power = power
             }
         }
