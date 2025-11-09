@@ -170,17 +170,10 @@ class FullCommandOpMode: BitflipOpMode() {
             )
         )
 
-        Gamepads.gamepad1.rightBumper.whenBecomesTrue(
-            ParallelGroup (
-                InstantCommand { spindexer.recordIntake(Artifact.PURPLE) },
-                spindexer.goToFirstEmptyIntake(),
-            )
-        )
-
         Gamepads.gamepad1.leftBumper.whenBecomesTrue(
-            ParallelGroup (
-                InstantCommand { spindexer.recordIntake(Artifact.GREEN) },
-                spindexer.goToFirstEmptyIntake(),
+            SequentialGroup (
+            InstantCommand { spindexer.recordIntake(colorSensor.detectedArtifact) },
+                spindexer.goToFirstEmptyIntake()
             )
         )
 
@@ -199,6 +192,20 @@ class FullCommandOpMode: BitflipOpMode() {
         Gamepads.gamepad1.cross  whenBecomesTrue intake.reverse()   whenBecomesFalse intake.forward()
 
         Gamepads.gamepad1.circle whenBecomesTrue InstantCommand { drivetrain.resetYaw() }
+
+
+        Gamepads.gamepad1.dpadLeft whenBecomesTrue ParallelGroup (
+            InstantCommand { spindexer.recordIntake(Artifact.GREEN) },
+            spindexer.goToFirstEmptyIntake(),
+        )
+
+        Gamepads.gamepad1.dpadRight whenBecomesTrue ParallelGroup (
+            InstantCommand { spindexer.recordIntake(Artifact.PURPLE) },
+            spindexer.goToFirstEmptyIntake(),
+        )
+
+        Gamepads.gamepad1.dpadDown whenBecomesTrue spindexer.goToNextOuttake()
+        Gamepads.gamepad1.dpadUp whenBecomesTrue transfer.shootArtifact()
 
         // gamepad red when no atag seen
         button {camera.distanceToGoal > 0.0} whenBecomesTrue InstantCommand {gamepad1.setLedColor(0.0,255.0,0.0,

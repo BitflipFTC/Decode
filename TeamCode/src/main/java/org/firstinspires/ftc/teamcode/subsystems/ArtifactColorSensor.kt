@@ -21,12 +21,15 @@ class ArtifactColorSensor: Subsystem {
 
     override fun periodic() {
         colors = colorSensor.normalizedColors
-        detectedArtifact = if (colors.red / colors.alpha <= 0.02 && colors.green / colors.alpha <= 0.02 && colors.blue / colors.alpha >= 0.023) {
-            Artifact.PURPLE
-        } else if (colors.red / colors.alpha <= 0.02 && colors.green / colors.alpha >= 0.023 && colors.blue / colors.alpha <= 0.022) {
-            Artifact.GREEN
-        } else {
-            Artifact.NONE
+        if (colorSensor.getDistance(DistanceUnit.CM) <= 5.0) {
+            detectedArtifact =
+                if (colors.red / colors.alpha <= 0.02 && colors.green / colors.alpha <= 0.02 && colors.blue / colors.alpha >= 0.023) {
+                    Artifact.PURPLE
+                } else if (colors.red / colors.alpha <= 0.02 && colors.green / colors.alpha >= 0.023 && colors.blue / colors.alpha <= 0.022) {
+                    Artifact.GREEN
+                } else {
+                    Artifact.NONE
+                }
         }
 
         ActiveOpMode.telemetry.run {
