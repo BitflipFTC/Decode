@@ -11,6 +11,7 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.Exposur
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.GainControl;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.teamcode.util.MotifPattern;
@@ -39,8 +40,12 @@ public class OV9281 implements Subsystem {
 
     private final ArrayList<AprilTagDetection> detectionsBuffer = new ArrayList<>();
 
-    private final Position cameraPosition = new Position(DistanceUnit.INCH,
-            0, 0, 0, 0);
+    // these are relative to the center of rotation of the turret.
+    private final Position cameraPosition = new Position(DistanceUnit.MM,
+            -0.02, -41.29940, 0, 0);
+
+    // with all orientation values 0, the camera is facing straight up. since we want it
+    // to be facing forward, we do -90.
     private final YawPitchRollAngles cameraOrientation = new YawPitchRollAngles(AngleUnit.DEGREES,
             0, -90, 0, 0);
 
@@ -67,6 +72,8 @@ public class OV9281 implements Subsystem {
     private double lastDistanceToGoal = 0;
     private double distanceToGoal = 0;
     private int targetID = 0;
+
+    private Pose3D turretPose = null;
     // 20: Blue
     // 24: Red
 
@@ -194,7 +201,7 @@ public class OV9281 implements Subsystem {
                 distanceToGoal = detection.ftcPose.range * lowPass + (1 - lowPass) * lastDistanceToGoal;
                 currentTagBearing = detection.ftcPose.bearing;
 
-                double yaw = detection.ftcPose.yaw;
+                currentTagYaw = detection.ftcPose.yaw;
                 /*
                     now we do the adjusted tag target calculations so the robot faces the back of the goal
                     54.046 degree angle offset from back wall to atag. (via field cad)
@@ -225,7 +232,9 @@ public class OV9281 implements Subsystem {
                     -1 * yaw -3.134277
                 */
 
-                adjustedTagTargetBearing = yawScalar * yaw - 3.134277;
+                adjustedTagTargetBearing = yawScalar * currentTagYaw - 3.134277;
+
+                turretPose = detection.robotPose;
             } else {
                 distanceToGoal = -1.0;
                 currentTagBearing = -1.0;
