@@ -140,7 +140,6 @@ class Shooter(): Subsystem {
         ActiveOpMode.telemetry.addData("Flywheel current RPM", flywheelRPM)
         ActiveOpMode.telemetry.addData("Flywheel at set point", atSetPoint())
         ActiveOpMode.telemetry.addData("Hood position", hoodPosition)
-        ActiveOpMode.telemetry.addData("Distance to goal", distance)
         ActiveOpMode.telemetry.addLine("---------------------------")
     }
 
