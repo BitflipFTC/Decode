@@ -58,7 +58,7 @@ repositories {
 
 dependencies {
     implementation project(':FtcRobotController')
-    implementation "com.bylazar:fullpanels:1.0.8"
+    implementation "com.bylazar:fullpanels:1.0.9"
     // slothload
     implementation("dev.frozenmilk.sinister:Sloth:0.2.4")
 
