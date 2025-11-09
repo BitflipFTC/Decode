@@ -30,6 +30,7 @@ class Turret(): Subsystem {
     private val controller = PIDController(kP, 0.0, kD, 0.0, kS)
 
     var bearing = 0.0
+    var targetBearing = 0.0
     var turningPower = 0.0
     var pidOutput: Double = 0.0
         private set
@@ -47,7 +48,7 @@ class Turret(): Subsystem {
     }
 
     override fun periodic() {
-        pidOutput = controller.calculate(bearing, 0.0) // bearing approaches 0
+        pidOutput = controller.calculate(bearing, targetBearing) // bearing approaches 0
 
         setPower(pidOutput + kV * turningPower)
 1
@@ -57,7 +58,7 @@ class Turret(): Subsystem {
 
         ActiveOpMode.telemetry.addData("Turret at set point", atSetPoint())
         ActiveOpMode.telemetry.addData("Turret bearing", bearing)
-        ActiveOpMode.telemetry.addData("Turret target bearing", 0.0)
+        ActiveOpMode.telemetry.addData("Turret target bearing", targetBearing)
         ActiveOpMode.telemetry.addData("Turret power", getPower())
 
         ActiveOpMode.telemetry.addLine("---------------------------")

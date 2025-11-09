@@ -2,6 +2,10 @@ package org.firstinspires.ftc.teamcode.subsystems;
 
 import android.util.Size;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.config.Config;
+import com.bylazar.configurables.annotations.Configurable;
+
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.ExposureControl;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.GainControl;
@@ -22,6 +26,8 @@ import java.util.stream.Collectors;
 import dev.nextftc.core.subsystems.Subsystem;
 import dev.nextftc.ftc.ActiveOpMode;
 
+@Config
+@Configurable
 public class OV9281 implements Subsystem {
 
     private AprilTagProcessor aprilTag;
@@ -51,7 +57,11 @@ public class OV9281 implements Subsystem {
         return visionPortal;
     }
 
+    public static double yawScalar = -1;
+
     private double currentTagBearing = 0;
+    private double adjustedTagTargetBearing = 0;
+    private double currentTagYaw = 0;
     private double distanceToGoal = 0;
     private int targetID = 0;
     // 20: Blue
@@ -179,11 +189,49 @@ public class OV9281 implements Subsystem {
             if (detection.id == targetID) {
                 distanceToGoal = detection.ftcPose.range;
                 currentTagBearing = detection.ftcPose.bearing;
+
+                double yaw = detection.ftcPose.yaw;
+                /*
+                    now we do the adjusted tag target calculations so the robot faces the back of the goal
+                    54.046 degree angle offset from back wall to atag. (via field cad)
+
+                    given that, we can calculate the ideal offset scalar such that the robot always faces the back of the goal.
+
+                    due to the fact that whoever designed this game enjoys suffering,
+                    when squared up to the tag, the back isn't centered. CAD shows that
+                    an offset of -3.134277 deg (the tag being a bit right of center) solves this.
+
+                    however, being squared up to the tag is rare. as such, we need to find
+                    a scalar that you can multiply by the current yaw to get the correct target bearing offset.
+
+                    to do this, I used the cad of the field and measured the extremes of aim -
+                    that being 90 deg against the side wall, and 0 deg against the back wall - then
+                    figured out the yaw for each position and the required bearing
+                    adjustment for each position.
+
+                    Back wall:
+                    +35.954 deg yaw
+                    -39.088277 deg offset bearing
+
+                    Side wall:
+                    -54.046 deg yaw
+                    +50.911723 deg offset bearing
+
+                    and from that we get the linear equation,
+                    -1 * yaw -3.134277
+                */
+
+                adjustedTagTargetBearing = yawScalar * yaw - 3.134277;
             } else {
                 distanceToGoal = -1.0;
                 currentTagBearing = -1.0;
             }
         }
+        ActiveOpMode.telemetry().addData("Distance from goal", distanceToGoal);
+        ActiveOpMode.telemetry().addData("Current tag bearing", currentTagBearing);
+        ActiveOpMode.telemetry().addData("Current tag yaw", currentTagYaw);
+        ActiveOpMode.telemetry().addData("Adjusted target tag bearing", adjustedTagTargetBearing);
+
         ActiveOpMode.telemetry().addLine("---------------------------");
     }
 
@@ -216,5 +264,9 @@ public class OV9281 implements Subsystem {
 
     public int getDetectionsAmount() {
         return detectionsBuffer.size();
+    }
+
+    public double getAdjustedTagTargetBearing() {
+        return adjustedTagTargetBearing;
     }
 }
