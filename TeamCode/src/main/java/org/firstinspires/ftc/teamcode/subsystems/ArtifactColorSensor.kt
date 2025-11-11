@@ -14,6 +14,15 @@ class ArtifactColorSensor: Subsystem {
         private set
 
     var detectedArtifact = Artifact.NONE
+        private set
+    val distance: Double
+        get() = colorSensor.getDistance(DistanceUnit.CM)
+    val red: Double
+        get() = colors.red / colors.alpha.toDouble()
+    val green: Double
+        get() = colors.green / colors.alpha.toDouble()
+    val blue: Double
+        get() = colors.blue / colors.alpha.toDouble()
 
     override fun initialize() {
         colorSensor = ActiveOpMode.hardwareMap.get(ColorRangeSensor::class.java, "colorSensor")
@@ -21,11 +30,11 @@ class ArtifactColorSensor: Subsystem {
 
     override fun periodic() {
         colors = colorSensor.normalizedColors
-        if (colorSensor.getDistance(DistanceUnit.CM) <= 5.0) {
+        if (distance <= 5.0) {
             detectedArtifact =
-                if (colors.red / colors.alpha <= 0.02 && colors.green / colors.alpha <= 0.02 && colors.blue / colors.alpha >= 0.023) {
+                if        (red <= 0.02 && green <= 0.02  && blue >= 0.023) {
                     Artifact.PURPLE
-                } else if (colors.red / colors.alpha <= 0.02 && colors.green / colors.alpha >= 0.023 && colors.blue / colors.alpha <= 0.022) {
+                } else if (red <= 0.02 && green >= 0.023 && blue <= 0.022) {
                     Artifact.GREEN
                 } else {
                     Artifact.NONE
@@ -33,16 +42,16 @@ class ArtifactColorSensor: Subsystem {
         }
 
         ActiveOpMode.telemetry.run {
-            addData("Normalized R", colors.red / colors.alpha)
-            addData("Normalized G", colors.green / colors.alpha)
-            addData("Normalized B", colors.blue / colors.alpha)
+            addData("Normalized R", red)
+            addData("Normalized G", green)
+            addData("Normalized B", blue)
             addData("R", colors.red)
             addData("G", colors.green)
             addData("B", colors.blue)
             addLine()
             addData("Detected Artifact", detectedArtifact.name)
             addData("Light detected", colorSensor.lightDetected)
-            addData("Distance", "%05.2fcm", colorSensor.getDistance(DistanceUnit.CM))
+            addData("Distance", "%05.2fcm", distance)
             addLine("------------------------------")
         }
     }

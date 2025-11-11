@@ -177,6 +177,14 @@ class FullCommandOpMode: BitflipOpMode() {
             )
         )
 
+        // hold down right bumper for auto indexing
+        (Gamepads.gamepad1.rightBumper and button { colorSensor.detectedArtifact != Artifact.NONE }).whenBecomesTrue {
+            SequentialGroup (
+                InstantCommand { spindexer.recordIntake(colorSensor.detectedArtifact) },
+                spindexer.goToFirstEmptyIntake()
+            )
+        }
+
         Gamepads.gamepad1.rightTrigger greaterThan 0.15 whenTrue {
             turret.bearing = camera.currentTagBearing
             turret.targetBearing = camera.adjustedTagTargetBearing
