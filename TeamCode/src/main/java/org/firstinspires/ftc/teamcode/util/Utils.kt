@@ -27,6 +27,12 @@ enum class Alliance (val aprilTagID: Int) {
     NONE(0)
 }
 
+enum class StartingPosition () {
+    GOAL,
+    FAR,
+    NONE
+}
+
 fun Gamepad.dpadToAxes(): Pair<Double, Double> {
     val x = (this.dpadRightWasPressed().toDouble()) - (this.dpadLeftWasPressed().toDouble())
     val y = (this.dpadUpWasPressed().toDouble()) - (this.dpadDownWasPressed().toDouble())

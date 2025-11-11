@@ -28,6 +28,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Turret
 import org.firstinspires.ftc.teamcode.util.Alliance
 import org.firstinspires.ftc.teamcode.util.Artifact
 import org.firstinspires.ftc.teamcode.util.BitflipOpMode
+import org.firstinspires.ftc.teamcode.util.InitConfigurer
 import org.firstinspires.ftc.teamcode.util.MotifPattern
 import org.firstinspires.ftc.teamcode.util.TelemetryComponent
 import org.firstinspires.ftc.teamcode.util.commands.RepeatCommand
@@ -68,75 +69,16 @@ class FullCommandOpMode: BitflipOpMode() {
             BulkReadComponent,
             BindingsComponent,
             LoopTimeComponent(),
+            InitConfigurer
         )
     }
 
     override fun onInit() {
         telemetry = JoinedTelemetry(telemetry, PanelsTelemetry.ftcTelemetry, FtcDashboard.getInstance().telemetry)
-//        telemetry.msTransmissionInterval = 250
 
         drivetrain.fieldCentric = true
         shooter.hoodPosition = 0.0
         shooter.periodic()
-    }
-
-    override fun onWaitForStart() {
-        telemetry.addData("Subsystems", "initialized")
-        telemetry.addLine("Press CIRCLE for Red  alliance")
-        telemetry.addLine("Press CROSS  for Blue alliance")
-        telemetry.addLine()
-        telemetry.addData("Selected alliance", "%s", alliance.name)
-        telemetry.addData("Selected goal", alliance.aprilTagID)
-
-        alliance = if (gamepad1.crossWasPressed()) {
-            Alliance.BLUE
-        } else if (gamepad1.circleWasPressed()) {
-            Alliance.RED
-        } else {
-            alliance
-        }
-
-    /*
-    when (initializeState) {
-            InitializeState.GET_MOTIF -> {
-                when (selectedMotif) {
-                    MotifPattern.GPP  -> {
-                        telemetry.addLine("- GPP")
-                        telemetry.addLine("PGP")
-                        telemetry.addLine("PPG")
-                        telemetry.addLine("NONE")
-
-                    }
-                    MotifPattern.PGP  -> {
-                        telemetry.addLine("GPP")
-                        telemetry.addLine("- PGP")
-                        telemetry.addLine("PPG")
-                        telemetry.addLine("NONE")
-                    }
-                    MotifPattern.PPG  -> {
-                        telemetry.addLine("GPP")
-                        telemetry.addLine("PGP")
-                        telemetry.addLine("- PPG")
-                        telemetry.addLine("NONE")
-                    }
-                    MotifPattern.NONE -> {
-                        telemetry.addLine("GPP")
-                        telemetry.addLine("PGP")
-                        telemetry.addLine("PPG")
-                        telemetry.addLine("- NONE")
-                    }
-                }
-
-                if (gamepad1.dpadUpWasPressed()) {
-                    selectedMotif = if (selectedMotif.ordinal == 0) allMotifs[0] else allMotifs[selectedMotif.ordinal - 1]
-                }
-
-                if (gamepad1.dpadDownWasPressed()) {
-                    selectedMotif = if (selectedMotif.ordinal == 3) allMotifs[3] else allMotifs[selectedMotif.ordinal + 1]
-                }
-            }
-        }
-        */
     }
 
     override fun onStartButtonPressed() {
