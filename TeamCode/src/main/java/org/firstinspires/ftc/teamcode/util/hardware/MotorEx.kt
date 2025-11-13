@@ -10,6 +10,7 @@ import kotlin.math.abs
 /**
  * @param motorName the configured name of the motor on the RobotController
  * @param cacheTolerance the range in which a new position won't be sent
+ * @param maxSlewRate the maximum change in motor power per loop
  */
 class MotorEx @JvmOverloads constructor(
     motorName: String,

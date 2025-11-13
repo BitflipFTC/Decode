@@ -30,26 +30,24 @@ class ArtifactColorSensor: Subsystem {
 
     override fun periodic() {
         colors = colorSensor.normalizedColors
-        if (distance <= 5.0) {
-            detectedArtifact =
-                if        (red <= 0.02 && green <= 0.02  && blue >= 0.023) {
-                    Artifact.PURPLE
-                } else if (red <= 0.02 && green >= 0.02 && blue <= 0.022) {
-                    Artifact.GREEN
-                } else {
-                    Artifact.NONE
-                }
+
+        detectedArtifact = if (distance <= 5.0) {
+            if (blue > green) {
+                Artifact.PURPLE
+            } else {
+                Artifact.GREEN
+            }
+        } else {
+            Artifact.NONE
         }
 
         ActiveOpMode.telemetry.run {
-            addData("Normalized R", red)
-            addData("Normalized G", green)
-            addData("Normalized B", blue)
-            addData("R", colors.red)
-            addData("G", colors.green)
-            addData("B", colors.blue)
+            addData("R", red)
+            addData("G", green)
+            addData("B", blue)
             addLine()
             addData("Detected Artifact", detectedArtifact.name)
+            addData("Detected Artifact Ordinal (graphing)", detectedArtifact.ordinal)
             addData("Light detected", colorSensor.lightDetected)
             addData("Distance", "%05.2fcm", distance)
             addLine("------------------------------")
