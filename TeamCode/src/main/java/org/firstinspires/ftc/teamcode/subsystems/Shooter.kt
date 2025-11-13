@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple
 import com.qualcomm.robotcore.hardware.PwmControl
 import com.qualcomm.robotcore.hardware.ServoImplEx
 import com.qualcomm.robotcore.hardware.VoltageSensor
+import com.qualcomm.robotcore.util.ElapsedTime
 import dev.nextftc.core.subsystems.Subsystem
 import dev.nextftc.ftc.ActiveOpMode
 import org.firstinspires.ftc.teamcode.subsystems.Shooter.Companion.kD
@@ -63,33 +64,43 @@ class Shooter(): Subsystem {
     private lateinit var hoodServo: ServoEx
     private lateinit var flywheelMotor: MotorEx
     private val flywheelController = PIDController(kP, kI, kD, kV)
+
+    // todo tune at 35.0, 50.0, 65.0, 80.0, 100.0, 120.0, 140.0.
+    // long goal is approximately 125 in. from peak of long to center of goal tag
+    // longest short zone is approx. 80 in. from peak to center
+    // shortest we can see from is about 35.0.
     private val lookupTable = InterpolatedLookupTable(
         doubleArrayOf(
-            32.0,
-            45.0,
-            60.0,
-            84.0,
-            115.0,
-            ),
+            35.0,
+            50.0,
+            65.0,
+            80.0,
+            100.0,
+            120.0,
+            140.0
+        ),
         doubleArrayOf(
-            0.5,
-            0.5,
-            0.3,
-            0.25,
-            0.1,
-            ),
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+        ),
         doubleArrayOf(
-            3100.0,
-            3350.0,
-            3600.0,
-            4250.0,
-            4650.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
         )
     )
 
     // main two adjustable params
 
-    //todo uncomment
     var targetFlywheelRPM = 0.0
     var hoodPosition = 0.3
 
@@ -128,7 +139,7 @@ class Shooter(): Subsystem {
         if (tuning) {
             flywheelController.setCoeffs(kP, kI, kD, kV, 0.0)
         }
-        
+
         pidOutput = flywheelController.calculate(filteredFlywheelRPM, targetFlywheelRPM)
         
         // allow it to stop SLOWLY when target is 0

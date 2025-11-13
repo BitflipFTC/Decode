@@ -100,7 +100,7 @@ public class OV9281 implements Subsystem {
                 .setCameraResolution(new Size(640,480))
                 .setShowStatsOverlay(true)
                 .setStreamFormat(VisionPortal.StreamFormat.MJPEG)
-                .enableLiveView(false)
+                .enableLiveView(true)
                 .addProcessor(aprilTag)
                 .setAutoStopLiveView(true)
                 .build();
