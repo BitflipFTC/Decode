@@ -37,15 +37,6 @@ import kotlin.time.Duration.Companion.milliseconds
 
 @TeleOp(name = "Command Drive", group = "TeleOp")
 class FullCommandOpMode: BitflipOpMode() {
-    val drivetrain = Drivetrain()
-    val intake = Intake()
-    val camera = OV9281()
-    val shooter = Shooter()
-    val spindexer = Spindexer()
-    val transfer = Transfer()
-    val turret = Turret()
-    val colorSensor = ArtifactColorSensor()
-
     var alliance = Alliance.NONE
 
     fun retryShoot() = RetryCommand(
@@ -57,7 +48,9 @@ class FullCommandOpMode: BitflipOpMode() {
     init {
         addComponents(
             SubsystemComponent(
-                drivetrain,
+                drivetrain.apply {
+                    fieldCentric = true
+                },
                 intake,
                 camera,
                 shooter,
@@ -66,19 +59,8 @@ class FullCommandOpMode: BitflipOpMode() {
                 turret,
                 colorSensor
             ),
-            BulkReadComponent,
-            BindingsComponent,
-            LoopTimeComponent(),
             InitConfigurer
         )
-    }
-
-    override fun onInit() {
-        telemetry = JoinedTelemetry(telemetry, PanelsTelemetry.ftcTelemetry, FtcDashboard.getInstance().telemetry)
-
-        drivetrain.fieldCentric = true
-        shooter.hoodPosition = 0.0
-        shooter.periodic()
     }
 
     override fun onStartButtonPressed() {
@@ -95,11 +77,17 @@ class FullCommandOpMode: BitflipOpMode() {
             .setRequirements(drivetrain)
             .setInterruptible(true)
             .setName("Drive")
-
         drive()
+
+        // gamepad red when no atag seen
+        InstantCommand { gamepad1.setLedColor(255.0,0.0,0.0, Gamepad.LED_DURATION_CONTINUOUS)}
+        button {camera.distanceToGoal > 0.0} whenBecomesTrue InstantCommand {gamepad1.setLedColor(0.0,255.0,0.0,
+            Gamepad.LED_DURATION_CONTINUOUS)} whenBecomesFalse InstantCommand {gamepad1.setLedColor(255.0,0.0,0.0,
+            Gamepad.LED_DURATION_CONTINUOUS)}
 
         Gamepads.gamepad1.triangle.whenBecomesTrue(
             SequentialGroup(
+                InstantCommand { Log.d("COMMAND_TIMER", "Shooting ${spindexer.totalFullSlots} artifacts")},
                 InstantCommand { Log.d("COMMAND_TIMER", "Start time: ${System.nanoTime() / 1000000}")},
                 RepeatCommand(
                     SequentialGroup(
@@ -156,11 +144,6 @@ class FullCommandOpMode: BitflipOpMode() {
 
         Gamepads.gamepad1.dpadDown whenBecomesTrue spindexer.goToNextOuttake()
         Gamepads.gamepad1.dpadUp whenBecomesTrue transfer.shootArtifact()
-
-        // gamepad red when no atag seen
-        button {camera.distanceToGoal > 0.0} whenBecomesTrue InstantCommand {gamepad1.setLedColor(0.0,255.0,0.0,
-            Gamepad.LED_DURATION_CONTINUOUS)} whenBecomesFalse InstantCommand {gamepad1.setLedColor(255.0,0.0,0.0,
-            Gamepad.LED_DURATION_CONTINUOUS)}
     }
 
 }
