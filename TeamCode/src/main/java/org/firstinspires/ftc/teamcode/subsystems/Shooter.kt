@@ -121,7 +121,9 @@ class Shooter(): Subsystem {
     var distance = 0.0
 
     override fun initialize() {
-        flywheelMotor = MotorEx("flywheel").zeroed().float().reverse()
+        flywheelMotor = MotorEx("flywheel").zeroed().float().reverse().apply {
+            maxSlewRate = 0.2
+        }
 
         hoodServo = ServoEx("hood")
 

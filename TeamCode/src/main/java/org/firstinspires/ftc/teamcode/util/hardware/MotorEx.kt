@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.util.hardware
 import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.DcMotorEx
 import com.qualcomm.robotcore.hardware.DcMotorSimple
+import com.qualcomm.robotcore.util.Range
 import dev.nextftc.ftc.ActiveOpMode
 import kotlin.math.abs
 
@@ -12,7 +13,8 @@ import kotlin.math.abs
  */
 class MotorEx @JvmOverloads constructor(
     motorName: String,
-    var cacheTolerance: Double = 0.01
+    var cacheTolerance: Double = 0.01,
+    var maxSlewRate: Double = Double.POSITIVE_INFINITY
 ) {
     private val motor: DcMotorEx = ActiveOpMode.hardwareMap.get(DcMotorEx::class.java, motorName)
 
@@ -22,7 +24,9 @@ class MotorEx @JvmOverloads constructor(
         set(power) {
             lastPower = motor.power
             if (abs(power - lastPower) >= cacheTolerance) {
-                motor.power = power
+                val desiredChange = power - lastPower
+                val limitedChange = Range.clip(desiredChange, -maxSlewRate, maxSlewRate)
+                motor.power += limitedChange
             }
         }
     val currentPosition: Int
