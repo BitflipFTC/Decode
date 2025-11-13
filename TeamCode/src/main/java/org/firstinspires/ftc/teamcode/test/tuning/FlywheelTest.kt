@@ -24,13 +24,10 @@ class FlywheelTest : LinearOpMode() {
         val intake = Intake()
         val spindexer = Spindexer()
         val turret = Turret()
+        val subsystems = setOf(shooter,camera,transfer,intake,spindexer,turret)
         telemetry = JoinedTelemetry(PanelsTelemetry.ftcTelemetry, FtcDashboard.getInstance().telemetry, telemetry)
-        camera.initialize()
-        shooter.initialize()
-        transfer.initialize()
-        intake.initialize()
-        spindexer.initialize()
-        turret.initialize()
+
+        subsystems.forEach { it.initialize() }
 
         // bulk caching
         val allHubs = hardwareMap.getAll(LynxModule::class.java)
@@ -63,6 +60,14 @@ class FlywheelTest : LinearOpMode() {
                 shooter.hoodPosition -= 0.05
             }
 
+            if (gamepad1.crossWasPressed()) {
+                shooter.targetFlywheelRPM = 0.0
+            }
+
+            if (gamepad1.circleWasPressed()) {
+                shooter.targetFlywheelRPM = 4500.0
+            }
+
             if (gamepad1.triangleWasPressed()) {
                 transfer.transferArtifact()
             }
@@ -86,12 +91,7 @@ class FlywheelTest : LinearOpMode() {
                 turret.turningPower = 0.0
             }
 
-            shooter.periodic()
-            camera.periodic()
-            transfer.periodic()
-            spindexer.periodic()
-            intake.periodic()
-            turret.periodic()
+            subsystems.forEach { it.periodic() }
 
             telemetry.update()
         }

@@ -242,8 +242,8 @@ public class OV9281 implements Subsystem {
         }
         ActiveOpMode.telemetry().addData("Distance from goal", distanceToGoal);
         ActiveOpMode.telemetry().addData("Current tag bearing", currentTagBearing);
-        ActiveOpMode.telemetry().addData("Current tag yaw", currentTagYaw);
         ActiveOpMode.telemetry().addData("Adjusted target tag bearing", adjustedTagTargetBearing);
+        ActiveOpMode.telemetry().addData("Current tag yaw", currentTagYaw);
 
         ActiveOpMode.telemetry().addLine("---------------------------");
     }

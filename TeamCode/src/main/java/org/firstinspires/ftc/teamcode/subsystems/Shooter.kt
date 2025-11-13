@@ -102,7 +102,7 @@ class Shooter(): Subsystem {
     // main two adjustable params
 
     var targetFlywheelRPM = 0.0
-    var hoodPosition = 0.3
+    var hoodPosition = 0.0
 
     var flywheelRPM = 0.0
         private set
@@ -125,9 +125,10 @@ class Shooter(): Subsystem {
             maxSlewRate = 0.2
         }
 
-        hoodServo = ServoEx("hood")
+        hoodServo = ServoEx("hood").apply{
+            position = hoodPosition
+        }
 
-        hoodServo.position = hoodPosition
         flywheelController.setPointTolerance = 155.toDouble()
 
         vSensor = ActiveOpMode.hardwareMap.get(VoltageSensor::class.java, "Control Hub")

@@ -13,8 +13,6 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagDetection
 
 @TeleOp(name = "Test: Turret", group = "Test")
 class TurretTest : LinearOpMode() {
-    var currentTagBearing: Double = 0.0
-    var targetTagBearing = 0.0
     override fun runOpMode() {
         telemetry = JoinedTelemetry(
             PanelsTelemetry.ftcTelemetry,
@@ -24,6 +22,9 @@ class TurretTest : LinearOpMode() {
 
         val turret = Turret()
         val camera = OV9281()
+        val subsystems = setOf(turret,camera)
+        subsystems.forEach { it.initialize() }
+        camera.targetID = 24
 
         // bulk caching
         val allHubs = hardwareMap.getAll(LynxModule::class.java)
@@ -33,35 +34,17 @@ class TurretTest : LinearOpMode() {
         telemetry.update()
 
         waitForStart()
-        val timer = LoopTimer()
-        timer.start()
-
 
         while (opModeIsActive()) {
             // more bulk caching
             allHubs.forEach { hub -> hub.clearBulkCache() }
 
-            // atag stuff
+            subsystems.forEach { it.periodic() }
 
-            val currentDetections: ArrayList<AprilTagDetection> =
-                camera.aprilTag.detections
+            turret.bearing = camera.adjustedTagTargetBearing
 
-            val targetDetections = currentDetections.filter { it.metadata.name.contains("RedTarget") }
-
-            currentTagBearing = when {
-                targetDetections.isEmpty() -> targetTagBearing
-                else                        -> targetDetections[0].ftcPose.bearing
-            }
-
-            turret.bearing = currentTagBearing
-            turret.periodic()
-
-            telemetry.addData("current tag bearing", currentTagBearing)
-            telemetry.addData(" target tag bearing", targetTagBearing)
             telemetry.addData("turret power", turret.getPower())
             telemetry.addData("At Setpoint?", turret.atSetPoint())
-            telemetry.addData("Loop rate", timer.ms)
-
 
             telemetry.update()
         }

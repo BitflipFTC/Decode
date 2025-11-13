@@ -16,14 +16,13 @@ class IntakeTest : LinearOpMode() {
         val spindexer = Spindexer()
         val intake = Intake()
         val transfer = Transfer()
+        val subsystems = setOf(spindexer, intake, transfer)
 
+        subsystems.forEach { it.initialize() }
         waitForStart()
 
         while(opModeIsActive()) {
-            spindexer.periodic()
-            telemetry.addData("Current spindexer position", spindexer.currentAngle)
-            telemetry.addData("Target spindexer position", spindexer.targetAngle)
-            telemetry.addData("Named spindexer position", spindexer.state.name)
+            subsystems.forEach { it.periodic() }
 
             if (gamepad1.dpadUpWasPressed()) {
                 transfer.transferArtifact()
