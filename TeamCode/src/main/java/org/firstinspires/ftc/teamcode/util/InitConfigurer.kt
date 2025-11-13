@@ -37,7 +37,7 @@ object InitConfigurer : Component {
 
                 selectedAlliance = if (gamepad1.crossWasPressed()) Alliance.BLUE else if (gamepad1.circleWasPressed()) Alliance.RED else selectedAlliance
 
-                if (gamepad1.crossWasPressed()) {
+                if (gamepad1.touchpadWasPressed()) {
                     hasSelectedAlliance = true
                     toNextPhase()
                 }
@@ -55,7 +55,7 @@ object InitConfigurer : Component {
 
                 selectedStartingPosition = if (gamepad1.triangleWasPressed()) StartingPosition.GOAL else if (gamepad1.squareWasPressed()) StartingPosition.FAR else selectedStartingPosition
 
-                if (gamepad1.crossWasPressed()) {
+                if (gamepad1.touchpadWasPressed()) {
                     hasSelectedStartingPosition = true
                     toNextPhase()
                 }

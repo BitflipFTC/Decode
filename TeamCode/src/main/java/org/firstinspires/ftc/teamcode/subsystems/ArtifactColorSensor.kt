@@ -34,7 +34,7 @@ class ArtifactColorSensor: Subsystem {
             detectedArtifact =
                 if        (red <= 0.02 && green <= 0.02  && blue >= 0.023) {
                     Artifact.PURPLE
-                } else if (red <= 0.02 && green >= 0.023 && blue <= 0.022) {
+                } else if (red <= 0.02 && green >= 0.02 && blue <= 0.022) {
                     Artifact.GREEN
                 } else {
                     Artifact.NONE

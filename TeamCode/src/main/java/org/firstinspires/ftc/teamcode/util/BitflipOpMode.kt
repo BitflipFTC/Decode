@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.util
 
 import dev.nextftc.core.commands.CommandManager
+import dev.nextftc.core.components.SubsystemComponent
 import dev.nextftc.ftc.ActiveOpMode
 import dev.nextftc.ftc.NextFTCOpMode
 import java.lang.RuntimeException
@@ -17,6 +18,7 @@ open class BitflipOpMode: NextFTCOpMode() {
 //                components.forEach { it.preWaitForStart() }
                 onWaitForStart()
                 telemetry.update()
+                InitConfigurer.postWaitForStart()
 //                components.reversed().forEach { it.postWaitForStart() }
             }
 
