@@ -21,12 +21,6 @@ import kotlin.time.Duration.Companion.milliseconds
 
 @TeleOp(name = "Command Drive", group = "TeleOp")
 class FullCommandOpMode: BitflipOpMode() {
-    fun retryShoot() = RetryCommand(
-        transfer.shootArtifact(),
-        { !shooter.atSetPoint() },
-        3
-    ).then(InstantCommand { if (!shooter.atSetPoint()) {spindexer.recordOuttake()}})
-
     init {
         addComponents(
             SubsystemComponent(
@@ -71,13 +65,7 @@ class FullCommandOpMode: BitflipOpMode() {
             SequentialGroup(
                 InstantCommand { Log.d("COMMAND_TIMER", "Shooting ${spindexer.totalFullSlots} artifacts")},
                 InstantCommand { Log.d("COMMAND_TIMER", "Start time: ${System.nanoTime() / 1000000}")},
-                RepeatCommand(
-                    SequentialGroup(
-                        spindexer.tryMotifOuttake(),
-                        WaitUntil(shooter::atSetPoint),
-                        retryShoot().thenWait(200.milliseconds)
-                    ), spindexer::totalFullSlots
-                ).then(spindexer.goToFirstEmptyIntake()),
+                shootAllArtifacts(200.milliseconds),
                 InstantCommand { Log.d("COMMAND_TIMER", "End time: ${System.nanoTime() / 1000000}")}
             )
         )

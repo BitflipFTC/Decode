@@ -3,6 +3,9 @@ package org.firstinspires.ftc.teamcode.util
 import com.bylazar.telemetry.JoinedTelemetry
 import com.bylazar.telemetry.PanelsTelemetry
 import dev.nextftc.core.commands.CommandManager
+import dev.nextftc.core.commands.delays.WaitUntil
+import dev.nextftc.core.commands.groups.SequentialGroup
+import dev.nextftc.core.commands.utility.InstantCommand
 import dev.nextftc.core.components.BindingsComponent
 import dev.nextftc.ftc.NextFTCOpMode
 import dev.nextftc.ftc.components.BulkReadComponent
@@ -15,7 +18,11 @@ import org.firstinspires.ftc.teamcode.subsystems.Shooter
 import org.firstinspires.ftc.teamcode.subsystems.Spindexer
 import org.firstinspires.ftc.teamcode.subsystems.Transfer
 import org.firstinspires.ftc.teamcode.subsystems.Turret
+import org.firstinspires.ftc.teamcode.util.commands.RepeatCommand
+import org.firstinspires.ftc.teamcode.util.commands.RetryCommand
 import java.lang.RuntimeException
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Automatically updates telemetry in init and in loop
@@ -60,7 +67,7 @@ open class BitflipOpMode: NextFTCOpMode() {
 //                components.forEach { it.preWaitForStart() }
                 onWaitForStart()
                 telemetry.update()
-                InitConfigurer.postWaitForStart()
+                if (components.contains(InitConfigurer)) InitConfigurer.postWaitForStart()
 //                components.reversed().forEach { it.postWaitForStart() }
             }
 
@@ -90,4 +97,18 @@ open class BitflipOpMode: NextFTCOpMode() {
             throw runtimeException  // Throw the custom RuntimeException
         }
     }
+
+    fun retryShoot() = RetryCommand(
+        transfer.shootArtifact(),
+        { !shooter.atSetPoint() },
+        3
+    ).then(InstantCommand { if (!shooter.atSetPoint()) {spindexer.recordOuttake()}})
+
+    fun shootAllArtifacts(delay: Duration) = RepeatCommand(
+        SequentialGroup(
+            spindexer.tryMotifOuttake(),
+            WaitUntil(shooter::atSetPoint),
+            retryShoot().thenWait(delay)
+        ), spindexer::totalFullSlots
+    ).then(spindexer.goToFirstEmptyIntake())
 }
