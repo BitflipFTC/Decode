@@ -191,6 +191,7 @@ public class OV9281 implements Subsystem {
             if (detection.metadata == null) {
                 distanceToGoal = -1.0;
                 currentTagBearing = -1.0;
+                adjustedTagTargetBearing = -1.0;
                 ActiveOpMode.telemetry().addData("Current tag", "No metadata");
                 continue;
             }
@@ -238,6 +239,7 @@ public class OV9281 implements Subsystem {
             } else {
                 distanceToGoal = -1.0;
                 currentTagBearing = -1.0;
+                adjustedTagTargetBearing = -1.0;
             }
         }
         ActiveOpMode.telemetry().addData("Distance from goal", distanceToGoal);

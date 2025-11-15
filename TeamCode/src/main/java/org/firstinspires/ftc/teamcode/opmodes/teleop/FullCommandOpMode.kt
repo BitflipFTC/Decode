@@ -65,7 +65,7 @@ class FullCommandOpMode: BitflipOpMode() {
 
     override fun onStartButtonPressed() {
         spindexer.motifPattern = camera.motif
-        camera.targetID = alliance.aprilTagID
+        camera.targetID = InitConfigurer.selectedAlliance.aprilTagID
 
         val drive = LambdaCommand()
             .setUpdate { drivetrain.setDrivetrainPowers(drivetrain.calculateDrivetrainPowers(
@@ -108,7 +108,7 @@ class FullCommandOpMode: BitflipOpMode() {
         )
 
         // hold down right bumper for auto indexing
-        (Gamepads.gamepad1.rightBumper and button { colorSensor.detectedArtifact != Artifact.NONE }).whenBecomesTrue {
+        /*(Gamepads.gamepad1.rightBumper and */button { colorSensor.detectedArtifact != Artifact.NONE }/*)*/.whenBecomesTrue {
             SequentialGroup (
                 InstantCommand { spindexer.recordIntake(colorSensor.detectedArtifact) },
                 spindexer.goToFirstEmptyIntake()
@@ -121,6 +121,7 @@ class FullCommandOpMode: BitflipOpMode() {
             turret.turningPower = gamepad1.right_stick_x.toDouble()
         } whenFalse {
             turret.bearing = 0.0
+            turret.targetBearing = 0.0
             turret.turningPower = 0.0
         }
 
@@ -130,7 +131,6 @@ class FullCommandOpMode: BitflipOpMode() {
         Gamepads.gamepad1.cross  whenBecomesTrue intake.reverse()   whenBecomesFalse intake.forward()
 
         Gamepads.gamepad1.circle whenBecomesTrue InstantCommand { drivetrain.resetYaw() }
-
 
         Gamepads.gamepad1.dpadLeft whenBecomesTrue ParallelGroup (
             InstantCommand { spindexer.recordIntake(Artifact.GREEN) },
