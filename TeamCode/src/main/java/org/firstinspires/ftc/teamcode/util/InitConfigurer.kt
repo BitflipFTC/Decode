@@ -2,10 +2,13 @@ package org.firstinspires.ftc.teamcode.util
 
 import dev.nextftc.core.components.Component
 import dev.nextftc.ftc.ActiveOpMode
+import org.firstinspires.ftc.robotcore.external.Telemetry
 
 object InitConfigurer : Component {
-    private val telemetry = ActiveOpMode.telemetry
-    private val gamepad1 = ActiveOpMode.gamepad1
+    private val telemetry: Telemetry
+        get() = ActiveOpMode.telemetry
+    private val gamepad1: com.qualcomm.robotcore.hardware.Gamepad
+        get() = ActiveOpMode.gamepad1
 
     private var hasSelectedAlliance = false
     private var hasSelectedStartingPosition = false
