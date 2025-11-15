@@ -1,92 +1,157 @@
 package org.firstinspires.ftc.teamcode.opmodes.auto
 
-import com.pedropathing.follower.Follower
 import com.pedropathing.geometry.BezierCurve
 import com.pedropathing.geometry.BezierLine
 import com.pedropathing.geometry.Pose
 import com.pedropathing.paths.PathChain
-import com.pedropathing.util.Timer
-import com.qualcomm.robotcore.eventloop.opmode.OpMode
-import org.firstinspires.ftc.teamcode.subsystems.Intake
-import org.firstinspires.ftc.teamcode.subsystems.OV9281
-import org.firstinspires.ftc.teamcode.subsystems.Shooter
-import org.firstinspires.ftc.teamcode.subsystems.Spindexer
-import org.firstinspires.ftc.teamcode.subsystems.Transfer
-import org.firstinspires.ftc.teamcode.subsystems.Turret
+import dev.nextftc.core.commands.delays.WaitUntil
+import dev.nextftc.core.commands.groups.ParallelGroup
+import dev.nextftc.core.commands.groups.SequentialGroup
+import dev.nextftc.core.commands.utility.InstantCommand
+import dev.nextftc.core.commands.utility.LambdaCommand
+import dev.nextftc.core.components.SubsystemComponent
+import dev.nextftc.core.units.m
+import dev.nextftc.extensions.pedro.FollowPath
+import dev.nextftc.extensions.pedro.PedroComponent
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants
+import org.firstinspires.ftc.teamcode.pedroPathing.Drawing
 import org.firstinspires.ftc.teamcode.util.Artifact
+import org.firstinspires.ftc.teamcode.util.BitflipOpMode
+import org.firstinspires.ftc.teamcode.util.InitConfigurer
+import kotlin.time.Duration.Companion.milliseconds
 
+class PedroPathing12RedAuto: BitflipOpMode() {
+    init {
+        addComponents(
+            SubsystemComponent(
+                spindexer,
+                intake,
+                turret,
+                camera,
+                shooter,
+                transfer
+            ),
+            PedroComponent(
+                Constants::createFollower
+            ),
+            InitConfigurer
+        )
+    }
 
-class PedroPathing12RedAuto: OpMode() {
-    private lateinit var follower: Follower
-    private lateinit var pathTimer: Timer
-    private lateinit var opmodeTimer: Timer
+    fun drawOnlyCurrent() {
+        try {
+            Drawing.drawRobot(PedroComponent.follower.pose)
+            Drawing.sendPacket()
+        } catch (e: Exception) {
+            throw RuntimeException("Drawing failed $e")
+        }
+    }
 
-    lateinit var spindexer: Spindexer
-    lateinit var intake: Intake
-    lateinit var turret: Turret
-    lateinit var camera: OV9281
-    lateinit var shooter: Shooter
-    lateinit var transfer: Transfer
+    fun draw() {
+        Drawing.drawDebug(PedroComponent.follower)
+    }
 
-    private var pathState = -1
-    private val targetTagBearing: Double = 0.0
-
-    var justFired = false
-
-    override fun init() {
-        pathTimer = Timer()
-        opmodeTimer = Timer()
-        opmodeTimer.resetTimer()
-
-        spindexer = Spindexer()
-        intake = Intake()
-        turret = Turret()
-        shooter = Shooter()
-        transfer = Transfer()
-        camera = OV9281()
-        camera.targetID = 24
-
-        follower = Constants.createFollower(hardwareMap)
+    override fun onInit() {
         buildPaths()
-        follower.setStartingPose(startPose)
+        PedroComponent.follower.setStartingPose(startPose)
     }
 
-    override fun loop() {
-        follower.update()    // update pathing
-        camera.periodic()       // update tag position + distance to tag
-        autonomousUpdate()   // FSM control
-
-        spindexer.periodic() // rotate spindexer as needed
-        intake.periodic()    // sets motor power to target power
-//        turret.periodic(currentTagPosition)
-        shooter.periodic()   // runs flywheel velocity pid + holds servo position
-        transfer.periodic()  // runs transfer position pid as needed
-
-        telemetry.addData("path state", pathState);
-        telemetry.addData("x", follower.pose.x);
-        telemetry.addData("y", follower.pose.y);
-        telemetry.addData("heading", follower.pose.heading);
-        telemetry.addData("Current Red Goal Position", camera.currentTagBearing)
-        telemetry.addData("Target Red Goal Position", targetTagBearing)
-        telemetry.addData("Distance to goal (in)", camera.distanceToGoal)
-
-        telemetry.update();
+    override fun waitForStart() {
+        drawOnlyCurrent()
     }
 
-    override fun start() {
-        opmodeTimer.resetTimer()
+    override fun onStartButtonPressed() {
+        camera.targetID = InitConfigurer.selectedAlliance.aprilTagID
         spindexer.motifPattern = camera.getMotif()
 
-        intake.intake()
-        spindexer.state = Spindexer.States.INTAKE_ZERO
+        val autoaim = LambdaCommand()
+            .setUpdate {
+                turret.bearing = camera.currentTagBearing
+                turret.targetBearing = camera.adjustedTagTargetBearing
+            }
+            .setIsDone { false }
+            .setRequirements(turret)
+            .setName("Autoaim")
+            .setInterruptible(false)
 
-        spindexer.recordIntake(Artifact.GREEN, 0)
-        spindexer.recordIntake(Artifact.PURPLE, 1)
-        spindexer.recordIntake(Artifact.PURPLE, 2)
+        val autoadjust = LambdaCommand()
+            .setUpdate {
+                shooter.calculateTargetState(camera.distanceToGoal)
+            }
+            .setIsDone { false }
+            .setRequirements(shooter)
+            .setName("AutoAdjust")
+            .setInterruptible(false)
 
-        shooter.calculateTargetState(camera.distanceToGoal)
-        setPathState(0)
+        val setUpPreloads = SequentialGroup(
+            InstantCommand { spindexer.recordIntake(Artifact.PURPLE, 0) },
+            InstantCommand { spindexer.recordIntake(Artifact.PURPLE, 1) },
+            InstantCommand { spindexer.recordIntake(Artifact.GREEN,  2) }
+        )
+
+        val waitUntilReadyToShoot = ParallelGroup(
+            WaitUntil(turret::atSetPoint),
+            WaitUntil(shooter::atSetPoint)
+        )
+
+        val activateColorSensorDetection = LambdaCommand()
+            .setUpdate {
+                if (colorSensor.distance <= 5) {
+                    spindexer.recordIntake(colorSensor.detectedArtifact)
+                    spindexer.goToFirstEmptyIntake()
+                }
+            }
+            .setIsDone { false }
+            .setRequirements(colorSensor)
+            .setName("Color Sensor Detecting")
+            .setInterruptible(true)
+
+        val disableColorSensorDetection = LambdaCommand()
+            .setIsDone { false }
+            .setRequirements(colorSensor)
+            .setName("Color Sensor Stopped")
+            .setInterruptible(true)
+
+        autoadjust()
+        autoaim()
+        setUpPreloads()
+        intake.runIntake()()
+        disableColorSensorDetection
+
+        val autonomousRoutine = SequentialGroup(
+            FollowPath(scorePreload, holdEnd = true),
+            waitUntilReadyToShoot,
+            shootAllArtifacts(200.milliseconds),
+            activateColorSensorDetection,
+            FollowPath(intake1, holdEnd = true),
+            disableColorSensorDetection,
+            FollowPath(score1),
+            waitUntilReadyToShoot,
+            shootAllArtifacts(200.milliseconds),
+            activateColorSensorDetection,
+            FollowPath(intake2, holdEnd = true),
+            disableColorSensorDetection,
+            FollowPath(score2),
+            shootAllArtifacts(200.milliseconds),
+            activateColorSensorDetection,
+            FollowPath(intake3, holdEnd = true),
+            disableColorSensorDetection,
+            FollowPath(score3),
+            shootAllArtifacts(200.milliseconds),
+            FollowPath(park)
+        )
+
+        autonomousRoutine()
+    }
+
+    override fun onUpdate() {
+        telemetry.addData("x", PedroComponent.follower.pose.x)
+        telemetry.addData("y", PedroComponent.follower.pose.y)
+        telemetry.addData("heading", PedroComponent.follower.pose.heading)
+
+        telemetry.update()
+
+        draw()
     }
 
     val horizontalIntakeStart = 100.0
@@ -118,7 +183,7 @@ class PedroPathing12RedAuto: OpMode() {
     lateinit var park: PathChain
 
     fun buildPaths() {
-        scorePreload = follower.pathBuilder()
+        scorePreload = PedroComponent.follower.pathBuilder()
             .addPath(
                 BezierLine(
                     startPose,
@@ -128,7 +193,7 @@ class PedroPathing12RedAuto: OpMode() {
             .setLinearHeadingInterpolation(startPose.heading, scorePose.heading)
             .build()
 
-        intake1 = follower.pathBuilder()
+        intake1 = PedroComponent.follower.pathBuilder()
             .addPath(
                 BezierCurve(
                     scorePose,
@@ -145,7 +210,7 @@ class PedroPathing12RedAuto: OpMode() {
         
         // spin spindexer
 
-        score1 = follower.pathBuilder()
+        score1 = PedroComponent.follower.pathBuilder()
             .addPath(
                 BezierLine(endIntake1, scorePose)
             )
@@ -154,7 +219,7 @@ class PedroPathing12RedAuto: OpMode() {
         
         // shoot + aim
 
-        intake2 = follower.pathBuilder()
+        intake2 = PedroComponent.follower.pathBuilder()
             .addPath(
                 BezierCurve(
                     scorePose,
@@ -169,14 +234,14 @@ class PedroPathing12RedAuto: OpMode() {
             .setTangentHeadingInterpolation()
             .build()
 
-        score2 = follower.pathBuilder()
+        score2 = PedroComponent.follower.pathBuilder()
             .addPath(
                 BezierLine(endIntake2, scorePose)
             )
             .setLinearHeadingInterpolation(endIntake2.heading, scorePose.heading)
             .build()
 
-        intake3 = follower.pathBuilder()
+        intake3 = PedroComponent.follower.pathBuilder()
             .addPath(
                 BezierCurve(
                     scorePose,
@@ -191,72 +256,18 @@ class PedroPathing12RedAuto: OpMode() {
             .setTangentHeadingInterpolation()
             .build()
 
-        score3 = follower.pathBuilder()
+        score3 = PedroComponent.follower.pathBuilder()
             .addPath(
                 BezierLine(endIntake3, scorePose)
             )
             .setLinearHeadingInterpolation(endIntake3.heading, scorePose.heading)
             .build()
 
-        park = follower.pathBuilder()
+        park = PedroComponent.follower.pathBuilder()
             .addPath(
                 BezierLine(scorePose, parkPose)
             )
             .setLinearHeadingInterpolation(scorePose.heading, parkPose.heading)
             .build()
-    }
-
-    fun autonomousUpdate() {
-        when (pathState) {
-            0 -> {
-                follower.followPath(scorePreload, true)
-                spindexer.toMotifOuttakePosition()
-                setPathState(1)
-            }
-
-            1 -> {
-                if (!follower.isBusy) {
-                    shooter.calculateTargetState(camera.distanceToGoal)
-                    turret.bearing = camera.currentTagBearing
-                    turret.periodic()
-
-                    // if aimed
-                    if (turret.atSetPoint()) {
-                        // if we should wait for the transfer + flywheel to reset
-                        if (justFired) {
-                            if (transfer.atSetPoint()) {
-                                justFired = false
-
-                                // if there are still balls to shoot, cycle
-                                if (spindexer.getArtifactString() != "NNN") {
-                                    spindexer.toNextOuttakePosition()
-                                }
-                            }
-                            // if the flywheel is right
-                        } else if (shooter.atSetPoint()) {
-                            transfer.transferArtifact()
-                            spindexer.recordOuttake()
-                            justFired = true
-                        }
-
-                        // if the balls are all shot and transfer has returned to rest
-                        if (spindexer.getArtifactString() == "NNN" && !justFired) {
-                            spindexer.toNextIntakePosition() // zero
-                            follower.followPath(intake1)
-                            setPathState(2)
-                        }
-                    }
-                }
-            }
-
-            2 -> {
-                // add some way to detect intake, then rotate spindexer toNextIntakePosition()
-            }
-        }
-    }
-
-    fun setPathState (state: Int) {
-        pathState = state
-        pathTimer.resetTimer()
     }
 }
