@@ -1,13 +1,13 @@
 package org.firstinspires.ftc.teamcode.opmodes.auto
 
-import com.acmerobotics.dashboard.config.Config
+import com.bylazar.configurables.annotations.Configurable
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.util.ElapsedTime
 import org.firstinspires.ftc.robotcore.external.Telemetry
 import org.firstinspires.ftc.teamcode.subsystems.Drivetrain
 
-@Config
+@Configurable
 @Autonomous(name = "Line Leave Auto", group = "Autonomous", preselectTeleOp = "Combined TeleOp")
 class LineLeaveAuto: LinearOpMode() {
     companion object {

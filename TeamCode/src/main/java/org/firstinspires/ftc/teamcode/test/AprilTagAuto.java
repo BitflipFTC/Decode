@@ -32,8 +32,6 @@ package org.firstinspires.ftc.teamcode.test;
 
 import android.annotation.SuppressLint;
 
-import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.config.Config;
 import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.JoinedTelemetry;
 import com.bylazar.telemetry.PanelsTelemetry;
@@ -56,7 +54,6 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
 import java.util.List;
 
-@Config
 @Configurable
 @TeleOp(name = "Concept: AprilTag Auto", group = "Concept")
 public class AprilTagAuto extends LinearOpMode {
@@ -82,7 +79,7 @@ public class AprilTagAuto extends LinearOpMode {
     @Override
     public void runOpMode() {
 
-        telemetry = new JoinedTelemetry(PanelsTelemetry.INSTANCE.getFtcTelemetry(), telemetry, FtcDashboard.getInstance().getTelemetry());
+        telemetry = new JoinedTelemetry(PanelsTelemetry.INSTANCE.getFtcTelemetry(), telemetry);
         camera = new OV9281();
 
         controller = new SquidController();

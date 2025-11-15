@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.test.utility;
 
-import com.acmerobotics.dashboard.FtcDashboard;
 import com.bylazar.telemetry.JoinedTelemetry;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -13,7 +12,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 public class VoltageTest extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
-        telemetry = new JoinedTelemetry(PanelsTelemetry.INSTANCE.getFtcTelemetry(), telemetry, FtcDashboard.getInstance().getTelemetry());
+        telemetry = new JoinedTelemetry(PanelsTelemetry.INSTANCE.getFtcTelemetry(), telemetry);
 
         DcMotorEx fl = hardwareMap.get(DcMotorEx.class, "frontleft");
         DcMotorEx fr = hardwareMap.get(DcMotorEx.class, "frontright");

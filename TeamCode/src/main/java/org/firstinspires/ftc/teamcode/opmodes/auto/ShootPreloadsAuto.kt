@@ -1,6 +1,6 @@
 package org.firstinspires.ftc.teamcode.opmodes.auto
 
-import com.acmerobotics.dashboard.config.Config
+import com.bylazar.configurables.annotations.Configurable
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.util.ElapsedTime
@@ -15,7 +15,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Turret
 import org.firstinspires.ftc.teamcode.util.Artifact
 import org.firstinspires.ftc.teamcode.util.MotifPattern
 
-@Config
+@Configurable
 @Autonomous(name = "Shoot Preloads Auto", group = "Autonomous", preselectTeleOp = "Combined TeleOp")
 class ShootPreloadsAuto: LinearOpMode() {
     companion object {

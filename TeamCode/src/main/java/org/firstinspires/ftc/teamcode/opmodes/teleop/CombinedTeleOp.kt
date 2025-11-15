@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.opmodes.teleop
 
-import com.acmerobotics.dashboard.FtcDashboard
-import com.acmerobotics.dashboard.config.Config
+import com.bylazar.configurables.annotations.Configurable
 import com.bylazar.telemetry.JoinedTelemetry
 import com.bylazar.telemetry.PanelsTelemetry
 import com.bylazar.utils.LoopTimer
@@ -22,7 +21,7 @@ import org.firstinspires.ftc.teamcode.util.Alliance
 import org.firstinspires.ftc.teamcode.util.dpadToAxes
 import kotlin.math.abs
 
-@Config
+@Configurable
 @TeleOp(name = "Combined TeleOp", group = "TeleOp")
 class CombinedTeleOp : LinearOpMode() {
     companion object {
@@ -65,7 +64,7 @@ class CombinedTeleOp : LinearOpMode() {
     // triangle shoots and returns to nearest rotation
     // gp2 right + left triggers move it manually
     override fun runOpMode() {
-        telemetry = JoinedTelemetry(PanelsTelemetry.ftcTelemetry, telemetry, FtcDashboard.getInstance().telemetry)
+        telemetry = JoinedTelemetry(PanelsTelemetry.ftcTelemetry, telemetry)
         telemetry.setDisplayFormat(Telemetry.DisplayFormat.HTML)
         val drivetrain = Drivetrain()
         val intake = Intake()

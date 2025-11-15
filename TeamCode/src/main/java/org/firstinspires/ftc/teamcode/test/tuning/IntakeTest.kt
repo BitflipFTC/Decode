@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.test.tuning
 
-import com.acmerobotics.dashboard.FtcDashboard
 import com.bylazar.telemetry.JoinedTelemetry
 import com.bylazar.telemetry.PanelsTelemetry
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
@@ -12,7 +11,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Transfer
 @TeleOp(name = "Test: Intake", group = "Test")
 class IntakeTest : LinearOpMode() {
     override fun runOpMode() {
-        telemetry = JoinedTelemetry(PanelsTelemetry.ftcTelemetry, FtcDashboard.getInstance().telemetry, telemetry)
+        telemetry = JoinedTelemetry(PanelsTelemetry.ftcTelemetry, telemetry)
         val spindexer = Spindexer()
         val intake = Intake()
         val transfer = Transfer()

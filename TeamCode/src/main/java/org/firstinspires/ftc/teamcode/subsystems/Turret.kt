@@ -1,14 +1,12 @@
 package org.firstinspires.ftc.teamcode.subsystems
 
-import com.acmerobotics.dashboard.config.Config
-import com.qualcomm.robotcore.hardware.CRServoImplEx
-import com.qualcomm.robotcore.hardware.PwmControl
+import com.bylazar.configurables.annotations.Configurable
 import dev.nextftc.core.subsystems.Subsystem
 import dev.nextftc.ftc.ActiveOpMode
 import org.firstinspires.ftc.teamcode.util.PIDController
 import org.firstinspires.ftc.teamcode.util.hardware.CRServoEx
 
-@Config
+@Configurable
 class Turret(): Subsystem {
     companion object {
         @JvmField

@@ -1,10 +1,6 @@
 package org.firstinspires.ftc.teamcode.subsystems
 
-import com.acmerobotics.dashboard.config.Config
 import com.bylazar.configurables.annotations.Configurable
-import com.qualcomm.robotcore.hardware.DcMotor
-import com.qualcomm.robotcore.hardware.DcMotorEx
-import com.qualcomm.robotcore.hardware.DcMotorSimple
 import com.qualcomm.robotcore.util.Range
 import dev.nextftc.core.commands.utility.LambdaCommand
 import dev.nextftc.core.subsystems.Subsystem
@@ -33,7 +29,6 @@ import kotlin.math.roundToInt
  *     |
  *
  */
-@Config
 @Configurable
 class Spindexer(): Subsystem {
     companion object {

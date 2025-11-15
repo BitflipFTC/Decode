@@ -1,13 +1,10 @@
 package org.firstinspires.ftc.teamcode.test.tuning
 
-import com.acmerobotics.dashboard.FtcDashboard
-import com.bylazar.battery.PanelsBattery
 import com.bylazar.telemetry.JoinedTelemetry
 import com.bylazar.telemetry.PanelsTelemetry
 import com.qualcomm.hardware.lynx.LynxModule
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
-import dev.nextftc.ftc.Gamepads
 import org.firstinspires.ftc.teamcode.subsystems.Intake
 import org.firstinspires.ftc.teamcode.subsystems.OV9281
 import org.firstinspires.ftc.teamcode.subsystems.Shooter
@@ -25,7 +22,7 @@ class FlywheelTest : LinearOpMode() {
         val spindexer = Spindexer()
         val turret = Turret()
         val subsystems = setOf(shooter,camera,transfer,intake,spindexer,turret)
-        telemetry = JoinedTelemetry(PanelsTelemetry.ftcTelemetry, FtcDashboard.getInstance().telemetry, telemetry)
+        telemetry = JoinedTelemetry(PanelsTelemetry.ftcTelemetry, telemetry)
 
         subsystems.forEach { it.initialize() }
 

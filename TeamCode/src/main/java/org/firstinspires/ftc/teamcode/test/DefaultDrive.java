@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.test;
 
-import com.acmerobotics.dashboard.FtcDashboard;
 import com.bylazar.telemetry.JoinedTelemetry;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
@@ -31,12 +30,11 @@ public class DefaultDrive extends OpMode {
 
     @Override
     public void init() {
-        telemetry = new JoinedTelemetry(PanelsTelemetry.INSTANCE.getFtcTelemetry(), telemetry, FtcDashboard.getInstance().getTelemetry());
+        telemetry = new JoinedTelemetry(PanelsTelemetry.INSTANCE.getFtcTelemetry(), telemetry);
         front_left  = hardwareMap.get(DcMotorEx.class, "frontleft");
         front_right = hardwareMap.get(DcMotorEx.class, "frontright");
         back_left   = hardwareMap.get(DcMotorEx.class, "backleft");
         back_right  = hardwareMap.get(DcMotorEx.class, "backright");
-        DcMotorEx tryt  = hardwareMap.get(DcMotorEx.class, "flywheel");
 
 
         front_left.setDirection(DcMotorSimple.Direction.REVERSE);

@@ -2,8 +2,6 @@ package org.firstinspires.ftc.teamcode.test
 
 import android.util.Log
 import android.util.Size
-import com.acmerobotics.dashboard.FtcDashboard
-import com.acmerobotics.dashboard.config.Config
 import com.bylazar.configurables.annotations.Configurable
 import com.bylazar.telemetry.JoinedTelemetry
 import com.bylazar.telemetry.PanelsTelemetry
@@ -26,7 +24,6 @@ import kotlin.math.pow
 import kotlin.math.sqrt
 
 @Configurable
-@Config
 @TeleOp(name = "Concept: AprilTag Driver", group = "Concept")
 class AprilTagDriver : LinearOpMode() {
     companion object {
@@ -59,7 +56,7 @@ class AprilTagDriver : LinearOpMode() {
 //        kP,kI,kD, 0.0, 0.0, max,
 //        min)
     override fun runOpMode() {
-        telemetry = JoinedTelemetry(PanelsTelemetry.ftcTelemetry, telemetry, FtcDashboard.getInstance().telemetry)
+        telemetry = JoinedTelemetry(PanelsTelemetry.ftcTelemetry, telemetry)
 
 //        frontLeft.direction = DcMotorSimple.Direction.REVERSE
 //        backLeft.direction  = DcMotorSimple.Direction.REVERSE

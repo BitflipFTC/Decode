@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode.test
 
-import com.acmerobotics.dashboard.FtcDashboard
-import com.acmerobotics.dashboard.config.Config
 import com.bylazar.configurables.annotations.Configurable
 import com.bylazar.gamepad.PanelsGamepad
 import com.bylazar.telemetry.JoinedTelemetry
@@ -21,7 +19,6 @@ import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.sin
 
-@Config
 @Configurable
 @TeleOp(name = "Heading Correct Drive", group = "TeleOp")
 class HeadingCorrectDrive : LinearOpMode() {
@@ -66,7 +63,7 @@ class HeadingCorrectDrive : LinearOpMode() {
 //    var hoodPos = 0.0
 
     override fun runOpMode() {
-        telemetry = JoinedTelemetry(PanelsTelemetry.ftcTelemetry, telemetry, FtcDashboard.getInstance().telemetry)
+        telemetry = JoinedTelemetry(PanelsTelemetry.ftcTelemetry, telemetry)
         frontLeft.direction = DcMotorSimple.Direction.REVERSE
         backLeft.direction  = DcMotorSimple.Direction.REVERSE
 

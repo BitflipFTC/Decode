@@ -2,8 +2,6 @@ package org.firstinspires.ftc.teamcode.subsystems;
 
 import android.util.Size;
 
-import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.config.Config;
 import com.bylazar.configurables.annotations.Configurable;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
@@ -27,7 +25,6 @@ import java.util.stream.Collectors;
 import dev.nextftc.core.subsystems.Subsystem;
 import dev.nextftc.ftc.ActiveOpMode;
 
-@Config
 @Configurable
 public class OV9281 implements Subsystem {
 
@@ -242,10 +239,11 @@ public class OV9281 implements Subsystem {
                 adjustedTagTargetBearing = -1.0;
             }
         }
-        ActiveOpMode.telemetry().addData("Distance from goal", distanceToGoal);
-        ActiveOpMode.telemetry().addData("Current tag bearing", currentTagBearing);
-        ActiveOpMode.telemetry().addData("Adjusted target tag bearing", adjustedTagTargetBearing);
-        ActiveOpMode.telemetry().addData("Current tag yaw", currentTagYaw);
+        ActiveOpMode.telemetry().addData("Target Tag ID", targetID);
+        ActiveOpMode.telemetry().addData("Distance from goal", "%06.3fin", distanceToGoal);
+        ActiveOpMode.telemetry().addData("Current tag bearing", "%05.2f deg",currentTagBearing);
+        ActiveOpMode.telemetry().addData("Adjusted target tag bearing","%05.2f deg", adjustedTagTargetBearing);
+        ActiveOpMode.telemetry().addData("Current tag yaw","%05.2f", currentTagYaw);
 
         ActiveOpMode.telemetry().addLine("---------------------------");
     }

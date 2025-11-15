@@ -1,24 +1,17 @@
 package org.firstinspires.ftc.teamcode.test.tuning
 
-import com.acmerobotics.dashboard.FtcDashboard
 import com.bylazar.telemetry.JoinedTelemetry
 import com.bylazar.telemetry.PanelsTelemetry
-import com.bylazar.utils.LoopTimer
 import com.qualcomm.hardware.lynx.LynxModule
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import org.firstinspires.ftc.teamcode.subsystems.OV9281
 import org.firstinspires.ftc.teamcode.subsystems.Turret
-import org.firstinspires.ftc.vision.apriltag.AprilTagDetection
 
 @TeleOp(name = "Test: Turret", group = "Test")
 class TurretTest : LinearOpMode() {
     override fun runOpMode() {
-        telemetry = JoinedTelemetry(
-            PanelsTelemetry.ftcTelemetry,
-            telemetry,
-            FtcDashboard.getInstance().telemetry
-        )
+        telemetry = JoinedTelemetry(PanelsTelemetry.ftcTelemetry, telemetry)
 
         val turret = Turret()
         val camera = OV9281()

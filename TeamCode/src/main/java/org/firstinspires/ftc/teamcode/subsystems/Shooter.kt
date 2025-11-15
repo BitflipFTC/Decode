@@ -1,13 +1,7 @@
 package org.firstinspires.ftc.teamcode.subsystems
 
-import com.acmerobotics.dashboard.config.Config
-import com.qualcomm.robotcore.hardware.DcMotor
-import com.qualcomm.robotcore.hardware.DcMotorEx
-import com.qualcomm.robotcore.hardware.DcMotorSimple
-import com.qualcomm.robotcore.hardware.PwmControl
-import com.qualcomm.robotcore.hardware.ServoImplEx
+import com.bylazar.configurables.annotations.Configurable
 import com.qualcomm.robotcore.hardware.VoltageSensor
-import com.qualcomm.robotcore.util.ElapsedTime
 import dev.nextftc.core.subsystems.Subsystem
 import dev.nextftc.ftc.ActiveOpMode
 import org.firstinspires.ftc.teamcode.subsystems.Shooter.Companion.kD
@@ -33,7 +27,7 @@ import org.firstinspires.ftc.teamcode.util.hardware.ServoEx
  * The flywheel speed is managed by a PID controller, and its constants ([kP], [kI], [kD], [kV])
  * can be tuned.
  */
-@Config
+@Configurable
 class Shooter(): Subsystem {
     companion object {
         const val FLYWHEEL_PPR = 28

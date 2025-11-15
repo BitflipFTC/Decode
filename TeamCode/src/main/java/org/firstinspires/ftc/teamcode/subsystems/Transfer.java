@@ -1,8 +1,6 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
-import com.acmerobotics.dashboard.config.Config;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.bylazar.configurables.annotations.Configurable;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.teamcode.util.PIDController;
@@ -19,7 +17,7 @@ import dev.nextftc.ftc.ActiveOpMode;
  * The main function is [transferArtifact], which initiates a transfer sequence.
  * The [update] method must be called in a loop to drive the motor to its target position.
  */
-@Config
+@Configurable
 public class Transfer implements Subsystem {
     // 1620rpm motor, so
     private final double TICKS_PER_REVOLUTION = 103.8;

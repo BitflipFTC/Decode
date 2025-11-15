@@ -1,12 +1,9 @@
 package org.firstinspires.ftc.teamcode.util
 
-import com.acmerobotics.dashboard.FtcDashboard
 import com.bylazar.telemetry.JoinedTelemetry
 import com.bylazar.telemetry.PanelsTelemetry
 import dev.nextftc.core.commands.CommandManager
 import dev.nextftc.core.components.BindingsComponent
-import dev.nextftc.core.components.SubsystemComponent
-import dev.nextftc.ftc.ActiveOpMode
 import dev.nextftc.ftc.NextFTCOpMode
 import dev.nextftc.ftc.components.BulkReadComponent
 import dev.nextftc.ftc.components.LoopTimeComponent
@@ -52,10 +49,7 @@ open class BitflipOpMode: NextFTCOpMode() {
 
     override fun runOpMode() {
         try {
-            telemetry = JoinedTelemetry(telemetry,
-                PanelsTelemetry.ftcTelemetry,
-                FtcDashboard.getInstance().telemetry
-            )
+            telemetry = JoinedTelemetry(telemetry, PanelsTelemetry.ftcTelemetry)
 
             components.forEach { it.preInit() }
             onInit()

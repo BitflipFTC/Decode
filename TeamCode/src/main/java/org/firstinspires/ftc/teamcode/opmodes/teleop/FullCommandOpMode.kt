@@ -1,9 +1,6 @@
 package org.firstinspires.ftc.teamcode.opmodes.teleop
 
 import android.util.Log
-import com.acmerobotics.dashboard.FtcDashboard
-import com.bylazar.telemetry.JoinedTelemetry
-import com.bylazar.telemetry.PanelsTelemetry
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import com.qualcomm.robotcore.hardware.Gamepad
 import dev.nextftc.bindings.button
@@ -12,33 +9,18 @@ import dev.nextftc.core.commands.groups.ParallelGroup
 import dev.nextftc.core.commands.groups.SequentialGroup
 import dev.nextftc.core.commands.utility.InstantCommand
 import dev.nextftc.core.commands.utility.LambdaCommand
-import dev.nextftc.core.components.BindingsComponent
 import dev.nextftc.core.components.SubsystemComponent
 import dev.nextftc.ftc.Gamepads
-import dev.nextftc.ftc.components.BulkReadComponent
-import dev.nextftc.ftc.components.LoopTimeComponent
-import org.firstinspires.ftc.teamcode.subsystems.ArtifactColorSensor
-import org.firstinspires.ftc.teamcode.subsystems.Drivetrain
-import org.firstinspires.ftc.teamcode.subsystems.Intake
-import org.firstinspires.ftc.teamcode.subsystems.OV9281
-import org.firstinspires.ftc.teamcode.subsystems.Shooter
-import org.firstinspires.ftc.teamcode.subsystems.Spindexer
-import org.firstinspires.ftc.teamcode.subsystems.Transfer
-import org.firstinspires.ftc.teamcode.subsystems.Turret
 import org.firstinspires.ftc.teamcode.util.Alliance
 import org.firstinspires.ftc.teamcode.util.Artifact
 import org.firstinspires.ftc.teamcode.util.BitflipOpMode
 import org.firstinspires.ftc.teamcode.util.InitConfigurer
-import org.firstinspires.ftc.teamcode.util.MotifPattern
-import org.firstinspires.ftc.teamcode.util.TelemetryComponent
 import org.firstinspires.ftc.teamcode.util.commands.RepeatCommand
 import org.firstinspires.ftc.teamcode.util.commands.RetryCommand
 import kotlin.time.Duration.Companion.milliseconds
 
 @TeleOp(name = "Command Drive", group = "TeleOp")
 class FullCommandOpMode: BitflipOpMode() {
-    var alliance = Alliance.NONE
-
     fun retryShoot() = RetryCommand(
         transfer.shootArtifact(),
         { !shooter.atSetPoint() },

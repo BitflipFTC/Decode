@@ -26,6 +26,12 @@ object InitConfigurer : Component {
 
     private var phase = Phase.NONE
 
+    override fun preInit() {
+        phase = Phase.NONE
+        selectedAlliance = Alliance.NONE
+        selectedStartingPosition = StartingPosition.NONE
+    }
+
     override fun postWaitForStart() {
         when (phase) {
             Phase.SELECTING_ALLIANCE          -> {
