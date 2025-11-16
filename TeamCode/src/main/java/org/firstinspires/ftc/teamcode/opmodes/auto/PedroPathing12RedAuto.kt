@@ -116,7 +116,8 @@ class PedroPathing12RedAuto: BitflipOpMode() {
         autoaim()
         setUpPreloads()
         intake.runIntake()()
-        disableColorSensorDetection
+        buildPaths()
+        disableColorSensorDetection()
 
         val autonomousRoutine = SequentialGroup(
             FollowPath(scorePreload, holdEnd = true),
