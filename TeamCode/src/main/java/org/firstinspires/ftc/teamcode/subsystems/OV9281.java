@@ -72,9 +72,7 @@ public class OV9281 implements Subsystem {
     private int targetID = 0;
 
     private Pose3D turretPose = null;
-
     private Pose3D tagPose = null;
-
     AprilTagMetadata targetTag = null;
 
     // 20: Blue

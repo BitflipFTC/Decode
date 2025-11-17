@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.subsystems
 
-import com.qualcomm.robotcore.hardware.ColorRangeSensor
-import com.qualcomm.robotcore.hardware.NormalizedColorSensor
+import com.qualcomm.hardware.rev.RevColorSensorV3
 import com.qualcomm.robotcore.hardware.NormalizedRGBA
 import dev.nextftc.core.subsystems.Subsystem
 import dev.nextftc.ftc.ActiveOpMode
@@ -9,7 +8,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit
 import org.firstinspires.ftc.teamcode.util.Artifact
 
 class ArtifactColorSensor: Subsystem {
-    private lateinit var colorSensor: ColorRangeSensor
+    private lateinit var colorSensor: RevColorSensorV3
     var colors: NormalizedRGBA = NormalizedRGBA()
         private set
 
@@ -25,7 +24,7 @@ class ArtifactColorSensor: Subsystem {
         get() = colors.blue / colors.alpha.toDouble()
 
     override fun initialize() {
-        colorSensor = ActiveOpMode.hardwareMap.get(ColorRangeSensor::class.java, "colorSensor")
+        colorSensor = ActiveOpMode.hardwareMap.get(RevColorSensorV3::class.java, "colorSensor")
     }
 
     override fun periodic() {

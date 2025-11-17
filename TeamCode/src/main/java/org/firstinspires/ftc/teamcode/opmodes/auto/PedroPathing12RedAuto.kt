@@ -4,13 +4,13 @@ import com.pedropathing.geometry.BezierCurve
 import com.pedropathing.geometry.BezierLine
 import com.pedropathing.geometry.Pose
 import com.pedropathing.paths.PathChain
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous
 import dev.nextftc.core.commands.delays.WaitUntil
 import dev.nextftc.core.commands.groups.ParallelGroup
 import dev.nextftc.core.commands.groups.SequentialGroup
 import dev.nextftc.core.commands.utility.InstantCommand
 import dev.nextftc.core.commands.utility.LambdaCommand
 import dev.nextftc.core.components.SubsystemComponent
-import dev.nextftc.core.units.m
 import dev.nextftc.extensions.pedro.FollowPath
 import dev.nextftc.extensions.pedro.PedroComponent
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants
@@ -20,6 +20,7 @@ import org.firstinspires.ftc.teamcode.util.BitflipOpMode
 import org.firstinspires.ftc.teamcode.util.InitConfigurer
 import kotlin.time.Duration.Companion.milliseconds
 
+@Autonomous(name = "pp 12")
 class PedroPathing12RedAuto: BitflipOpMode() {
     init {
         addComponents(
@@ -29,7 +30,8 @@ class PedroPathing12RedAuto: BitflipOpMode() {
                 turret,
                 camera,
                 shooter,
-                transfer
+                transfer,
+                colorSensor
             ),
             PedroComponent(
                 Constants::createFollower
@@ -118,6 +120,8 @@ class PedroPathing12RedAuto: BitflipOpMode() {
         intake.runIntake()()
         buildPaths()
         disableColorSensorDetection()
+
+        PedroComponent.follower.setStartingPose(startPose)
 
         val autonomousRoutine = SequentialGroup(
             FollowPath(scorePreload, holdEnd = true),
