@@ -118,7 +118,8 @@ class PedroPathing12RedAuto: BitflipOpMode() {
         autoaim()
         setUpPreloads()
         intake.runIntake()()
-        disableColorSensorDetection
+        buildPaths()
+        disableColorSensorDetection()
 
         PedroComponent.follower.setStartingPose(startPose)
 
