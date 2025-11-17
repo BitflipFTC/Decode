@@ -7,8 +7,10 @@ import com.bylazar.configurables.annotations.Configurable;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.ExposureControl;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.GainControl;
+import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
@@ -69,6 +71,7 @@ public class OV9281 implements Subsystem {
     private double lastDistanceToGoal = 0;
     private double distanceToGoal = 0;
     private int targetID = 0;
+    double yawimpl2 = 0;
 
     private Pose3D turretPose = null;
     // 20: Blue
@@ -230,9 +233,22 @@ public class OV9281 implements Subsystem {
                     -1 * yaw -3.134277
                 */
 
-                adjustedTagTargetBearing = yawScalar * currentTagYaw - 3.134277;
+//                if (currentTagBearing <= 5) {
+                    adjustedTagTargetBearing = -yawScalar * currentTagYaw - 3.134277;
+//                } else {
+//                    adjustedTagTargetBearing = 0;
+//                }
 
                 turretPose = detection.robotPose;
+                VectorF tagvec = detection.metadata.fieldPosition;
+                Pose3D tagPos = new Pose3D(
+                        new Position(DistanceUnit.INCH, tagvec.get(0), tagvec.get(1), tagvec.get(2), detection.frameAcquisitionNanoTime),
+                        new YawPitchRollAngles(AngleUnit.DEGREES, 54.046, 90, 0, detection.frameAcquisitionNanoTime)
+                );
+
+
+                // 54.046 degree
+                yawimpl2 = turretPose.getOrientation().getYaw() - tagPos.getOrientation().getYaw();
             } else {
                 distanceToGoal = -1.0;
                 currentTagBearing = -1.0;
@@ -244,6 +260,8 @@ public class OV9281 implements Subsystem {
         ActiveOpMode.telemetry().addData("Current tag bearing", "%05.2f deg",currentTagBearing);
         ActiveOpMode.telemetry().addData("Adjusted target tag bearing","%05.2f deg", adjustedTagTargetBearing);
         ActiveOpMode.telemetry().addData("Current tag yaw","%05.2f", currentTagYaw);
+        ActiveOpMode.telemetry().addData("Yaw impl 2","%05.2f", yawimpl2);
+
 
         ActiveOpMode.telemetry().addLine("---------------------------");
     }

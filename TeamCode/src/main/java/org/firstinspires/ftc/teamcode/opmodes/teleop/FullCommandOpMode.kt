@@ -4,19 +4,15 @@ import android.util.Log
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import com.qualcomm.robotcore.hardware.Gamepad
 import dev.nextftc.bindings.button
-import dev.nextftc.core.commands.delays.WaitUntil
 import dev.nextftc.core.commands.groups.ParallelGroup
 import dev.nextftc.core.commands.groups.SequentialGroup
 import dev.nextftc.core.commands.utility.InstantCommand
 import dev.nextftc.core.commands.utility.LambdaCommand
 import dev.nextftc.core.components.SubsystemComponent
 import dev.nextftc.ftc.Gamepads
-import org.firstinspires.ftc.teamcode.util.Alliance
 import org.firstinspires.ftc.teamcode.util.Artifact
 import org.firstinspires.ftc.teamcode.util.BitflipOpMode
 import org.firstinspires.ftc.teamcode.util.InitConfigurer
-import org.firstinspires.ftc.teamcode.util.commands.RepeatCommand
-import org.firstinspires.ftc.teamcode.util.commands.RetryCommand
 import kotlin.time.Duration.Companion.milliseconds
 
 @TeleOp(name = "Command Drive", group = "TeleOp")
