@@ -16,6 +16,7 @@ import org.firstinspires.ftc.teamcode.util.MotifPattern;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagGameDatabase;
+import org.firstinspires.ftc.vision.apriltag.AprilTagMetadata;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
 import java.util.ArrayList;
@@ -59,7 +60,7 @@ public class OV9281 implements Subsystem {
         return visionPortal;
     }
 
-    public static double yawScalar = -1;
+    public static double yawScalar = -0.31422408;
 
     private final double lowPass = 0.075;
 
@@ -71,6 +72,11 @@ public class OV9281 implements Subsystem {
     private int targetID = 0;
 
     private Pose3D turretPose = null;
+
+    private Pose3D tagPose = null;
+
+    AprilTagMetadata targetTag = null;
+
     // 20: Blue
     // 24: Red
 
@@ -199,7 +205,14 @@ public class OV9281 implements Subsystem {
                 distanceToGoal = detection.ftcPose.range * lowPass + (1 - lowPass) * lastDistanceToGoal;
                 currentTagBearing = detection.ftcPose.bearing;
 
-                currentTagYaw = detection.ftcPose.yaw;
+                turretPose = detection.robotPose;
+
+                // prolly will work idk
+                currentTagYaw = Math.toDegrees(Math.atan2(
+                        tagPose.getPosition().x - turretPose.getPosition().x,
+                        tagPose.getPosition().y - turretPose.getPosition().y
+                )) - tagPose.getOrientation().getYaw();
+
                 /*
                     now we do the adjusted tag target calculations so the robot faces the back of the goal
                     54.046 degree angle offset from back wall to atag. (via field cad)
@@ -230,9 +243,8 @@ public class OV9281 implements Subsystem {
                     -1 * yaw -3.134277
                 */
 
-                adjustedTagTargetBearing = yawScalar * currentTagYaw - 3.134277;
+                adjustedTagTargetBearing = yawScalar * currentTagYaw - 0.99045;
 
-                turretPose = detection.robotPose;
             } else {
                 distanceToGoal = -1.0;
                 currentTagBearing = -1.0;
@@ -250,6 +262,12 @@ public class OV9281 implements Subsystem {
 
     public void setTargetID (int id) {
         targetID = id;
+
+        targetTag = AprilTagGameDatabase.getDecodeTagLibrary().lookupTag(id);
+        tagPose = new Pose3D(
+                new Position(DistanceUnit.INCH, targetTag.fieldPosition.get(0), targetTag.fieldPosition.get(1), targetTag.fieldPosition.get(2), 0),
+                new YawPitchRollAngles(AngleUnit.DEGREES, 54.046, 90, 0, 0)
+        );
     }
 
     public int getTargetID() {
