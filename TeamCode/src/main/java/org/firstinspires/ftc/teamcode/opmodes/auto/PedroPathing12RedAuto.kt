@@ -62,6 +62,12 @@ class PedroPathing12RedAuto: BitflipOpMode() {
         drawOnlyCurrent()
     }
 
+    val waitUntilReadyToShoot: ParallelGroup
+        get() = ParallelGroup(
+            WaitUntil(turret::atSetPoint),
+            WaitUntil(shooter::atSetPoint)
+        )
+
     override fun onStartButtonPressed() {
         camera.targetID = InitConfigurer.selectedAlliance.aprilTagID
         spindexer.motifPattern = camera.getMotif()
@@ -91,11 +97,6 @@ class PedroPathing12RedAuto: BitflipOpMode() {
             InstantCommand { spindexer.recordIntake(Artifact.GREEN,  2) }
         )
 
-        val waitUntilReadyToShoot = ParallelGroup(
-            WaitUntil(turret::atSetPoint),
-            WaitUntil(shooter::atSetPoint)
-        )
-
         val activateColorSensorDetection = LambdaCommand()
             .setUpdate {
                 if (colorSensor.distance <= 5) {
@@ -108,20 +109,10 @@ class PedroPathing12RedAuto: BitflipOpMode() {
             .setName("Color Sensor Detecting")
             .setInterruptible(true)
 
-        val disableColorSensorDetection = LambdaCommand()
-            .setIsDone { false }
-            .setRequirements(colorSensor)
-            .setName("Color Sensor Stopped")
-            .setInterruptible(true)
-
         autoadjust()
         autoaim()
         setUpPreloads()
         intake.runIntake()()
-        buildPaths()
-        disableColorSensorDetection()
-
-        PedroComponent.follower.setStartingPose(startPose)
 
         val autonomousRoutine = SequentialGroup(
             FollowPath(scorePreload, holdEnd = true),
@@ -129,18 +120,18 @@ class PedroPathing12RedAuto: BitflipOpMode() {
             shootAllArtifacts(200.milliseconds),
             activateColorSensorDetection,
             FollowPath(intake1, holdEnd = true),
-            disableColorSensorDetection,
+            InstantCommand { activateColorSensorDetection.cancel() },
             FollowPath(score1),
             waitUntilReadyToShoot,
             shootAllArtifacts(200.milliseconds),
             activateColorSensorDetection,
             FollowPath(intake2, holdEnd = true),
-            disableColorSensorDetection,
+            InstantCommand { activateColorSensorDetection.cancel() },
             FollowPath(score2),
             shootAllArtifacts(200.milliseconds),
             activateColorSensorDetection,
             FollowPath(intake3, holdEnd = true),
-            disableColorSensorDetection,
+            InstantCommand { activateColorSensorDetection.cancel() },
             FollowPath(score3),
             shootAllArtifacts(200.milliseconds),
             FollowPath(park)
