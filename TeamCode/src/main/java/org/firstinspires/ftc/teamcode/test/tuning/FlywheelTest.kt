@@ -81,7 +81,6 @@ class FlywheelTest : LinearOpMode() {
 
             if (gamepad1.right_trigger >= 0.15) {
                 turret.bearing = camera.currentTagBearing
-                turret.targetBearing = camera.adjustedTagTargetBearing
                 turret.turningPower = gamepad1.right_stick_x.toDouble()
             } else {
                 turret.bearing = 0.0

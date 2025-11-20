@@ -60,21 +60,12 @@ public class OV9281 implements Subsystem {
         return visionPortal;
     }
 
-    public static double yawScalar = -0.31422408;
-
     private final double lowPass = 0.075;
 
     private double currentTagBearing = 0;
-    private double adjustedTagTargetBearing = 0;
-    private double currentTagYaw = 0;
     private double lastDistanceToGoal = 0;
     private double distanceToGoal = 0;
     private int targetID = 0;
-
-    private Pose3D turretPose = null;
-    private Pose3D tagPose = null;
-    AprilTagMetadata targetTag = null;
-
     // 20: Blue
     // 24: Red
 
@@ -183,7 +174,7 @@ public class OV9281 implements Subsystem {
         if (count == 0) {
             ActiveOpMode.telemetry().addData("Detected April Tags", 0);
             distanceToGoal = -1.0;
-            currentTagBearing = -1.0;
+            currentTagBearing = 0.0;
             return;
         }
 
@@ -191,8 +182,7 @@ public class OV9281 implements Subsystem {
         for (AprilTagDetection detection : detectionsBuffer) {
             if (detection.metadata == null) {
                 distanceToGoal = -1.0;
-                currentTagBearing = -1.0;
-                adjustedTagTargetBearing = -1.0;
+                currentTagBearing = -0.1;
                 ActiveOpMode.telemetry().addData("Current tag", "No metadata");
                 continue;
             }
@@ -202,70 +192,19 @@ public class OV9281 implements Subsystem {
             if (detection.id == targetID) {
                 distanceToGoal = detection.ftcPose.range * lowPass + (1 - lowPass) * lastDistanceToGoal;
                 currentTagBearing = detection.ftcPose.bearing;
-
-                turretPose = detection.robotPose;
-
-                // prolly will work idk
-                currentTagYaw = Math.toDegrees(Math.atan2(
-                        tagPose.getPosition().x - turretPose.getPosition().x,
-                        tagPose.getPosition().y - turretPose.getPosition().y
-                )) - tagPose.getOrientation().getYaw();
-
-                /*
-                    now we do the adjusted tag target calculations so the robot faces the back of the goal
-                    54.046 degree angle offset from back wall to atag. (via field cad)
-
-                    given that, we can calculate the ideal offset scalar such that the robot always faces the back of the goal.
-
-                    due to the fact that whoever designed this game enjoys suffering,
-                    when squared up to the tag, the back isn't centered. CAD shows that
-                    an offset of -3.134277 deg (the tag being a bit right of center) solves this.
-
-                    however, being squared up to the tag is rare. as such, we need to find
-                    a scalar that you can multiply by the current yaw to get the correct target bearing offset.
-
-                    to do this, I used the cad of the field and measured the extremes of aim -
-                    that being 90 deg against the side wall, and 0 deg against the back wall - then
-                    figured out the yaw for each position and the required bearing
-                    adjustment for each position.
-
-                    Back wall:
-                    +35.954 deg yaw
-                    -39.088277 deg offset bearing
-
-                    Side wall:
-                    -54.046 deg yaw
-                    +50.911723 deg offset bearing
-
-                    and from that we get the linear equation,
-                    -1 * yaw -3.134277
-                */
-
-                adjustedTagTargetBearing = yawScalar * currentTagYaw - 0.99045;
-
             } else {
                 distanceToGoal = -1.0;
-                currentTagBearing = -1.0;
-                adjustedTagTargetBearing = -1.0;
+                currentTagBearing = -0.2;
             }
         }
         ActiveOpMode.telemetry().addData("Target Tag ID", targetID);
         ActiveOpMode.telemetry().addData("Distance from goal", "%06.3fin", distanceToGoal);
         ActiveOpMode.telemetry().addData("Current tag bearing", "%05.2f deg",currentTagBearing);
-        ActiveOpMode.telemetry().addData("Adjusted target tag bearing","%05.2f deg", adjustedTagTargetBearing);
-        ActiveOpMode.telemetry().addData("Current tag yaw","%05.2f", currentTagYaw);
-
         ActiveOpMode.telemetry().addLine("---------------------------");
     }
 
     public void setTargetID (int id) {
         targetID = id;
-
-        targetTag = AprilTagGameDatabase.getDecodeTagLibrary().lookupTag(id);
-        tagPose = new Pose3D(
-                new Position(DistanceUnit.INCH, targetTag.fieldPosition.get(0), targetTag.fieldPosition.get(1), targetTag.fieldPosition.get(2), 0),
-                new YawPitchRollAngles(AngleUnit.DEGREES, 54.046, 90, 0, 0)
-        );
     }
 
     public int getTargetID() {
@@ -293,9 +232,5 @@ public class OV9281 implements Subsystem {
 
     public int getDetectionsAmount() {
         return detectionsBuffer.size();
-    }
-
-    public double getAdjustedTagTargetBearing() {
-        return adjustedTagTargetBearing;
     }
 }

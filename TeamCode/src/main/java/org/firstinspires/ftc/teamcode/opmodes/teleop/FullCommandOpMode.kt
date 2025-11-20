@@ -83,11 +83,9 @@ class FullCommandOpMode: BitflipOpMode() {
 
         Gamepads.gamepad1.rightTrigger greaterThan 0.15 whenTrue {
             turret.bearing = camera.currentTagBearing
-            turret.targetBearing = camera.adjustedTagTargetBearing
             turret.turningPower = gamepad1.right_stick_x.toDouble()
         } whenFalse {
             turret.bearing = 0.0
-            turret.targetBearing = 0.0
             turret.turningPower = 0.0
         }
 

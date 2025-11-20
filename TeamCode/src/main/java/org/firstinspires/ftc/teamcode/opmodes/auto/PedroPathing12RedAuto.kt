@@ -75,7 +75,6 @@ class PedroPathing12RedAuto: BitflipOpMode() {
         val autoaim = LambdaCommand()
             .setUpdate {
                 turret.bearing = camera.currentTagBearing
-                turret.targetBearing = camera.adjustedTagTargetBearing
             }
             .setIsDone { false }
             .setRequirements(turret)
