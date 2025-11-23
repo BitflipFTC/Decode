@@ -33,17 +33,14 @@ class Shooter(): Subsystem {
         const val FLYWHEEL_PPR = 28
         const val LOW_PASS = 0.05
 
-        const val PEAK_NEAR_LAUNCH_ZONE = 83.0
-        const val CLOSE_SHOOTING = 32.1
-        
         @JvmField
-        var kP = 0.005
+        var kP = 0.009
         @JvmField
         var kI = 0.0
         @JvmField
         var kD = 0.0
         @JvmField
-        var kV = 0.00255
+        var kV = 0.0024
 
         @JvmField
         var tuning = false
@@ -65,7 +62,7 @@ class Shooter(): Subsystem {
     // shortest we can see from is about 35.0.
     private val lookupTable = InterpolatedLookupTable(
         doubleArrayOf(
-            35.0,
+            40.0,
             50.0,
             65.0,
             80.0,
@@ -74,22 +71,22 @@ class Shooter(): Subsystem {
             140.0
         ),
         doubleArrayOf(
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0
+            0.5,
+            0.5,
+            0.35,
+            0.3,
+            0.2,
+            0.1,
+            0.05
         ),
         doubleArrayOf(
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0
+            3250.0,
+            3500.0,
+            3750.0,
+            3875.0,
+            4250.0,
+            4500.0,
+            5000.0
         )
     )
 
@@ -123,7 +120,7 @@ class Shooter(): Subsystem {
             position = hoodPosition
         }
 
-        flywheelController.setPointTolerance = 155.toDouble()
+        flywheelController.setPointTolerance = 85.toDouble()
 
         vSensor = ActiveOpMode.hardwareMap.get(VoltageSensor::class.java, "Control Hub")
     }
