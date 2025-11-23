@@ -67,10 +67,10 @@ open class BitflipOpMode: NextFTCOpMode() {
 //                components.forEach { it.preWaitForStart() }
                 BindingsComponent.preWaitForStart()
                 onWaitForStart()
-                telemetry.update()
                 if (components.contains(InitConfigurer)) InitConfigurer.postWaitForStart()
                 BulkReadComponent.postWaitForStart()
 
+                telemetry.update()
 //                components.reversed().forEach { it.postWaitForStart() }
             }
 

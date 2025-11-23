@@ -2,9 +2,12 @@ package org.firstinspires.ftc.teamcode.opmodes.auto
 
 import com.pedropathing.geometry.BezierCurve
 import com.pedropathing.geometry.BezierLine
+import com.pedropathing.geometry.CoordinateSystem
+import com.pedropathing.geometry.PedroCoordinates
 import com.pedropathing.geometry.Pose
 import com.pedropathing.paths.PathChain
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous
+import dev.nextftc.core.commands.delays.Delay
 import dev.nextftc.core.commands.delays.WaitUntil
 import dev.nextftc.core.commands.groups.ParallelGroup
 import dev.nextftc.core.commands.groups.SequentialGroup
@@ -19,6 +22,7 @@ import org.firstinspires.ftc.teamcode.util.Artifact
 import org.firstinspires.ftc.teamcode.util.BitflipOpMode
 import org.firstinspires.ftc.teamcode.util.InitConfigurer
 import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
 @Autonomous(name = "pp 12")
 class PedroPathing12RedAuto: BitflipOpMode() {
@@ -100,7 +104,7 @@ class PedroPathing12RedAuto: BitflipOpMode() {
             .setUpdate {
                 if (colorSensor.distance <= 5) {
                     spindexer.recordIntake(colorSensor.detectedArtifact)
-                    spindexer.goToFirstEmptyIntake()
+                    spindexer.goToFirstEmptyIntake()()
                 }
             }
             .setIsDone { false }
@@ -108,6 +112,7 @@ class PedroPathing12RedAuto: BitflipOpMode() {
             .setName("Color Sensor Detecting")
             .setInterruptible(true)
 
+        PedroComponent.follower.pose = (Pose(72.0,72.0,0.0, PedroCoordinates.INSTANCE))
         autoadjust()
         autoaim()
         setUpPreloads()
@@ -115,25 +120,33 @@ class PedroPathing12RedAuto: BitflipOpMode() {
 
         val autonomousRoutine = SequentialGroup(
             FollowPath(scorePreload, holdEnd = true),
-            waitUntilReadyToShoot,
-            shootAllArtifacts(200.milliseconds),
-            activateColorSensorDetection,
+            Delay(2.seconds),
+//            waitUntilReadyToShoot,
+//            shootAllArtifacts(200.milliseconds),
+//            activateColorSensorDetection,
             FollowPath(intake1, holdEnd = true),
-            InstantCommand { activateColorSensorDetection.cancel() },
+            Delay(500.milliseconds),
+//            InstantCommand { activateColorSensorDetection.cancel() },
             FollowPath(score1),
-            waitUntilReadyToShoot,
-            shootAllArtifacts(200.milliseconds),
-            activateColorSensorDetection,
+            Delay(2.seconds),
+//            waitUntilReadyToShoot,
+//            shootAllArtifacts(200.milliseconds),
+//            activateColorSensorDetection,
             FollowPath(intake2, holdEnd = true),
-            InstantCommand { activateColorSensorDetection.cancel() },
+            Delay(500.milliseconds),
+//            InstantCommand { activateColorSensorDetection.cancel() },
             FollowPath(score2),
-            shootAllArtifacts(200.milliseconds),
-            activateColorSensorDetection,
+            Delay(2.seconds),
+//            shootAllArtifacts(200.milliseconds),
+//            activateColorSensorDetection,
             FollowPath(intake3, holdEnd = true),
-            InstantCommand { activateColorSensorDetection.cancel() },
-            FollowPath(score3),
-            shootAllArtifacts(200.milliseconds),
-            FollowPath(park)
+            Delay(500.milliseconds),
+//            InstantCommand { activateColorSensorDetection.cancel() },
+            FollowPath(score3, holdEnd = true),
+            Delay(2.seconds),
+//            waitUntilReadyToShoot,
+//            shootAllArtifacts(200.milliseconds),
+            FollowPath(park),
         )
 
         autonomousRoutine()
@@ -143,9 +156,6 @@ class PedroPathing12RedAuto: BitflipOpMode() {
         telemetry.addData("x", PedroComponent.follower.pose.x)
         telemetry.addData("y", PedroComponent.follower.pose.y)
         telemetry.addData("heading", PedroComponent.follower.pose.heading)
-
-        telemetry.update()
-
         draw()
     }
 
