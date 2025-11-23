@@ -52,7 +52,7 @@ class FullCommandOpMode: BitflipOpMode() {
         drive()
 
         // gamepad red when no atag seen
-        InstantCommand { gamepad1.setLedColor(255.0,0.0,0.0, Gamepad.LED_DURATION_CONTINUOUS)}
+        InstantCommand { gamepad1.setLedColor(255.0,0.0,0.0, Gamepad.LED_DURATION_CONTINUOUS)}()
         button {camera.distanceToGoal > 0.0} whenBecomesTrue InstantCommand {gamepad1.setLedColor(0.0,255.0,0.0,
             Gamepad.LED_DURATION_CONTINUOUS)} whenBecomesFalse InstantCommand {gamepad1.setLedColor(255.0,0.0,0.0,
             Gamepad.LED_DURATION_CONTINUOUS)}
@@ -74,12 +74,12 @@ class FullCommandOpMode: BitflipOpMode() {
         )
 
         // hold down right bumper for auto indexing
-        /*(Gamepads.gamepad1.rightBumper and */button { colorSensor.detectedArtifact != Artifact.NONE }/*)*/.whenBecomesTrue {
+        button { colorSensor.detectedArtifact != Artifact.NONE }.whenBecomesTrue(
             SequentialGroup (
                 InstantCommand { spindexer.recordIntake(colorSensor.detectedArtifact) },
                 spindexer.goToFirstEmptyIntake()
             )
-        }
+        )
 
         Gamepads.gamepad1.rightTrigger greaterThan 0.15 whenTrue {
             turret.bearing = camera.currentTagBearing
