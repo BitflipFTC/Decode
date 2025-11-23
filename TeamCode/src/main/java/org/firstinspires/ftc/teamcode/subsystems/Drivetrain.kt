@@ -84,7 +84,6 @@ class Drivetrain(): Subsystem {
     }
 
     fun calculateDrivetrainPowers (strafe: Double, forward: Double, yaw: Double): DrivePowers {
-        heading = imu.robotYawPitchRollAngles.getYaw(AngleUnit.DEGREES)
 
         if (!fieldCentric) {
             return DrivePowers(
@@ -94,6 +93,7 @@ class Drivetrain(): Subsystem {
                 (forward + strafe - yaw) * driveSpeed
             ).normalized()
         } else {
+            heading = imu.robotYawPitchRollAngles.getYaw(AngleUnit.DEGREES)
             val rotStrafe = strafe * cos(Math.toRadians(-heading)) - forward * sin(Math.toRadians(-heading))
             val rotForward = strafe * sin(Math.toRadians(-heading)) + forward * cos(Math.toRadians(-heading))
 
