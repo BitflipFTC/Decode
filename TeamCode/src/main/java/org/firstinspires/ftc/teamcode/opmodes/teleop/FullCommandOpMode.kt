@@ -53,9 +53,11 @@ class FullCommandOpMode: BitflipOpMode() {
 
         // gamepad red when no atag seen
         InstantCommand { gamepad1.setLedColor(255.0,0.0,0.0, Gamepad.LED_DURATION_CONTINUOUS)}()
-        button {camera.distanceToGoal > 0.0} whenBecomesTrue InstantCommand {gamepad1.setLedColor(0.0,255.0,0.0,
-            Gamepad.LED_DURATION_CONTINUOUS)} whenBecomesFalse InstantCommand {gamepad1.setLedColor(255.0,0.0,0.0,
-            Gamepad.LED_DURATION_CONTINUOUS)}
+        button {camera.distanceToGoal > 0.0} whenBecomesTrue InstantCommand {
+            gamepad1.setLedColor(0.0,255.0,0.0, Gamepad.LED_DURATION_CONTINUOUS)
+        } whenBecomesFalse InstantCommand {
+            gamepad1.setLedColor(255.0,0.0,0.0, Gamepad.LED_DURATION_CONTINUOUS)
+        }
 
         Gamepads.gamepad1.triangle.whenBecomesTrue(
             SequentialGroup(
@@ -109,5 +111,4 @@ class FullCommandOpMode: BitflipOpMode() {
         Gamepads.gamepad1.dpadDown whenBecomesTrue spindexer.goToNextOuttake()
         Gamepads.gamepad1.dpadUp whenBecomesTrue transfer.shootArtifact()
     }
-
 }

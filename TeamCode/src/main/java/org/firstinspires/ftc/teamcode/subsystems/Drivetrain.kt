@@ -93,9 +93,9 @@ class Drivetrain(): Subsystem {
                 (forward + strafe - yaw) * driveSpeed
             ).normalized()
         } else {
-            heading = imu.robotYawPitchRollAngles.getYaw(AngleUnit.DEGREES)
-            val rotStrafe = strafe * cos(Math.toRadians(-heading)) - forward * sin(Math.toRadians(-heading))
-            val rotForward = strafe * sin(Math.toRadians(-heading)) + forward * cos(Math.toRadians(-heading))
+            heading = -imu.robotYawPitchRollAngles.getYaw(AngleUnit.RADIANS)
+            val rotStrafe = strafe * cos(heading) - forward * sin(heading)
+            val rotForward = strafe * sin(heading) + forward * cos(heading)
 
             return DrivePowers(
                 (rotForward + rotStrafe + yaw) * driveSpeed,
