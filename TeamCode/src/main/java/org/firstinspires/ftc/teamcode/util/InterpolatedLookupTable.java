@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode.util;
 
 import org.firstinspires.ftc.teamcode.subsystems.Shooter;
 
+import java.util.Arrays;
+
 /**
  * Implements a lookup table that uses linear interpolation to estimate output values
  * (angle and velocity) based on a given input distance.

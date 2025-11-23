@@ -24,7 +24,7 @@ class MotorEx @JvmOverloads constructor(
         get() = motor.power
         set(power) {
             lastPower = motor.power
-            if (abs(power - lastPower) >= cacheTolerance) {
+            if (abs(power - lastPower) > cacheTolerance) {
                 val desiredChange = power - lastPower
                 val limitedChange = Range.clip(desiredChange, -maxSlewRate, maxSlewRate)
                 motor.power += limitedChange

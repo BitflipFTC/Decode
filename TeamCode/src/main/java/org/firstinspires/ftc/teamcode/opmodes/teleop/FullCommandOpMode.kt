@@ -21,7 +21,7 @@ class FullCommandOpMode: BitflipOpMode() {
         addComponents(
             SubsystemComponent(
                 drivetrain.apply {
-                    fieldCentric = true
+                    fieldCentric = false
                 },
                 intake,
                 camera,
@@ -60,12 +60,7 @@ class FullCommandOpMode: BitflipOpMode() {
         }
 
         Gamepads.gamepad1.triangle.whenBecomesTrue(
-            SequentialGroup(
-                InstantCommand { Log.d("COMMAND_TIMER", "Shooting ${spindexer.totalFullSlots} artifacts")},
-                InstantCommand { Log.d("COMMAND_TIMER", "Start time: ${System.nanoTime() / 1000000}")},
-                shootAllArtifacts(200.milliseconds),
-                InstantCommand { Log.d("COMMAND_TIMER", "End time: ${System.nanoTime() / 1000000}")}
-            )
+            shootAllArtifacts(200.milliseconds),
         )
 
         Gamepads.gamepad1.leftBumper.whenBecomesTrue(
