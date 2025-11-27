@@ -21,7 +21,7 @@ class FullCommandOpMode: BitflipOpMode() {
         addComponents(
             SubsystemComponent(
                 drivetrain.apply {
-                    fieldCentric = false
+                    fieldCentric = true
                 },
                 intake,
                 camera,
@@ -71,17 +71,17 @@ class FullCommandOpMode: BitflipOpMode() {
         )
 
         // hold down right bumper for auto indexing
-        button { colorSensor.detectedArtifact != Artifact.NONE }.whenBecomesTrue(
+        button { colorSensor.detectedArtifact != Artifact.NONE && !spindexer.isFull }.whenBecomesTrue(
             SequentialGroup (
                 InstantCommand { spindexer.recordIntake(colorSensor.detectedArtifact) },
                 spindexer.goToFirstEmptyIntake()
             )
         )
 
-        Gamepads.gamepad1.rightTrigger greaterThan 0.15 whenTrue {
+        Gamepads.gamepad1.rightTrigger greaterThan 0.15 whenFalse  {
             turret.bearing = camera.currentTagBearing
             turret.turningPower = gamepad1.right_stick_x.toDouble()
-        } whenFalse {
+        } whenTrue {
             turret.bearing = 0.0
             turret.turningPower = 0.0
         }

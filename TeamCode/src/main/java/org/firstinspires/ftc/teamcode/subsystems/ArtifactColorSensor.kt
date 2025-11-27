@@ -14,14 +14,13 @@ class ArtifactColorSensor: Subsystem {
 
     var detectedArtifact = Artifact.NONE
         private set
-    val distance: Double
-        get() = colorSensor.getDistance(DistanceUnit.CM)
+    var distance: Double = 0.0
     val red: Double
-        get() = colors.red / colors.alpha.toDouble()
+        get() = colors.red.toDouble()
     val green: Double
-        get() = colors.green / colors.alpha.toDouble()
+        get() = colors.green.toDouble()
     val blue: Double
-        get() = colors.blue / colors.alpha.toDouble()
+        get() = colors.blue.toDouble()
 
     override fun initialize() {
         colorSensor = ActiveOpMode.hardwareMap.get(RevColorSensorV3::class.java, "colorSensor")
@@ -29,6 +28,7 @@ class ArtifactColorSensor: Subsystem {
 
     override fun periodic() {
         colors = colorSensor.normalizedColors
+        distance = colorSensor.getDistance(DistanceUnit.CM)
 
         detectedArtifact = if (distance <= 5.0) {
             if (blue > green) {
@@ -41,13 +41,8 @@ class ArtifactColorSensor: Subsystem {
         }
 
         ActiveOpMode.telemetry.run {
-            addData("R", red)
-            addData("G", green)
-            addData("B", blue)
-            addLine()
             addData("Detected Artifact", detectedArtifact.name)
             addData("Detected Artifact Ordinal (graphing)", detectedArtifact.ordinal)
-            addData("Light detected", colorSensor.lightDetected)
             addData("Distance", "%05.2fcm", distance)
             addLine("------------------------------")
         }
