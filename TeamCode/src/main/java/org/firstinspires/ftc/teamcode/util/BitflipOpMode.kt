@@ -109,7 +109,7 @@ open class BitflipOpMode: NextFTCOpMode() {
 
     fun shootAllArtifacts(delay: Duration) = RepeatCommand(
         SequentialGroup(
-            spindexer.tryMotifOuttake().endAfter(20002.milliseconds),
+            spindexer.tryMotifOuttake().endAfter(2000.milliseconds),
             WaitUntil(shooter::atSetPoint).endAfter(1000.milliseconds), // add timeout to the wait so it doesn't wait forever
             retryShoot().thenWait(delay)
         ), spindexer::totalFullSlots
