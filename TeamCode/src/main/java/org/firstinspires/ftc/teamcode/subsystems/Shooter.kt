@@ -56,10 +56,9 @@ class Shooter(): Subsystem {
     private lateinit var flywheelMotor: MotorEx
     private val flywheelController = PIDController(kP, kI, kD, kV)
 
-    // todo tune at 35.0, 50.0, 65.0, 80.0, 100.0, 120.0, 140.0.
     // long goal is approximately 125 in. from peak of long to center of goal tag
     // longest short zone is approx. 80 in. from peak to center
-    // shortest we can see from is about 35.0.
+    // shortest we can see from is about 25.0.
     private val lookupTable = InterpolatedLookupTable(
         doubleArrayOf(
             40.0,
@@ -72,10 +71,10 @@ class Shooter(): Subsystem {
         ),
         doubleArrayOf(
             0.5,
-            0.5,
+            0.45,
             0.35,
-            0.3,
-            0.2,
+            0.225,
+            0.15,
             0.1,
             0.05
         ),
@@ -83,7 +82,7 @@ class Shooter(): Subsystem {
             3250.0,
             3500.0,
             3750.0,
-            3875.0,
+            4000.0,
             4250.0,
             4500.0,
             5000.0

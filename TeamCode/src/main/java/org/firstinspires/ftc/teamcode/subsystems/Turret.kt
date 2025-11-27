@@ -12,13 +12,13 @@ class Turret(): Subsystem {
         @JvmField
         var kP = 0.004
         @JvmField
-        var kD = 0.0012
+        var kD = 0.00052
         @JvmField
-        var kS = 0.0272
+        var kS = 0.035
         @JvmField
         var kV = -0.22
         @JvmField
-        var setPointTolerance : Double = 5.toDouble() // degrees
+        var setPointTolerance : Double = 3.toDouble() // degrees
         @JvmField
         var tuning = false
     }
