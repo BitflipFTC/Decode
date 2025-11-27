@@ -112,7 +112,6 @@ class PedroPathing12RedAuto: BitflipOpMode() {
             .setName("Color Sensor Detecting")
             .setInterruptible(true)
 
-        PedroComponent.follower.pose = (Pose(72.0,72.0,0.0, PedroCoordinates.INSTANCE))
         autoadjust()
         autoaim()
         setUpPreloads()
@@ -160,7 +159,7 @@ class PedroPathing12RedAuto: BitflipOpMode() {
     }
 
     val horizontalIntakeStart = 100.0
-    val horizontalIntakeEnd   = 125.0
+    val horizontalIntakeEnd   = 117.0
 
     val intake1Vertical = 34.0
     val intake2Vertical = 58.5
