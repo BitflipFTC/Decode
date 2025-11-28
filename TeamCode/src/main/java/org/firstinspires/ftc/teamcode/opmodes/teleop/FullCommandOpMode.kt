@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.opmodes.teleop
 
-import android.util.Log
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import com.qualcomm.robotcore.hardware.Gamepad
 import dev.nextftc.bindings.button
@@ -16,7 +15,7 @@ import org.firstinspires.ftc.teamcode.util.InitConfigurer
 import kotlin.time.Duration.Companion.milliseconds
 
 @TeleOp(name = "Command Drive", group = "TeleOp")
-class FullCommandOpMode: BitflipOpMode() {
+class FullCommandOpMode : BitflipOpMode() {
     init {
         addComponents(
             SubsystemComponent(
@@ -36,49 +35,59 @@ class FullCommandOpMode: BitflipOpMode() {
     }
 
     override fun onStartButtonPressed() {
+        // todo remove these once we have a functional auto that gets these.
         spindexer.motifPattern = camera.motif
         camera.targetID = InitConfigurer.selectedAlliance.aprilTagID
 
+        // Teleop Driver controls
         val drive = LambdaCommand()
-            .setUpdate { drivetrain.setDrivetrainPowers(drivetrain.calculateDrivetrainPowers(
-                gamepad1.left_stick_x.toDouble(),
-                -gamepad1.left_stick_y.toDouble(),
-                gamepad1.right_stick_x.toDouble()
-            )) }
+            .setUpdate {
+                drivetrain.setDrivetrainPowers(
+                    drivetrain.calculateDrivetrainPowers(
+                        gamepad1.left_stick_x.toDouble(),
+                        -gamepad1.left_stick_y.toDouble(),
+                        gamepad1.right_stick_x.toDouble()
+                    )
+                )
+            }
             .setIsDone { false }
             .setRequirements(drivetrain)
             .setInterruptible(true)
             .setName("Drive")
         drive()
+        Gamepads.gamepad1.circle whenBecomesTrue InstantCommand { drivetrain.resetYaw() }
 
-        // gamepad red when no atag seen
-        InstantCommand { gamepad1.setLedColor(255.0,0.0,0.0, Gamepad.LED_DURATION_CONTINUOUS)}()
-        button {camera.distanceToGoal > 0.0} whenBecomesTrue InstantCommand {
-            gamepad1.setLedColor(0.0,255.0,0.0, Gamepad.LED_DURATION_CONTINUOUS)
+        // Gamepad lighting control
+        InstantCommand { gamepad1.setLedColor(255.0, 0.0, 0.0, Gamepad.LED_DURATION_CONTINUOUS) }()
+        button { camera.distanceToGoal > 0.0 } whenBecomesTrue InstantCommand {
+            gamepad1.setLedColor(0.0, 255.0, 0.0, Gamepad.LED_DURATION_CONTINUOUS)
         } whenBecomesFalse InstantCommand {
-            gamepad1.setLedColor(255.0,0.0,0.0, Gamepad.LED_DURATION_CONTINUOUS)
+            gamepad1.setLedColor(255.0, 0.0, 0.0, Gamepad.LED_DURATION_CONTINUOUS)
         }
 
+        // Auto shoot all artifacts
         Gamepads.gamepad1.triangle.whenBecomesTrue(
             shootAllArtifacts(200.milliseconds),
         )
 
-        Gamepads.gamepad1.leftBumper.whenBecomesTrue(
-            SequentialGroup (
-            InstantCommand { spindexer.recordIntake(colorSensor.detectedArtifact) },
+        // Auto indexing
+        // check that the spindexer isn't full so it doesn't continuously record new intakes when it becomes full
+        button { colorSensor.detectedArtifact != Artifact.NONE && !spindexer.isFull }.whenBecomesTrue(
+            SequentialGroup(
+                InstantCommand { spindexer.recordIntake(colorSensor.detectedArtifact) },
                 spindexer.goToFirstEmptyIntake()
             )
         )
-
-        // hold down right bumper for auto indexing
-        button { colorSensor.detectedArtifact != Artifact.NONE && !spindexer.isFull }.whenBecomesTrue(
-            SequentialGroup (
+        // Manual override for auto index
+        Gamepads.gamepad1.leftBumper.whenBecomesTrue(
+            SequentialGroup(
                 InstantCommand { spindexer.recordIntake(colorSensor.detectedArtifact) },
                 spindexer.goToFirstEmptyIntake()
             )
         )
 
-        Gamepads.gamepad1.rightTrigger greaterThan 0.15 whenFalse  {
+        // Turret autoaiming (can turn off with right trigger)
+        Gamepads.gamepad1.rightTrigger greaterThan 0.15 whenFalse {
             turret.bearing = camera.currentTagBearing
             turret.turningPower = gamepad1.right_stick_x.toDouble()
         } whenTrue {
@@ -86,24 +95,26 @@ class FullCommandOpMode: BitflipOpMode() {
             turret.turningPower = 0.0
         }
 
-        Gamepads.gamepad1.leftTrigger greaterThan 0.15 whenTrue { shooter.targetFlywheelRPM = 0.0 } whenFalse { shooter.calculateTargetState(camera.distanceToGoal) }
+        // Shooter auto adjusting (can turn off with left trigger)
+        Gamepads.gamepad1.leftTrigger greaterThan 0.15 whenTrue {
+            shooter.targetFlywheelRPM = 0.0
+        } whenFalse { shooter.setTargetState(camera.distanceToGoal) }
 
+        // Intake controls
         Gamepads.gamepad1.square whenBecomesTrue intake.toggleRun()
-        Gamepads.gamepad1.cross  whenBecomesTrue intake.reverse()   whenBecomesFalse intake.forward()
+        Gamepads.gamepad1.cross whenBecomesTrue intake.reverse() whenBecomesFalse intake.forward()
 
-        Gamepads.gamepad1.circle whenBecomesTrue InstantCommand { drivetrain.resetYaw() }
 
-        Gamepads.gamepad1.dpadLeft whenBecomesTrue ParallelGroup (
-            InstantCommand { spindexer.recordIntake(Artifact.GREEN) },
-            spindexer.goToFirstEmptyIntake(),
+        // Manual controls (testing)
+        Gamepads.gamepad1.dpadDown whenBecomesTrue ParallelGroup(
+            InstantCommand {
+                spindexer.recordOuttake(0)
+                spindexer.recordOuttake(1)
+                spindexer.recordOuttake(2)
+            }
         )
-
-        Gamepads.gamepad1.dpadRight whenBecomesTrue ParallelGroup (
-            InstantCommand { spindexer.recordIntake(Artifact.PURPLE) },
-            spindexer.goToFirstEmptyIntake(),
-        )
-
-        Gamepads.gamepad1.dpadDown whenBecomesTrue spindexer.goToNextOuttake()
         Gamepads.gamepad1.dpadUp whenBecomesTrue transfer.shootArtifact()
+        Gamepads.gamepad1.dpadLeft whenBecomesTrue spindexer.goToNextOuttake()
+        Gamepads.gamepad1.dpadRight whenBecomesTrue spindexer.goToNextIntake()
     }
 }

@@ -164,23 +164,19 @@ class Spindexer(): Subsystem {
     // --------- functions that do things ---------
 
     /** used when setting a new target */
-    fun resetIntegral(): Unit = controller.resetTotalError()
+    private fun resetIntegral(): Unit = controller.resetTotalError()
 
     /**
      * Records that an artifact of a certain color has been collected in the current slot.
      */
-    fun recordIntake(color: Artifact) {
-        collectedArtifacts[statesToSlotsMap.getValue(state)] = color
-    }
-
-    fun recordIntake(color: Artifact, slot: Int) {
-        collectedArtifacts[slot] = color
-    }
+    @JvmOverloads
+    fun recordIntake(color: Artifact, slot: Int = statesToSlotsMap.getValue(state)) = collectedArtifacts.set(slot, color)
 
     /**
      * Records that an artifact has been removed from the current slot.
      */
-    fun recordOuttake() = collectedArtifacts.set(statesToSlotsMap.getValue(state), Artifact.NONE)
+    @JvmOverloads
+    fun recordOuttake(slot: Int = statesToSlotsMap.getValue(state)) = collectedArtifacts.set(slot, Artifact.NONE)
 
     // --------- functions that control hardware ---------
 
@@ -363,6 +359,16 @@ class Spindexer(): Subsystem {
         collectedArtifacts.mapIndexedNotNull { index, artifact -> if (artifact == Artifact.PURPLE) index else null }
 
     // Commands
+    /**
+     * Moves to the next spindexer position, cycling through intakes then outtakes.
+     */
+    fun goToNextPosition() = LambdaCommand()
+        .setStart(this::toNextPosition)
+        .setIsDone(this::atSetPoint)
+        .setRequirements(this)
+        .setName("To Next Position")
+        .setInterruptible(true)
+
     /**
      * Moves to the next intake, or intake 0 if not at an intake.
      */
