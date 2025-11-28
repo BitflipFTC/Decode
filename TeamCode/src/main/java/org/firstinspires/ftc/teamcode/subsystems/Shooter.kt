@@ -149,7 +149,7 @@ class Shooter(): Subsystem {
 
     fun atSetPoint() = flywheelController.atSetPoint()
 
-    fun calculateTargetState(distance: Double) {
+    fun setTargetState(distance: Double) {
         // ensure the parameter distance is actually based on an apriltag reading
         if (distance > 0.0) {
             state = lookupTable.calculate(distance)

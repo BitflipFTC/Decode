@@ -3,7 +3,6 @@ package org.firstinspires.ftc.teamcode.opmodes.teleop
 import com.bylazar.configurables.annotations.Configurable
 import com.bylazar.telemetry.JoinedTelemetry
 import com.bylazar.telemetry.PanelsTelemetry
-import com.bylazar.utils.LoopTimer
 import com.qualcomm.hardware.lynx.LynxModule
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
@@ -21,8 +20,8 @@ import org.firstinspires.ftc.teamcode.util.Alliance
 import org.firstinspires.ftc.teamcode.util.dpadToAxes
 import kotlin.math.abs
 
-@Configurable
-@TeleOp(name = "Combined TeleOp", group = "TeleOp")
+//@Configurable
+//@TeleOp(name = "Combined TeleOp", group = "TeleOp")
 class CombinedTeleOp : LinearOpMode() {
     companion object {
         @JvmField
@@ -164,7 +163,7 @@ class CombinedTeleOp : LinearOpMode() {
 
             // map auto adjust behind right trigger
             if (gamepad1.right_trigger >= 0.25) {
-                shooter.calculateTargetState(camera.distanceToGoal)
+                shooter.setTargetState(camera.distanceToGoal)
             } else {
                 shooter.state = Shooter.ShooterState(hoodPosition, flywheelRPM)
             }

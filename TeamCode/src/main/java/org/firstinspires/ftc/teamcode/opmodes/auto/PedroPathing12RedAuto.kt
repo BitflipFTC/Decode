@@ -2,8 +2,6 @@ package org.firstinspires.ftc.teamcode.opmodes.auto
 
 import com.pedropathing.geometry.BezierCurve
 import com.pedropathing.geometry.BezierLine
-import com.pedropathing.geometry.CoordinateSystem
-import com.pedropathing.geometry.PedroCoordinates
 import com.pedropathing.geometry.Pose
 import com.pedropathing.paths.PathChain
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous
@@ -87,7 +85,7 @@ class PedroPathing12RedAuto: BitflipOpMode() {
 
         val autoadjust = LambdaCommand()
             .setUpdate {
-                shooter.calculateTargetState(camera.distanceToGoal)
+                shooter.setTargetState(camera.distanceToGoal)
             }
             .setIsDone { false }
             .setRequirements(shooter)

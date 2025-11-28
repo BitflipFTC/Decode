@@ -174,7 +174,7 @@ class ShootPreloadsAuto: LinearOpMode() {
         while (!doneShooting && opModeIsActive()) {
             // update pids and get new camera readings
             updateCamera(startingPosition.targetTag)
-            shooter.calculateTargetState(currentTagDistance)
+            shooter.setTargetState(currentTagDistance)
             turret.bearing = currentTagBearing
             turret.periodic()
             shooter.periodic()
