@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.opmodes.teleop
 
+import android.R
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import com.qualcomm.robotcore.hardware.Gamepad
 import dev.nextftc.bindings.button
@@ -78,6 +79,8 @@ class FullCommandOpMode : BitflipOpMode() {
                 spindexer.goToFirstEmptyIntake()
             )
         )
+        button { spindexer.isFull } whenBecomesTrue spindexer.tryMotifOuttake().and(intake.reverse()) whenBecomesFalse intake.forward()
+
         // Manual override for auto index
         Gamepads.gamepad1.leftBumper.whenBecomesTrue(
             SequentialGroup(
