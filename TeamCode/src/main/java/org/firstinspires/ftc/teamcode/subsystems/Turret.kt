@@ -10,13 +10,13 @@ import org.firstinspires.ftc.teamcode.util.hardware.CRServoEx
 class Turret(): Subsystem {
     companion object {
         @JvmField
-        var kP = 0.004
+        var kP = 0.0031
         @JvmField
-        var kD = 0.00052
+        var kD = 0.00055
         @JvmField
-        var kS = 0.035
+        var kS = 0.04
         @JvmField
-        var kV = -0.22
+        var kV = -0.2
         @JvmField
         var setPointTolerance : Double = 3.toDouble() // degrees
         @JvmField

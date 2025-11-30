@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.opmodes.teleop
 
-import android.R
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import com.qualcomm.robotcore.hardware.Gamepad
 import dev.nextftc.bindings.button
@@ -21,7 +20,7 @@ class FullCommandOpMode : BitflipOpMode() {
         addComponents(
             SubsystemComponent(
                 drivetrain.apply {
-                    fieldCentric = true
+                    fieldCentric = false
                 },
                 intake,
                 camera,
@@ -99,9 +98,11 @@ class FullCommandOpMode : BitflipOpMode() {
         }
 
         // Shooter auto adjusting (can turn off with left trigger)
-        Gamepads.gamepad1.leftTrigger greaterThan 0.15 whenTrue {
+        Gamepads.gamepad1.leftTrigger greaterThan 0.15 whenFalse {
             shooter.targetFlywheelRPM = 0.0
-        } whenFalse { shooter.setTargetState(camera.distanceToGoal) }
+        } whenTrue {
+            shooter.setTargetState(camera.distanceToGoal)
+        }
 
         // Intake controls
         Gamepads.gamepad1.square whenBecomesTrue intake.toggleRun()
