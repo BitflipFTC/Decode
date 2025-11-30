@@ -100,7 +100,7 @@ class PedroPathing12RedAuto: BitflipOpMode() {
 
         val activateColorSensorDetection = LambdaCommand()
             .setUpdate {
-                if (colorSensor.distance <= 5) {
+                if (colorSensor.detectedArtifact != Artifact.NONE && !spindexer.isFull) {
                     spindexer.recordIntake(colorSensor.detectedArtifact)
                     spindexer.goToFirstEmptyIntake()()
                 }
@@ -109,6 +109,7 @@ class PedroPathing12RedAuto: BitflipOpMode() {
             .setRequirements(colorSensor)
             .setName("Color Sensor Detecting")
             .setInterruptible(true)
+
 
         autoadjust()
         autoaim()
@@ -123,7 +124,7 @@ class PedroPathing12RedAuto: BitflipOpMode() {
 //            activateColorSensorDetection,
             FollowPath(intake1, holdEnd = true),
             Delay(500.milliseconds),
-//            InstantCommand { activateColorSensorDetection.cancel() },
+//            InstantCommand { activateColorSensorDetection.stop(true) },
             FollowPath(score1),
             Delay(2.seconds),
 //            waitUntilReadyToShoot,
