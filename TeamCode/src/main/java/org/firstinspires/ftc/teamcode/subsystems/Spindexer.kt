@@ -93,7 +93,7 @@ object Spindexer: Subsystem {
     val allStates = States.entries.toList()
 
     // models physical slots. slots themselves rotate with the spindexer
-    private val collectedArtifacts = mutableListOf(
+    private val collectedArtifacts = arrayOf(
         Artifact.NONE,
         Artifact.NONE,
         Artifact.NONE,
@@ -168,8 +168,9 @@ object Spindexer: Subsystem {
      * Clears the [collectedArtifacts] variable and replaces it with the arguments.
      */
     fun setCollectedArtifacts(slot0: Artifact, slot1: Artifact, slot2: Artifact) {
-        collectedArtifacts.clear()
-        collectedArtifacts.addAll(listOf(slot0, slot1, slot2))
+        listOf(slot0, slot1, slot2).forEachIndexed { index, artifact -> 
+            collectedArtifacts[index] = artifact
+        }
     }
 
     /**
