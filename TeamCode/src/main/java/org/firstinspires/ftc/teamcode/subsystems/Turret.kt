@@ -7,21 +7,19 @@ import org.firstinspires.ftc.teamcode.util.PIDController
 import org.firstinspires.ftc.teamcode.util.hardware.CRServoEx
 
 @Configurable
-class Turret(): Subsystem {
-    companion object {
-        @JvmField
-        var kP = 0.0031
-        @JvmField
-        var kD = 0.00055
-        @JvmField
-        var kS = 0.04
-        @JvmField
-        var kV = -0.2
-        @JvmField
-        var setPointTolerance : Double = 3.toDouble() // degrees
-        @JvmField
-        var tuning = false
-    }
+object Turret: Subsystem {
+    @JvmField
+    var kP = 0.0031
+    @JvmField
+    var kD = 0.00055
+    @JvmField
+    var kS = 0.04
+    @JvmField
+    var kV = -0.2
+    @JvmField
+    var setPointTolerance : Double = 3.toDouble() // degrees
+    @JvmField
+    var tuning = false
 
     private lateinit var servoL: CRServoEx
     private lateinit var servoR: CRServoEx

@@ -14,7 +14,7 @@ import kotlin.math.cos
 import kotlin.math.max
 import kotlin.math.sin
 
-class Drivetrain(): Subsystem {
+object Drivetrain: Subsystem {
     class DrivePowers(val fl: Double, val fr: Double, val bl: Double, val br: Double) {
         @SuppressLint("DefaultLocale")
         override fun toString(): String {

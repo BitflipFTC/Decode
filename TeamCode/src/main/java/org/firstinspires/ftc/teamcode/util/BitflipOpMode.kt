@@ -37,14 +37,14 @@ import kotlin.time.Duration.Companion.milliseconds
  * - colorSensor
  */
 open class BitflipOpMode: NextFTCOpMode() {
-    protected val drivetrain = Drivetrain()
-    protected val intake = Intake()
+    protected val drivetrain = Drivetrain
+    protected val intake = Intake
     protected val camera = OV9281()
-    protected val shooter = Shooter()
-    protected val spindexer = Spindexer()
+    protected val shooter = Shooter
+    protected val spindexer = Spindexer
     protected val transfer = Transfer()
-    protected val turret = Turret()
-    protected val colorSensor = ArtifactColorSensor()
+    protected val turret = Turret
+    protected val colorSensor = ArtifactColorSensor
 
     init {
         addComponents(

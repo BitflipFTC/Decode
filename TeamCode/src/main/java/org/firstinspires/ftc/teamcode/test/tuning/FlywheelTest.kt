@@ -16,13 +16,13 @@ import org.firstinspires.ftc.teamcode.subsystems.Turret
 @TeleOp(name = "Test: Flywheel", group = "Test")
 class FlywheelTest : LinearOpMode() {
     override fun runOpMode() {
-        val shooter = Shooter()
+        val shooter = Shooter
         val camera = OV9281()
         val transfer = Transfer()
-        val intake = Intake()
-        val spindexer = Spindexer()
-        val turret = Turret()
-        val colorSensor = ArtifactColorSensor()
+        val intake = Intake
+        val spindexer = Spindexer
+        val turret = Turret
+        val colorSensor = ArtifactColorSensor
         val subsystems = setOf(shooter,camera,transfer,intake,spindexer,turret, colorSensor)
         telemetry = JoinedTelemetry(PanelsTelemetry.ftcTelemetry, telemetry)
 

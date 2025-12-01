@@ -12,8 +12,8 @@ import org.firstinspires.ftc.teamcode.subsystems.Transfer
 class IntakeTest : LinearOpMode() {
     override fun runOpMode() {
         telemetry = JoinedTelemetry(PanelsTelemetry.ftcTelemetry, telemetry)
-        val spindexer = Spindexer()
-        val intake = Intake()
+        val spindexer = Spindexer
+        val intake = Intake
         val transfer = Transfer()
         val subsystems = setOf(spindexer, intake, transfer)
 

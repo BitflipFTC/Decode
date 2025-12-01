@@ -9,7 +9,7 @@ import org.firstinspires.ftc.teamcode.subsystems.ArtifactColorSensor
 @TeleOp(name = "Test: Color Sensor", group = "Test")
 class ColorSensorTest : LinearOpMode() {
     override fun runOpMode() {
-        val colorSensor = ArtifactColorSensor()
+        val colorSensor = ArtifactColorSensor
         colorSensor.initialize()
         telemetry = JoinedTelemetry(PanelsTelemetry.ftcTelemetry, telemetry)
         waitForStart()

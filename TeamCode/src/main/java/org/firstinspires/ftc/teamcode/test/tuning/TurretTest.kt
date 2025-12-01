@@ -13,7 +13,7 @@ class TurretTest : LinearOpMode() {
     override fun runOpMode() {
         telemetry = JoinedTelemetry(PanelsTelemetry.ftcTelemetry, telemetry)
 
-        val turret = Turret()
+        val turret = Turret
         val camera = OV9281()
         val subsystems = setOf(turret,camera)
         subsystems.forEach { it.initialize() }
