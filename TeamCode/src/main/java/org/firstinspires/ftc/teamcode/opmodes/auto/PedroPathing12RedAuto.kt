@@ -93,9 +93,13 @@ class PedroPathing12RedAuto: BitflipOpMode() {
             .setInterruptible(false)
 
         val setUpPreloads = SequentialGroup(
-            InstantCommand { spindexer.recordIntake(Artifact.PURPLE, 0) },
-            InstantCommand { spindexer.recordIntake(Artifact.PURPLE, 1) },
-            InstantCommand { spindexer.recordIntake(Artifact.GREEN,  2) }
+            InstantCommand {
+                spindexer.setCollectedArtifacts(
+                    Artifact.PURPLE,
+                    Artifact.PURPLE,
+                    Artifact.GREEN
+                )
+            }
         )
 
         val activateColorSensorDetection = LambdaCommand()

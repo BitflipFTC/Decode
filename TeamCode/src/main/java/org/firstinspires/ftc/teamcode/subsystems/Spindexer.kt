@@ -173,6 +173,14 @@ class Spindexer(): Subsystem {
     fun recordIntake(color: Artifact, slot: Int = statesToSlotsMap.getValue(state)) = collectedArtifacts.set(slot, color)
 
     /**
+     * Clears the [collectedArtifacts] variable and replaces it with the arguments.
+     */
+    fun setCollectedArtifacts(slot0: Artifact, slot1: Artifact, slot2: Artifact) {
+        collectedArtifacts.clear()
+        collectedArtifacts.addAll(listOf(slot0, slot1, slot2))
+    }
+
+    /**
      * Records that an artifact has been removed from the current slot.
      */
     @JvmOverloads
