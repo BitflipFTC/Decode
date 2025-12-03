@@ -18,6 +18,7 @@ import dev.nextftc.ftc.components.LoopTimeComponent
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants
 import org.firstinspires.ftc.teamcode.pedroPathing.Drawing
 import org.firstinspires.ftc.teamcode.util.Artifact
+import org.firstinspires.ftc.teamcode.util.BetterLoopTimeComponent
 import org.firstinspires.ftc.teamcode.util.BitflipOpMode
 import org.firstinspires.ftc.teamcode.util.InitConfigurer
 import kotlin.time.Duration.Companion.milliseconds
@@ -40,7 +41,7 @@ class PedroPathing12RedAuto: BitflipOpMode() {
                 Constants::createFollower
             ),
             InitConfigurer,
-            LoopTimeComponent()
+            BetterLoopTimeComponent
         )
     }
 

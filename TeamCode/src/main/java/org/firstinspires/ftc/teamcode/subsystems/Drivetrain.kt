@@ -45,7 +45,7 @@ object Drivetrain: Subsystem {
         private set
 
     var fieldCentric = false
-    var driveSpeed = 0.8
+    var driveSpeed = 1.0
 
     private lateinit var imu: IMU
     private lateinit var frontLeft : MotorEx

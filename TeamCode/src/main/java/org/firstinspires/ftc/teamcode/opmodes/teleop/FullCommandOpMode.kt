@@ -11,6 +11,7 @@ import dev.nextftc.core.components.SubsystemComponent
 import dev.nextftc.ftc.Gamepads
 import dev.nextftc.ftc.components.LoopTimeComponent
 import org.firstinspires.ftc.teamcode.util.Artifact
+import org.firstinspires.ftc.teamcode.util.BetterLoopTimeComponent
 import org.firstinspires.ftc.teamcode.util.BitflipOpMode
 import org.firstinspires.ftc.teamcode.util.InitConfigurer
 import kotlin.time.Duration.Companion.milliseconds
@@ -32,7 +33,7 @@ class FullCommandOpMode : BitflipOpMode() {
                 colorSensor
             ),
             InitConfigurer,
-            LoopTimeComponent()
+            BetterLoopTimeComponent
         )
     }
 
