@@ -9,6 +9,7 @@ import dev.nextftc.core.commands.utility.InstantCommand
 import dev.nextftc.core.commands.utility.LambdaCommand
 import dev.nextftc.core.components.SubsystemComponent
 import dev.nextftc.ftc.Gamepads
+import dev.nextftc.ftc.components.LoopTimeComponent
 import org.firstinspires.ftc.teamcode.util.Artifact
 import org.firstinspires.ftc.teamcode.util.BitflipOpMode
 import org.firstinspires.ftc.teamcode.util.InitConfigurer
@@ -30,7 +31,8 @@ class FullCommandOpMode : BitflipOpMode() {
                 turret,
                 colorSensor
             ),
-            InitConfigurer
+            InitConfigurer,
+            LoopTimeComponent()
         )
     }
 

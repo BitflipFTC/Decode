@@ -14,6 +14,7 @@ import dev.nextftc.core.commands.utility.LambdaCommand
 import dev.nextftc.core.components.SubsystemComponent
 import dev.nextftc.extensions.pedro.FollowPath
 import dev.nextftc.extensions.pedro.PedroComponent
+import dev.nextftc.ftc.components.LoopTimeComponent
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants
 import org.firstinspires.ftc.teamcode.pedroPathing.Drawing
 import org.firstinspires.ftc.teamcode.util.Artifact
@@ -38,7 +39,8 @@ class PedroPathing12RedAuto: BitflipOpMode() {
             PedroComponent(
                 Constants::createFollower
             ),
-            InitConfigurer
+            InitConfigurer,
+            LoopTimeComponent()
         )
     }
 
@@ -58,6 +60,7 @@ class PedroPathing12RedAuto: BitflipOpMode() {
     override fun onInit() {
         buildPaths()
         PedroComponent.follower.setStartingPose(farStartPose)
+        drawOnlyCurrent()
     }
 
     override fun waitForStart() {

@@ -40,6 +40,7 @@ object InitConfigurer : Component {
                     addLine()
                     addLine("Press CROSS  for BLUE")
                     addLine("Press CIRCLE for RED")
+                    addLine("Press TOUCHPAD to confirm")
                     addLine()
                     addData("Current alliance", selectedAlliance.name)
                 }
@@ -58,6 +59,7 @@ object InitConfigurer : Component {
                     addLine()
                     addLine("Press TRIANGLE for GOAL")
                     addLine("Press SQUARE   for FAR")
+                    addLine("Press TOUCHPAD to confirm")
                     addLine()
                     addData("Current starting position", selectedStartingPosition.name)
                 }
