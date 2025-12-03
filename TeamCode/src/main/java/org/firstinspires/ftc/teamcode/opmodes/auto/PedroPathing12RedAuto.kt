@@ -57,7 +57,7 @@ class PedroPathing12RedAuto: BitflipOpMode() {
 
     override fun onInit() {
         buildPaths()
-        PedroComponent.follower.setStartingPose(startPose)
+        PedroComponent.follower.setStartingPose(farStartPose)
     }
 
     override fun waitForStart() {
@@ -162,7 +162,7 @@ class PedroPathing12RedAuto: BitflipOpMode() {
     }
 
     val horizontalIntakeStart = 100.0
-    val horizontalIntakeEnd   = 117.0
+    val horizontalIntakeEnd   = 125.0
 
     val intake1Vertical = 34.0
     val intake2Vertical = 58.5
@@ -170,9 +170,12 @@ class PedroPathing12RedAuto: BitflipOpMode() {
 
     val intakeHeading = Math.toRadians(0.0)
 
-    val startPose     = Pose(88.0, 8.5, Math.toRadians(90.0))
-    val scorePose     = Pose(88.0, 14.0, Math.toRadians(65.0))
-    val parkPose      = Pose(105.500, 33.500, Math.toRadians(90.0))
+    val farStartPose     = Pose(88.0,  8.5,    Math.toRadians(90.0))
+    val farShootPose     = Pose(88.0,  14.0,   Math.toRadians(65.0))
+    val farParkPose      = Pose(105.500,  33.500, Math.toRadians(90.0))
+    val nearStartPose    = Pose(121.0, 125.0,  Math.toRadians(35.954))
+    val nearShootPose    = Pose(96.0,  96.0,   Math.toRadians(47.0))
+    val nearParkPose     = Pose(125.0, 90.0, Math.toRadians(90.0))
     val startIntake1  = Pose(horizontalIntakeStart, intake1Vertical, intakeHeading)
     val endIntake1    = Pose(horizontalIntakeEnd,   intake1Vertical, intakeHeading)
     val startIntake2  = Pose(horizontalIntakeStart, intake2Vertical, intakeHeading)
@@ -193,22 +196,22 @@ class PedroPathing12RedAuto: BitflipOpMode() {
         scorePreload = PedroComponent.follower.pathBuilder()
             .addPath(
                 BezierLine(
-                    startPose,
-                    scorePose
+                    farStartPose,
+                    farShootPose
                 )
             )
-            .setLinearHeadingInterpolation(startPose.heading, scorePose.heading)
+            .setLinearHeadingInterpolation(farStartPose.heading, farShootPose.heading)
             .build()
 
         intake1 = PedroComponent.follower.pathBuilder()
             .addPath(
                 BezierCurve(
-                    scorePose,
-                    Pose(startPose.x, intake1Vertical),
+                    farShootPose,
+                    Pose(farStartPose.x, intake1Vertical),
                     startIntake1
                 )
             )
-            .setLinearHeadingInterpolation(scorePose.heading, startIntake1.heading)
+            .setLinearHeadingInterpolation(farShootPose.heading, startIntake1.heading)
             .addPath(
                 BezierLine(startIntake1, endIntake1)
             )
@@ -219,9 +222,9 @@ class PedroPathing12RedAuto: BitflipOpMode() {
 
         score1 = PedroComponent.follower.pathBuilder()
             .addPath(
-                BezierLine(endIntake1, scorePose)
+                BezierLine(endIntake1, farShootPose)
             )
-            .setLinearHeadingInterpolation(endIntake1.heading, scorePose.heading)
+            .setLinearHeadingInterpolation(endIntake1.heading, farShootPose.heading)
             .build()
         
         // shoot + aim
@@ -229,12 +232,12 @@ class PedroPathing12RedAuto: BitflipOpMode() {
         intake2 = PedroComponent.follower.pathBuilder()
             .addPath(
                 BezierCurve(
-                    scorePose,
-                    Pose(scorePose.x, intake2Vertical),
+                    farShootPose,
+                    Pose(farShootPose.x, intake2Vertical),
                     startIntake2
                 )
             )
-            .setLinearHeadingInterpolation(scorePose.heading, startIntake2.heading)
+            .setLinearHeadingInterpolation(farShootPose.heading, startIntake2.heading)
             .addPath(
                 BezierLine(startIntake2, endIntake2)
             )
@@ -243,20 +246,20 @@ class PedroPathing12RedAuto: BitflipOpMode() {
 
         score2 = PedroComponent.follower.pathBuilder()
             .addPath(
-                BezierLine(endIntake2, scorePose)
+                BezierLine(endIntake2, nearShootPose)
             )
-            .setLinearHeadingInterpolation(endIntake2.heading, scorePose.heading)
+            .setLinearHeadingInterpolation(endIntake2.heading, nearShootPose.heading)
             .build()
 
         intake3 = PedroComponent.follower.pathBuilder()
             .addPath(
                 BezierCurve(
-                    scorePose,
-                    Pose(scorePose.x, intake3Vertical),
+                    nearShootPose,
+                    Pose(nearShootPose.x, intake3Vertical),
                     startIntake3
                 )
             )
-            .setLinearHeadingInterpolation(scorePose.heading, startIntake3.heading)
+            .setLinearHeadingInterpolation(nearShootPose.heading, startIntake3.heading)
             .addPath(
                 BezierLine(startIntake3, endIntake3)
             )
@@ -265,16 +268,16 @@ class PedroPathing12RedAuto: BitflipOpMode() {
 
         score3 = PedroComponent.follower.pathBuilder()
             .addPath(
-                BezierLine(endIntake3, scorePose)
+                BezierLine(endIntake3, nearShootPose)
             )
-            .setLinearHeadingInterpolation(endIntake3.heading, scorePose.heading)
+            .setLinearHeadingInterpolation(endIntake3.heading, farShootPose.heading)
             .build()
 
         park = PedroComponent.follower.pathBuilder()
             .addPath(
-                BezierLine(scorePose, parkPose)
+                BezierLine(nearShootPose, nearParkPose)
             )
-            .setLinearHeadingInterpolation(scorePose.heading, parkPose.heading)
+            .setLinearHeadingInterpolation(nearShootPose.heading, nearParkPose.heading)
             .build()
     }
 }
