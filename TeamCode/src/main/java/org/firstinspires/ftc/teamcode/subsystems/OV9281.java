@@ -84,8 +84,8 @@ public class OV9281 implements Subsystem {
                 .setOutputUnits(DistanceUnit.INCH, AngleUnit.DEGREES)
                 .build();
 
-        aprilTag.setDecimation(3f);
-        aprilTag.setPoseSolver(AprilTagProcessor.PoseSolver.OPENCV_SOLVEPNP_EPNP);
+        aprilTag.setDecimation(2f);
+        aprilTag.setPoseSolver(AprilTagProcessor.PoseSolver.APRILTAG_BUILTIN);
 
         visionPortal = new VisionPortal.Builder()
                 .setCamera(ActiveOpMode.hardwareMap().get(WebcamName.class, "camera"))
@@ -108,14 +108,6 @@ public class OV9281 implements Subsystem {
 
         exposureControl = visionPortal.getCameraControl(ExposureControl.class);
         gainControl = visionPortal.getCameraControl(GainControl.class);
-        while (visionPortal.getCameraState() != VisionPortal.CameraState.STREAMING) {
-            try {
-                Thread.sleep(20);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                return;
-            }
-        }
         exposureControl.setMode(ExposureControl.Mode.Manual);
         defaultExposure = exposureControl.getExposure(TimeUnit.MILLISECONDS);
         defaultGain = gainControl.getGain();

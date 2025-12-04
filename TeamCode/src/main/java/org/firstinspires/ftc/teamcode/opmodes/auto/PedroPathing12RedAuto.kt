@@ -14,7 +14,6 @@ import dev.nextftc.core.commands.utility.LambdaCommand
 import dev.nextftc.core.components.SubsystemComponent
 import dev.nextftc.extensions.pedro.FollowPath
 import dev.nextftc.extensions.pedro.PedroComponent
-import dev.nextftc.ftc.components.LoopTimeComponent
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants
 import org.firstinspires.ftc.teamcode.pedroPathing.Drawing
 import org.firstinspires.ftc.teamcode.util.Artifact
@@ -37,9 +36,7 @@ class PedroPathing12RedAuto: BitflipOpMode() {
                 transfer,
                 colorSensor
             ),
-            PedroComponent(
-                Constants::createFollower
-            ),
+            PedroComponent(Constants::createFollower),
             InitConfigurer,
             BetterLoopTimeComponent
         )
@@ -179,7 +176,7 @@ class PedroPathing12RedAuto: BitflipOpMode() {
     val farParkPose      = Pose(105.500,  33.500, Math.toRadians(90.0))
     val nearStartPose    = Pose(121.0, 125.0,  Math.toRadians(35.954))
     val nearShootPose    = Pose(96.0,  96.0,   Math.toRadians(47.0))
-    val nearParkPose     = Pose(125.0, 90.0, Math.toRadians(90.0))
+    val nearParkPose     = Pose(125.0, 90.0, Math.toRadians(0.0))
     val startIntake1  = Pose(horizontalIntakeStart, intake1Vertical, intakeHeading)
     val endIntake1    = Pose(horizontalIntakeEnd,   intake1Vertical, intakeHeading)
     val startIntake2  = Pose(horizontalIntakeStart, intake2Vertical, intakeHeading)

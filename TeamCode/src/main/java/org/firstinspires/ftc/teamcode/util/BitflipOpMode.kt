@@ -49,7 +49,7 @@ open class BitflipOpMode: NextFTCOpMode() {
     init {
         addComponents(
             BulkReadComponent,
-            BindingsComponent,
+            BindingsComponent
         )
     }
 
