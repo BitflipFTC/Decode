@@ -426,9 +426,11 @@ object Spindexer: Subsystem {
      * Tries to move to an orientation in which it can outtake artifacts in the motif order. If the spindexer
      * does not have the correct assortment of artifacts, it instead goes to the first full outtake, or outtake 0 if all slots are full or empty.
      */
-    fun tryMotifOuttake() = IfElseCommand(
-        this::hasMotifAssortment,
-        goToMotifOuttake(),
-        goToFirstFullOuttake()
-    )
+    fun tryMotifOuttake(): LambdaCommand {
+        return if (hasMotifAssortment) {
+            goToMotifOuttake()
+        } else {
+            goToFirstFullOuttake()
+        }
+    }
 }

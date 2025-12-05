@@ -111,6 +111,6 @@ open class BitflipOpMode: NextFTCOpMode() {
             spindexer.tryMotifOuttake().endAfter(2000.milliseconds),
             WaitUntil(shooter::atSetPoint).endAfter(1000.milliseconds), // add timeout to the wait so it doesn't wait forever
             retryShoot().thenWait(delay)
-        ), spindexer::totalFullSlots
+        ).setName("Shoot all artifacts"), spindexer::totalFullSlots
     ).then(spindexer.goToFirstEmptyIntake())
 }
