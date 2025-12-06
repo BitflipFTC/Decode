@@ -29,6 +29,12 @@ object Turret: Subsystem {
     var turningPower = 0.0
     var pidOutput: Double = 0.0
         private set
+    var power: Double
+        get() = servoR.power
+        set(pow) {
+            servoL.power = -pow
+            servoR.power = -pow
+        }
 
     override fun initialize() {
         servoL = CRServoEx("turretL")
@@ -37,15 +43,10 @@ object Turret: Subsystem {
         controller.setPointTolerance = setPointTolerance
     }
 
-    fun setPower (pow : Double) {
-        servoR.power = -pow
-        servoL.power = -pow
-    }
-
     override fun periodic() {
         pidOutput = controller.calculate(bearing, 0.0) // bearing approaches 0
 
-        setPower(pidOutput + kV * turningPower)
+        power = pidOutput + kV * turningPower
 1
         if (tuning) {
             controller.setCoeffs(kP, 0.0, kD, 0.0, kS)
@@ -54,11 +55,9 @@ object Turret: Subsystem {
         ActiveOpMode.telemetry.addData("Turret at set point", atSetPoint())
         ActiveOpMode.telemetry.addData("Turret bearing", bearing)
         ActiveOpMode.telemetry.addData("Turret target bearing", 0.0)
-        ActiveOpMode.telemetry.addData("Turret power", getPower())
+        ActiveOpMode.telemetry.addData("Turret power", power)
         ActiveOpMode.telemetry.addLine("---------------------------")
     }
-
-    fun getPower() = servoR.power
 
     fun atSetPoint() = controller.atSetPoint()
 }

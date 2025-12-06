@@ -17,15 +17,16 @@ import org.firstinspires.ftc.teamcode.subsystems.Turret
 class FlywheelTest : LinearOpMode() {
     override fun runOpMode() {
         val shooter = Shooter
-        val camera = OV9281()
+//        val camera = OV9281()
         val transfer = Transfer()
         val intake = Intake
         val spindexer = Spindexer
         val turret = Turret
         val colorSensor = ArtifactColorSensor
-        val subsystems = setOf(shooter,camera,transfer,intake,spindexer,turret, colorSensor)
+        val subsystems = setOf(shooter,transfer,intake,spindexer, colorSensor)
         telemetry = JoinedTelemetry(PanelsTelemetry.ftcTelemetry, telemetry)
 
+        turret.initialize()
         subsystems.forEach { it.initialize() }
 
         // bulk caching
@@ -35,7 +36,7 @@ class FlywheelTest : LinearOpMode() {
         waitForStart()
 
         shooter.hoodPosition = 0.0
-        camera.targetID = 24
+//        camera.targetID = 24
         shooter.periodic()
 
         while (opModeIsActive()) {
@@ -81,15 +82,16 @@ class FlywheelTest : LinearOpMode() {
                 spindexer.toNextIntakePosition()
             }
 
-            if (gamepad1.right_trigger >= 0.15) {
-                turret.bearing = camera.currentTagBearing
-                turret.turningPower = gamepad1.right_stick_x.toDouble()
-            } else {
-                turret.bearing = 0.0
-                turret.turningPower = 0.0
-                turret.setPower(gamepad1.right_stick_x.toDouble() * 0.5)
-            }
+//            if (gamepad1.right_trigger >= 0.15) {
+//                turret.bearing = camera.currentTagBearing
+//                turret.turningPower = gamepad1.right_stick_x.toDouble()
+//            } else {
+//                turret.bearing = 0.0
+//                turret.turningPower = 0.0
+                turret.power = gamepad1.right_stick_x.toDouble()
+//            }
 
+            telemetry.addData("Turret Power", turret.power)
             subsystems.forEach { it.periodic() }
 
             telemetry.update()

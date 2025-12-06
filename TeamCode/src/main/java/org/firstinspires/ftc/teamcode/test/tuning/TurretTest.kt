@@ -36,7 +36,7 @@ class TurretTest : LinearOpMode() {
 
             turret.bearing = camera.currentTagBearing
 
-            telemetry.addData("turret power", turret.getPower())
+            telemetry.addData("turret power", turret.power)
             telemetry.addData("At Setpoint?", turret.atSetPoint())
 
             telemetry.update()
