@@ -6,8 +6,8 @@ import com.qualcomm.hardware.lynx.LynxModule
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import org.firstinspires.ftc.teamcode.subsystems.ArtifactColorSensor
+import org.firstinspires.ftc.teamcode.subsystems.Drivetrain
 import org.firstinspires.ftc.teamcode.subsystems.Intake
-import org.firstinspires.ftc.teamcode.subsystems.OV9281
 import org.firstinspires.ftc.teamcode.subsystems.Shooter
 import org.firstinspires.ftc.teamcode.subsystems.Spindexer
 import org.firstinspires.ftc.teamcode.subsystems.Transfer
@@ -16,14 +16,18 @@ import org.firstinspires.ftc.teamcode.subsystems.Turret
 @TeleOp(name = "Test: Flywheel", group = "Test")
 class FlywheelTest : LinearOpMode() {
     override fun runOpMode() {
-        val shooter = Shooter
+        val shooter = Shooter()
+        val drivetrain = Drivetrain().apply {
+            fieldCentric = false
+            driveSpeed = 1.0
+        }
 //        val camera = OV9281()
         val transfer = Transfer()
-        val intake = Intake
-        val spindexer = Spindexer
-        val turret = Turret
-        val colorSensor = ArtifactColorSensor
-        val subsystems = setOf(shooter,transfer,intake,spindexer, colorSensor)
+        val intake = Intake()
+        val spindexer = Spindexer()
+        val turret = Turret()
+        val colorSensor = ArtifactColorSensor()
+        val subsystems = setOf(shooter,transfer,intake,spindexer, colorSensor, drivetrain)
         telemetry = JoinedTelemetry(PanelsTelemetry.ftcTelemetry, telemetry)
 
         turret.initialize()
@@ -90,6 +94,8 @@ class FlywheelTest : LinearOpMode() {
 //                turret.turningPower = 0.0
                 turret.power = gamepad1.right_stick_x.toDouble()
 //            }
+
+            drivetrain.setDrivetrainPowers(drivetrain.calculateDrivetrainPowers(0.0,0.0,gamepad1.left_stick_x.toDouble()))
 
             telemetry.addData("Turret Power", turret.power)
             subsystems.forEach { it.periodic() }

@@ -30,6 +30,8 @@ object InitConfigurer : Component {
         phase = Phase.NONE
         selectedAlliance = Alliance.NONE
         selectedStartingPosition = StartingPosition.NONE
+        hasSelectedAlliance = false
+        hasSelectedStartingPosition = false
     }
 
     override fun postWaitForStart() {

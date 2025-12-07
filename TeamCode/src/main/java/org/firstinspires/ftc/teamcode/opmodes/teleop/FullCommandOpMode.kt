@@ -81,7 +81,7 @@ class FullCommandOpMode : BitflipOpMode() {
                 spindexer.goToFirstEmptyIntake()
             )
         )
-        button { spindexer.isFull } whenBecomesTrue spindexer.tryMotifOuttake().and(intake.reverse()) whenBecomesFalse intake.forward()
+//        button { spindexer.isFull } whenBecomesTrue spindexer.tryMotifOuttake().and(intake.reverse()) whenBecomesFalse intake.forward()
 
         // Manual override for auto index
         Gamepads.gamepad1.leftBumper.whenBecomesTrue(

@@ -52,16 +52,16 @@ class CombinedTeleOp : LinearOpMode() {
     override fun runOpMode() {
         telemetry = JoinedTelemetry(PanelsTelemetry.ftcTelemetry, telemetry)
         telemetry.setDisplayFormat(Telemetry.DisplayFormat.HTML)
-        val drivetrain = Drivetrain.apply {
+        val drivetrain = Drivetrain().apply {
             fieldCentric = false
         }
-        val intake = Intake
+        val intake = Intake()
         val transfer = Transfer()
-        val spindexer = Spindexer
-        val shooter = Shooter
-        val turret = Turret
+        val spindexer = Spindexer()
+        val shooter = Shooter()
+        val turret = Turret()
         val camera = OV9281()
-        val colorSensor = ArtifactColorSensor
+        val colorSensor = ArtifactColorSensor()
         val subsystems = listOf(
             drivetrain,
             intake,
@@ -96,7 +96,7 @@ class CombinedTeleOp : LinearOpMode() {
             // for gamepad layouts
 
             // drivetrain
-            if (gamepad1.touchpadWasPressed()) Drivetrain.fieldCentric = !Drivetrain.fieldCentric
+            if (gamepad1.touchpadWasPressed()) drivetrain.fieldCentric = !drivetrain.fieldCentric
             if (gamepad1.circleWasPressed()) drivetrain.resetYaw()
             drivetrain.setDrivetrainPowers(drivetrain.calculateDrivetrainPowers(
                 gamepad1.left_stick_x.toDouble(),

@@ -37,14 +37,14 @@ import kotlin.time.Duration.Companion.milliseconds
  * - colorSensor
  */
 open class BitflipOpMode: NextFTCOpMode() {
-    protected val drivetrain = Drivetrain
-    protected val intake = Intake
+    protected val drivetrain = Drivetrain()
+    protected val intake = Intake()
     protected val camera = OV9281()
-    protected val shooter = Shooter
-    protected val spindexer = Spindexer
+    protected val shooter = Shooter()
+    protected val spindexer = Spindexer()
     protected val transfer = Transfer()
-    protected val turret = Turret
-    protected val colorSensor = ArtifactColorSensor
+    protected val turret = Turret()
+    protected val colorSensor = ArtifactColorSensor()
 
     init {
         addComponents(
@@ -108,8 +108,8 @@ open class BitflipOpMode: NextFTCOpMode() {
 
     fun shootAllArtifacts(delay: Duration) = RepeatCommand(
         SequentialGroup(
-            spindexer.tryMotifOuttake().endAfter(2000.milliseconds),
-            WaitUntil(shooter::atSetPoint).endAfter(1000.milliseconds), // add timeout to the wait so it doesn't wait forever
+            spindexer.tryMotifOuttake(),
+            WaitUntil(shooter::atSetPoint), // add timeout to the wait so it doesn't wait forever
             retryShoot().thenWait(delay)
         ).setName("Shoot all artifacts"), spindexer::totalFullSlots
     ).then(spindexer.goToFirstEmptyIntake())

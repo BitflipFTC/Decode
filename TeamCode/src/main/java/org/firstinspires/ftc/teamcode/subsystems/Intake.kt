@@ -14,7 +14,7 @@ import org.firstinspires.ftc.teamcode.util.hardware.MotorEx
  * This class provides a simple interface for controlling the intake motor.
  * It exposes a `power` property that can be set directly.
  */
-object Intake: Subsystem {
+class Intake(): Subsystem {
     enum class State (val value: Double) {
         OFF(0.0),
         INTAKE(0.9),

@@ -30,27 +30,35 @@ import kotlin.math.roundToInt
  *
  */
 @Configurable
-object Spindexer: Subsystem {
-    const val GEAR_RATIO: Double = 1.375 // 22t out to 16t in
-    const val TICKS_PER_REVOLUTION: Double = 537.7 * GEAR_RATIO
+class Spindexer(): Subsystem {
+    companion object {
+        const val GEAR_RATIO: Double = 1.375 // 22t out to 16t in
+        const val TICKS_PER_REVOLUTION: Double = 537.7 * GEAR_RATIO
 
-    @JvmField
-    var kP = 0.006
-    @JvmField
-    var kI = 0.028
-    @JvmField
-    var kD = 0.0002
-    @JvmField
-    var kS = 0.005
-    @JvmField
-    var turningFeedforward = 0.0
-    @JvmField
-    var setpointTolerance = 1.0 // in degrees
+        @JvmField
+        var kP = 0.006
 
-    @JvmField
-    var maxPower = 0.5
-    @JvmField
-    var tuning = false
+        @JvmField
+        var kI = 0.035
+
+        @JvmField
+        var kD = 0.0002
+
+        @JvmField
+        var kS = 0.006
+
+        @JvmField
+        var turningFeedforward = 0.0
+
+        @JvmField
+        var setpointTolerance = 1.0 // in degrees
+
+        @JvmField
+        var maxPower = 0.5
+
+        @JvmField
+        var tuning = false
+    }
 
     // ------------------ DATA STRUCTURES ------------------
     /**

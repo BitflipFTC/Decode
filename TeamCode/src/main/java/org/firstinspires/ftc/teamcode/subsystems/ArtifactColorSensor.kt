@@ -7,7 +7,7 @@ import dev.nextftc.ftc.ActiveOpMode
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit
 import org.firstinspires.ftc.teamcode.util.Artifact
 
-object ArtifactColorSensor: Subsystem {
+class ArtifactColorSensor(): Subsystem {
     private lateinit var colorSensor: RevColorSensorV3
     var colors: NormalizedRGBA = NormalizedRGBA()
         private set

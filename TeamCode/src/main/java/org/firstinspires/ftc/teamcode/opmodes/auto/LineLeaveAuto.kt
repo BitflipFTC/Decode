@@ -25,7 +25,7 @@ class LineLeaveAuto: LinearOpMode() {
     var startingPosition = Start.NONE
 
     override fun runOpMode() {
-        val drivetrain = Drivetrain
+        val drivetrain = Drivetrain()
         val timer = ElapsedTime()
 
         telemetry.setDisplayFormat(Telemetry.DisplayFormat.HTML)

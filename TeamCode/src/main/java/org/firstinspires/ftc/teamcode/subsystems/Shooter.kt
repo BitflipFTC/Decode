@@ -24,21 +24,26 @@ import org.firstinspires.ftc.teamcode.util.hardware.ServoEx
  * can be tuned.
  */
 @Configurable
-object Shooter: Subsystem {
-    const val FLYWHEEL_PPR = 28
-    const val LOW_PASS = 0.05
+class Shooter(): Subsystem {
+    companion object {
+        const val FLYWHEEL_PPR = 28
+        const val LOW_PASS = 0.05
 
-    @JvmField
-    var kP = 0.009
-    @JvmField
-    var kI = 0.0
-    @JvmField
-    var kD = 0.0
-    @JvmField
-    var kV = 0.0024
+        @JvmField
+        var kP = 0.009
 
-    @JvmField
-    var tuning = false
+        @JvmField
+        var kI = 0.0
+
+        @JvmField
+        var kD = 0.0
+
+        @JvmField
+        var kV = 0.0024
+
+        @JvmField
+        var tuning = false
+    }
 
     class ShooterState (
         val angle: Double,
