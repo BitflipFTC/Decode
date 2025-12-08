@@ -38,14 +38,22 @@ public class OV9281 implements Subsystem {
 
     private final ArrayList<AprilTagDetection> detectionsBuffer = new ArrayList<>();
 
-    // these are relative to the center of rotation of the turret.
+    // https://ftc-docs.firstinspires.org/en/latest/apriltag/vision_portal/apriltag_localization/apriltag-localization.html
+    /*
+        If all values are zero (no translation), that implies the camera is at the center of the robot.
+        Suppose your camera is positioned 5 inches to the left, 7 inches forward, and 12 inches above the ground - you would need to set the position to (-5, 7, 12).
+     */
     private final Position cameraPosition = new Position(DistanceUnit.MM,
-            -0.02, -41.29940, 0, 0);
+            0.03380, 212.51288, 271.44038, 0);
 
-    // with all orientation values 0, the camera is facing straight up. since we want it
-    // to be facing forward, we do -90.
+    /*
+        If all values are zero (no rotation), that implies the camera is pointing straight up.
+        In most cases, you’ll need to set the pitch to -90 degrees (rotation about the x-axis), meaning the camera is horizontal.
+        Use a yaw of 0 if the camera is pointing forwards, +90 degrees if it’s pointing straight left, -90 degrees for straight right, etc.
+        You can also set the roll to +/-90 degrees if it’s vertical, or 180 degrees if it’s upside-down.
+     */
     private final YawPitchRollAngles cameraOrientation = new YawPitchRollAngles(AngleUnit.DEGREES,
-            0, -90, 0, 0);
+            0, -75, 0, 0);
 
     double fx = 549.993552641,
             fy = 549.993552641,
@@ -84,7 +92,7 @@ public class OV9281 implements Subsystem {
                 .setOutputUnits(DistanceUnit.INCH, AngleUnit.DEGREES)
                 .build();
 
-        aprilTag.setDecimation(2f);
+        aprilTag.setDecimation(3f);
         aprilTag.setPoseSolver(AprilTagProcessor.PoseSolver.APRILTAG_BUILTIN);
 
         visionPortal = new VisionPortal.Builder()
@@ -125,6 +133,14 @@ public class OV9281 implements Subsystem {
 
     public void setExposure (int exposure) {
         exposureControl.setExposure(exposure, TimeUnit.MILLISECONDS);
+    }
+
+    public void disableProcessor() {
+        visionPortal.setProcessorEnabled(aprilTag, false);
+    }
+
+    public void enableProcessor() {
+        visionPortal.setProcessorEnabled(aprilTag, true);
     }
 
     public void stopStreaming() {
