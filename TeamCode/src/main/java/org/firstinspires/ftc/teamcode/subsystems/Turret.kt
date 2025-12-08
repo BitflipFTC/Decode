@@ -1,70 +1,93 @@
 package org.firstinspires.ftc.teamcode.subsystems
 
 import com.bylazar.configurables.annotations.Configurable
+import com.pedropathing.ftc.PoseConverter
+import com.pedropathing.geometry.PedroCoordinates
+import com.pedropathing.geometry.Pose
+import com.qualcomm.robotcore.util.Range
 import dev.nextftc.core.subsystems.Subsystem
 import dev.nextftc.ftc.ActiveOpMode
+import org.firstinspires.ftc.robotcore.external.navigation.Pose2D
+import org.firstinspires.ftc.teamcode.util.Alliance
 import org.firstinspires.ftc.teamcode.util.PIDController
 import org.firstinspires.ftc.teamcode.util.hardware.CRServoEx
+import org.firstinspires.ftc.teamcode.util.hardware.ServoEx
+import org.firstinspires.ftc.vision.apriltag.AprilTagGameDatabase
+import org.firstinspires.ftc.vision.apriltag.AprilTagLibrary
+import org.firstinspires.ftc.vision.apriltag.AprilTagMetadata
+import kotlin.math.atan2
 
 @Configurable
 class Turret(): Subsystem {
     companion object {
-        @JvmField
-        var kP = 0.0031
+        const val GEAR_RATIO: Double = 33.0/89.0
 
-        @JvmField
-        var kD = 0.00055
+        // 667.4157303371 total degrees of freedom for turret
+        // manually limit it from
+        // -240 to 240
+        const val TURRET_RANGE: Double = 480.0 // degrees
 
-        @JvmField
-        var kS = 0.04
-
-        @JvmField
-        var kV = -0.2
-
-        @JvmField
-        var setPointTolerance: Double = 3.toDouble() // degrees
-
-        @JvmField
-        var tuning = false
+        const val SERVO_LIMITS = TURRET_RANGE / GEAR_RATIO
+        const val SERVO_MIN = 0.5 - ((SERVO_LIMITS / 2) / 1800)
+        const val SERVO_MAX = 0.5 + ((SERVO_LIMITS / 2) / 1800)
     }
 
-    private lateinit var servoL: CRServoEx
-    private lateinit var servoR: CRServoEx
-    private val controller = PIDController(kP, 0.0, kD, 0.0, kS)
+    private lateinit var servoL: ServoEx
+    private lateinit var servoR: ServoEx
 
-    var bearing = 0.0
-    var turningPower = 0.0
-    var pidOutput: Double = 0.0
-        private set
-    var power: Double
-        get() = servoR.power
-        set(pow) {
-            servoL.power = -pow
-            servoR.power = -pow
+    private val goalPositions = mapOf(
+        20 to Pose(2.0, 144.0),
+        24 to Pose(142.0, 144.0)
+    )
+
+    var robotPose = Pose()
+    private var goalPose = Pose()
+    var selectedAlliance: Alliance = Alliance.NONE
+        set(alliance) {
+            field = alliance
+            // if alliance was not set, just auto set it to red
+            goalPose = goalPositions[alliance.aprilTagID] ?: goalPositions.getValue(24)
+        }
+    private var bearing = 0.0
+
+    private var position: Double = 0.5
+        set(pos) {
+            field = pos
+            servoL.position = pos
+            servoR.position = pos
+        }
+    // inputs range from -200 to 200
+    var angle: Double
+        get() = (position * TURRET_RANGE) - TURRET_RANGE / 2
+        set(angle) {
+            val clippedAngle = angle.coerceIn(0.0 - (TURRET_RANGE / 2), TURRET_RANGE / 2)
+            // make it positive, then scale it to 0..1
+            val scaledAngle = (clippedAngle + TURRET_RANGE / 2) / TURRET_RANGE
+
+            position = scaledAngle
         }
 
     override fun initialize() {
-        servoL = CRServoEx("turretL")
-        servoR = CRServoEx("turretR")
+        servoL = ServoEx("turretL")
+        servoR = ServoEx("turretR")
 
-        controller.setPointTolerance = setPointTolerance
+        servoL.scaleRange(SERVO_MIN, SERVO_MAX)
+        servoR.scaleRange(SERVO_MIN, SERVO_MAX)
     }
 
     override fun periodic() {
-        pidOutput = controller.calculate(bearing, 0.0) // bearing approaches 0
+        // we assume robot is 0, 0 in a graph.
+        // bearing is equal to the angle between the robot and the goal.
+        // it is normalized to (-180, 180] degrees, with 0 being right
+        bearing = Math.toDegrees(atan2(goalPose.y - robotPose.y, goalPose.x - robotPose.x))
 
-        power = pidOutput + kV * turningPower
-1
-        if (tuning) {
-            controller.setCoeffs(kP, 0.0, kD, 0.0, kS)
-        }
+        // normalize robot pose between (-180, 180]
+        val robotHeading = Math.toDegrees(if (robotPose.heading > Math.PI) { robotPose.heading - (2 * Math.PI) } else { robotPose.heading } )
 
-        ActiveOpMode.telemetry.addData("Turret at set point", atSetPoint())
-        ActiveOpMode.telemetry.addData("Turret bearing", bearing)
-        ActiveOpMode.telemetry.addData("Turret target bearing", 0.0)
-        ActiveOpMode.telemetry.addData("Turret power", power)
+        angle = bearing - robotHeading
+
+        ActiveOpMode.telemetry.addData("Turret target angle", angle)
+        ActiveOpMode.telemetry.addData("Turret target position", position)
         ActiveOpMode.telemetry.addLine("---------------------------")
     }
-
-    fun atSetPoint() = controller.atSetPoint()
 }

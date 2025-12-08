@@ -31,4 +31,6 @@ class ServoEx(
                 servo.position = position
             }
         }
+
+    fun scaleRange(min: Double, max: Double) = servo.scaleRange(min, max)
 }
