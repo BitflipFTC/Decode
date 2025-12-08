@@ -128,11 +128,6 @@ class CombinedTeleOp : LinearOpMode() {
                 intake.reversed = false
             }
 
-            // map autoaim behind right trigger
-            if (gamepad1.right_trigger >= 0.15) {
-                turret.bearing = camera.currentTagBearing
-            }
-
             // map auto adjust behind left trigger
             if (gamepad1.left_trigger >= 0.15) {
                 shooter.setTargetState(camera.distanceToGoal)

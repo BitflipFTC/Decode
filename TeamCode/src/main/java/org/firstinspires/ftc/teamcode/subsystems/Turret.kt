@@ -86,6 +86,8 @@ class Turret(): Subsystem {
 
         angle = bearing - robotHeading
 
+        ActiveOpMode.telemetry.addData("Turret calculated bearing", bearing)
+        ActiveOpMode.telemetry.addData("Turret robot heading", robotHeading)
         ActiveOpMode.telemetry.addData("Turret target angle", angle)
         ActiveOpMode.telemetry.addData("Turret target position", position)
         ActiveOpMode.telemetry.addLine("---------------------------")

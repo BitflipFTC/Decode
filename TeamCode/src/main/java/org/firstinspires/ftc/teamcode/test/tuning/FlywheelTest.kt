@@ -92,12 +92,11 @@ class FlywheelTest : LinearOpMode() {
 //            } else {
 //                turret.bearing = 0.0
 //                turret.turningPower = 0.0
-                turret.power = gamepad1.right_stick_x.toDouble()
+                turret.angle += gamepad1.right_stick_x.toDouble() * 180
 //            }
 
             drivetrain.setDrivetrainPowers(drivetrain.calculateDrivetrainPowers(0.0,0.0,gamepad1.left_stick_x.toDouble()))
 
-            telemetry.addData("Turret Power", turret.power)
             subsystems.forEach { it.periodic() }
 
             telemetry.update()

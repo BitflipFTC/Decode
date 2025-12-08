@@ -12,6 +12,7 @@ import dev.nextftc.core.commands.groups.SequentialGroup
 import dev.nextftc.core.commands.utility.InstantCommand
 import dev.nextftc.core.commands.utility.LambdaCommand
 import dev.nextftc.core.components.SubsystemComponent
+import dev.nextftc.core.units.m
 import dev.nextftc.extensions.pedro.FollowPath
 import dev.nextftc.extensions.pedro.PedroComponent
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants
@@ -67,7 +68,7 @@ class PedroPathing12RedAuto: BitflipOpMode() {
 
     val waitUntilReadyToShoot: ParallelGroup
         get() = ParallelGroup(
-            WaitUntil(turret::atSetPoint),
+            Delay(500.milliseconds),
             WaitUntil(shooter::atSetPoint)
         )
 
@@ -77,7 +78,7 @@ class PedroPathing12RedAuto: BitflipOpMode() {
 
         val autoaim = LambdaCommand()
             .setUpdate {
-                turret.bearing = camera.currentTagBearing
+                turret.robotPose = PedroComponent.follower.pose
             }
             .setIsDone { false }
             .setRequirements(turret)

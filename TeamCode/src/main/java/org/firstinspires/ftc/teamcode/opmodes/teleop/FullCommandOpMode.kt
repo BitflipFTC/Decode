@@ -8,7 +8,10 @@ import dev.nextftc.core.commands.groups.SequentialGroup
 import dev.nextftc.core.commands.utility.InstantCommand
 import dev.nextftc.core.commands.utility.LambdaCommand
 import dev.nextftc.core.components.SubsystemComponent
+import dev.nextftc.extensions.pedro.PedroComponent
+import dev.nextftc.extensions.pedro.PedroComponent.Companion.follower
 import dev.nextftc.ftc.Gamepads
+import org.firstinspires.ftc.teamcode.pedroPathing.Constants
 import org.firstinspires.ftc.teamcode.util.Artifact
 import org.firstinspires.ftc.teamcode.util.BetterLoopTimeComponent
 import org.firstinspires.ftc.teamcode.util.BitflipOpMode
@@ -33,7 +36,8 @@ class FullCommandOpMode : BitflipOpMode() {
                 colorSensor
             ),
             InitConfigurer,
-            BetterLoopTimeComponent
+            BetterLoopTimeComponent,
+            PedroComponent(Constants::createFollower)
         )
     }
 
@@ -41,6 +45,7 @@ class FullCommandOpMode : BitflipOpMode() {
         // todo remove these once we have a functional auto that gets these.
         spindexer.motifPattern = camera.motif
         camera.targetID = InitConfigurer.selectedAlliance.aprilTagID
+        turret.selectedAlliance = InitConfigurer.selectedAlliance
 
         // Teleop Driver controls
         val drive = LambdaCommand()
@@ -92,12 +97,8 @@ class FullCommandOpMode : BitflipOpMode() {
         )
 
         // Turret autoaiming (can turn off with right trigger)
-        Gamepads.gamepad1.rightTrigger greaterThan 0.15 whenFalse {
-            turret.bearing = camera.currentTagBearing
-            turret.turningPower = gamepad1.right_stick_x.toDouble()
-        } whenTrue {
-            turret.bearing = 0.0
-            turret.turningPower = 0.0
+        Gamepads.gamepad1.rightTrigger greaterThan 0.15 whenTrue {
+            turret.robotPose = follower.pose
         }
 
         // Shooter auto adjusting (can turn off with left trigger)
