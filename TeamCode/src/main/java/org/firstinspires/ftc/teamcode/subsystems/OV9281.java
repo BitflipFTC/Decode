@@ -3,12 +3,17 @@ package org.firstinspires.ftc.teamcode.subsystems;
 import android.util.Size;
 
 import com.bylazar.configurables.annotations.Configurable;
+import com.pedropathing.ftc.InvertedFTCCoordinates;
+import com.pedropathing.ftc.PoseConverter;
+import com.pedropathing.geometry.PedroCoordinates;
+import com.pedropathing.geometry.Pose;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.ExposureControl;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.GainControl;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
@@ -45,6 +50,8 @@ public class OV9281 implements Subsystem {
      */
     private final Position cameraPosition = new Position(DistanceUnit.MM,
             0.03380, 212.51288, 271.44038, 0);
+
+    private Pose robotPose = new Pose();
 
     /*
         If all values are zero (no rotation), that implies the camera is pointing straight up.
@@ -200,6 +207,9 @@ public class OV9281 implements Subsystem {
             if (detection.id == targetID) {
                 distanceToGoal = detection.ftcPose.range * lowPass + (1 - lowPass) * lastDistanceToGoal;
                 currentTagBearing = detection.ftcPose.bearing;
+                robotPose = PoseConverter.pose2DToPose(new Pose2D(
+                        DistanceUnit.INCH, detection.robotPose.getPosition().x, detection.robotPose.getPosition().y, AngleUnit.DEGREES, detection.robotPose.getOrientation().getYaw(AngleUnit.DEGREES)
+                ), InvertedFTCCoordinates.INSTANCE).getAsCoordinateSystem(PedroCoordinates.INSTANCE);
             } else {
                 distanceToGoal = -1.0;
                 currentTagBearing = -0.2;
@@ -240,5 +250,9 @@ public class OV9281 implements Subsystem {
 
     public int getDetectionsAmount() {
         return detectionsBuffer.size();
+    }
+
+    public Pose getRobotPose() {
+        return robotPose;
     }
 }
