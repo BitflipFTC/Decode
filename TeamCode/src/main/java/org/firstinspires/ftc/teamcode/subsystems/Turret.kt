@@ -41,7 +41,8 @@ class Turret(): Subsystem {
     )
 
     var robotPose = Pose()
-    private var goalPose = Pose()
+    var goalPose = Pose()
+        private set
     var selectedAlliance: Alliance = Alliance.NONE
         set(alliance) {
             field = alliance
