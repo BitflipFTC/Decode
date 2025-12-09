@@ -26,7 +26,7 @@ class ShootWhileMoving : LinearOpMode() {
         const val FLYWHEEL_DIAMETER = 0.072 // m
         const val GRAVITY = 9.80665 // m/s^2
         const val LINEAR_SPEED_COEFF = 0.45
-        const val INITIAL_HEIGHT = 14.0 * 0.0254 // m
+        const val INITIAL_HEIGHT = 12.5 * 0.0254 // m
         const val TARGET_HEIGHT = 38.75 * 0.0254 // m
     }
 
