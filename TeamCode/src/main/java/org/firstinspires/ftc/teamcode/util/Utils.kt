@@ -8,8 +8,7 @@ fun Boolean.toDouble(): Double {
 
 enum class Artifact {
     GREEN,
-    PURPLE,
-    NONE;
+    PURPLE;
 
     fun firstLetter() = this.name.first()
 }
@@ -17,20 +16,17 @@ enum class Artifact {
 enum class MotifPattern {
     GPP,
     PGP,
-    PPG,
-    NONE
+    PPG
 }
 
 enum class Alliance (val aprilTagID: Int) {
     RED(24),
-    BLUE(20),
-    NONE(0)
+    BLUE(20)
 }
 
 enum class StartingPosition () {
     GOAL,
-    FAR,
-    NONE
+    FAR
 }
 
 fun Gamepad.dpadToAxes(): Pair<Double, Double> {

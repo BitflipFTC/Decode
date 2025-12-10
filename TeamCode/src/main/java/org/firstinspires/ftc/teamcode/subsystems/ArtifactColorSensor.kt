@@ -12,7 +12,7 @@ class ArtifactColorSensor(): Subsystem {
     var colors: NormalizedRGBA = NormalizedRGBA()
         private set
 
-    var detectedArtifact = Artifact.NONE
+    var detectedArtifact: Artifact? = null
         private set
     var distance: Double = 0.0
     val red: Double
@@ -47,7 +47,7 @@ class ArtifactColorSensor(): Subsystem {
                 Artifact.GREEN
             }
         } else {
-            detectedArtifact = Artifact.NONE
+            detectedArtifact = null
         }
 
         if (readDistance) {
@@ -55,8 +55,8 @@ class ArtifactColorSensor(): Subsystem {
         }
 
         ActiveOpMode.telemetry.run {
-            addData("Detected Artifact", detectedArtifact.name)
-            addData("Detected Artifact Ordinal (graphing)", detectedArtifact.ordinal)
+            addData("Detected Artifact", detectedArtifact?.name ?: "none")
+            addData("Detected Artifact Ordinal (graphing)", detectedArtifact?.ordinal ?: 2)
             addData("Distance", "%05.2fcm", distance)
             addLine("------------------------------")
         }

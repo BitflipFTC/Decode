@@ -44,7 +44,7 @@ class FullCommandOpMode : BitflipOpMode() {
     override fun onStartButtonPressed() {
         // todo remove these once we have a functional auto that gets these.
         spindexer.motifPattern = camera.motif
-        camera.targetID = InitConfigurer.selectedAlliance.aprilTagID
+        camera.targetID = InitConfigurer.selectedAlliance?.aprilTagID ?: 24
         turret.selectedAlliance = InitConfigurer.selectedAlliance
 
         // Teleop Driver controls
@@ -80,21 +80,13 @@ class FullCommandOpMode : BitflipOpMode() {
 
         // Auto indexing
         // check that the spindexer isn't full so it doesn't continuously record new intakes when it becomes full
-        button { colorSensor.detectedArtifact != Artifact.NONE && !spindexer.isFull }.whenBecomesTrue(
+        button { colorSensor.detectedArtifact != null && !spindexer.isFull }.whenBecomesTrue(
             SequentialGroup(
-                InstantCommand { spindexer.recordIntake(colorSensor.detectedArtifact) },
+                InstantCommand { spindexer.recordIntake(colorSensor.detectedArtifact!!) },
                 spindexer.goToFirstEmptyIntake()
             )
         )
 //        button { spindexer.isFull } whenBecomesTrue spindexer.tryMotifOuttake().and(intake.reverse()) whenBecomesFalse intake.forward()
-
-        // Manual override for auto index
-        Gamepads.gamepad1.leftBumper.whenBecomesTrue(
-            SequentialGroup(
-                InstantCommand { spindexer.recordIntake(colorSensor.detectedArtifact) },
-                spindexer.goToFirstEmptyIntake()
-            )
-        )
 
         // Turret autoaiming (can turn off with right trigger)
         Gamepads.gamepad1.rightTrigger greaterThan 0.15 whenTrue {

@@ -96,8 +96,8 @@ class ShootWhileMoving : LinearOpMode() {
                 spindexer.toFirstEmptyIntakePosition()
             }
 
-            if (colorSensor.detectedArtifact != Artifact.NONE && !spindexer.isFull) {
-                spindexer.recordIntake(colorSensor.detectedArtifact)
+            if (colorSensor.detectedArtifact != null && !spindexer.isFull) {
+                spindexer.recordIntake(colorSensor.detectedArtifact!!)
                 spindexer.toFirstEmptyIntakePosition()
             }
 

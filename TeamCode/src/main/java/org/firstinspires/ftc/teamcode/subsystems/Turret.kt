@@ -43,11 +43,11 @@ class Turret(): Subsystem {
     var robotPose = Pose()
     var goalPose = Pose()
         private set
-    var selectedAlliance: Alliance = Alliance.NONE
+    var selectedAlliance: Alliance? = null
         set(alliance) {
             field = alliance
             // if alliance was not set, just auto set it to red
-            goalPose = goalPositions[alliance.aprilTagID] ?: goalPositions.getValue(24)
+            goalPose = goalPositions[alliance?.aprilTagID ?: 24] ?: goalPositions.getValue(24)
         }
     private var bearing = 0.0
 

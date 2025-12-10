@@ -85,7 +85,7 @@ class CombinedTeleOp : LinearOpMode() {
         val allHubs = hardwareMap.getAll(LynxModule::class.java)
         allHubs.forEach { hub -> hub.bulkCachingMode = LynxModule.BulkCachingMode.MANUAL }
 
-        camera.targetID = InitConfigurer.selectedAlliance.aprilTagID
+        camera.targetID = InitConfigurer.selectedAlliance?.aprilTagID ?: 24
         loopTimer.start()
 
         while (opModeIsActive()) {

@@ -73,7 +73,7 @@ class PedroPathing12RedAuto: BitflipOpMode() {
         )
 
     override fun onStartButtonPressed() {
-        camera.targetID = InitConfigurer.selectedAlliance.aprilTagID
+        camera.targetID = InitConfigurer.selectedAlliance?.aprilTagID ?: 24
         spindexer.motifPattern = camera.getMotif()
 
         val autoaim = LambdaCommand()
@@ -106,8 +106,8 @@ class PedroPathing12RedAuto: BitflipOpMode() {
 
         val activateColorSensorDetection = LambdaCommand()
             .setUpdate {
-                if (colorSensor.detectedArtifact != Artifact.NONE && !spindexer.isFull) {
-                    spindexer.recordIntake(colorSensor.detectedArtifact)
+                if (colorSensor.detectedArtifact != null && !spindexer.isFull) {
+                    spindexer.recordIntake(colorSensor.detectedArtifact!!)
                     spindexer.goToFirstEmptyIntake()()
                 }
             }

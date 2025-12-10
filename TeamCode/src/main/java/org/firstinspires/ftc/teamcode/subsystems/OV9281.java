@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode.subsystems;
 
 import android.util.Size;
 
+import androidx.annotation.Nullable;
+
 import com.bylazar.configurables.annotations.Configurable;
 import com.pedropathing.ftc.InvertedFTCCoordinates;
 import com.pedropathing.ftc.PoseConverter;
@@ -161,7 +163,8 @@ public class OV9281 implements Subsystem {
     public MotifPattern getMotif() {
         ArrayList<AprilTagDetection> currentDetections = this.aprilTag.getDetections();
         ArrayList<AprilTagDetection> obeliskDetections = currentDetections.stream().filter((detection) -> detection.metadata.name.contains("Obelisk")).collect(Collectors.toCollection(ArrayList::new));
-        MotifPattern pattern = MotifPattern.NONE;
+        @Nullable
+        MotifPattern pattern = null;
 
         if (obeliskDetections.isEmpty()) return pattern;
 

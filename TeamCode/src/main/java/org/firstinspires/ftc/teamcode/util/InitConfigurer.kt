@@ -13,23 +13,22 @@ object InitConfigurer : Component {
     private var hasSelectedAlliance = false
     private var hasSelectedStartingPosition = false
 
-    var selectedAlliance: Alliance = Alliance.NONE
+    var selectedAlliance: Alliance? = null
         private set
-    var selectedStartingPosition: StartingPosition = StartingPosition.NONE
+    var selectedStartingPosition: StartingPosition? = null
         private set
 
     enum class Phase {
         SELECTING_ALLIANCE,
-        SELECTING_STARTING_POSITION,
-        NONE
+        SELECTING_STARTING_POSITION
     }
 
-    private var phase = Phase.NONE
+    private var phase: Phase? = null
 
     override fun preInit() {
-        phase = Phase.NONE
-        selectedAlliance = Alliance.NONE
-        selectedStartingPosition = StartingPosition.NONE
+        phase = null
+        selectedAlliance = null
+        selectedStartingPosition = null
         hasSelectedAlliance = false
         hasSelectedStartingPosition = false
     }
@@ -44,7 +43,7 @@ object InitConfigurer : Component {
                     addLine("Press CIRCLE for RED")
                     addLine("Press TOUCHPAD to confirm")
                     addLine()
-                    addData("Current alliance", selectedAlliance.name)
+                    addData("Current alliance", selectedAlliance?.name ?: "NONE SELECTED")
                 }
 
                 selectedAlliance = if (gamepad1.crossWasPressed()) Alliance.BLUE else if (gamepad1.circleWasPressed()) Alliance.RED else selectedAlliance
@@ -63,7 +62,7 @@ object InitConfigurer : Component {
                     addLine("Press SQUARE   for FAR")
                     addLine("Press TOUCHPAD to confirm")
                     addLine()
-                    addData("Current starting position", selectedStartingPosition.name)
+                    addData("Current starting position", selectedStartingPosition?.name ?: "NONE SELECTED")
                 }
 
                 selectedStartingPosition = if (gamepad1.triangleWasPressed()) StartingPosition.GOAL else if (gamepad1.squareWasPressed()) StartingPosition.FAR else selectedStartingPosition
@@ -74,7 +73,7 @@ object InitConfigurer : Component {
                 }
             }
 
-            Phase.NONE                        -> toNextPhase()
+            null                        -> toNextPhase()
         }
     }
 

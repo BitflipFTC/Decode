@@ -101,10 +101,10 @@ class Spindexer(): Subsystem {
     val allStates = States.entries.toList()
 
     // models physical slots. slots themselves rotate with the spindexer
-    private val collectedArtifacts = arrayOf(
-        Artifact.NONE,
-        Artifact.NONE,
-        Artifact.NONE,
+    private val collectedArtifacts: Array<Artifact?> = arrayOf(
+        null,
+        null,
+        null
     )
 
 
@@ -153,10 +153,10 @@ class Spindexer(): Subsystem {
         get() = findPurpleSlots().size == 2 && findGreenSlots().size == 1
     var robotTurningPower: Double = 0.0
 
-    var motifPattern: MotifPattern = MotifPattern.NONE
+    var motifPattern: MotifPattern? = null
 
     fun getArtifactString(): String =
-        collectedArtifacts.joinToString("") { it.firstLetter().toString() }
+        collectedArtifacts.joinToString("") { it?.firstLetter()?.toString() ?: "N" }
 
     fun atSetPoint() = controller.atSetPoint()
 
@@ -185,7 +185,7 @@ class Spindexer(): Subsystem {
      * Records that an artifact has been removed from the current slot.
      */
     @JvmOverloads
-    fun recordOuttake(slot: Int = statesToSlotsMap.getValue(state)) = collectedArtifacts.set(slot, Artifact.NONE)
+    fun recordOuttake(slot: Int = statesToSlotsMap.getValue(state)) = collectedArtifacts.set(slot, null)
 
     // --------- functions that control hardware ---------
 
@@ -278,7 +278,7 @@ class Spindexer(): Subsystem {
                 MotifPattern.GPP  -> greenIndex
                 MotifPattern.PGP  -> if (greenIndex == 0) 2 else greenIndex - 1
                 MotifPattern.PPG  -> if (greenIndex == 2) 0 else greenIndex + 1
-                MotifPattern.NONE -> 0
+                null -> 0
             }
 
             state = slotsToOuttakes[targetOuttakeIndex]
@@ -347,7 +347,7 @@ class Spindexer(): Subsystem {
         ActiveOpMode.telemetry.addData("Spindexer atSetPoint", atSetPoint())
         ActiveOpMode.telemetry.addData("Spindexer indexed artifacts", getArtifactString())
         ActiveOpMode.telemetry.addData("Spindexer has motif assortment", hasMotifAssortment)
-        ActiveOpMode.telemetry.addData("Motif Pattern", motifPattern.name)
+        ActiveOpMode.telemetry.addData("Motif Pattern", motifPattern?.name ?: "NONE")
         ActiveOpMode.telemetry.addData("Times to shoot", totalFullSlots)
         ActiveOpMode.telemetry.addLine("---------------------------")
     }
@@ -356,10 +356,10 @@ class Spindexer(): Subsystem {
     // ------------------ INNER HELPER FUNCTIONS ------------------
 
     private fun findFullSlots() =
-        collectedArtifacts.mapIndexedNotNull { index, artifact -> if (artifact != Artifact.NONE) index else null }
+        collectedArtifacts.mapIndexedNotNull { index, artifact -> if (artifact != null) index else null }
 
     private fun findEmptySlots() =
-        collectedArtifacts.mapIndexedNotNull { index, artifact -> if (artifact == Artifact.NONE) index else null }
+        collectedArtifacts.mapIndexedNotNull { index, artifact -> if (artifact == null) index else null }
 
     private fun findGreenSlots() =
         collectedArtifacts.mapIndexedNotNull { index, artifact -> if (artifact == Artifact.GREEN) index else null }

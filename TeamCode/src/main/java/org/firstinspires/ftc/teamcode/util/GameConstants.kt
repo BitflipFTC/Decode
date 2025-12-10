@@ -1,11 +1,11 @@
 package org.firstinspires.ftc.teamcode.util
 
 object GameConstants {
-    var alliance: Alliance = Alliance.NONE
-    var motifPattern: MotifPattern = MotifPattern.NONE
+    var alliance: Alliance? = null
+    var motifPattern: MotifPattern? = null
 
     fun reset() {
-        alliance = Alliance.NONE
-        motifPattern = MotifPattern.NONE
+        alliance = null
+        motifPattern = null
     }
 }
