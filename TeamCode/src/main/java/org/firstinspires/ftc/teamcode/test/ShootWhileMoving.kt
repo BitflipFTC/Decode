@@ -42,6 +42,8 @@ class ShootWhileMoving : LinearOpMode() {
 
         val subsystems = setOf(intake, camera, shooter, spindexer, transfer, turret, colorSensor)
 
+        var holdingPose = false
+
         subsystems.forEach { it.initialize() }
 
         camera.targetID = 24
@@ -61,12 +63,14 @@ class ShootWhileMoving : LinearOpMode() {
         while (opModeIsActive()) {
             allHubs.forEach { hub -> hub.clearBulkCache() }
 
-            follower.setTeleOpDrive(
-                -gamepad1.left_stick_y * 0.8,
-                -gamepad1.left_stick_x * 0.8,
-                -gamepad1.right_stick_x * 0.8,
-                false
-            )
+            if (!holdingPose) {
+                follower.setTeleOpDrive(
+                    -gamepad1.left_stick_y * 0.8,
+                    -gamepad1.left_stick_x * 0.8,
+                    -gamepad1.right_stick_x * 0.8,
+                    false
+                )
+            }
 
             if (gamepad1.squareWasPressed()) {
                 intake.toggle()
@@ -105,6 +109,16 @@ class ShootWhileMoving : LinearOpMode() {
                 spindexer.recordOuttake(0)
                 spindexer.recordOuttake(1)
                 spindexer.recordOuttake(2)
+            }
+
+            if (gamepad1.circleWasPressed()) {
+                holdingPose = true
+                follower.holdPoint(follower.pose)
+            }
+
+            if (gamepad1.circleWasReleased()) {
+                holdingPose = false
+                follower.breakFollowing()
             }
 
             // calc (short for calculations)
