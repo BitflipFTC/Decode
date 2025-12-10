@@ -35,21 +35,23 @@ class ArtifactColorSensor(): Subsystem {
 
     override fun periodic() {
         // alternate reads to improve loop times
-        if (!readDistance) {
-            colors = colorSensor.normalizedColors
-        } else {
-            distance = colorSensor.getDistance(DistanceUnit.CM)
-        }
-        readDistance = !readDistance
+        if (distance <= 5.0) {
+            readDistance = !readDistance
+            if (!readDistance) {
+                colors = colorSensor.normalizedColors
+            }
 
-        detectedArtifact = if (distance <= 5.0) {
-            if (blue > green) {
+            detectedArtifact = if (blue > green) {
                 Artifact.PURPLE
             } else {
                 Artifact.GREEN
             }
         } else {
-            Artifact.NONE
+            detectedArtifact = Artifact.NONE
+        }
+
+        if (readDistance) {
+            distance = colorSensor.getDistance(DistanceUnit.CM)
         }
 
         ActiveOpMode.telemetry.run {
