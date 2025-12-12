@@ -30,6 +30,54 @@ class ShootWhileMoving : LinearOpMode() {
         const val TARGET_HEIGHT = 38.75 * 0.0254 // m
     }
 
+    enum class Shoot {
+        IDLE,
+        MOVE_SPINDEXER,
+        TRANSFER_ARTIFACT,
+        CHECK_FOR_SHOT,
+    }
+
+    private var shootingState = Shoot.IDLE
+    private var shootingRetryCounter = 0
+    private val shootingRetryMax = 3
+
+    fun shootAllArtifacts(spindexer: Spindexer) {
+        if (!spindexer.isEmpty) {
+            shootingState = Shoot.MOVE_SPINDEXER
+        }
+    }
+
+    fun updateShootingFSM (spindexer: Spindexer, transfer: Transfer, shooter: Shooter) {
+        when (shootingState) {
+            Shoot.MOVE_SPINDEXER    -> {
+                spindexer.toMotifOuttakePosition()
+                shootingState = Shoot.TRANSFER_ARTIFACT
+            }
+            Shoot.TRANSFER_ARTIFACT -> {
+                if (shooter.atSetPoint() && spindexer.atSetPoint()) {
+                    transfer.transferArtifact()
+                    shootingState = Shoot.CHECK_FOR_SHOT
+                }
+            }
+            Shoot.CHECK_FOR_SHOT    -> {
+                if (transfer.atSetPoint()) {
+                    if (!shooter.atSetPoint()) { // outtake successful
+                        spindexer.recordOuttake()
+                    } else if (shootingRetryCounter < shootingRetryMax) { // outtake unsucessful, retry
+                        shootingState = Shoot.TRANSFER_ARTIFACT
+                        shootingRetryCounter++
+                        return // leave this code block
+                    }
+
+                    // either outtake was successful or retries were exhausted
+                    shootingRetryCounter = 0
+                    shootingState = if (spindexer.isEmpty) Shoot.IDLE else Shoot.MOVE_SPINDEXER
+                }
+            }
+            else              -> {}
+        }
+    }
+
     override fun runOpMode() {
         val intake = Intake()
         val camera = OV9281()
@@ -105,6 +153,10 @@ class ShootWhileMoving : LinearOpMode() {
                 spindexer.toMotifOuttakePosition()
             }
 
+            if (gamepad1.dpadUpWasPressed()) {
+                shootAllArtifacts(spindexer)
+            }
+
             if (gamepad1.dpadLeftWasPressed()) {
                 spindexer.recordOuttake(0)
                 spindexer.recordOuttake(1)
@@ -150,9 +202,10 @@ class ShootWhileMoving : LinearOpMode() {
             shooter.setTargetState(shotDistance)
             // calc
 
-            BetterLoopTimeComponent.postUpdate()
+            updateShootingFSM(spindexer,transfer,shooter)
             subsystems.forEach { it.periodic() }
             follower.update()
+            BetterLoopTimeComponent.postUpdate()
             telemetry.update()
         }
     }
