@@ -92,9 +92,9 @@ public class OV9281 implements Subsystem {
     public void initialize () {
         aprilTag = new AprilTagProcessor.Builder()
                 .setTagLibrary(AprilTagGameDatabase.getDecodeTagLibrary())
-                .setDrawTagOutline(true)
+//                .setDrawTagOutline(true)
                 .setDrawTagID(true)
-                .setDrawAxes(true)
+//                .setDrawAxes(true)
                 .setDrawCubeProjection(true)
                 .setLensIntrinsics(fx,fy,cx,cy)
                 .setCameraPose(cameraPosition,cameraOrientation)
@@ -102,7 +102,7 @@ public class OV9281 implements Subsystem {
                 .build();
 
         aprilTag.setDecimation(3f);
-        aprilTag.setPoseSolver(AprilTagProcessor.PoseSolver.APRILTAG_BUILTIN);
+        aprilTag.setPoseSolver(AprilTagProcessor.PoseSolver.OPENCV_SOLVEPNP_EPNP);
 
         visionPortal = new VisionPortal.Builder()
                 .setCamera(ActiveOpMode.hardwareMap().get(WebcamName.class, "camera"))
