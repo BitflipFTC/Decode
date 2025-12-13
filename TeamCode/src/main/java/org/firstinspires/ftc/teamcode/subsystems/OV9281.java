@@ -42,6 +42,7 @@ public class OV9281 implements Subsystem {
     private GainControl gainControl;
     private long defaultExposure;
     private int defaultGain;
+    boolean debugTelemetry = true;
 
     private final ArrayList<AprilTagDetection> detectionsBuffer = new ArrayList<>();
 
@@ -190,22 +191,26 @@ public class OV9281 implements Subsystem {
         int count = detectionsBuffer.size();
 
         if (count == 0) {
-            ActiveOpMode.telemetry().addData("Detected April Tags", 0);
+            if (debugTelemetry)
+                ActiveOpMode.telemetry().addData("Detected April Tags", 0);
             distanceToGoal = -1.0;
             currentTagBearing = 0.0;
             return;
         }
 
-        ActiveOpMode.telemetry().addData("Detected April Tags", detectionsBuffer.size());
+        if (debugTelemetry)
+            ActiveOpMode.telemetry().addData("Detected April Tags", detectionsBuffer.size());
         for (AprilTagDetection detection : detectionsBuffer) {
             if (detection.metadata == null) {
                 distanceToGoal = -1.0;
                 currentTagBearing = -0.1;
-                ActiveOpMode.telemetry().addData("Current tag", "No metadata");
+                if (debugTelemetry)
+                    ActiveOpMode.telemetry().addData("Current tag", "No metadata");
                 continue;
             }
 
-            ActiveOpMode.telemetry().addData("TAG NAME", detection.metadata.name);
+            if (debugTelemetry)
+                ActiveOpMode.telemetry().addData("TAG NAME", detection.metadata.name);
 
             if (detection.id == targetID) {
                 distanceToGoal = detection.ftcPose.range * lowPass + (1 - lowPass) * lastDistanceToGoal;
@@ -218,10 +223,13 @@ public class OV9281 implements Subsystem {
                 currentTagBearing = -0.2;
             }
         }
-        ActiveOpMode.telemetry().addData("Target Tag ID", targetID);
-        ActiveOpMode.telemetry().addData("Distance from goal", "%06.3fin", distanceToGoal);
-        ActiveOpMode.telemetry().addData("Current tag bearing", "%05.2f deg",currentTagBearing);
-        ActiveOpMode.telemetry().addLine("---------------------------");
+
+        if (debugTelemetry) {
+            ActiveOpMode.telemetry().addData("Target Tag ID", targetID);
+            ActiveOpMode.telemetry().addData("Distance from goal", "%06.3fin", distanceToGoal);
+            ActiveOpMode.telemetry().addData("Current tag bearing", "%05.2f deg", currentTagBearing);
+            ActiveOpMode.telemetry().addLine("---------------------------");
+        }
     }
 
     public void setTargetID (int id) {
@@ -230,6 +238,10 @@ public class OV9281 implements Subsystem {
 
     public int getTargetID() {
         return targetID;
+    }
+
+    public void setDecimation(float decimation) {
+        aprilTag.setDecimation(decimation);
     }
 
     /**

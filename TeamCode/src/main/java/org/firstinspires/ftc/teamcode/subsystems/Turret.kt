@@ -35,6 +35,8 @@ class Turret(): Subsystem {
     private lateinit var servoL: ServoEx
     private lateinit var servoR: ServoEx
 
+    var debugTelemetry = true
+
     private val goalPositions = mapOf(
         20 to Pose(2.0, 144.0),
         24 to Pose(142.0, 144.0)
@@ -87,10 +89,12 @@ class Turret(): Subsystem {
 
         angle = bearing - robotHeading
 
-        ActiveOpMode.telemetry.addData("Turret calculated bearing", bearing)
-        ActiveOpMode.telemetry.addData("Turret robot heading", robotHeading)
-        ActiveOpMode.telemetry.addData("Turret target angle", angle)
-        ActiveOpMode.telemetry.addData("Turret target position", position)
-        ActiveOpMode.telemetry.addLine("---------------------------")
+        if (debugTelemetry) {
+            ActiveOpMode.telemetry.addData("Turret calculated bearing", bearing)
+            ActiveOpMode.telemetry.addData("Turret robot heading", robotHeading)
+            ActiveOpMode.telemetry.addData("Turret target angle", angle)
+            ActiveOpMode.telemetry.addData("Turret target position", position)
+            ActiveOpMode.telemetry.addLine("---------------------------")
+        }
     }
 }

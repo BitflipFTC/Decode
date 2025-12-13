@@ -33,6 +33,8 @@ public class Transfer implements Subsystem {
     public static double maxPower = 1;
     public static boolean tuning = false;
 
+    boolean debugTelemetry = true;
+
     private MotorEx motor = null;
 
     private final PIDController controller = new PIDController(kP, kI, kD, 0, 0, 1, -1);
@@ -110,10 +112,12 @@ public class Transfer implements Subsystem {
             controller.setCoeffs(kP, kI, kD, 0.0, 0.0);
         }
 
-        ActiveOpMode.telemetry().addData("Transfer current ticks", getCurrentPosition());
-        ActiveOpMode.telemetry().addData("Transfer target ticks", targetPosition);
-        ActiveOpMode.telemetry().addData("Transfer at set point", atSetPoint());
-        ActiveOpMode.telemetry().addLine("---------------------------");
+        if (debugTelemetry) {
+            ActiveOpMode.telemetry().addData("Transfer current ticks", getCurrentPosition());
+            ActiveOpMode.telemetry().addData("Transfer target ticks", targetPosition);
+            ActiveOpMode.telemetry().addData("Transfer at set point", atSetPoint());
+            ActiveOpMode.telemetry().addLine("---------------------------");
+        }
     }
 
     public boolean atSetPoint() {

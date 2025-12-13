@@ -24,6 +24,8 @@ class Intake(): Subsystem {
 
     var reversed = false
 
+    var debugTelemetry = true
+
     /**
      * The current power of the intake motor. Can be set to any value between -1.0 and 1.0.
      */
@@ -77,8 +79,11 @@ class Intake(): Subsystem {
 
     override fun periodic() {
         motor.power = if (reversed) -power.value else power.value
-        ActiveOpMode.telemetry.addData("Intake state", power.name)
-        ActiveOpMode.telemetry.addData("Reversed", reversed)
-        ActiveOpMode.telemetry.addLine("---------------------------")
+
+        if (debugTelemetry) {
+            ActiveOpMode.telemetry.addData("Intake state", power.name)
+            ActiveOpMode.telemetry.addData("Reversed", reversed)
+            ActiveOpMode.telemetry.addLine("---------------------------")
+        }
     }
 }

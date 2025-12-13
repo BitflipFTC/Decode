@@ -22,6 +22,8 @@ class ArtifactColorSensor(): Subsystem {
     val blue: Double
         get() = colors.blue.toDouble()
 
+    var debugTelemetry = true
+
     // reading the distance is one i2c read,
     // reading the colors is another.
     // We split these reads into two loops, only reading one per loop,
@@ -54,11 +56,13 @@ class ArtifactColorSensor(): Subsystem {
             distance = colorSensor.getDistance(DistanceUnit.CM)
         }
 
-        ActiveOpMode.telemetry.run {
-            addData("Detected Artifact", detectedArtifact?.name ?: "none")
-            addData("Detected Artifact Ordinal (graphing)", detectedArtifact?.ordinal ?: 2)
-            addData("Distance", "%05.2fcm", distance)
-            addLine("------------------------------")
+        if (debugTelemetry) {
+            ActiveOpMode.telemetry.run {
+                addData("Detected Artifact", detectedArtifact?.name ?: "none")
+                addData("Detected Artifact Ordinal (graphing)", detectedArtifact?.ordinal ?: 2)
+                addData("Distance", "%05.2fcm", distance)
+                addLine("------------------------------")
+            }
         }
     }
 

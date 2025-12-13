@@ -109,6 +109,8 @@ class Shooter(): Subsystem {
         }
     var distance = 0.0
 
+    var debugTelemetry = true
+
     override fun initialize() {
         flywheelMotor = MotorEx("flywheel").zeroed().float().reverse().apply {
             maxSlewRate = 0.2
@@ -139,11 +141,13 @@ class Shooter(): Subsystem {
 
         hoodServo.position = hoodPosition
 
-        ActiveOpMode.telemetry.addData("Flywheel target RPM", targetFlywheelRPM)
-        ActiveOpMode.telemetry.addData("Flywheel current RPM", flywheelRPM)
-        ActiveOpMode.telemetry.addData("Flywheel at set point", atSetPoint())
-        ActiveOpMode.telemetry.addData("Hood position", hoodPosition)
-        ActiveOpMode.telemetry.addLine("---------------------------")
+        if (debugTelemetry) {
+            ActiveOpMode.telemetry.addData("Flywheel target RPM", targetFlywheelRPM)
+            ActiveOpMode.telemetry.addData("Flywheel current RPM", flywheelRPM)
+            ActiveOpMode.telemetry.addData("Flywheel at set point", atSetPoint())
+            ActiveOpMode.telemetry.addData("Hood position", hoodPosition)
+            ActiveOpMode.telemetry.addLine("---------------------------")
+        }
     }
 
     fun atSetPoint() = flywheelController.atSetPoint()

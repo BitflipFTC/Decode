@@ -60,6 +60,8 @@ class Spindexer(): Subsystem {
         var tuning = false
     }
 
+    var debugTelemetry = true
+
     // ------------------ DATA STRUCTURES ------------------
     /**
      * Defines the named angular positions for the spindexer, used for both intake and outtake.
@@ -341,15 +343,16 @@ class Spindexer(): Subsystem {
         val motorPower = pidOutput + turningFeedforward * -robotTurningPower
         motor.power = Range.clip(motorPower, -maxPower, maxPower)
 
-        ActiveOpMode.telemetry.addData("Spindexer target angle", targetAngle)
-        ActiveOpMode.telemetry.addData("Spindexer current angle", currentAngle)
-        ActiveOpMode.telemetry.addData("Spindexer current state", state.name)
-        ActiveOpMode.telemetry.addData("Spindexer atSetPoint", atSetPoint())
-        ActiveOpMode.telemetry.addData("Spindexer indexed artifacts", getArtifactString())
-        ActiveOpMode.telemetry.addData("Spindexer has motif assortment", hasMotifAssortment)
-        ActiveOpMode.telemetry.addData("Motif Pattern", motifPattern?.name ?: "NONE")
-        ActiveOpMode.telemetry.addData("Times to shoot", totalFullSlots)
-        ActiveOpMode.telemetry.addLine("---------------------------")
+        if (debugTelemetry) {
+            ActiveOpMode.telemetry.addData("Spindexer target angle", targetAngle)
+            ActiveOpMode.telemetry.addData("Spindexer current angle", currentAngle)
+            ActiveOpMode.telemetry.addData("Spindexer current state", state.name)
+            ActiveOpMode.telemetry.addData("Spindexer atSetPoint", atSetPoint())
+            ActiveOpMode.telemetry.addData("Spindexer indexed artifacts", getArtifactString())
+            ActiveOpMode.telemetry.addData("Spindexer has motif assortment", hasMotifAssortment)
+            ActiveOpMode.telemetry.addData("Motif Pattern", motifPattern?.name ?: "NONE")
+            ActiveOpMode.telemetry.addLine("---------------------------")
+        }
     }
 
 

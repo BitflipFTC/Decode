@@ -44,6 +44,8 @@ class Drivetrain(): Subsystem {
     var heading = 0.0
         private set
 
+    var debugTelemetry = true
+
     var fieldCentric = false
     var driveSpeed = 1.0
 
@@ -111,7 +113,9 @@ class Drivetrain(): Subsystem {
     }
 
     override fun periodic() {
-        ActiveOpMode.telemetry.addLine(currentDrivePowers.toString())
-        ActiveOpMode.telemetry.addData("Heading", heading)
+        if (debugTelemetry) {
+            ActiveOpMode.telemetry.addLine(currentDrivePowers.toString())
+            ActiveOpMode.telemetry.addData("Heading", heading)
+        }
     }
 }
