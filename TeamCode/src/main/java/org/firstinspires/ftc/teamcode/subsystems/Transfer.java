@@ -25,11 +25,11 @@ public class Transfer implements Subsystem {
 
     // amount of times the motor should turn every time it transfers an
     // artifact to the flywheel
-    public static int MOTOR_TURNS = 7;
+    public static int MOTOR_TURNS = 5;
 
-    public static double kP = 0.007;
-    public static double kI = 0.03;
-    public static double kD = 0.0002;
+    public static double kP = 0.0;
+    public static double kI = 0.0;
+    public static double kD = 0.0;
     public static double maxPower = 1;
     public static boolean tuning = false;
 

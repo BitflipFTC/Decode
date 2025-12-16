@@ -30,16 +30,9 @@ class Shooter(): Subsystem {
         const val LOW_PASS = 0.05
 
         @JvmField
-        var kP = 0.009
-
+        var kP = 0.0
         @JvmField
-        var kI = 0.0
-
-        @JvmField
-        var kD = 0.0
-
-        @JvmField
-        var kV = 0.0024
+        var kV = 0.0
 
         @JvmField
         var tuning = false
@@ -53,38 +46,17 @@ class Shooter(): Subsystem {
     private lateinit var vSensor: VoltageSensor
     private lateinit var hoodServo: ServoEx
     private lateinit var flywheelMotor: MotorEx
-    private val flywheelController = PIDController(kP, kI, kD, kV)
+    private val flywheelController = PIDController(kP, 0.0, 0.0, kV)
 
     // long goal is approximately 125 in. from peak of long to center of goal tag
     // longest short zone is approx. 80 in. from peak to center
     // shortest we can see from is about 25.0.
     private val lookupTable = InterpolatedLookupTable(
         doubleArrayOf(
-            40.0,
-            50.0,
-            65.0,
-            80.0,
-            100.0,
-            120.0,
-            140.0
         ),
         doubleArrayOf(
-            0.5,
-            0.45,
-            0.35,
-            0.225,
-            0.15,
-            0.1,
-            0.05
         ),
         doubleArrayOf(
-            3250.0,
-            3500.0,
-            3750.0,
-            4000.0,
-            4250.0,
-            4500.0,
-            5000.0
         )
     )
 
@@ -131,7 +103,7 @@ class Shooter(): Subsystem {
         filteredFlywheelRPM = flywheelRPM * LOW_PASS + lastFlywheelRPM * (1 - LOW_PASS)
 
         if (tuning) {
-            flywheelController.setCoeffs(kP, kI, kD, kV, 0.0)
+            flywheelController.setCoeffs(kP, 0.0, 0.0, kV, 0.0)
         }
 
         pidOutput = flywheelController.calculate(filteredFlywheelRPM, targetFlywheelRPM)
