@@ -17,7 +17,7 @@ import org.firstinspires.ftc.teamcode.util.hardware.MotorEx
 class Intake(): Subsystem {
     enum class State (val value: Double) {
         OFF(0.0),
-        INTAKE(1.0),
+        INTAKE(0.8),
     }
 
     private lateinit var motor: MotorEx
