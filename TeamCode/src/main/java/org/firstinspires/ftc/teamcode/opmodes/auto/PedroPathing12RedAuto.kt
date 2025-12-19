@@ -195,16 +195,7 @@ class PedroPathing12RedAuto: BitflipOpMode() {
     lateinit var park: PathChain
 
     fun buildPaths() {
-        scorePreload = PedroComponent.follower.pathBuilder()
-            .addPath(
-                BezierLine(
-                    farStartPose,
-                    farShootPose
-                )
-            )
-            .setLinearHeadingInterpolation(farStartPose.heading, farShootPose.heading)
-            .build()
-
+        scorePreload = buildBasicLine(farStartPose, farShootPose)
         intake1 = PedroComponent.follower.pathBuilder()
             .addPath(
                 BezierCurve(
@@ -222,13 +213,7 @@ class PedroPathing12RedAuto: BitflipOpMode() {
         
         // spin spindexer
 
-        score1 = PedroComponent.follower.pathBuilder()
-            .addPath(
-                BezierLine(endIntake1, farShootPose)
-            )
-            .setLinearHeadingInterpolation(endIntake1.heading, farShootPose.heading)
-            .build()
-        
+        score1 = buildBasicLine(endIntake1, farShootPose)
         // shoot + aim
 
         intake2 = PedroComponent.follower.pathBuilder()
@@ -246,12 +231,7 @@ class PedroPathing12RedAuto: BitflipOpMode() {
             .setTangentHeadingInterpolation()
             .build()
 
-        score2 = PedroComponent.follower.pathBuilder()
-            .addPath(
-                BezierLine(endIntake2, nearShootPose)
-            )
-            .setLinearHeadingInterpolation(endIntake2.heading, nearShootPose.heading)
-            .build()
+        score2 = buildBasicLine(endIntake2,nearShootPose)
 
         intake3 = PedroComponent.follower.pathBuilder()
             .addPath(
@@ -268,18 +248,18 @@ class PedroPathing12RedAuto: BitflipOpMode() {
             .setTangentHeadingInterpolation()
             .build()
 
-        score3 = PedroComponent.follower.pathBuilder()
-            .addPath(
-                BezierLine(endIntake3, nearShootPose)
-            )
-            .setLinearHeadingInterpolation(endIntake3.heading, farShootPose.heading)
-            .build()
+        score3 = buildBasicLine(endIntake3,nearShootPose)
 
-        park = PedroComponent.follower.pathBuilder()
-            .addPath(
-                BezierLine(nearShootPose, nearParkPose)
-            )
-            .setLinearHeadingInterpolation(nearShootPose.heading, nearParkPose.heading)
-            .build()
+        park = buildTangentLine(nearShootPose, nearParkPose)
     }
+
+    fun buildBasicLine(p1: Pose, p2: Pose) = PedroComponent.follower.pathBuilder()
+        .addPath(BezierLine(p1, p2))
+        .setLinearHeadingInterpolation(p1.heading,p2.heading)
+        .build()
+
+    fun buildTangentLine(p1: Pose, p2: Pose) = PedroComponent.follower.pathBuilder()
+        .addPath(BezierLine(p1, p2))
+        .setTangentHeadingInterpolation()
+        .build()
 }
