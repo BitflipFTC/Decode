@@ -36,6 +36,7 @@ class Turret(): Subsystem {
     private lateinit var servoR: ServoEx
 
     var debugTelemetry = true
+    var automatic = true
 
     private val goalPositions = mapOf(
         20 to Pose(2.0, 144.0),
@@ -87,7 +88,9 @@ class Turret(): Subsystem {
         // normalize robot pose between (-180, 180]
         val robotHeading = Math.toDegrees(if (robotPose.heading > Math.PI) { robotPose.heading - (2 * Math.PI) } else { robotPose.heading } )
 
-        angle = bearing - robotHeading
+        if (automatic) {
+            angle = bearing - robotHeading
+        }
 
         if (debugTelemetry) {
             ActiveOpMode.telemetry.addData("Turret calculated bearing", bearing)
