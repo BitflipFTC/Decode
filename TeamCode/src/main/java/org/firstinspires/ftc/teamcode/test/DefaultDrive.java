@@ -17,7 +17,6 @@ public class DefaultDrive extends OpMode {
     DcMotorEx back_left;
     DcMotorEx back_right;
     double driveSpeed = 0.5;
-    IMU imu;
 
     enum Speed {
         MAX,
@@ -37,8 +36,9 @@ public class DefaultDrive extends OpMode {
         back_right  = hardwareMap.get(DcMotorEx.class, "backright");
 
 
+        front_right.setDirection(DcMotorSimple.Direction.REVERSE);
+        back_right.setDirection(DcMotorSimple.Direction.REVERSE);
         front_left.setDirection(DcMotorSimple.Direction.REVERSE);
-        back_left.setDirection(DcMotorSimple.Direction.REVERSE);
 
         front_left.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         front_right.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -54,12 +54,6 @@ public class DefaultDrive extends OpMode {
         front_right.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         back_left.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         back_right.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-        imu = hardwareMap.get(IMU.class, "imu");
-
-        imu.initialize(new IMU.Parameters(new RevHubOrientationOnRobot(
-                RevHubOrientationOnRobot.LogoFacingDirection.BACKWARD,
-                RevHubOrientationOnRobot.UsbFacingDirection.UP)));
 
         telemetry.addData("Initialized", true);
         telemetry.update();
@@ -132,9 +126,6 @@ public class DefaultDrive extends OpMode {
         telemetry.addData("Y", "front_right");
         telemetry.addData("B", "back_right");
 
-        telemetry.addLine("---------------------------------------");
-
-        telemetry.addData("imu heading", imu.getRobotYawPitchRollAngles().getYaw());
         telemetry.update();
     }
 }
