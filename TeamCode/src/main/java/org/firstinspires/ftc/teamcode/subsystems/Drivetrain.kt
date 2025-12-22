@@ -49,7 +49,6 @@ class Drivetrain(): Subsystem {
     var fieldCentric = false
     var driveSpeed = 1.0
 
-    private lateinit var imu: IMU
     private lateinit var frontLeft : MotorEx
     private lateinit var frontRight: MotorEx
     private lateinit var backLeft  : MotorEx
@@ -57,23 +56,9 @@ class Drivetrain(): Subsystem {
 
     override fun initialize() {
         frontLeft = MotorEx("frontleft").reverse().zeroed().brake()
-        frontRight = MotorEx("frontright").brake().zeroed()
-        backLeft = MotorEx("backleft").reverse().zeroed().brake()
-        backRight = MotorEx("backright").zeroed().brake()
-
-        imu = ActiveOpMode.hardwareMap.get(IMU::class.java, "imu").apply {
-            initialize(
-                IMU.Parameters(
-                    RevHubOrientationOnRobot(
-                        RevHubOrientationOnRobot.LogoFacingDirection.LEFT,
-                        RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD
-                    )
-                )
-            )
-            resetYaw()
-        }
-
-        heading = imu.robotYawPitchRollAngles.getYaw(AngleUnit.RADIANS)
+        frontRight = MotorEx("frontright").reverse().brake().zeroed()
+        backLeft = MotorEx("backleft").zeroed().brake()
+        backRight = MotorEx("backright").reverse().zeroed().brake()
     }
 
     fun setDrivetrainPowers(powers: DrivePowers) {
@@ -86,30 +71,15 @@ class Drivetrain(): Subsystem {
     }
 
     fun calculateDrivetrainPowers (strafe: Double, forward: Double, yaw: Double): DrivePowers {
-
-        if (!fieldCentric) {
-            return DrivePowers(
-                (forward + strafe + yaw) * driveSpeed,
-                (forward - strafe - yaw) * driveSpeed,
-                (forward - strafe + yaw) * driveSpeed,
-                (forward + strafe - yaw) * driveSpeed
-            ).normalized()
-        } else {
-            heading = -imu.robotYawPitchRollAngles.getYaw(AngleUnit.RADIANS)
-            val rotStrafe = strafe * cos(heading) - forward * sin(heading)
-            val rotForward = strafe * sin(heading) + forward * cos(heading)
-
-            return DrivePowers(
-                (rotForward + rotStrafe + yaw) * driveSpeed,
-                (rotForward - rotStrafe - yaw) * driveSpeed,
-                (rotForward - rotStrafe + yaw) * driveSpeed,
-                (rotForward + rotStrafe - yaw) * driveSpeed
-            ).normalized()
-        }
+        return DrivePowers(
+            (forward + strafe + yaw) * driveSpeed,
+            (forward - strafe - yaw) * driveSpeed,
+            (forward - strafe + yaw) * driveSpeed,
+            (forward + strafe - yaw) * driveSpeed
+        ).normalized()
     }
 
     fun resetYaw () {
-        imu.resetYaw()
     }
 
     override fun periodic() {
