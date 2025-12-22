@@ -61,7 +61,7 @@ android {
 
 dependencies {
     implementation project(':FtcRobotController')
-    implementation "com.bylazar:fullpanels:1.0.10"
+    implementation "com.bylazar:fullpanels:1.0.12"
     // slothload
 // remove for pp tuning
 //    implementation("dev.frozenmilk.sinister:Sloth:0.2.4")
