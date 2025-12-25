@@ -1,14 +1,12 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import static org.firstinspires.ftc.teamcode.util.OpModeConstants.telemetry;
+
 import com.bylazar.configurables.annotations.Configurable;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.teamcode.util.PIDController;
 import org.firstinspires.ftc.teamcode.util.hardware.MotorEx;
-
-import dev.nextftc.core.commands.utility.LambdaCommand;
-import dev.nextftc.core.subsystems.Subsystem;
-import dev.nextftc.ftc.ActiveOpMode;
 
 /**
  * Manages the transfer mechanism, which moves artifacts from the spindexer to the shooter.
@@ -39,8 +37,7 @@ public class Transfer implements Subsystem {
 
     private final PIDController controller = new PIDController(kP, kI, kD, 0, 0, 1, -1);
 
-    @Override
-    public void initialize() {
+    public Transfer() {
         controller.setSetPointTolerance(10);
         motor = new MotorEx("transfer").zeroed().brake();
     }
@@ -113,23 +110,15 @@ public class Transfer implements Subsystem {
         }
 
         if (debugTelemetry) {
-            ActiveOpMode.telemetry().addData("Transfer current ticks", getCurrentPosition());
-            ActiveOpMode.telemetry().addData("Transfer target ticks", targetPosition);
-            ActiveOpMode.telemetry().addData("Transfer at set point", atSetPoint());
-            ActiveOpMode.telemetry().addLine("---------------------------");
+            assert telemetry != null;
+            telemetry.addData("Transfer current ticks", getCurrentPosition());
+            telemetry.addData("Transfer target ticks", targetPosition);
+            telemetry.addData("Transfer at set point", atSetPoint());
+            telemetry.addLine("---------------------------");
         }
     }
 
     public boolean atSetPoint() {
         return controller.atSetPoint();
-    }
-
-    public LambdaCommand shootArtifact() {
-        return new LambdaCommand()
-                .setStart(this::transferArtifact)
-                .setIsDone(this::atSetPoint)
-                .setName("Shoot artifact")
-                .setInterruptible(true)
-                .setRequirements(this);
     }
 }

@@ -1,18 +1,9 @@
 package org.firstinspires.ftc.teamcode.subsystems
 
 import android.annotation.SuppressLint
-import com.qualcomm.hardware.rev.RevHubOrientationOnRobot
-import com.qualcomm.robotcore.hardware.DcMotor
-import com.qualcomm.robotcore.hardware.DcMotorEx
-import com.qualcomm.robotcore.hardware.DcMotorSimple
-import com.qualcomm.robotcore.hardware.IMU
-import dev.nextftc.core.subsystems.Subsystem
-import dev.nextftc.ftc.ActiveOpMode
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit
+import org.firstinspires.ftc.teamcode.util.OpModeConstants.telemetry
 import org.firstinspires.ftc.teamcode.util.hardware.MotorEx
-import kotlin.math.cos
 import kotlin.math.max
-import kotlin.math.sin
 
 class Drivetrain(): Subsystem {
     class DrivePowers(val fl: Double, val fr: Double, val bl: Double, val br: Double) {
@@ -49,17 +40,10 @@ class Drivetrain(): Subsystem {
     var fieldCentric = false
     var driveSpeed = 1.0
 
-    private lateinit var frontLeft : MotorEx
-    private lateinit var frontRight: MotorEx
-    private lateinit var backLeft  : MotorEx
-    private lateinit var backRight : MotorEx
-
-    override fun initialize() {
-        frontLeft = MotorEx("frontleft").reverse().zeroed().brake()
-        frontRight = MotorEx("frontright").reverse().brake().zeroed()
-        backLeft = MotorEx("backleft").zeroed().brake()
-        backRight = MotorEx("backright").reverse().zeroed().brake()
-    }
+    private var frontLeft : MotorEx = MotorEx("frontleft").reverse().zeroed().brake()
+    private var frontRight: MotorEx = MotorEx("frontright").reverse().brake().zeroed()
+    private var backLeft  : MotorEx = MotorEx("backleft").zeroed().brake()
+    private var backRight : MotorEx = MotorEx("backright").reverse().zeroed().brake()
 
     fun setDrivetrainPowers(powers: DrivePowers) {
         frontLeft.power = powers.fl
@@ -84,8 +68,10 @@ class Drivetrain(): Subsystem {
 
     override fun periodic() {
         if (debugTelemetry) {
-            ActiveOpMode.telemetry.addLine(currentDrivePowers.toString())
-            ActiveOpMode.telemetry.addData("Heading", heading)
+            telemetry!!.run{
+                addLine(currentDrivePowers.toString())
+                addData("Heading", heading)
+            }
         }
     }
 }

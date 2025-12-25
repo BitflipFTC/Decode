@@ -1,19 +1,18 @@
 package org.firstinspires.ftc.teamcode.util
 
 import com.bylazar.utils.LoopTimer
-import dev.nextftc.core.components.Component
-import dev.nextftc.ftc.ActiveOpMode
+import org.firstinspires.ftc.robotcore.external.Telemetry
 
-object BetterLoopTimeComponent : Component {
+object BetterLoopTimeComponent {
     private val loopTimer = LoopTimer(10)
-    override fun preStartButtonPressed() {
+    fun start () {
         loopTimer.start()
     }
 
-    override fun postUpdate() {
+    fun update(telemetry: Telemetry) {
         loopTimer.end()
         loopTimer.start()
-        ActiveOpMode.telemetry.run {
+        telemetry.run {
             addData("Loop ms", loopTimer.ms.toDouble())
             addData("Loop hz", loopTimer.hz)
         }

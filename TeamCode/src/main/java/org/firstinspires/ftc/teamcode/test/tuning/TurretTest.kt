@@ -20,7 +20,6 @@ class TurretTest : LinearOpMode() {
         val camera = OV9281()
         val follower = Constants.createFollower(hardwareMap)
         val subsystems = setOf(turret,camera)
-        subsystems.forEach { it.initialize() }
         camera.targetID = 24
         turret.selectedAlliance = Alliance.RED
 

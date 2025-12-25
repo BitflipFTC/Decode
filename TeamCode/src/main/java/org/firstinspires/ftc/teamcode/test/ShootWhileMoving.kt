@@ -1,5 +1,8 @@
 package org.firstinspires.ftc.teamcode.test
 
+import android.graphics.Paint
+import com.bylazar.telemetry.JoinedTelemetry
+import com.bylazar.telemetry.PanelsTelemetry
 import com.pedropathing.geometry.Pose
 import com.qualcomm.hardware.lynx.LynxModule
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
@@ -16,6 +19,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Turret
 import org.firstinspires.ftc.teamcode.util.Alliance
 import org.firstinspires.ftc.teamcode.util.Artifact
 import org.firstinspires.ftc.teamcode.util.BetterLoopTimeComponent
+import org.firstinspires.ftc.teamcode.util.OpModeConstants
 import kotlin.math.PI
 import kotlin.math.sin
 import kotlin.math.sqrt
@@ -79,6 +83,9 @@ class ShootWhileMoving : LinearOpMode() {
     }
 
     override fun runOpMode() {
+        telemetry = JoinedTelemetry(PanelsTelemetry.ftcTelemetry, telemetry)
+        OpModeConstants.telemetry = telemetry
+        OpModeConstants.hardwareMap = hardwareMap
         val intake = Intake()
         val camera = OV9281()
         val shooter = Shooter()
@@ -92,8 +99,6 @@ class ShootWhileMoving : LinearOpMode() {
 
         var holdingPose = false
 
-        subsystems.forEach { it.initialize() }
-
         camera.targetID = 24
         turret.selectedAlliance = Alliance.RED
         follower.setStartingPose(Pose(72.0, 72.0, Math.PI / 2))
@@ -105,7 +110,7 @@ class ShootWhileMoving : LinearOpMode() {
         val allHubs = hardwareMap.getAll(LynxModule::class.java)
         allHubs.forEach { hub -> hub.bulkCachingMode = LynxModule.BulkCachingMode.MANUAL }
 
-        BetterLoopTimeComponent.preStartButtonPressed()
+        BetterLoopTimeComponent.start()
         follower.startTeleopDrive(true)
 
         while (opModeIsActive()) {
@@ -205,7 +210,7 @@ class ShootWhileMoving : LinearOpMode() {
             updateShootingFSM(spindexer,transfer,shooter)
             subsystems.forEach { it.periodic() }
             follower.update()
-            BetterLoopTimeComponent.postUpdate()
+            BetterLoopTimeComponent.update(telemetry)
             telemetry.update()
         }
     }

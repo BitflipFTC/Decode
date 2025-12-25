@@ -30,9 +30,6 @@ class FlywheelTest : LinearOpMode() {
         val subsystems = setOf(shooter,transfer,intake,spindexer, colorSensor, drivetrain, turret)
         telemetry = JoinedTelemetry(PanelsTelemetry.ftcTelemetry, telemetry)
 
-        turret.initialize()
-        subsystems.forEach { it.initialize() }
-
         // bulk caching
         val allHubs = hardwareMap.getAll(LynxModule::class.java)
         allHubs.forEach { hub -> hub.bulkCachingMode = LynxModule.BulkCachingMode.MANUAL }

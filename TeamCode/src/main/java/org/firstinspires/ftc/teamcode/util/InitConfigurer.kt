@@ -1,15 +1,12 @@
 package org.firstinspires.ftc.teamcode.util
 
-import dev.nextftc.core.components.Component
-import dev.nextftc.ftc.ActiveOpMode
+import com.qualcomm.robotcore.hardware.Gamepad
 import org.firstinspires.ftc.robotcore.external.Telemetry
 
-object InitConfigurer : Component {
-    private val telemetry: Telemetry
-        get() = ActiveOpMode.telemetry
-    private val gamepad1: com.qualcomm.robotcore.hardware.Gamepad
-        get() = ActiveOpMode.gamepad1
-
+class InitConfigurer(
+    val telemetry: Telemetry,
+    val gamepad1: Gamepad
+){
     private var hasSelectedAlliance = false
     private var hasSelectedStartingPosition = false
 
@@ -25,7 +22,7 @@ object InitConfigurer : Component {
 
     private var phase: Phase? = null
 
-    override fun preInit() {
+    fun start() {
         phase = null
         selectedAlliance = null
         selectedStartingPosition = null
@@ -33,7 +30,7 @@ object InitConfigurer : Component {
         hasSelectedStartingPosition = false
     }
 
-    override fun postWaitForStart() {
+    fun update() {
         when (phase) {
             Phase.SELECTING_ALLIANCE          -> {
                 telemetry.run {

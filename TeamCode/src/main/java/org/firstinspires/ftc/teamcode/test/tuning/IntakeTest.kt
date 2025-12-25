@@ -17,7 +17,6 @@ class IntakeTest : LinearOpMode() {
         val transfer = Transfer()
         val subsystems = setOf(spindexer, intake, transfer)
 
-        subsystems.forEach { it.initialize() }
         waitForStart()
 
         while(opModeIsActive()) {

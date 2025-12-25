@@ -1,11 +1,6 @@
 package org.firstinspires.ftc.teamcode.subsystems
 
-import com.qualcomm.robotcore.hardware.DcMotor
-import com.qualcomm.robotcore.hardware.DcMotorEx
-import com.qualcomm.robotcore.hardware.DcMotorSimple
-import dev.nextftc.core.commands.utility.LambdaCommand
-import dev.nextftc.core.subsystems.Subsystem
-import dev.nextftc.ftc.ActiveOpMode
+import org.firstinspires.ftc.teamcode.util.OpModeConstants.telemetry
 import org.firstinspires.ftc.teamcode.util.hardware.MotorEx
 
 /**
@@ -20,7 +15,7 @@ class Intake(): Subsystem {
         INTAKE(0.8),
     }
 
-    private lateinit var motor: MotorEx
+    private var motor: MotorEx = MotorEx("intake").reverse().brake().zeroed()
 
     var reversed = false
 
@@ -46,44 +41,15 @@ class Intake(): Subsystem {
         power = State.OFF
     }
 
-    fun runIntake() = LambdaCommand()
-        .setStart { intake() }
-        .setStop { interrupted -> if (!interrupted) {off()} }
-        .setRequirements(this)
-        .setInterruptible(true)
-        .setName("Intake")
-
-    fun toggleRun() = LambdaCommand()
-        .setStart { toggle() }
-        .setRequirements(this)
-        .setInterruptible(true)
-        .setName("Toggle Intake")
-
-    fun stopIntake() = LambdaCommand()
-        .setStart { off() }
-        .setRequirements(this)
-        .setInterruptible(true)
-        .setName("Stop intake")
-
-    fun reverse() = LambdaCommand()
-        .setStart { this.reversed = true }
-        .setRequirements(this)
-
-    fun forward() = LambdaCommand()
-        .setStart { this.reversed = false }
-        .setRequirements(this)
-
-    override fun initialize() {
-        motor = MotorEx("intake").reverse().brake().zeroed()
-    }
-
     override fun periodic() {
         motor.power = if (reversed) -power.value else power.value
 
         if (debugTelemetry) {
-            ActiveOpMode.telemetry.addData("Intake state", power.name)
-            ActiveOpMode.telemetry.addData("Reversed", reversed)
-            ActiveOpMode.telemetry.addLine("---------------------------")
+            telemetry!!.run{
+                addData("Intake state", power.name)
+                addData("Reversed", reversed)
+                addLine("---------------------------")
+            }
         }
     }
 }

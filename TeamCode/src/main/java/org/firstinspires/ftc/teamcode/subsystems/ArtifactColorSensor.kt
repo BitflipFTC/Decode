@@ -2,13 +2,14 @@ package org.firstinspires.ftc.teamcode.subsystems
 
 import com.qualcomm.hardware.rev.RevColorSensorV3
 import com.qualcomm.robotcore.hardware.NormalizedRGBA
-import dev.nextftc.core.subsystems.Subsystem
-import dev.nextftc.ftc.ActiveOpMode
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit
 import org.firstinspires.ftc.teamcode.util.Artifact
+import org.firstinspires.ftc.teamcode.util.OpModeConstants.hardwareMap
+import org.firstinspires.ftc.teamcode.util.OpModeConstants.telemetry
 
 class ArtifactColorSensor(): Subsystem {
-    private lateinit var colorSensor: RevColorSensorV3
+    private var colorSensor: RevColorSensorV3 =
+        hardwareMap!!.get(RevColorSensorV3::class.java, "colorSensor")
     var colors: NormalizedRGBA = NormalizedRGBA()
         private set
 
@@ -30,10 +31,6 @@ class ArtifactColorSensor(): Subsystem {
     // which decreases loop times.
     // when this is false, the colors are read.
     private var readDistance = true
-
-    override fun initialize() {
-        colorSensor = ActiveOpMode.hardwareMap.get(RevColorSensorV3::class.java, "colorSensor")
-    }
 
     override fun periodic() {
         // alternate reads to improve loop times
@@ -57,7 +54,7 @@ class ArtifactColorSensor(): Subsystem {
         }
 
         if (debugTelemetry) {
-            ActiveOpMode.telemetry.run {
+            telemetry!!.run {
                 addData("Detected Artifact", detectedArtifact?.name ?: "none")
                 addData("Detected Artifact Ordinal (graphing)", detectedArtifact?.ordinal ?: 2)
                 addData("Distance", "%05.2fcm", distance)

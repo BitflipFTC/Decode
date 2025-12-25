@@ -2,9 +2,9 @@ package org.firstinspires.ftc.teamcode.subsystems
 
 import com.bylazar.configurables.annotations.Configurable
 import com.qualcomm.robotcore.hardware.VoltageSensor
-import dev.nextftc.core.subsystems.Subsystem
-import dev.nextftc.ftc.ActiveOpMode
 import org.firstinspires.ftc.teamcode.util.InterpolatedLookupTable
+import org.firstinspires.ftc.teamcode.util.OpModeConstants.hardwareMap
+import org.firstinspires.ftc.teamcode.util.OpModeConstants.telemetry
 import org.firstinspires.ftc.teamcode.util.PIDController
 import org.firstinspires.ftc.teamcode.util.hardware.MotorEx
 import org.firstinspires.ftc.teamcode.util.hardware.ServoEx
@@ -42,24 +42,6 @@ class Shooter(): Subsystem {
         val angle: Double,
         val rpm: Double,
     )
-
-    private lateinit var vSensor: VoltageSensor
-    private lateinit var hoodServo: ServoEx
-    private lateinit var flywheelMotor: MotorEx
-    private val flywheelController = PIDController(kP, 0.0, 0.0, kV)
-
-    // long goal is approximately 125 in. from peak of long to center of goal tag
-    // longest short zone is approx. 80 in. from peak to center
-    // shortest we can see from is about 25.0.
-    private val lookupTable = InterpolatedLookupTable(
-        doubleArrayOf(
-        ),
-        doubleArrayOf(
-        ),
-        doubleArrayOf(
-        )
-    )
-
     // main two adjustable params
 
     var targetFlywheelRPM = 0.0
@@ -83,19 +65,28 @@ class Shooter(): Subsystem {
 
     var debugTelemetry = true
 
-    override fun initialize() {
-        flywheelMotor = MotorEx("flywheel").zeroed().float().reverse().apply {
-            maxSlewRate = 0.2
-        }
-
-        hoodServo = ServoEx("hood").apply{
-            position = hoodPosition
-        }
-
-        flywheelController.setPointTolerance = 85.toDouble()
-
-        vSensor = ActiveOpMode.hardwareMap.get(VoltageSensor::class.java, "Control Hub")
+    private var vSensor: VoltageSensor = hardwareMap!!.get(VoltageSensor::class.java, "Control Hub")
+    private var hoodServo: ServoEx = ServoEx("hood").apply{
+        position = hoodPosition
     }
+    private var flywheelMotor: MotorEx = MotorEx("flywheel").zeroed().float().reverse().apply {
+        maxSlewRate = 0.2
+    }
+    private val flywheelController = PIDController(kP, 0.0, 0.0, kV).apply {
+        setPointTolerance = 85.0
+    }
+
+    // long goal is approximately 125 in. from peak of long to center of goal tag
+    // longest short zone is approx. 80 in. from peak to center
+    // shortest we can see from is about 25.0.
+    private val lookupTable = InterpolatedLookupTable(
+        doubleArrayOf(
+        ),
+        doubleArrayOf(
+        ),
+        doubleArrayOf(
+        )
+    )
 
     override fun periodic() {
         lastFlywheelRPM = flywheelRPM
@@ -114,11 +105,11 @@ class Shooter(): Subsystem {
         hoodServo.position = hoodPosition
 
         if (debugTelemetry) {
-            ActiveOpMode.telemetry.addData("Flywheel target RPM", targetFlywheelRPM)
-            ActiveOpMode.telemetry.addData("Flywheel current RPM", flywheelRPM)
-            ActiveOpMode.telemetry.addData("Flywheel at set point", atSetPoint())
-            ActiveOpMode.telemetry.addData("Hood position", hoodPosition)
-            ActiveOpMode.telemetry.addLine("---------------------------")
+            telemetry!!.addData("Flywheel target RPM", targetFlywheelRPM)
+            telemetry!!.addData("Flywheel current RPM", flywheelRPM)
+            telemetry!!.addData("Flywheel at set point", atSetPoint())
+            telemetry!!.addData("Hood position", hoodPosition)
+            telemetry!!.addLine("---------------------------")
         }
     }
 

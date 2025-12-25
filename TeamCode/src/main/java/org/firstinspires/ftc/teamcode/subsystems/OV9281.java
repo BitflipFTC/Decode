@@ -1,5 +1,8 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import static org.firstinspires.ftc.teamcode.util.OpModeConstants.hardwareMap;
+import static org.firstinspires.ftc.teamcode.util.OpModeConstants.telemetry;
+
 import android.util.Size;
 
 import androidx.annotation.Nullable;
@@ -16,22 +19,17 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.GainCon
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
-import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.teamcode.util.MotifPattern;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagGameDatabase;
-import org.firstinspires.ftc.vision.apriltag.AprilTagMetadata;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-
-import dev.nextftc.core.subsystems.Subsystem;
-import dev.nextftc.ftc.ActiveOpMode;
 
 @Configurable
 public class OV9281 implements Subsystem {
@@ -89,8 +87,7 @@ public class OV9281 implements Subsystem {
 
     // exposure: 1-7
     // gain: 1-6
-    @Override
-    public void initialize () {
+    public OV9281 () {
         aprilTag = new AprilTagProcessor.Builder()
                 .setTagLibrary(AprilTagGameDatabase.getDecodeTagLibrary())
 //                .setDrawTagOutline(true)
@@ -105,8 +102,9 @@ public class OV9281 implements Subsystem {
         aprilTag.setDecimation(3f);
         aprilTag.setPoseSolver(AprilTagProcessor.PoseSolver.OPENCV_SOLVEPNP_EPNP);
 
+        assert hardwareMap != null;
         visionPortal = new VisionPortal.Builder()
-                .setCamera(ActiveOpMode.hardwareMap().get(WebcamName.class, "camera"))
+                .setCamera(hardwareMap.get(WebcamName.class, "camera"))
                 .setCameraResolution(new Size(640,480))
                 .setShowStatsOverlay(true)
                 .setStreamFormat(VisionPortal.StreamFormat.MJPEG)
@@ -190,27 +188,29 @@ public class OV9281 implements Subsystem {
 
         int count = detectionsBuffer.size();
 
+        assert telemetry != null;
         if (count == 0) {
-            if (debugTelemetry)
-                ActiveOpMode.telemetry().addData("Detected April Tags", 0);
+            if (debugTelemetry) {
+                telemetry.addData("Detected April Tags", 0);
+            }
             distanceToGoal = -1.0;
             currentTagBearing = 0.0;
             return;
         }
 
         if (debugTelemetry)
-            ActiveOpMode.telemetry().addData("Detected April Tags", detectionsBuffer.size());
+            telemetry.addData("Detected April Tags", detectionsBuffer.size());
         for (AprilTagDetection detection : detectionsBuffer) {
             if (detection.metadata == null) {
                 distanceToGoal = -1.0;
                 currentTagBearing = -0.1;
                 if (debugTelemetry)
-                    ActiveOpMode.telemetry().addData("Current tag", "No metadata");
+                    telemetry.addData("Current tag", "No metadata");
                 continue;
             }
 
             if (debugTelemetry)
-                ActiveOpMode.telemetry().addData("TAG NAME", detection.metadata.name);
+                telemetry.addData("TAG NAME", detection.metadata.name);
 
             if (detection.id == targetID) {
                 distanceToGoal = detection.ftcPose.range * lowPass + (1 - lowPass) * lastDistanceToGoal;
@@ -225,10 +225,10 @@ public class OV9281 implements Subsystem {
         }
 
         if (debugTelemetry) {
-            ActiveOpMode.telemetry().addData("Target Tag ID", targetID);
-            ActiveOpMode.telemetry().addData("Distance from goal", "%06.3fin", distanceToGoal);
-            ActiveOpMode.telemetry().addData("Current tag bearing", "%05.2f deg", currentTagBearing);
-            ActiveOpMode.telemetry().addLine("---------------------------");
+            telemetry.addData("Target Tag ID", targetID);
+            telemetry.addData("Distance from goal", "%06.3fin", distanceToGoal);
+            telemetry.addData("Current tag bearing", "%05.2f deg", currentTagBearing);
+            telemetry.addLine("---------------------------");
         }
     }
 

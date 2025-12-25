@@ -1,20 +1,10 @@
 package org.firstinspires.ftc.teamcode.subsystems
 
 import com.bylazar.configurables.annotations.Configurable
-import com.pedropathing.ftc.PoseConverter
-import com.pedropathing.geometry.PedroCoordinates
 import com.pedropathing.geometry.Pose
-import com.qualcomm.robotcore.util.Range
-import dev.nextftc.core.subsystems.Subsystem
-import dev.nextftc.ftc.ActiveOpMode
-import org.firstinspires.ftc.robotcore.external.navigation.Pose2D
 import org.firstinspires.ftc.teamcode.util.Alliance
-import org.firstinspires.ftc.teamcode.util.PIDController
-import org.firstinspires.ftc.teamcode.util.hardware.CRServoEx
+import org.firstinspires.ftc.teamcode.util.OpModeConstants.telemetry
 import org.firstinspires.ftc.teamcode.util.hardware.ServoEx
-import org.firstinspires.ftc.vision.apriltag.AprilTagGameDatabase
-import org.firstinspires.ftc.vision.apriltag.AprilTagLibrary
-import org.firstinspires.ftc.vision.apriltag.AprilTagMetadata
 import kotlin.math.atan2
 
 @Configurable
@@ -32,8 +22,8 @@ class Turret(): Subsystem {
         const val SERVO_MAX = 0.5 + ((SERVO_LIMITS / 2) / 1800)
     }
 
-    private lateinit var servoL: ServoEx
-    private lateinit var servoR: ServoEx
+    private var servoL: ServoEx = ServoEx("turretL")
+    private var servoR: ServoEx = ServoEx("turretR")
 
     var debugTelemetry = true
     var automatic = true
@@ -71,10 +61,7 @@ class Turret(): Subsystem {
             position = scaledAngle
         }
 
-    override fun initialize() {
-        servoL = ServoEx("turretL")
-        servoR = ServoEx("turretR")
-
+    init {
         servoL.scaleRange(SERVO_MIN, SERVO_MAX)
         servoR.scaleRange(SERVO_MIN, SERVO_MAX)
     }
@@ -93,11 +80,11 @@ class Turret(): Subsystem {
         }
 
         if (debugTelemetry) {
-            ActiveOpMode.telemetry.addData("Turret calculated bearing", bearing)
-            ActiveOpMode.telemetry.addData("Turret robot heading", robotHeading)
-            ActiveOpMode.telemetry.addData("Turret target angle", angle)
-            ActiveOpMode.telemetry.addData("Turret target position", position)
-            ActiveOpMode.telemetry.addLine("---------------------------")
+            telemetry!!.addData("Turret calculated bearing", bearing)
+            telemetry!!.addData("Turret robot heading", robotHeading)
+            telemetry!!.addData("Turret target angle", angle)
+            telemetry!!.addData("Turret target position", position)
+            telemetry!!.addLine("---------------------------")
         }
     }
 }
