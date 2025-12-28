@@ -36,16 +36,16 @@ class Spindexer(): Subsystem {
         const val TICKS_PER_REVOLUTION: Double = 537.7 * GEAR_RATIO
 
         @JvmField
-        var kP = 0.0
+        var kP = 0.006
 
         @JvmField
-        var kI = 0.0
+        var kI = 0.035
 
         @JvmField
-        var kD = 0.0
+        var kD = 0.0002
 
         @JvmField
-        var kS = 0.0
+        var kS = 0.006
 
         @JvmField
         var turningFeedforward = 0.0
@@ -54,7 +54,10 @@ class Spindexer(): Subsystem {
         var setpointTolerance = 1.0 // in degrees
 
         @JvmField
-        var maxPower = 1.0
+        var maxPower = 0.5
+
+        @JvmField
+        var staticFrictionDeadband = 1.5
 
         @JvmField
         var tuning = false
@@ -322,7 +325,7 @@ class Spindexer(): Subsystem {
     // ------------------ INTERNAL HARDWARE CONTROL ------------------
 
     private lateinit var motor: MotorEx
-    private val controller = PIDController(kP, kI, kD, 0.0, kS)
+    private val controller = PIDController(kP, kI, kD, 0.0, kS, staticFrictionDeadband = staticFrictionDeadband)
 
     override fun initialize() {
         motor = MotorEx("spindexer").zeroed().brake()
@@ -337,6 +340,7 @@ class Spindexer(): Subsystem {
     override fun periodic() {
         if (tuning) {
             controller.setCoeffs(kP, kI, kD, 0.0, kS)
+            controller.staticFrictionDeadband = staticFrictionDeadband
         }
 
         val pidOutput = controller.calculate(currentTicks, targetTicks)

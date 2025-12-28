@@ -26,7 +26,8 @@ open class PIDController(
     var kV : Double = 0.0,
     var kS : Double = 0.0,
     protected var maxIntegral: Double = 1.0,
-    protected var minIntegral: Double = -1.0
+    protected var minIntegral: Double = -1.0,
+    var staticFrictionDeadband: Double = 0.0
 ) {
     var setpoint : Double = 0.0
     var processVariable : Double = 0.0
@@ -87,7 +88,7 @@ open class PIDController(
         totalError += timePeriod * error
         totalError = min(maxIntegral, max(minIntegral, totalError))
 
-        val feedforward = setpoint * kV + sign(error) * kS
+        val feedforward = setpoint * kV + if (abs(error) > staticFrictionDeadband) { sign(error) * kS } else 0.0
         var feedback = kP * error + kD * velError
         feedback = if (abs(feedback + feedforward) >= 1) feedback else feedback + kI * totalError
         return feedforward + feedback

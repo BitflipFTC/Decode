@@ -16,19 +16,19 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 public class Constants {
     public static FollowerConstants followerConstants = new FollowerConstants()
-            .mass(11.34)
-            .forwardZeroPowerAcceleration(-55)//todo avg 5 values on full batt
-            .lateralZeroPowerAcceleration(-85)//todo avg 5 values on full batt
-            .translationalPIDFCoefficients(new PIDFCoefficients(0.06, 0.0, 0.003, 0.04))
-            .headingPIDFCoefficients(new PIDFCoefficients(1.2, 0, 0.01, 0.03))
-            .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.0075, 0, 0.0002, 0.01, 0.6))
-            .centripetalScaling(0.0005);
+            .mass(11.34);
+//            .forwardZeroPowerAcceleration(-55)
+//            .lateralZeroPowerAcceleration(-85)
+//            .translationalPIDFCoefficients(new PIDFCoefficients(0.06, 0.0, 0.003, 0.04))
+//            .headingPIDFCoefficients(new PIDFCoefficients(1.2, 0, 0.01, 0.03))
+//            .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.0075, 0, 0.0002, 0.01, 0.6))
+//            .centripetalScaling(0.0005);
 
 
     public static MecanumConstants driveConstants = new MecanumConstants()
             .maxPower(1.0)
-            .xVelocity(60.9047)//todo avg 5 values on full batt
-            .yVelocity(51.0390461)//todo avg 5 values on full batt
+//            .xVelocity(60.9047)//todo avg 5 values on full batt
+//            .yVelocity(51.0390461)//todo avg 5 values on full batt
             .rightFrontMotorName("frontright")
             .rightRearMotorName("backright")
             .leftRearMotorName("backleft")
