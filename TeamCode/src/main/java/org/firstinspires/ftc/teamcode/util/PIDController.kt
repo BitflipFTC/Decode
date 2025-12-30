@@ -19,7 +19,7 @@ import kotlin.math.sign
  * @param maxIntegral Maximum integral value (to prevent windup)
  * @param minIntegral Minimum integral value (to prevent windup)
  */
-open class PIDController(
+open class PIDController @JvmOverloads constructor(
     var kP : Double = 0.0,
     var kI : Double = 0.0,
     var kD : Double = 0.0,

@@ -12,7 +12,6 @@ import dev.nextftc.ftc.ActiveOpMode;
 
 /**
  * Manages the transfer mechanism, which moves artifacts from the spindexer to the shooter.
- *
  * This class uses a PID controller to precisely control the rotation of the transfer motor.
  * The main function is [transferArtifact], which initiates a transfer sequence.
  * The [update] method must be called in a loop to drive the motor to its target position.
@@ -20,24 +19,24 @@ import dev.nextftc.ftc.ActiveOpMode;
 @Configurable
 public class Transfer implements Subsystem {
     // 1620rpm motor, so
-    private final double TICKS_PER_REVOLUTION = 103.8;
+    private final double TICKS_PER_REVOLUTION = 145.1;
     private double targetPosition = 0;
 
     // amount of times the motor should turn every time it transfers an
     // artifact to the flywheel
-    public static int MOTOR_TURNS = 5;
+    public static int MOTOR_TURNS = 1;
 
-    public static double kP = 0.0;
-    public static double kI = 0.0;
-    public static double kD = 0.0;
-    public static double maxPower = 1;
-    public static boolean tuning = false;
+    public static double kP = 0.007;
+    public static double kI = 0.03;
+    public static double kD = 0.0002;
+    public static double maxPower = 0.5;
+    public static boolean tuning = true;
 
     boolean debugTelemetry = true;
 
     private MotorEx motor = null;
 
-    private final PIDController controller = new PIDController(kP, kI, kD, 0, 0, 1, -1);
+    private final PIDController controller = new PIDController(kP, kI, kD);
 
     @Override
     public void initialize() {
@@ -80,7 +79,7 @@ public class Transfer implements Subsystem {
         // determine the difference between where the current target position is and where it should be
         // positive if it is too short of a full revolution
         // ceil ensures that the transfer always does AT LEAST MOTOR_TURNS rotations
-        double targetPositionErrorFromRotation = Math.ceil(targetRevolutions) - targetRevolutions;
+        double targetPositionErrorFromRotation = Math.round(targetRevolutions);
 
         // then set a new target that snaps to the nearest rotation
         // adds the difference between the current target and the nearest revolution

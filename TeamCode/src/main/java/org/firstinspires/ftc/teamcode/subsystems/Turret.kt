@@ -25,7 +25,7 @@ class Turret(): Subsystem {
         // 667.4157303371 total degrees of freedom for turret
         // manually limit it from
         // -240 to 240
-        const val TURRET_RANGE: Double = 480.0 // degrees
+        const val TURRET_RANGE: Double = 360.0 // degrees
 
         const val SERVO_LIMITS = TURRET_RANGE / GEAR_RATIO
         const val SERVO_MIN = 0.5 - ((SERVO_LIMITS / 2) / 1800)
@@ -77,6 +77,8 @@ class Turret(): Subsystem {
 
         servoL.scaleRange(SERVO_MIN, SERVO_MAX)
         servoR.scaleRange(SERVO_MIN, SERVO_MAX)
+
+        angle = 0.0
     }
 
     override fun periodic() {
@@ -88,8 +90,9 @@ class Turret(): Subsystem {
         // normalize robot pose between (-180, 180]
         val robotHeading = Math.toDegrees(if (robotPose.heading > Math.PI) { robotPose.heading - (2 * Math.PI) } else { robotPose.heading } )
 
+        val angle = bearing - robotHeading
         if (automatic) {
-            angle = bearing - robotHeading
+//            angle = bearing - robotHeading
         }
 
         if (debugTelemetry) {

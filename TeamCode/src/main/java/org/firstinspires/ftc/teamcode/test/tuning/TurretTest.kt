@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.test.tuning
 
+import com.bylazar.field.Style
 import com.bylazar.telemetry.JoinedTelemetry
 import com.bylazar.telemetry.PanelsTelemetry
 import com.pedropathing.geometry.Pose
@@ -7,6 +8,7 @@ import com.qualcomm.hardware.lynx.LynxModule
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants
+import org.firstinspires.ftc.teamcode.pedroPathing.Drawing
 import org.firstinspires.ftc.teamcode.subsystems.OV9281
 import org.firstinspires.ftc.teamcode.subsystems.Turret
 import org.firstinspires.ftc.teamcode.util.Alliance
@@ -17,11 +19,8 @@ class TurretTest : LinearOpMode() {
         telemetry = JoinedTelemetry(PanelsTelemetry.ftcTelemetry, telemetry)
 
         val turret = Turret()
-        val camera = OV9281()
-        val follower = Constants.createFollower(hardwareMap)
-        val subsystems = setOf(turret,camera)
+        val subsystems = setOf(turret)
         subsystems.forEach { it.initialize() }
-        camera.targetID = 24
         turret.selectedAlliance = Alliance.RED
 
         // bulk caching
@@ -31,15 +30,18 @@ class TurretTest : LinearOpMode() {
         telemetry.addLine("Initialized. Press play")
         telemetry.update()
 
+        Drawing.init()
         waitForStart()
-
-        follower.setStartingPose(Pose(72.0, 72.0, 90.0))
 
         while (opModeIsActive()) {
             // more bulk caching
             allHubs.forEach { hub -> hub.clearBulkCache() }
+            turret.robotPose = Pose(72.0, 72.0, 90.0)
 
-            turret.robotPose = follower.pose
+            Drawing.drawRobot(turret.robotPose)
+            Drawing.drawRobot(turret.goalPose)
+            Drawing.sendPacket()
+
             subsystems.forEach { it.periodic() }
 
             telemetry.update()

@@ -24,36 +24,11 @@ class IntakeTest : LinearOpMode() {
             subsystems.forEach { it.periodic() }
 
             if (gamepad1.dpadUpWasPressed()) {
-                transfer.transferArtifact()
+                intake.power += 0.1
             }
 
             if (gamepad1.dpadDownWasPressed()) {
-                transfer.undoTransfer()
-            }
-
-            if (gamepad1.crossWasPressed()) {
-                spindexer.state = Spindexer.States.INTAKE_ZERO
-            }
-
-            if (gamepad1.triangleWasPressed()) {
-                spindexer.state = Spindexer.States.OUTTAKE_ZERO
-            }
-
-            if (gamepad1.circleWasPressed()) {
-                spindexer.toNextPosition()
-                gamepad1.rumble(500)
-            }
-
-            if (gamepad1.rightBumperWasPressed()) {
-                spindexer.toNextOuttakePosition()
-            }
-
-            if (gamepad1.leftBumperWasPressed()) {
-                spindexer.toNextIntakePosition()
-            }
-
-            if (gamepad1.squareWasPressed()) {
-                intake.toggle()
+                intake.power -= 0.1
             }
 
             telemetry.addData("Intake Power", intake.power)
