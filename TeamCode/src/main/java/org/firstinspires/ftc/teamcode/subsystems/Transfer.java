@@ -79,7 +79,7 @@ public class Transfer implements Subsystem {
         // determine the difference between where the current target position is and where it should be
         // positive if it is too short of a full revolution
         // ceil ensures that the transfer always does AT LEAST MOTOR_TURNS rotations
-        double targetPositionErrorFromRotation = Math.round(targetRevolutions);
+        double targetPositionErrorFromRotation = Math.ceil(targetRevolutions) - targetRevolutions;
 
         // then set a new target that snaps to the nearest rotation
         // adds the difference between the current target and the nearest revolution
