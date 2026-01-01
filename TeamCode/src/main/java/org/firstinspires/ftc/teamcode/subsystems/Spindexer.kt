@@ -237,7 +237,7 @@ class Spindexer(): Subsystem {
                     // full = 1, so targets 1, then can go 1 -> 2
                     // for [0,1]
                     // full = 2, so targets 0, then can go 0 -> 1
-                    targetIndex = if (emptySlot == 2) 0 else emptySlot + 1
+                    targetIndex = emptySlot
                 }
 
                 1    -> {
@@ -288,6 +288,8 @@ class Spindexer(): Subsystem {
             }
 
             state = slotsToOuttakes[targetOuttakeIndex]
+        } else {
+            return toFirstFullOuttakePosition()
         }
     }
 
