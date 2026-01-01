@@ -14,7 +14,8 @@ class ArtifactColorSensor(): Subsystem {
 
     var detectedArtifact: Artifact? = null
         private set
-    var distance: Double = 0.0
+    // make sure this starts above 5.0 to avoid the color sensor making a fake read on the first loop
+    var distance: Double = 10.0
     val red: Double
         get() = colors.red.toDouble()
     val green: Double
@@ -37,7 +38,7 @@ class ArtifactColorSensor(): Subsystem {
 
     override fun periodic() {
         // alternate reads to improve loop times
-        if (distance <= 5.0) {
+        if (distance <= 3.0) {
             readDistance = !readDistance
             if (!readDistance) {
                 colors = colorSensor.normalizedColors
@@ -61,6 +62,7 @@ class ArtifactColorSensor(): Subsystem {
                 addData("Detected Artifact", detectedArtifact?.name ?: "none")
                 addData("Detected Artifact Ordinal (graphing)", detectedArtifact?.ordinal ?: 2)
                 addData("Distance", "%05.2fcm", distance)
+                addData("Read distance", readDistance)
                 addLine("------------------------------")
             }
         }
