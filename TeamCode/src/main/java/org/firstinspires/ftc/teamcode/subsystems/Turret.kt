@@ -60,7 +60,9 @@ class Turret(): Subsystem {
     var angle: Double
         get() = (position * TURRET_RANGE) - TURRET_RANGE / 2
         set(angle) {
-            val clippedAngle = angle.coerceIn(0.0 - (TURRET_RANGE / 2), TURRET_RANGE / 2)
+//            val clippedAngle = angle.coerceIn(0.0 - (TURRET_RANGE / 2), TURRET_RANGE / 2)
+            // scale angle between -180 and 180
+            val clippedAngle = if (angle < -180) angle + 360 else if (angle > 180) angle - 360 else angle
             // make it positive, then scale it to 0..1
             val scaledAngle = (clippedAngle + TURRET_RANGE / 2) / TURRET_RANGE
 
