@@ -18,7 +18,7 @@ import dev.nextftc.ftc.ActiveOpMode;
  */
 @Configurable
 public class Transfer implements Subsystem {
-    // 1620rpm motor, so
+    // 1150rpm motor, so
     private final double TICKS_PER_REVOLUTION = 145.1;
     private double targetPosition = 0;
 
@@ -29,7 +29,7 @@ public class Transfer implements Subsystem {
     public static double kP = 0.007;
     public static double kI = 0.03;
     public static double kD = 0.0002;
-    public static double maxPower = 0.5;
+    public static double maxPower = 0.6;
     public static boolean tuning = true;
 
     boolean debugTelemetry = true;
@@ -71,21 +71,9 @@ public class Transfer implements Subsystem {
      */
     public void transferArtifact() {
         // set the initial target position (the current position + MOTOR_TURNS rotations)
-        double targetPosition = getCurrentPosition() + MOTOR_TURNS * TICKS_PER_REVOLUTION; // ticks
+        double localTargetPosition = getTargetPosition() + MOTOR_TURNS * TICKS_PER_REVOLUTION; // ticks
 
-        // convert to revolutions
-        double targetRevolutions = targetPosition / TICKS_PER_REVOLUTION; // revolutions
-
-        // determine the difference between where the current target position is and where it should be
-        // positive if it is too short of a full revolution
-        // ceil ensures that the transfer always does AT LEAST MOTOR_TURNS rotations
-        double targetPositionErrorFromRotation = Math.ceil(targetRevolutions) - targetRevolutions;
-
-        // then set a new target that snaps to the nearest rotation
-        // adds the difference between the current target and the nearest revolution
-        // to ensure the rotation always ends at the same spot
-        double targetPositionToNearestRotation = targetPosition + targetPositionErrorFromRotation * TICKS_PER_REVOLUTION;
-        setMotorTarget(targetPositionToNearestRotation);
+        setMotorTarget(localTargetPosition);
     }
 
     public void undoTransfer() {
