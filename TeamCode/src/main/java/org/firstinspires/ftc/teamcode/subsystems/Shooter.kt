@@ -30,9 +30,9 @@ class Shooter(): Subsystem {
         const val LOW_PASS = 0.05
 
         @JvmField
-        var kP = 0.009
+        var kP = 0.05
         @JvmField
-        var kV = 0.0024
+        var kV = 0.0026
 
         @JvmField
         var tuning = false

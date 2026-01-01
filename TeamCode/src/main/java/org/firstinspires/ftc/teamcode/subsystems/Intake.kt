@@ -17,7 +17,7 @@ import org.firstinspires.ftc.teamcode.util.hardware.MotorEx
 class Intake(): Subsystem {
     enum class State (val value: Double) {
         OFF(0.0),
-        INTAKE(0.7),
+        INTAKE(0.85),
     }
 
     private lateinit var motor: MotorEx
@@ -29,23 +29,23 @@ class Intake(): Subsystem {
     /**
      * The current power of the intake motor. Can be set to any value between -1.0 and 1.0.
      */
-    var power: Double = 0.0
+    var power: State = State.OFF
 
 //    /**
 //     * Toggles the intake motor's power between full forward (1.0) and off (0.0).
 //     */
     fun toggle () {
-//        power = if (power == State.INTAKE) State.OFF else State.INTAKE
+        power = if (power == State.INTAKE) State.OFF else State.INTAKE
     }
-//
+
     fun intake () {
-//        power = State.INTAKE
+        power = State.INTAKE
     }
-//
+
     fun off () {
-//        power = State.OFF
+        power = State.OFF
     }
-//
+
     fun runIntake() = LambdaCommand()
 //        .setStart { intake() }
 //        .setStop { interrupted -> if (!interrupted) {off()} }
@@ -78,10 +78,10 @@ class Intake(): Subsystem {
     }
 
     override fun periodic() {
-        motor.power = power
+        motor.power = power.value
 
         if (debugTelemetry) {
-//            ActiveOpMode.telemetry.addData("Intake state", power.name)
+            ActiveOpMode.telemetry.addData("Intake state", power.name)
             ActiveOpMode.telemetry.addData("Reversed", reversed)
             ActiveOpMode.telemetry.addLine("---------------------------")
         }
