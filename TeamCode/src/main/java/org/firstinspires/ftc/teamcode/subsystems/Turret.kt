@@ -24,7 +24,7 @@ class Turret(): Subsystem {
 
         // 667.4157303371 total degrees of freedom for turret
         // manually limit it from
-        // -240 to 240
+        // -180 to 180
         const val TURRET_RANGE: Double = 360.0 // degrees
 
         const val SERVO_LIMITS = TURRET_RANGE / GEAR_RATIO
@@ -44,14 +44,10 @@ class Turret(): Subsystem {
     )
 
     var robotPose = Pose()
-    var goalPose = Pose()
-        private set
+    // this lazily initialies the goal pose, so if it's not manually set in the opmode, it assumes RED.
+    // this has been verified to work.
+    val goalPose by lazy { goalPositions[selectedAlliance?.aprilTagID ?: 24] ?: goalPositions.getValue(24) }
     var selectedAlliance: Alliance? = null
-        set(alliance) {
-            field = alliance
-            // if alliance was not set, just auto set it to red
-            goalPose = goalPositions[alliance?.aprilTagID ?: 24] ?: goalPositions.getValue(24)
-        }
     private var bearing = 0.0
 
     private var position: Double = 0.5
@@ -90,17 +86,19 @@ class Turret(): Subsystem {
         // normalize robot pose between (-180, 180]
         val robotHeading = Math.toDegrees(if (robotPose.heading > Math.PI) { robotPose.heading - (2 * Math.PI) } else { robotPose.heading } )
 
-        val angle = bearing - robotHeading
+        // allows you to do manual control just by setting automatic to false and updating turret.angle
         if (automatic) {
-//            angle = bearing - robotHeading
+            angle = bearing - robotHeading
         }
 
         if (debugTelemetry) {
-            ActiveOpMode.telemetry.addData("Turret calculated bearing", bearing)
-            ActiveOpMode.telemetry.addData("Turret robot heading", robotHeading)
-            ActiveOpMode.telemetry.addData("Turret target angle", angle)
-            ActiveOpMode.telemetry.addData("Turret target position", position)
-            ActiveOpMode.telemetry.addLine("---------------------------")
+            ActiveOpMode.telemetry.run{
+                addData("Turret calculated bearing", bearing)
+                addData("Turret robot heading", robotHeading)
+                addData("Turret target angle", angle)
+                addData("Turret target position", position)
+                addLine("---------------------------")
+            }
         }
     }
 }
