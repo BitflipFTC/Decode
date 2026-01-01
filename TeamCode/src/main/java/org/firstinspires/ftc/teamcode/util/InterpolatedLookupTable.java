@@ -51,23 +51,19 @@ public class InterpolatedLookupTable {
      */
     static class Dataset {
         /** The independent variable array (Distance). Must be strictly increasing. */
-        double[] distanceTable;
+        double[] inputTable;
         /** The first dependent variable array (Angle). */
-        double[] angleTable;
-        /** The second dependent variable array (Velocity). */
-        double[] velocityTable;
+        double[] outputTable;
 
 
         /**
          * Constructs a Dataset object.
-         * @param distanceTable The array of distances.
-         * @param angleTable The array of angles corresponding to the distances.
-         * @param velocityTable The array of velocities corresponding to the distances.
+         * @param inputTable The array of distances.
+         * @param outputTable The array of angles corresponding to the distances.
          */
-        protected Dataset(double[] distanceTable, double[] angleTable, double[] velocityTable) {
-            this.distanceTable = distanceTable;
-            this.angleTable = angleTable;
-            this.velocityTable = velocityTable;
+        protected Dataset(double[] inputTable, double[] outputTable) {
+            this.inputTable = inputTable;
+            this.outputTable = outputTable;
         }
     }
 
@@ -76,13 +72,12 @@ public class InterpolatedLookupTable {
 
     /**
      * Constructs the InterpolatedLookupTable from three arrays of any length
-     * @param distanceTable a {@code double[]}, sorted in an ascending order
-     * @param angleTable a {@code double[]}, sorted in any order
-     * @param velocityTable a {@code double[]}, sorted in any order
+     * @param inputTable a {@code double[]}, sorted in an ascending order
+     * @param outputTable a {@code double[]}, sorted in any order
      * </ul>
      */
-    public InterpolatedLookupTable(double[] distanceTable, double[] angleTable, double[] velocityTable) {
-        this.dataset = new Dataset(distanceTable, angleTable, velocityTable);
+    public InterpolatedLookupTable(double[] inputTable, double[] outputTable) {
+        this.dataset = new Dataset(inputTable, outputTable);
     }
 
     /**
@@ -93,29 +88,25 @@ public class InterpolatedLookupTable {
      * @param input The distance value to look up.
      * @return new {@code FlywheelState()} containing angle, velocity, and estimated shot time
      */
-    public Shooter.ShooterState calculate(double input) {
-        double[] distanceTable = dataset.distanceTable;
-        double[] angleTable = dataset.angleTable;
-        double[] velocityTable = dataset.velocityTable;
-//        double[] estimatedShotTimeTable = dataset.estimatedShotTimeTable;
+    public double calculate(double input) {
+        double[] inputTable = dataset.inputTable;
+        double[] outputTable = dataset.outputTable;
 
-        double angle;
-        double velocity;
-//        double estimatedShotTime;
+        double output;
 
         Bounds bounds = new Bounds();
 
         // 1. Clamping Logic: Ensure input is within the table's range.
-        if (input > distanceTable[distanceTable.length - 1]) {
-            input = distanceTable[distanceTable.length - 1];
-        } else if (input < distanceTable[0]) {
-            input = distanceTable[0];
+        if (input > inputTable[inputTable.length - 1]) {
+            input = inputTable[inputTable.length - 1];
+        } else if (input < inputTable[0]) {
+            input = inputTable[0];
         }
 
         // 2. Find Bounding Indices
-        for (int i = 1; i < distanceTable.length; i++) {
-            double lastVal = distanceTable[i-1];
-            double currentVal = distanceTable[i];
+        for (int i = 1; i < inputTable.length; i++) {
+            double lastVal = inputTable[i-1];
+            double currentVal = inputTable[i];
 
             // Finds the segment where V_lower <= input <= V_upper
             if ((currentVal >= input && lastVal < input) || lastVal == input) {
@@ -134,11 +125,9 @@ public class InterpolatedLookupTable {
         double index = (input - bounds.lowerValue) / (bounds.upperValue - bounds.lowerValue) + bounds.lowerIndex;
 
         // 3. Interpolate Output Values
-        angle = interpolate(index, (int) bounds.lowerIndex, (int) bounds.upperIndex, angleTable);
-        velocity = interpolate(index, (int) bounds.lowerIndex, (int) bounds.upperIndex, velocityTable);
-//        estimatedShotTime = interpolate(index, (int) bounds.lowerIndex, (int) bounds.upperIndex, estimatedShotTimeTable);
+        output = interpolate(index, (int) bounds.lowerIndex, (int) bounds.upperIndex, outputTable);
 
-        return new Shooter.ShooterState(angle, velocity);
+        return output;
     }
 
     /**

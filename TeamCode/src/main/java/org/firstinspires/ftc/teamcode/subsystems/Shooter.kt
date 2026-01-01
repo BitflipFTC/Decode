@@ -51,13 +51,26 @@ class Shooter(): Subsystem {
     // long goal is approximately 125 in. from peak of long to center of goal tag
     // longest short zone is approx. 80 in. from peak to center
     // shortest we can see from is about 25.0.
-    private val lookupTable = InterpolatedLookupTable(
-        doubleArrayOf(
-        ),
-        doubleArrayOf(
-        ),
-        doubleArrayOf(
-        )
+    val distanceArray = doubleArrayOf(
+
+    )
+
+    val speedArray = doubleArrayOf(
+
+    )
+
+    val angleArray = doubleArrayOf(
+
+    )
+
+    private val velocityLookupTable = InterpolatedLookupTable(
+        distanceArray,
+        speedArray
+    )
+
+    private val angleLookupTable = InterpolatedLookupTable(
+        speedArray,
+        angleArray
     )
 
     // main two adjustable params
@@ -73,12 +86,6 @@ class Shooter(): Subsystem {
         private set
     var pidOutput = 0.0
         private set
-    var state = ShooterState(targetFlywheelRPM,hoodPosition)
-        set(state) {
-            field = state
-            targetFlywheelRPM = state.rpm
-            hoodPosition = state.angle
-        }
     var distance = 0.0
 
     var debugTelemetry = true
@@ -127,7 +134,8 @@ class Shooter(): Subsystem {
     fun setTargetState(distance: Double) {
         // ensure the parameter distance is actually based on an apriltag reading
         if (distance > 0.0) {
-            state = lookupTable.calculate(distance)
+            targetFlywheelRPM = velocityLookupTable.calculate(distance)
+            hoodPosition = angleLookupTable.calculate(distance)
         }
 
         this.distance = distance
