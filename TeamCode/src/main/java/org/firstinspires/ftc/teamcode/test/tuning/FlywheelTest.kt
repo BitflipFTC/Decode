@@ -65,11 +65,15 @@ class FlywheelTest : LinearOpMode() {
             }
 
             if (gamepad1.crossWasPressed()) {
-                shooter.targetFlywheelRPM = 0.0
+                intake.reversed = true
+            }
+
+            if (gamepad1.crossWasReleased()) {
+                intake.reversed = false
             }
 
             if (gamepad1.circleWasPressed()) {
-                shooter.targetFlywheelRPM = 4500.0
+                shooter.targetFlywheelRPM = 0.0
             }
 
             if (gamepad1.triangleWasPressed()) {
@@ -92,10 +96,10 @@ class FlywheelTest : LinearOpMode() {
 //            } else {
 //                turret.bearing = 0.0
 //                turret.turningPower = 0.0
-                turret.angle -= gamepad1.right_stick_x.toDouble() * 5
+                turret.angle -= (gamepad1.right_trigger - gamepad1.left_trigger) * 5
 //            }
 
-            drivetrain.setDrivetrainPowers(drivetrain.calculateDrivetrainPowers(0.0,0.0,gamepad1.left_stick_x.toDouble()))
+            drivetrain.setDrivetrainPowers(drivetrain.calculateDrivetrainPowers(gamepad1.left_stick_x.toDouble(), -gamepad1.left_stick_y.toDouble(),gamepad1.right_stick_x.toDouble()))
 
             subsystems.forEach { it.periodic() }
 
