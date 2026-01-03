@@ -52,15 +52,27 @@ class Shooter(): Subsystem {
     // longest short zone is approx. 80 in. from peak to center
     // shortest we can see from is about 25.0.
     val distanceArray = doubleArrayOf(
-
+        41.0,
+        60.0,
+        75.0,
+        95.0,
+        143.0,
     )
 
     val speedArray = doubleArrayOf(
-
+        2500.0,
+        3000.0,
+        3000.0,
+        3350.0,
+        4000.0
     )
 
     val angleArray = doubleArrayOf(
-
+        0.0,
+        0.05,
+        0.3,
+        0.325,
+        0.55
     )
 
     private val velocityLookupTable = InterpolatedLookupTable(
@@ -135,7 +147,7 @@ class Shooter(): Subsystem {
         // ensure the parameter distance is actually based on an apriltag reading
         if (distance > 0.0) {
             targetFlywheelRPM = velocityLookupTable.calculate(distance)
-            hoodPosition = angleLookupTable.calculate(distance)
+            hoodPosition = angleLookupTable.calculate(targetFlywheelRPM)
         }
 
         this.distance = distance

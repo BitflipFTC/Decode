@@ -54,7 +54,7 @@ class Spindexer(): Subsystem {
         var setpointTolerance = 3.0 // in degrees
 
         @JvmField
-        var maxPower = 0.75
+        var maxPower = 0.6
 
 
         @JvmField
