@@ -62,9 +62,8 @@ class ArtifactColorSensor(): Subsystem {
         if (debugTelemetry) {
             ActiveOpMode.telemetry.run {
                 addData("Detected Artifact", detectedArtifact?.name ?: "none")
-                addData("Detected Artifact Ordinal (graphing)", detectedArtifact?.ordinal ?: 2)
                 addData("Distance", "%05.2fcm", distance)
-                addData("Read distance", readDistance)
+                addData("Read distance?", readDistance)
                 addLine("------------------------------")
             }
         }

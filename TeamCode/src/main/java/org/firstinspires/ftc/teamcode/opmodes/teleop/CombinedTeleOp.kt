@@ -68,13 +68,13 @@ class CombinedTeleOp : LinearOpMode() {
 
     var lastSpindexerFull = false
 
-    fun shootAllArtifacts(spindexer: Spindexer) {
+    fun shootAllArtifacts() {
         if (!spindexer.isEmpty) {
             shootingState = Shoot.MOVE_SPINDEXER
         }
     }
 
-    fun updateShootingFSM (spindexer: Spindexer, transfer: Transfer, shooter: Shooter) {
+    fun updateShootingFSM () {
         when (shootingState) {
             Shoot.MOVE_SPINDEXER    -> {
                 spindexer.toMotifOuttakePosition()
@@ -109,25 +109,25 @@ class CombinedTeleOp : LinearOpMode() {
         }
     }
 
+    val intake = Intake()
+    val transfer = Transfer()
+    val spindexer = Spindexer()
+    val shooter = Shooter()
+    val turret = Turret()
+//       val camera = OV9281()
+    val colorSensor = ArtifactColorSensor()
+    val subsystems = listOf(
+        intake,
+        transfer,
+        spindexer,
+        shooter,
+        turret,
+        colorSensor
+    )
+
     override fun runOpMode() {
         telemetry = JoinedTelemetry(PanelsTelemetry.ftcTelemetry, telemetry)
-        telemetry.setDisplayFormat(Telemetry.DisplayFormat.HTML)
         val follower = Constants.createFollower(hardwareMap)
-        val intake = Intake()
-        val transfer = Transfer()
-        val spindexer = Spindexer()
-        val shooter = Shooter()
-        val turret = Turret()
-//        val camera = OV9281()
-        val colorSensor = ArtifactColorSensor()
-        val subsystems = listOf(
-            intake,
-            transfer,
-            spindexer,
-            shooter,
-            turret,
-            colorSensor
-        )
         val loopTimer = LoopTimer(10)
 
         subsystems.forEach { it.initialize() }
@@ -217,9 +217,9 @@ class CombinedTeleOp : LinearOpMode() {
 //                gamepad1.setLedColor(255.0, 0.0, 0.0, Gamepad.LED_DURATION_CONTINUOUS)
 //            }
 
-//            if (gamepad1.touchpadWasPressed()) {
-//                shootAllArtifacts(spindexer)
-//            }
+            if (gamepad1.touchpadWasPressed()) {
+                shootAllArtifacts()
+            }
 //
 //            if (gamepad1.dpadDownWasPressed()) {
 //                shooter.targetFlywheelRPM -= 250
@@ -241,7 +241,7 @@ class CombinedTeleOp : LinearOpMode() {
 
             turret.angle -= (gamepad1.right_trigger - gamepad1.left_trigger) * 5
 
-            updateShootingFSM(spindexer,transfer,shooter)
+            updateShootingFSM()
 
             lastArtifactDetected = artifactDetected
             artifactDetected = colorSensor.detectedArtifact != null && !spindexer.isFull && spindexer.slotsToIntakes.contains(spindexer.state) && spindexer.atSetPoint()
@@ -255,7 +255,6 @@ class CombinedTeleOp : LinearOpMode() {
 
             telemetry.addData("Loop Hz", "%05.2f", loopTimer.hz)
             telemetry.addData("Loop ms", "%05.2f", loopTimer.ms.toDouble())
-            telemetry.addData("Distance", turret.goalPose.distanceFrom(follower.pose))
             telemetry.addData("x", follower.pose.x)
             telemetry.addData("y", follower.pose.y)
             telemetry.addData("heading", follower.pose.heading)

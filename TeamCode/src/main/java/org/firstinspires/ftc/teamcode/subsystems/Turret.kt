@@ -46,8 +46,8 @@ class Turret(): Subsystem {
     var automatic = true
 
     private val goalPositions = mapOf(
-        20 to Pose(0.0, 144.0),
-        24 to Pose(144.0, 144.0)
+        20 to Pose(1.0, 144.0),
+        24 to Pose(143.0, 144.0)
     )
 
     var robotPose = Pose()
@@ -125,7 +125,8 @@ class Turret(): Subsystem {
                 addData("Turret calculated bearing", bearing)
                 addData("Turret robot heading", robotHeading)
                 addData("Turret target angle", angle)
-                addData("Turret target position", position)
+                addData("Turret current position", position)
+                addData("Distance", goalPose.distanceFrom(turretPose))
                 addLine("---------------------------")
             }
         }
