@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.subsystems
 
+import android.util.Log
 import com.qualcomm.hardware.rev.RevColorSensorV3
 import com.qualcomm.robotcore.hardware.NormalizedRGBA
 import dev.nextftc.core.subsystems.Subsystem
@@ -44,6 +45,7 @@ class ArtifactColorSensor(): Subsystem {
                 colors = colorSensor.normalizedColors
             }
 
+            Log.d("FSM", "colors, b: $blue, g: $green")
             detectedArtifact = if (blue > green) {
                 Artifact.PURPLE
             } else {
