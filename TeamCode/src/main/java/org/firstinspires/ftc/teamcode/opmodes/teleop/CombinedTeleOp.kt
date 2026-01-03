@@ -209,7 +209,7 @@ class CombinedTeleOp : LinearOpMode() {
             } else if (!spindexer.isFull && lastSpindexerFull) {
                 intake.reversed = false
             }
-
+1
             // if we have a detection, green; otherwise, red
 //            if (camera.distanceToGoal > 0.0) {
 //                gamepad1.setLedColor(0.0, 255.0, 0.0, Gamepad.LED_DURATION_CONTINUOUS)
@@ -217,25 +217,27 @@ class CombinedTeleOp : LinearOpMode() {
 //                gamepad1.setLedColor(255.0, 0.0, 0.0, Gamepad.LED_DURATION_CONTINUOUS)
 //            }
 
-            if (gamepad1.touchpadWasPressed()) {
-                shootAllArtifacts(spindexer)
-            }
-
-            if (gamepad1.dpadDownWasPressed()) {
-                shooter.targetFlywheelRPM -= 250
-            }
-
-            if (gamepad1.dpadUpWasPressed()) {
-                shooter.targetFlywheelRPM += 250
-            }
-
-            if (gamepad1.dpadRightWasPressed()) {
-                shooter.hoodPosition += 0.05
-            }
-
-            if (gamepad1.dpadLeftWasPressed()) {
-                shooter.hoodPosition -= 0.05
-            }
+//            if (gamepad1.touchpadWasPressed()) {
+//                shootAllArtifacts(spindexer)
+//            }
+//
+//            if (gamepad1.dpadDownWasPressed()) {
+//                shooter.targetFlywheelRPM -= 250
+//            }
+//
+//            if (gamepad1.dpadUpWasPressed()) {
+//                shooter.targetFlywheelRPM += 250
+//            }
+//
+//            if (gamepad1.dpadRightWasPressed()) {
+//                shooter.hoodPosition += 0.05
+//            }
+//
+//            if (gamepad1.dpadLeftWasPressed()) {
+//                shooter.hoodPosition -= 0.05
+//            }
+//
+            shooter.setTargetState(turret.goalPose.distanceFrom(follower.pose))
 
             turret.angle -= (gamepad1.right_trigger - gamepad1.left_trigger) * 5
 
@@ -253,6 +255,10 @@ class CombinedTeleOp : LinearOpMode() {
 
             telemetry.addData("Loop Hz", "%05.2f", loopTimer.hz)
             telemetry.addData("Loop ms", "%05.2f", loopTimer.ms.toDouble())
+            telemetry.addData("Distance", turret.goalPose.distanceFrom(follower.pose))
+            telemetry.addData("x", follower.pose.x)
+            telemetry.addData("y", follower.pose.y)
+            telemetry.addData("heading", follower.pose.heading)
             telemetry.update()
 
             follower.setTeleOpDrive(
