@@ -14,6 +14,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants
 import org.firstinspires.ftc.teamcode.pedroPathing.Drawing
 import org.firstinspires.ftc.teamcode.subsystems.ArtifactColorSensor
 import org.firstinspires.ftc.teamcode.subsystems.Intake
+import org.firstinspires.ftc.teamcode.subsystems.OV9281
 import org.firstinspires.ftc.teamcode.subsystems.Shooter
 import org.firstinspires.ftc.teamcode.subsystems.Spindexer
 import org.firstinspires.ftc.teamcode.subsystems.Transfer
@@ -22,8 +23,8 @@ import org.firstinspires.ftc.teamcode.util.Artifact
 import org.firstinspires.ftc.teamcode.util.BetterLoopTimeComponent
 
 @Suppress("UNUSED")
-@Autonomous(name="12 ball red")
-class Red12: LinearOpMode() {
+@Autonomous(name = "12 ball red")
+class Red12 : LinearOpMode() {
     enum class PathState {
         Start,
         DScorePreload,
@@ -58,6 +59,7 @@ class Red12: LinearOpMode() {
     val shooter: Shooter = Shooter()
     val intake: Intake = Intake()
     val colorSensor: ArtifactColorSensor = ArtifactColorSensor()
+    val camera: OV9281 = OV9281()
 
     val subsystems = setOf(spindexer, turret, transfer, shooter, intake, colorSensor)
 
@@ -91,7 +93,10 @@ class Red12: LinearOpMode() {
             autonomousPathUpdate()
             updateShootingFSM()
 
-            val artifactDetected = colorSensor.detectedArtifact != null && !spindexer.isFull && spindexer.slotsToIntakes.contains(spindexer.state) && spindexer.atSetPoint()
+            val artifactDetected =
+                colorSensor.detectedArtifact != null && !spindexer.isFull && spindexer.slotsToIntakes.contains(
+                    spindexer.state
+                ) && spindexer.atSetPoint()
             if (artifactDetected) {
                 spindexer.recordIntake(colorSensor.detectedArtifact!!)
                 spindexer.toFirstEmptyIntakePosition()
@@ -111,8 +116,8 @@ class Red12: LinearOpMode() {
         }
     }
 
-    val horizontalIntakeStart = 85.0
-    val horizontalIntakeEnd   = 130.0
+    val horizontalIntakeStart = 100.0
+    val horizontalIntakeEnd = 130.0
     val horizontalIntakeMoveBack = 125.0
 
     val intake1Vertical = 82.5
@@ -120,23 +125,23 @@ class Red12: LinearOpMode() {
     val intake3Vertical = 34.0
     val intakeHeading = Math.toRadians(0.0)
 
-    val farStartPose     = Pose(88.0,  8.5,    Math.toRadians(90.0))
-    val farShootPose     = Pose(88.0,  14.0,   Math.toRadians(0.0))
-    val farParkPose      = Pose(105.500,  33.500, Math.toRadians(90.0))
-    val nearStartPose    = Pose(121.5, 123.0,  0.738)
-    val nearShootPose    = Pose(horizontalIntakeStart,  88.0,   intakeHeading)
-    val nearParkPose     = Pose(125.0, 90.0, Math.toRadians(0.0))
-    val startIntake1  = Pose(horizontalIntakeStart, intake1Vertical, intakeHeading)
-    val endIntake1    = Pose(127.5,   intake1Vertical, intakeHeading)
-    val startIntake2  = Pose(horizontalIntakeStart, intake2Vertical, intakeHeading)
-    val endIntake2    = Pose(horizontalIntakeEnd,   intake2Vertical, intakeHeading)
+    val farStartPose = Pose(88.0, 8.5, Math.toRadians(90.0))
+    val farShootPose = Pose(88.0, 14.0, Math.toRadians(0.0))
+    val farParkPose = Pose(105.500, 33.500, Math.toRadians(90.0))
+    val nearStartPose = Pose(121.5, 123.0, 0.738)
+    val nearShootPose = Pose(88.0, 88.0, intakeHeading)
+    val nearParkPose = Pose(125.0, 90.0, Math.toRadians(0.0))
+    val startIntake1 = Pose(horizontalIntakeStart, intake1Vertical, intakeHeading)
+    val endIntake1 = Pose(127.5, intake1Vertical, intakeHeading)
+    val startIntake2 = Pose(horizontalIntakeStart, intake2Vertical, intakeHeading)
+    val endIntake2 = Pose(horizontalIntakeEnd, intake2Vertical, intakeHeading)
     val endIntake2Move = Pose(endIntake2.x, horizontalIntakeMoveBack, intakeHeading)
-    val startIntake3  = Pose(horizontalIntakeStart, intake3Vertical, intakeHeading)
-    val endIntake3    = Pose(horizontalIntakeEnd,   intake3Vertical, intakeHeading)
+    val startIntake3 = Pose(horizontalIntakeStart, intake3Vertical, intakeHeading)
+    val endIntake3 = Pose(horizontalIntakeEnd, intake3Vertical, intakeHeading)
     val endIntake3Move = Pose(endIntake3.x, horizontalIntakeMoveBack, intakeHeading)
 
-//    val emptyRampControl = Pose(horizontalIntakeEnd, 74.0, Math.toRadians(90.0))
-    val emptyRampStart = Pose(115.0, 75.0, Math.toRadians(90.0))
+    //    val emptyRampControl = Pose(horizontalIntakeEnd, 74.0, Math.toRadians(90.0))
+    val emptyRampStart = Pose(120.0, 75.0, Math.toRadians(90.0))
     val emptyRamp = Pose(127.5, 75.0, Math.toRadians(90.0))
 
     lateinit var scorePreload: PathChain
@@ -149,7 +154,17 @@ class Red12: LinearOpMode() {
     lateinit var park: PathChain
 
     fun buildPaths() {
-        scorePreload = buildBasicLine(nearStartPose, nearShootPose)
+        scorePreload = follower.pathBuilder()
+            .addPath(
+                BezierLine(
+                    nearStartPose,
+                    nearShootPose
+                )
+            )
+            .setLinearHeadingInterpolation(nearStartPose.heading, Math.toRadians(90.0))
+            .addParametricCallback(1.0) { spindexer.motifPattern = camera.motif }
+            .build()
+
         intake1 = follower.pathBuilder()
             .addPath(
                 BezierCurve(
@@ -158,7 +173,7 @@ class Red12: LinearOpMode() {
                     startIntake1
                 )
             )
-            .setLinearHeadingInterpolation(nearShootPose.heading, startIntake1.heading)
+            .setLinearHeadingInterpolation(Math.toRadians(90.0), startIntake1.heading)
             .addPath(
                 BezierLine(startIntake1, endIntake1)
             )
@@ -167,11 +182,12 @@ class Red12: LinearOpMode() {
             .addPath(
                 BezierLine(endIntake1, emptyRampStart)
             )
-            .setConstantHeadingInterpolation(emptyRamp.heading)
-//            .addParametricCallback(1.0) { intake.off() }
-            .addPath(BezierLine(
-                emptyRampStart, emptyRamp
-            ))
+            .setLinearHeadingInterpolation(endIntake1.heading, emptyRamp.heading)
+            .addPath(
+                BezierLine(
+                    emptyRampStart, emptyRamp
+                )
+            )
             .setConstantHeadingInterpolation(emptyRamp.heading)
             .build()
 
@@ -200,11 +216,9 @@ class Red12: LinearOpMode() {
                 )
             )
             .setTangentHeadingInterpolation()
-//            .addParametricCallback(0.0) { intake.intake() }
-//            .addParametricCallback(1.0) { intake.off() }
             .build()
 
-        score2 = buildBasicLine(endIntake2Move,nearShootPose)
+        score2 = buildBasicLine(endIntake2Move, nearShootPose)
 
         intake3 = follower.pathBuilder()
             .addPath(
@@ -226,18 +240,16 @@ class Red12: LinearOpMode() {
                 )
             )
             .setTangentHeadingInterpolation()
-//            .addParametricCallback(0.0) { intake.intake() }
-//            .addParametricCallback(1.0) { intake.off() }
             .build()
 
-        score3 = buildBasicLine(endIntake3Move,farShootPose)
+        score3 = buildBasicLine(endIntake3Move, farShootPose)
 
         park = buildTangentLine(farShootPose, farParkPose)
     }
 
     fun buildBasicLine(p1: Pose, p2: Pose): PathChain = follower.pathBuilder()
         .addPath(BezierLine(p1, p2))
-        .setLinearHeadingInterpolation(p1.heading,p2.heading)
+        .setLinearHeadingInterpolation(p1.heading, p2.heading)
         .build()
 
     fun buildTangentLine(p1: Pose, p2: Pose): PathChain = follower.pathBuilder()
@@ -245,7 +257,7 @@ class Red12: LinearOpMode() {
         .setTangentHeadingInterpolation()
         .build()
 
-    fun autonomousPathUpdate () {
+    fun autonomousPathUpdate() {
         when (pathState) {
             PathState.Start         -> {} // do nothing
             PathState.DScorePreload -> {
@@ -253,66 +265,77 @@ class Red12: LinearOpMode() {
                 intake.off()
                 pathState = PathState.ScorePreload
             }
+
             PathState.ScorePreload  -> {
                 if (!follower.isBusy) {
                     shootAllArtifacts()
                     pathState = PathState.DIntake1
                 }
             }
+
             PathState.DIntake1      -> {
                 if (shootingState == Shoot.IDLE) {
                     follower.followPath(intake1, 0.4, true)
                     pathState = PathState.DScore1
                 }
             }
+
             PathState.DScore1       -> {
                 if (!follower.isBusy) {
                     follower.followPath(score1, 0.75, true)
                     pathState = PathState.Score1
                 }
             }
+
             PathState.Score1        -> {
                 if (!follower.isBusy) {
                     shootAllArtifacts()
                     pathState = PathState.DIntake2
                 }
             }
+
             PathState.DIntake2      -> {
                 if (shootingState == Shoot.IDLE) {
                     follower.followPath(intake2, 0.4, true)
                     pathState = PathState.DScore2
                 }
             }
+
             PathState.DScore2       -> {
                 if (!follower.isBusy) {
                     follower.followPath(score2, 0.75, true)
                     pathState = PathState.Score2
                 }
             }
+
             PathState.Score2        -> {
                 if (!follower.isBusy) {
                     shootAllArtifacts()
                     pathState = PathState.DIntake3
                 }
             }
+
             PathState.DIntake3      -> {
                 if (shootingState == Shoot.IDLE) {
                     follower.followPath(intake3, 0.4, true)
                     pathState = PathState.DScore3
                 }
             }
+
             PathState.DScore3       -> {
                 if (!follower.isBusy) {
                     follower.followPath(score3, 0.75, true)
                     pathState = PathState.Score3
                 }
             }
+
             PathState.Score3        -> {
                 if (!follower.isBusy) {
                     shootAllArtifacts()
                     pathState = PathState.DPark
                 }
             }
+
             PathState.DPark         -> {
                 if (shootingState == Shoot.IDLE) {
                     follower.followPath(park, 0.75, true)
@@ -327,28 +350,42 @@ class Red12: LinearOpMode() {
         }
     }
 
-    fun updateShootingFSM () {
+    fun updateShootingFSM() {
         when (shootingState) {
             Shoot.MOVE_SPINDEXER      -> {
-                spindexer.toFirstFullOuttakePosition()
-                Log.d("FSM", "MOVING SPINDEXER TO ${spindexer.state.name}, ${spindexer.getArtifactString()}")
+                spindexer.toMotifOuttakePosition()
+                Log.d(
+                    "FSM",
+                    "MOVING SPINDEXER TO ${spindexer.state.name}, ${spindexer.getArtifactString()}"
+                )
                 shootingState = Shoot.TRANSFER_ARTIFACT
             }
+
             Shoot.TRANSFER_ARTIFACT   -> {
                 Log.d("FSM", "Waiting for shooter or spindexer")
-                Log.d("FSM", "sp: ${spindexer.currentAngle}, ${spindexer.targetAngle}, sh: ${shooter.flywheelRPM}, ${shooter.targetFlywheelRPM}")
+                Log.d(
+                    "FSM",
+                    "sp: ${spindexer.currentAngle}, ${spindexer.targetAngle}, sh: ${shooter.flywheelRPM}, ${shooter.targetFlywheelRPM}"
+                )
                 if (shooter.atSetPoint() && spindexer.atSetPoint()) {
                     transfer.transferArtifact()
                     Log.d("FSM", "TRANSFERING")
                     shootingState = Shoot.WAIT_FOR_COMPLETION
                 }
             }
+
             Shoot.WAIT_FOR_COMPLETION -> {
-                Log.d("FSM", "WAITING FOR TRANSFER, ${transfer.currentPosition}, ${transfer.targetPosition}")
+                Log.d(
+                    "FSM",
+                    "WAITING FOR TRANSFER, ${transfer.currentPosition}, ${transfer.targetPosition}"
+                )
                 if (transfer.atSetPoint()) {
                     spindexer.recordOuttake()
                     Log.d("FSM", "EVALUATING SPINDEXER FULLNESS")
-                    Log.d("FSM", "Spindexer isEmpty: " + spindexer.isEmpty + ", isFull: " + spindexer.isFull + ", Str: " + spindexer.getArtifactString())
+                    Log.d(
+                        "FSM",
+                        "Spindexer isEmpty: " + spindexer.isEmpty + ", isFull: " + spindexer.isFull + ", Str: " + spindexer.getArtifactString()
+                    )
 
                     if (spindexer.isEmpty) {
                         shootingState = Shoot.IDLE
@@ -358,6 +395,7 @@ class Red12: LinearOpMode() {
                     }
                 }
             }
+
             Shoot.IDLE                -> {}
         }
     }

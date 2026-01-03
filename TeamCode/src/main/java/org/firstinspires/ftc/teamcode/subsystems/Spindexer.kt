@@ -268,12 +268,9 @@ class Spindexer(): Subsystem {
     }
 
     fun toMotifOuttakePosition() {
-        val purpleSlots = findPurpleSlots()
-        val greenSlots = findGreenSlots()
-
         // if we have the correct config of balls
-        if (purpleSlots.size == 2 && greenSlots.size == 1) {
-            val greenIndex = greenSlots[0]
+        if (hasMotifAssortment) {
+            val greenIndex = findGreenSlots()[0]
 
             // decide which slot should be set to outtake
             // assuming the spindexer will be moving clockwise
@@ -316,7 +313,7 @@ class Spindexer(): Subsystem {
                 }
 
                 else -> {
-                    return toNextOuttakePosition()
+                    targetSlot = 0
                 }
             }
 

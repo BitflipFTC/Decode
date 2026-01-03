@@ -80,13 +80,6 @@ public class OV9281 implements Subsystem {
 
     private final double lowPass = 0.075;
 
-    private double currentTagBearing = 0;
-    private double lastDistanceToGoal = 0;
-    private double distanceToGoal = 0;
-    private int targetID = 0;
-    // 20: Blue
-    // 24: Red
-
     // exposure: 1-7
     // gain: 1-6
     @Override
@@ -162,8 +155,7 @@ public class OV9281 implements Subsystem {
     }
 
     public MotifPattern getMotif() {
-        ArrayList<AprilTagDetection> currentDetections = this.aprilTag.getDetections();
-        ArrayList<AprilTagDetection> obeliskDetections = currentDetections.stream().filter((detection) -> detection.metadata.name.contains("Obelisk")).collect(Collectors.toCollection(ArrayList::new));
+        ArrayList<AprilTagDetection> obeliskDetections = this.aprilTag.getDetections().stream().filter((detection) -> detection.metadata.name.contains("Obelisk")).collect(Collectors.toCollection(ArrayList::new));
         @Nullable
         MotifPattern pattern = null;
 
@@ -182,7 +174,6 @@ public class OV9281 implements Subsystem {
 
     @Override
     public void periodic() {
-        lastDistanceToGoal = distanceToGoal < 0 ? lastDistanceToGoal : distanceToGoal;
         detectionsBuffer.clear();
         if (aprilTag.getDetections() != null) {
             detectionsBuffer.addAll(aprilTag.getDetections());
@@ -193,8 +184,6 @@ public class OV9281 implements Subsystem {
         if (count == 0) {
             if (debugTelemetry)
                 ActiveOpMode.telemetry().addData("Detected April Tags", 0);
-            distanceToGoal = -1.0;
-            currentTagBearing = 0.0;
             return;
         }
 
@@ -202,8 +191,6 @@ public class OV9281 implements Subsystem {
             ActiveOpMode.telemetry().addData("Detected April Tags", detectionsBuffer.size());
         for (AprilTagDetection detection : detectionsBuffer) {
             if (detection.metadata == null) {
-                distanceToGoal = -1.0;
-                currentTagBearing = -0.1;
                 if (debugTelemetry)
                     ActiveOpMode.telemetry().addData("Current tag", "No metadata");
                 continue;
@@ -212,55 +199,16 @@ public class OV9281 implements Subsystem {
             if (debugTelemetry)
                 ActiveOpMode.telemetry().addData("TAG NAME", detection.metadata.name);
 
-            if (detection.id == targetID) {
-                distanceToGoal = detection.ftcPose.range * lowPass + (1 - lowPass) * lastDistanceToGoal;
-                currentTagBearing = detection.ftcPose.bearing;
+            if ((detection.id == 20 || detection.id == 24) && detection.decisionMargin > 30f) {
                 robotPose = PoseConverter.pose2DToPose(new Pose2D(
                         DistanceUnit.INCH, detection.robotPose.getPosition().x, detection.robotPose.getPosition().y, AngleUnit.DEGREES, detection.robotPose.getOrientation().getYaw(AngleUnit.DEGREES)
                 ), InvertedFTCCoordinates.INSTANCE).getAsCoordinateSystem(PedroCoordinates.INSTANCE);
-            } else {
-                distanceToGoal = -1.0;
-                currentTagBearing = -0.2;
             }
         }
-
-        if (debugTelemetry) {
-            ActiveOpMode.telemetry().addData("Target Tag ID", targetID);
-            ActiveOpMode.telemetry().addData("Distance from goal", "%06.3fin", distanceToGoal);
-            ActiveOpMode.telemetry().addData("Current tag bearing", "%05.2f deg", currentTagBearing);
-            ActiveOpMode.telemetry().addLine("---------------------------");
-        }
-    }
-
-    public void setTargetID (int id) {
-        targetID = id;
-    }
-
-    public int getTargetID() {
-        return targetID;
     }
 
     public void setDecimation(float decimation) {
         aprilTag.setDecimation(decimation);
-    }
-
-    /**
-     * @return the bearing to the detected apriltag in degrees.
-     */
-    public double getCurrentTagBearing() {
-        return currentTagBearing;
-    }
-
-    public void resetAprilTagData() {
-        currentTagBearing = 0.0;
-        distanceToGoal = 0.0;
-    }
-
-    /**
-     * @return the distance to the detected apriltag in inches.
-     */
-    public double getDistanceToGoal() {
-        return distanceToGoal;
     }
 
     public int getDetectionsAmount() {
