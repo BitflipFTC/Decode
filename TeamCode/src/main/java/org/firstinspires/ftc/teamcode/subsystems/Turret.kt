@@ -16,11 +16,18 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagGameDatabase
 import org.firstinspires.ftc.vision.apriltag.AprilTagLibrary
 import org.firstinspires.ftc.vision.apriltag.AprilTagMetadata
 import kotlin.math.atan2
+import kotlin.math.cos
+import kotlin.math.sin
 
 @Configurable
 class Turret(): Subsystem {
     companion object {
         const val GEAR_RATIO: Double = 33.0/89.0
+
+        // the offset between the turret's center of rotation
+        // and the robot's center of rotation in inches.
+        // 75 is measured in mm, then converted to inches by dividing.
+        const val TURRET_OFFSET: Double = 75 / 25.4
 
         // 667.4157303371 total degrees of freedom for turret
         // manually limit it from
@@ -39,11 +46,31 @@ class Turret(): Subsystem {
     var automatic = true
 
     private val goalPositions = mapOf(
-        20 to Pose(2.0, 144.0),
-        24 to Pose(142.0, 144.0)
+        20 to Pose(0.0, 144.0),
+        24 to Pose(144.0, 144.0)
     )
 
     var robotPose = Pose()
+        set(pose) {
+            field = pose
+            turretPose = pose
+        }
+
+    // DO NOT SET OUTSIDE OF THE SETTER OF ROBOTPOSE
+    // EVER
+    // DO NOT DO IT
+    // BAD
+    private var turretPose = Pose()
+        set(pose) {
+            val r = TURRET_OFFSET
+            val theta = pose.heading
+
+            val x = r * cos(theta)
+            val y = r * sin(theta)
+
+            field = Pose(pose.x - x, pose.y - y, pose.heading)
+        }
+
     // this lazily initialies the goal pose, so if it's not manually set in the opmode, it assumes RED.
     // this has been verified to work.
     val goalPose by lazy { goalPositions[selectedAlliance?.aprilTagID ?: 24] ?: goalPositions.getValue(24) }
@@ -83,10 +110,10 @@ class Turret(): Subsystem {
         // we assume robot is 0, 0 in a graph.
         // bearing is equal to the angle between the robot and the goal.
         // it is normalized to (-180, 180] degrees, with 0 being right
-        bearing = Math.toDegrees(atan2(goalPose.y - robotPose.y, goalPose.x - robotPose.x))
+        bearing = Math.toDegrees(atan2(goalPose.y - turretPose.y, goalPose.x - turretPose.x))
 
         // normalize robot pose between (-180, 180]
-        val robotHeading = Math.toDegrees(if (robotPose.heading > Math.PI) { robotPose.heading - (2 * Math.PI) } else { robotPose.heading } )
+        val robotHeading = Math.toDegrees(if (turretPose.heading > Math.PI) { turretPose.heading - (2 * Math.PI) } else { turretPose.heading } )
 
         // allows you to do manual control just by setting automatic to false and updating turret.angle
         if (automatic) {
