@@ -55,15 +55,15 @@ class Shooter(): Subsystem {
         41.0,
         60.0,
         75.0,
-        95.0,
-        143.0,
+        84.0,
+        130.0
     )
 
     val speedArray = doubleArrayOf(
         2500.0,
+        2999.0,
         3000.0,
-        3000.0,
-        3350.0,
+        3150.0,
         4000.0
     )
 
@@ -71,8 +71,8 @@ class Shooter(): Subsystem {
         0.0,
         0.05,
         0.3,
-        0.325,
-        0.55
+        0.6,
+        0.6,
     )
 
     private val velocityLookupTable = InterpolatedLookupTable(
@@ -111,12 +111,19 @@ class Shooter(): Subsystem {
             position = hoodPosition
         }
 
-        flywheelController.setPointTolerance = 85.toDouble()
+        flywheelController.setPointTolerance = 65.toDouble()
 
         vSensor = ActiveOpMode.hardwareMap.get(VoltageSensor::class.java, "Control Hub")
     }
 
+    private var cachedVoltage = 13.0
+    private var voltageTimer = 0
+
     override fun periodic() {
+        if (voltageTimer++ % 50 == 0) {
+            cachedVoltage = vSensor.voltage
+        }
+
         lastFlywheelRPM = flywheelRPM
         flywheelRPM = (flywheelMotor.velocity / FLYWHEEL_PPR) * 60
         filteredFlywheelRPM = flywheelRPM * LOW_PASS + lastFlywheelRPM * (1 - LOW_PASS)
@@ -128,7 +135,7 @@ class Shooter(): Subsystem {
         pidOutput = flywheelController.calculate(filteredFlywheelRPM, targetFlywheelRPM)
         
         // allow it to stop SLOWLY when target is 0
-        flywheelMotor.power = if (flywheelController.error <= -500) 0.0 else pidOutput / vSensor.voltage
+        flywheelMotor.power = if (flywheelController.error <= -500) 0.0 else pidOutput / cachedVoltage
 
         hoodServo.position = hoodPosition
 

@@ -100,17 +100,11 @@ open class BitflipOpMode: NextFTCOpMode() {
         }
     }
 
-    fun retryShoot() = RetryCommand(
-        transfer.shootArtifact(),
-        { !shooter.atSetPoint() },
-        3
-    ).then(InstantCommand { if (!shooter.atSetPoint()) {spindexer.recordOuttake()}})
-
-    fun shootAllArtifacts(delay: Duration) = RepeatCommand(
+    fun shootAllArtifacts() = RepeatCommand(
         SequentialGroup(
-            spindexer.tryMotifOuttake(),
-            WaitUntil(shooter::atSetPoint), // add timeout to the wait so it doesn't wait forever
-            retryShoot().thenWait(delay)
-        ).setName("Shoot all artifacts"), spindexer::totalFullSlots
-    ).then(spindexer.goToFirstEmptyIntake())
+            spindexer.goToFirstFullOuttake(),
+            WaitUntil(shooter::atSetPoint),
+            transfer.shootArtifact()
+        ).setName("Shoot all artifacts"), {3}
+    ).then(spindexer.goToNextIntake())
 }

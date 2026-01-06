@@ -44,7 +44,7 @@ class FullCommandOpMode : BitflipOpMode() {
     override fun onStartButtonPressed() {
         // todo remove these once we have a functional auto that gets these.
         spindexer.motifPattern = camera.motif
-        camera.targetID = InitConfigurer.selectedAlliance?.aprilTagID ?: 24
+//        camera.targetID = InitConfigurer.selectedAlliance?.aprilTagID ?: 24
         turret.selectedAlliance = InitConfigurer.selectedAlliance
 
         // Teleop Driver controls
@@ -67,15 +67,15 @@ class FullCommandOpMode : BitflipOpMode() {
 
         // Gamepad lighting control
         InstantCommand { gamepad1.setLedColor(255.0, 0.0, 0.0, Gamepad.LED_DURATION_CONTINUOUS) }()
-        button { camera.distanceToGoal > 0.0 } whenBecomesTrue InstantCommand {
-            gamepad1.setLedColor(0.0, 255.0, 0.0, Gamepad.LED_DURATION_CONTINUOUS)
-        } whenBecomesFalse InstantCommand {
-            gamepad1.setLedColor(255.0, 0.0, 0.0, Gamepad.LED_DURATION_CONTINUOUS)
-        }
+//        button { camera.distanceToGoal > 0.0 } whenBecomesTrue InstantCommand {
+//            gamepad1.setLedColor(0.0, 255.0, 0.0, Gamepad.LED_DURATION_CONTINUOUS)
+//        } whenBecomesFalse InstantCommand {
+//            gamepad1.setLedColor(255.0, 0.0, 0.0, Gamepad.LED_DURATION_CONTINUOUS)
+//        }
 
         // Auto shoot all artifacts
         Gamepads.gamepad1.triangle.whenBecomesTrue(
-            shootAllArtifacts(200.milliseconds),
+            shootAllArtifacts(),
         )
 
         // Auto indexing
@@ -86,35 +86,28 @@ class FullCommandOpMode : BitflipOpMode() {
                 spindexer.goToFirstEmptyIntake()
             )
         )
-//        button { spindexer.isFull } whenBecomesTrue spindexer.tryMotifOuttake().and(intake.reverse()) whenBecomesFalse intake.forward()
+        button { spindexer.isFull } whenBecomesTrue spindexer.tryMotifOuttake().and(intake.reverse()) whenBecomesFalse intake.forward()
 
         // Turret autoaiming (can turn off with right trigger)
-        Gamepads.gamepad1.rightTrigger greaterThan 0.15 whenTrue {
-            turret.robotPose = follower.pose
-        }
+//        Gamepads.gamepad1.rightTrigger greaterThan 0.15 whenTrue {
+//            turret.robotPose = follower.pose
+//        }
 
         // Shooter auto adjusting (can turn off with left trigger)
-        Gamepads.gamepad1.leftTrigger greaterThan 0.15 whenFalse {
-            shooter.targetFlywheelRPM = 0.0
-        } whenTrue {
-            shooter.setTargetState(camera.distanceToGoal)
-        }
+//        Gamepads.gamepad1.leftTrigger greaterThan 0.15 whenFalse {
+//            shooter.targetFlywheelRPM = 0.0
+//        } whenTrue {
+//            shooter.setTargetState(camera.distanceToGoal)
+//        }
 
         // Intake controls
         Gamepads.gamepad1.square whenBecomesTrue intake.toggleRun()
         Gamepads.gamepad1.cross whenBecomesTrue intake.reverse() whenBecomesFalse intake.forward()
 
-
         // Manual controls (testing)
-        Gamepads.gamepad1.dpadDown whenBecomesTrue ParallelGroup(
-            InstantCommand {
-                spindexer.recordOuttake(0)
-                spindexer.recordOuttake(1)
-                spindexer.recordOuttake(2)
-            }
-        )
-        Gamepads.gamepad1.dpadUp whenBecomesTrue transfer.shootArtifact()
-        Gamepads.gamepad1.dpadLeft whenBecomesTrue spindexer.goToNextOuttake()
-        Gamepads.gamepad1.dpadRight whenBecomesTrue spindexer.goToNextIntake()
+        Gamepads.gamepad1.dpadUp whenBecomesTrue InstantCommand { shooter.targetFlywheelRPM += 250.0}
+        Gamepads.gamepad1.dpadDown whenBecomesTrue InstantCommand { shooter.targetFlywheelRPM -= 250.0 }
+        Gamepads.gamepad1.dpadRight whenBecomesTrue InstantCommand { shooter.hoodPosition += 0.5}
+        Gamepads.gamepad1.dpadLeft whenBecomesTrue InstantCommand { shooter.hoodPosition -= 0.5 }
     }
 }

@@ -26,44 +26,30 @@ class ArtifactColorSensor(): Subsystem {
 
     var debugTelemetry = true
 
-    // reading the distance is one i2c read,
-    // reading the colors is another.
-    // We split these reads into two loops, only reading one per loop,
-    // which decreases loop times.
-    // when this is false, the colors are read.
-    private var readDistance = true
-
     override fun initialize() {
         colorSensor = ActiveOpMode.hardwareMap.get(RevColorSensorV3::class.java, "colorSensor")
     }
 
     override fun periodic() {
         // alternate reads to improve loop times
-        if (distance <= 3.0) {
-            readDistance = !readDistance
-            if (!readDistance) {
-                colors = colorSensor.normalizedColors
-            }
+        colors = colorSensor.normalizedColors
+        distance = colorSensor.getDistance(DistanceUnit.CM)
 
-            Log.d("FSM", "colors, b: $blue, g: $green")
-            detectedArtifact = if (blue > green) {
+        detectedArtifact = if (distance < 3.0) {
+            Log.d("FSM", "colors, b: $blue, g: $green, d: $distance")
+            if (blue > green) {
                 Artifact.PURPLE
             } else {
                 Artifact.GREEN
             }
         } else {
-            detectedArtifact = null
-        }
-
-        if (readDistance) {
-            distance = colorSensor.getDistance(DistanceUnit.CM)
+            null
         }
 
         if (debugTelemetry) {
             ActiveOpMode.telemetry.run {
                 addData("Detected Artifact", detectedArtifact?.name ?: "none")
                 addData("Distance", "%05.2fcm", distance)
-                addData("Read distance?", readDistance)
                 addLine("------------------------------")
             }
         }

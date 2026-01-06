@@ -19,19 +19,19 @@ apply plugin: 'org.jetbrains.kotlin.android'
 // remove for pp tuning
 
 // from slothload
-//apply plugin: 'dev.frozenmilk.sinister.sloth.load'
-//
-//buildscript {
-//    repositories {
-//        mavenCentral()
-//        maven {
-//            url "https://repo.dairy.foundation/releases"
-//        }
-//    }
-//    dependencies {
-//        classpath "dev.frozenmilk:Load:0.2.4"
-//    }
-//}
+apply plugin: 'dev.frozenmilk.sinister.sloth.load'
+
+buildscript {
+    repositories {
+        mavenCentral()
+        maven {
+            url "https://repo.dairy.foundation/releases"
+        }
+    }
+    dependencies {
+        classpath "dev.frozenmilk:Load:0.2.4"
+    }
+}
 // end slothload
 
 android {
@@ -52,11 +52,11 @@ android {
 }
 // remove for pp tuning
 // from slothload
-//repositories {
-//    maven {
-//        url = "https://repo.dairy.foundation/releases"
-//    }
-//}
+repositories {
+    maven {
+        url = "https://repo.dairy.foundation/releases"
+    }
+}
 // end slothload
 
 dependencies {
@@ -64,8 +64,8 @@ dependencies {
     implementation "com.bylazar:fullpanels:1.0.12"
     // slothload
 // remove for pp tuning
-//    implementation("dev.frozenmilk.sinister:Sloth:0.2.4")
-//    implementation("com.acmerobotics.slothboard:dashboard:0.2.4+0.4.17")
+    implementation("dev.frozenmilk.sinister:Sloth:0.2.4")
+    implementation("com.acmerobotics.slothboard:dashboard:0.2.4+0.4.17")
 
     implementation 'gay.zharel.fateweaver:ftc:0.3.3'
     implementation 'dev.nextftc:bindings:1.0.1'

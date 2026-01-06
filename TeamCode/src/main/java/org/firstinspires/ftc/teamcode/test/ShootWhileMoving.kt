@@ -94,7 +94,7 @@ class ShootWhileMoving : LinearOpMode() {
 
         subsystems.forEach { it.initialize() }
 
-        camera.targetID = 24
+//        camera.targetID = 24
         turret.selectedAlliance = Alliance.RED
         follower.setStartingPose(Pose(72.0, 72.0, Math.PI / 2))
 

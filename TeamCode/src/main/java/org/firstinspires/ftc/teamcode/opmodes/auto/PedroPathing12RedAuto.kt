@@ -73,7 +73,7 @@ class PedroPathing12RedAuto: BitflipOpMode() {
     }
 
     override fun onStartButtonPressed() {
-        camera.targetID = InitConfigurer.selectedAlliance?.aprilTagID ?: 24
+//        camera.targetID = InitConfigurer.selectedAlliance?.aprilTagID ?: 24
         spindexer.motifPattern = camera.getMotif()
 
         val autoaim = LambdaCommand()

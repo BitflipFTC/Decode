@@ -5,13 +5,17 @@ import com.bylazar.configurables.annotations.Configurable
 import com.bylazar.telemetry.JoinedTelemetry
 import com.bylazar.telemetry.PanelsTelemetry
 import com.bylazar.utils.LoopTimer
+import com.pedropathing.follower.Follower
+import com.pedropathing.geometry.BezierLine
 import com.pedropathing.geometry.Pose
+import com.pedropathing.paths.HeadingInterpolator
 import com.qualcomm.hardware.lynx.LynxModule
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import com.qualcomm.robotcore.hardware.Gamepad
 import com.qualcomm.robotcore.util.ElapsedTime
 import org.firstinspires.ftc.robotcore.external.Telemetry
+import org.firstinspires.ftc.teamcode.opmodes.auto.Red12
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants
 import org.firstinspires.ftc.teamcode.pedroPathing.Drawing
 import org.firstinspires.ftc.teamcode.subsystems.ArtifactColorSensor
@@ -24,35 +28,17 @@ import org.firstinspires.ftc.teamcode.subsystems.Intake
 import org.firstinspires.ftc.teamcode.subsystems.OV9281
 import org.firstinspires.ftc.teamcode.util.Alliance
 import org.firstinspires.ftc.teamcode.util.InitConfigurer
+import org.firstinspires.ftc.teamcode.util.MotifPattern
 import org.firstinspires.ftc.teamcode.util.dpadToAxes
 import kotlin.math.abs
 
 @Configurable
 @TeleOp(name = "Combined TeleOp")
 class CombinedTeleOp : LinearOpMode() {
-    // shooter logic is as follows
-    // when right trigger is held on gp1, if there is an apriltag visible
-    // it auto sets rpm and hood.
-    // when a preset is pressed on gp2, it auto sets to those UNLESS right
-    // trigger is being held down
-    // when manual adjustments are made on gp2, it adjusts the targets UNLESS
-    // right trigger is held, amd keeps those adjustments UNTIL a preset is assigned
-    // OR the right trigger is held
-
-    // spindexer logic is as follows
-    // when r1 / l1 is pressed, it snaps to that preset
-    // HOWEVER, when right stick is moved on gp2, it sets the new target to that
-    // and keeps it there until a new preset is selected or further input
-    // is detected
-
-    // turret logic is as follows
-    // turret is entirely controlled by gp2 left stick
-    // UNLESS gp2 left bumper is held AND apriltag is seen
-
-    // transfer logic
-    // uhhhhhhhhhhhhhh
-    // triangle shoots and returns to nearest rotation
-    // gp2 right + left triggers move it manually
+    companion object {
+        var follower: Follower? = null
+        var motifPattern: MotifPattern? = null
+    }
 
     enum class Shoot {
         IDLE,
@@ -78,24 +64,24 @@ class CombinedTeleOp : LinearOpMode() {
         when (shootingState) {
             Shoot.MOVE_SPINDEXER    -> {
                 spindexer.toMotifOuttakePosition()
-                Log.d("FSM", "MOVING SPINDEXER TO ${spindexer.state.name}, ${spindexer.getArtifactString()}")
+//                Log.d("FSM", "MOVING SPINDEXER TO ${spindexer.state.name}, ${spindexer.getArtifactString()}")
                 shootingState = Shoot.TRANSFER_ARTIFACT
             }
             Shoot.TRANSFER_ARTIFACT -> {
-                Log.d("FSM", "Waiting for shooter or spindexer")
-                Log.d("FSM", "sp: ${spindexer.currentAngle}, ${spindexer.targetAngle}, sh: ${shooter.flywheelRPM}, ${shooter.targetFlywheelRPM}")
+//                Log.d("FSM", "Waiting for shooter or spindexer")
+//                Log.d("FSM", "sp: ${spindexer.currentAngle}, ${spindexer.targetAngle}, sh: ${shooter.flywheelRPM}, ${shooter.targetFlywheelRPM}")
                 if (shooter.atSetPoint() && spindexer.atSetPoint()) {
                     transfer.transferArtifact()
-                    Log.d("FSM", "TRANSFERING")
+//                    Log.d("FSM", "TRANSFERING")
                     shootingState = Shoot.WAIT_FOR_COMPLETION
                 }
             }
             Shoot.WAIT_FOR_COMPLETION -> {
-                Log.d("FSM", "WAITING FOR TRANSFER, ${transfer.currentPosition}, ${transfer.targetPosition}")
+//                Log.d("FSM", "WAITING FOR TRANSFER, ${transfer.currentPosition}, ${transfer.targetPosition}")
                 if (transfer.atSetPoint()) {
                     spindexer.recordOuttake()
-                    Log.d("FSM", "EVALUATING SPINDEXER FULLNESS")
-                    Log.d("FSM", "Spindexer isEmpty: " + spindexer.isEmpty + ", isFull: " + spindexer.isFull + ", Str: " + spindexer.getArtifactString())
+//                    Log.d("FSM", "EVALUATING SPINDEXER FULLNESS")
+//                    Log.d("FSM", "Spindexer isEmpty: " + spindexer.isEmpty + ", isFull: " + spindexer.isFull + ", Str: " + spindexer.getArtifactString())
 
                     if (spindexer.isEmpty) {
                         shootingState = Shoot.IDLE
@@ -114,7 +100,7 @@ class CombinedTeleOp : LinearOpMode() {
     val spindexer = Spindexer()
     val shooter = Shooter()
     val turret = Turret()
-//       val camera = OV9281()
+       val camera = OV9281()
     val colorSensor = ArtifactColorSensor()
     val subsystems = listOf(
         intake,
@@ -122,18 +108,32 @@ class CombinedTeleOp : LinearOpMode() {
         spindexer,
         shooter,
         turret,
-        colorSensor
+        colorSensor,
+        camera
     )
 
     override fun runOpMode() {
+        if (follower == null) {
+            follower = Constants.createFollower(hardwareMap)
+            follower!!.setStartingPose(Pose(72.0, 72.0, Math.toRadians(90.0)))
+        }
+        spindexer.motifPattern = motifPattern
         telemetry = JoinedTelemetry(PanelsTelemetry.ftcTelemetry, telemetry)
-        val follower = Constants.createFollower(hardwareMap)
         val loopTimer = LoopTimer(10)
 
         subsystems.forEach { it.initialize() }
-        follower.setStartingPose(Pose(72.0,72.0, Math.toRadians(90.0)))
-        follower.update()
+        follower!!.update()
         Drawing.init()
+        var automatedDriving = false
+        val goToFarShoot = {follower!!.pathBuilder()
+            .addPath(BezierLine(follower!!::getPose, Pose(88.0, 14.0)))
+            .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower!!::getHeading, Math.toRadians(90.0), 1.0))
+            .build()}
+
+        val goToNearShoot = {follower!!.pathBuilder()
+            .addPath(BezierLine(follower!!::getPose, Pose(88.0, 88.0)))
+            .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower!!::getHeading, Math.toRadians(0.0), 1.0))
+            .build()}
 
         InitConfigurer.preInit()
         while (opModeInInit()) {
@@ -145,11 +145,13 @@ class CombinedTeleOp : LinearOpMode() {
         val allHubs = hardwareMap.getAll(LynxModule::class.java)
         allHubs.forEach { hub -> hub.bulkCachingMode = LynxModule.BulkCachingMode.MANUAL }
 
-        turret.selectedAlliance = Alliance.RED
+        turret.selectedAlliance = InitConfigurer.selectedAlliance ?: Alliance.RED
 //        camera.targetID = InitConfigurer.selectedAlliance?.aprilTagID ?: 24
         loopTimer.start()
 
-        follower.startTeleopDrive(true)
+//        follower.followPath(goToFarShoot())
+
+        follower!!.startTeleopDrive(true)
         while (opModeIsActive()) {
             loopTimer.end()
             loopTimer.start()
@@ -158,14 +160,6 @@ class CombinedTeleOp : LinearOpMode() {
 
             // see https://www.padcrafter.com/?templates=Driver+1%7CDriver+2&plat=1%7C1&col=%23242424%2C%23606A6E%2C%23FFFFFF&leftStick=Drivetrain+translation%7CTurret+Manual+Control&rightStick=Drivetrain+rotation%7CSpindexer+Manual+Control&yButton=Actuate+Transfer&xButton=Toggle+intake&rightTrigger=Auto+adjust+shooter%7CTransfer+forward&rightBumper=Spindexer%3A+Next+Outtake&leftBumper=Spindexer%3A+Next+Intake%7CAutoaim+turret&leftTrigger=Reverse+Intake%7CTransfer+backward&bButton=Reset+yaw+%28TO+BE+REMOVED%29%7CLong+shooting+preset&backButton=Toggle+field+centric&dpadLeft=%7CHoodPosition+-+0.05&dpadRight=%7CHoodPosition+%2B+0.05&dpadUp=%7CFlywheel+RPM+%2B+250&dpadDown=%7CFlywheel+RPM+-+250&aButton=%7CClose+shooting+preset
             // for gamepad layouts
-
-            // drivetrain
-//            if (gamepad1.touchpadWasPressed()) drivetrain.fieldCentric = !drivetrain.fieldCentric
-//            if (gamepad1.circleWasPressed()) drivetrain.resetYaw()
-//            drivetrain.setDrivetrainPowers(drivetrain.calculateDrivetrainPowers(
-//                gamepad1.left_stick_x.toDouble(),
-//                -gamepad1.left_stick_y.toDouble(),
-//                gamepad1.right_stick_x.toDouble()))
 
             // transfer
             if (gamepad1.triangleWasPressed()) { transfer.transferArtifact(); gamepad1.rumble(500) }
@@ -192,12 +186,29 @@ class CombinedTeleOp : LinearOpMode() {
                 intake.reversed = false
             }
 
-            // map auto adjust behind left trigger
-//            if (gamepad1.left_trigger >= 0.15) {
-//                shooter.setTargetState(camera.distanceToGoal)
-//            } else {
-//                shooter.targetFlywheelRPM = 0.0
-//            }
+            if (!automatedDriving) {
+                follower!!.setTeleOpDrive(
+                    -gamepad1.left_stick_y.toDouble(),
+                    -gamepad1.left_stick_x.toDouble(),
+                    -gamepad1.right_stick_x.toDouble(),
+                    true
+                )
+            }
+
+            if (gamepad1.backWasPressed()) {
+                automatedDriving = true
+                follower!!.followPath(goToFarShoot())
+            }
+
+            if (gamepad1.optionsWasPressed()) {
+                automatedDriving = true
+                follower!!.followPath(goToNearShoot())
+            }
+
+            if (automatedDriving && (!follower!!.isBusy || gamepad1.psWasPressed())) {
+                automatedDriving = false
+                follower!!.startTeleopDrive(true)
+            }
 
             // update all mechanisms
             lastSpindexerFull = spindexer.isFull
@@ -210,23 +221,16 @@ class CombinedTeleOp : LinearOpMode() {
                 intake.reversed = false
             }
 1
-            // if we have a detection, green; otherwise, red
-//            if (camera.distanceToGoal > 0.0) {
-//                gamepad1.setLedColor(0.0, 255.0, 0.0, Gamepad.LED_DURATION_CONTINUOUS)
-//            } else {
-//                gamepad1.setLedColor(255.0, 0.0, 0.0, Gamepad.LED_DURATION_CONTINUOUS)
-//            }
-
             if (gamepad1.touchpadWasPressed()) {
                 shootAllArtifacts()
             }
-//
+
 //            if (gamepad1.dpadDownWasPressed()) {
-//                shooter.targetFlywheelRPM -= 250
+//                shooter.targetFlywheelRPM -= 125
 //            }
 //
 //            if (gamepad1.dpadUpWasPressed()) {
-//                shooter.targetFlywheelRPM += 250
+//                shooter.targetFlywheelRPM += 125
 //            }
 //
 //            if (gamepad1.dpadRightWasPressed()) {
@@ -236,39 +240,34 @@ class CombinedTeleOp : LinearOpMode() {
 //            if (gamepad1.dpadLeftWasPressed()) {
 //                shooter.hoodPosition -= 0.05
 //            }
-//
-            shooter.setTargetState(turret.goalPose.distanceFrom(follower.pose))
 
-            turret.angle -= (gamepad1.right_trigger - gamepad1.left_trigger) * 5
+            shooter.setTargetState(turret.goalPose.distanceFrom(follower!!.pose))
+
+//            turret.angle -= (gamepad1.right_trigger - gamepad1.left_trigger) * 5
 
             updateShootingFSM()
 
             lastArtifactDetected = artifactDetected
             artifactDetected = colorSensor.detectedArtifact != null && !spindexer.isFull && spindexer.slotsToIntakes.contains(spindexer.state) && spindexer.atSetPoint()
             if (artifactDetected && !lastArtifactDetected) {
-                Log.d("FSM", "detected artifact: ${colorSensor.detectedArtifact?.name}, spindexer not full: ${!spindexer.isFull}, spindexer state not null: ${spindexer.slotsToIntakes.contains(spindexer.state)}, spindexer at set point: ${spindexer.atSetPoint()}")
+//                Log.d("FSM", "detected artifact: ${colorSensor.detectedArtifact?.name}, spindexer not full: ${!spindexer.isFull}, spindexer state not null: ${spindexer.slotsToIntakes.contains(spindexer.state)}, spindexer at set point: ${spindexer.atSetPoint()}")
                 spindexer.recordIntake(colorSensor.detectedArtifact!!)
-                Log.d("FSM","new artifact string: ${spindexer.getArtifactString()}, current state: ${spindexer.state.name}")
+//                Log.d("FSM","new artifact string: ${spindexer.getArtifactString()}, current state: ${spindexer.state.name}")
                 spindexer.toFirstEmptyIntakePosition()
             }
 
 
             telemetry.addData("Loop Hz", "%05.2f", loopTimer.hz)
             telemetry.addData("Loop ms", "%05.2f", loopTimer.ms.toDouble())
-            telemetry.addData("x", follower.pose.x)
-            telemetry.addData("y", follower.pose.y)
-            telemetry.addData("heading", follower.pose.heading)
+            telemetry.addData("x", follower!!.pose.x)
+            telemetry.addData("y", follower!!.pose.y)
+            telemetry.addData("heading", follower!!.pose.heading)
+            telemetry.addData("cam pose", camera.robotPose.toString())
             telemetry.update()
 
-            follower.setTeleOpDrive(
-                -gamepad1.left_stick_y.toDouble(),
-                -gamepad1.left_stick_x.toDouble(),
-                -gamepad1.right_stick_x.toDouble(),
-                true
-            )
-            follower.update()
+            follower!!.update()
             Drawing.drawDebug(follower)
-            turret.robotPose = follower.pose
+            turret.robotPose = follower!!.pose
         }
     }
 }
