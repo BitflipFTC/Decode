@@ -102,8 +102,6 @@ class Turret(): Subsystem {
 
         servoL.scaleRange(SERVO_MIN, SERVO_MAX)
         servoR.scaleRange(SERVO_MIN, SERVO_MAX)
-
-        angle = 0.0
     }
 
     override fun periodic() {
