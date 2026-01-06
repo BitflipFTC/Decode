@@ -30,7 +30,7 @@ class Shooter(): Subsystem {
         const val LOW_PASS = 0.05
 
         @JvmField
-        var kP = 0.05
+        var kP = 0.04
         @JvmField
         var kV = 0.0026
 
@@ -61,7 +61,7 @@ class Shooter(): Subsystem {
 
     val speedArray = doubleArrayOf(
         2500.0,
-        2999.0,
+        3000.0,
         3000.0,
         3150.0,
         4000.0
@@ -81,7 +81,7 @@ class Shooter(): Subsystem {
     )
 
     private val angleLookupTable = InterpolatedLookupTable(
-        speedArray,
+        distanceArray,
         angleArray
     )
 
@@ -154,7 +154,7 @@ class Shooter(): Subsystem {
         // ensure the parameter distance is actually based on an apriltag reading
         if (distance > 0.0) {
             targetFlywheelRPM = velocityLookupTable.calculate(distance)
-            hoodPosition = angleLookupTable.calculate(targetFlywheelRPM)
+            hoodPosition = angleLookupTable.calculate(distance)
         }
 
         this.distance = distance

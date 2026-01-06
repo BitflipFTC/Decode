@@ -7,5 +7,6 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 class ResetFollower: LinearOpMode() {
     override fun runOpMode() {
         CombinedTeleOp.follower = null
+        CombinedTeleOp.motifPattern = null
     }
 }

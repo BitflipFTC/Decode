@@ -31,3 +31,6 @@ val endIntake3Move = Pose(horizontalIntakeMoveBack, endIntake3.y, intakeHeading)
 
 val emptyRampStart = Pose(120.0, 77.0, Math.toRadians(90.0))
 val emptyRamp = Pose(127.5, 77.0, Math.toRadians(90.0))
+
+val redPark = Pose(38.75, 33.25, Math.toRadians(90.0))
+val redHPCorner = Pose(8.4, 7.5, Math.toRadians(90.0))
