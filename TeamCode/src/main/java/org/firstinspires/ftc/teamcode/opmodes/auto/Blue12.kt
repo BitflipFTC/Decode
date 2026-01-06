@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.opmodes.auto
 
+import android.service.credentials.CallingAppInfo
 import android.util.Log
 import com.bylazar.telemetry.JoinedTelemetry
 import com.bylazar.telemetry.PanelsTelemetry
@@ -21,12 +22,13 @@ import org.firstinspires.ftc.teamcode.subsystems.Shooter
 import org.firstinspires.ftc.teamcode.subsystems.Spindexer
 import org.firstinspires.ftc.teamcode.subsystems.Transfer
 import org.firstinspires.ftc.teamcode.subsystems.Turret
+import org.firstinspires.ftc.teamcode.util.Alliance
 import org.firstinspires.ftc.teamcode.util.Artifact
 import org.firstinspires.ftc.teamcode.util.BetterLoopTimeComponent
 
 @Suppress("UNUSED")
-@Autonomous(name = "12 ball red near", preselectTeleOp = "Combined TeleOp")
-class Red12 : LinearOpMode() {
+@Autonomous(name = "12 ball blue near", preselectTeleOp = "Combined TeleOp")
+class Blue12 : LinearOpMode() {
     enum class PathState {
         Start,
         DScorePreload,
@@ -69,13 +71,14 @@ class Red12 : LinearOpMode() {
 
         follower = Constants.createFollower(hardwareMap)
         buildPaths()
-        follower!!.setStartingPose(nearStartPose)
+        follower!!.setStartingPose(nearStartPose.mirror())
         follower!!.update()
         Drawing.init()
         Drawing.drawDebug(follower)
 
         subsystems.forEach { it.initialize() }
         camera.initialize()
+        turret.selectedAlliance = Alliance.BLUE
 
         while (opModeInInit()) {
             follower!!.update()
@@ -120,8 +123,6 @@ class Red12 : LinearOpMode() {
         follower!!.breakFollowing()
     }
 
-
-
     lateinit var scorePreload: PathChain
     lateinit var intake1: PathChain
     lateinit var score1: PathChain
@@ -135,11 +136,11 @@ class Red12 : LinearOpMode() {
         scorePreload = follower!!.pathBuilder()
             .addPath(
                 BezierLine(
-                    nearStartPose,
-                    nearShootPose
+                    nearStartPose.mirror(),
+                    nearShootPose.mirror()
                 )
             )
-            .setLinearHeadingInterpolation(nearStartPose.heading, Math.toRadians(90.0))
+            .setLinearHeadingInterpolation(nearStartPose.mirror().heading, Math.toRadians(90.0))
             .addParametricCallback(0.0) { intake.intake() }
             .addParametricCallback(1.0) {
                 spindexer.motifPattern = camera.motif
@@ -150,66 +151,66 @@ class Red12 : LinearOpMode() {
         intake1 = follower!!.pathBuilder()
             .addPath(
                 BezierCurve(
-                    nearShootPose,
-                    intake1Control,
-                    startIntake1
+                    nearShootPose.mirror(),
+                    intake1Control.mirror(),
+                    startIntake1.mirror()
                 )
             )
-            .setLinearHeadingInterpolation(Math.toRadians(90.0), startIntake1.heading)
+            .setLinearHeadingInterpolation(Math.toRadians(90.0), startIntake1.mirror().heading)
             .addPath(
-                BezierLine(startIntake1, endIntake1)
+                BezierLine(startIntake1.mirror(), endIntake1.mirror())
             )
             .setTangentHeadingInterpolation()
             .build()
 
-        score1 = buildBasicLine(endIntake1, nearShootPose)
+        score1 = buildBasicLine(endIntake1.mirror(), nearShootPose.mirror())
 
         intake2 = follower!!.pathBuilder()
             .addPath(
                 BezierCurve(
-                    nearShootPose,
-                    intake2Control,
-                    startIntake2
+                    nearShootPose.mirror(),
+                    intake2Control.mirror(),
+                    startIntake2.mirror()
                 )
             )
-            .setLinearHeadingInterpolation(nearShootPose.heading, startIntake2.heading)
+            .setLinearHeadingInterpolation(nearShootPose.mirror().heading, startIntake2.mirror().heading)
             .addPath(
-                BezierLine(startIntake2, endIntake2)
+                BezierLine(startIntake2.mirror(), endIntake2.mirror())
             )
             .setTangentHeadingInterpolation()
             .addPath(
                 BezierLine(
-                    endIntake2,
-                    endIntake2Move
+                    endIntake2.mirror(),
+                    endIntake2Move.mirror()
                 )
             )
             .setTangentHeadingInterpolation().setReversed()
             .build()
 
-        score2 = buildBasicLine(endIntake2Move, nearShootPose)
+        score2 = buildBasicLine(endIntake2Move.mirror(), nearShootPose.mirror())
 
         intake3 = follower!!.pathBuilder()
             .addPath(
                 BezierCurve(
-                    nearShootPose,
-                    intake3Control,
-                    startIntake3
+                    nearShootPose.mirror(),
+                    intake3Control.mirror(),
+                    startIntake3.mirror()
                 )
             )
-            .setLinearHeadingInterpolation(nearShootPose.heading, startIntake3.heading)
+            .setLinearHeadingInterpolation(nearShootPose.mirror().heading, startIntake3.mirror().heading)
             .addPath(
-                BezierLine(startIntake3, endIntake3)
+                BezierLine(startIntake3.mirror(), endIntake3.mirror())
             )
             .setTangentHeadingInterpolation()
             .addPath(
-                BezierLine(endIntake3, endIntake3Move)
+                BezierLine(endIntake3.mirror(), endIntake3Move.mirror())
             )
             .setTangentHeadingInterpolation().setReversed()
             .build()
 
-        score3 = buildBasicLine(endIntake3, nearShootPose)
+        score3 = buildBasicLine(endIntake3.mirror(), nearShootPose.mirror())
 
-        park = buildBasicLine(nearShootPose, nearParkPose)
+        park = buildBasicLine(nearShootPose.mirror(), nearParkPose.mirror())
     }
 
     fun buildBasicLine(p1: Pose, p2: Pose): PathChain = follower!!.pathBuilder()
