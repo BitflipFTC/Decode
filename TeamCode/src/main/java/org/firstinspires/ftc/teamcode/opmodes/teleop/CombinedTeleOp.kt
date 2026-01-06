@@ -11,6 +11,7 @@ import com.pedropathing.paths.HeadingInterpolator
 import com.qualcomm.hardware.lynx.LynxModule
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
+import com.qualcomm.robotcore.hardware.Gamepad
 import org.firstinspires.ftc.teamcode.opmodes.auto.redHPCorner
 import org.firstinspires.ftc.teamcode.opmodes.auto.redPark
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants
@@ -226,6 +227,7 @@ class CombinedTeleOp : LinearOpMode() {
             if (gamepad1.backWasPressed()) {
                 automatedDriving = true
                 fol.followPath(goToPark())
+                gamepad1.setLedColor(0.0,0.0,255.0, Gamepad.LED_DURATION_CONTINUOUS)
             }
 
             if (gamepad1.optionsWasPressed()) {
@@ -235,6 +237,7 @@ class CombinedTeleOp : LinearOpMode() {
             if (automatedDriving && (!fol.isBusy || gamepad1.psWasPressed())) {
                 automatedDriving = false
                 fol.startTeleopDrive(true)
+                gamepad1.setLedColor(255.0, 136.0, 30.0, Gamepad.LED_DURATION_CONTINUOUS)
             }
 
             // update all mechanisms
