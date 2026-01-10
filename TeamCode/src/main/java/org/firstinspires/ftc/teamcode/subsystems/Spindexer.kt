@@ -36,13 +36,13 @@ class Spindexer(): Subsystem {
         const val TICKS_PER_REVOLUTION: Double = 537.7 * GEAR_RATIO
 
         @JvmField
-        var kP = 0.02
+        var kP = 0.018
 
         @JvmField
         var kI = 0.0
 
         @JvmField
-        var kD = 0.0002
+        var kD = 0.00015
 
         @JvmField
         var kS = 0.01

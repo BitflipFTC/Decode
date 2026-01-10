@@ -30,7 +30,7 @@ class Shooter(): Subsystem {
         const val LOW_PASS = 0.05
 
         @JvmField
-        var kP = 0.04
+        var kP = 0.025
         @JvmField
         var kV = 0.0026
 
@@ -63,15 +63,15 @@ class Shooter(): Subsystem {
         2500.0,
         3000.0,
         3000.0,
-        3150.0,
+        3425.0,
         4000.0
     )
 
     val angleArray = doubleArrayOf(
         0.0,
         0.05,
-        0.3,
-        0.6,
+        0.15,
+        0.225,
         0.6,
     )
 
@@ -111,7 +111,7 @@ class Shooter(): Subsystem {
             position = hoodPosition
         }
 
-        flywheelController.setPointTolerance = 65.toDouble()
+        flywheelController.setPointTolerance = 45.toDouble()
 
         vSensor = ActiveOpMode.hardwareMap.get(VoltageSensor::class.java, "Control Hub")
     }

@@ -25,28 +25,12 @@ import org.firstinspires.ftc.teamcode.subsystems.Turret
 import org.firstinspires.ftc.teamcode.util.Alliance
 import org.firstinspires.ftc.teamcode.util.Artifact
 import org.firstinspires.ftc.teamcode.util.BetterLoopTimeComponent
+import org.firstinspires.ftc.teamcode.util.FiniteStateMachine
+import org.firstinspires.ftc.teamcode.util.InitConfigurer
 
 @Suppress("UNUSED")
 @Autonomous(name = "12 ball blue near", preselectTeleOp = "Combined TeleOp")
 class Blue12 : LinearOpMode() {
-    enum class PathState {
-        Start,
-        DScorePreload,
-        ScorePreload,
-        DIntake1,
-        DScore1,
-        Score1,
-        DIntake2,
-        DScore2,
-        Score2,
-        DIntake3,
-        DScore3,
-        Score3,
-        DPark
-    }
-
-    var pathState: PathState = PathState.Start
-
     enum class Shoot {
         IDLE,
         MOVE_SPINDEXER,
@@ -66,6 +50,8 @@ class Blue12 : LinearOpMode() {
 
     val subsystems = setOf(spindexer, turret, transfer, shooter, intake, colorSensor)
 
+    val finiteStateMachine: FiniteStateMachine = FiniteStateMachine()
+
     override fun runOpMode() {
         telemetry = JoinedTelemetry(PanelsTelemetry.ftcTelemetry, telemetry)
 
@@ -75,6 +61,7 @@ class Blue12 : LinearOpMode() {
         follower!!.update()
         Drawing.init()
         Drawing.drawDebug(follower)
+        InitConfigurer.selectedAlliance = Alliance.BLUE
 
         subsystems.forEach { it.initialize() }
         camera.initialize()
@@ -92,10 +79,63 @@ class Blue12 : LinearOpMode() {
             Artifact.PURPLE,
             Artifact.PURPLE,
         )
-        pathState = PathState.DScorePreload
+
+        finiteStateMachine
+            .addState(
+                "DScore Preload",
+                ::opModeIsActive,
+                {
+                    follower!!.followPath(scorePreload, 1.0, true)
+                    intake.off()
+                }
+            ).addState(
+                "Shoot preload",
+                {!follower!!.isBusy },
+                ::shootAllArtifacts
+            ).addState(
+                "Intake 1",
+                {shootingState == Shoot.IDLE},
+                {follower!!.followPath(intake1, 0.7, true)}
+            ).addState(
+                "DScore 1",
+                {!follower!!.isBusy},
+                {follower!!.followPath(score1, 1.0, true)}
+            ).addState(
+                "Shoot 1",
+                {!follower!!.isBusy},
+                ::shootAllArtifacts
+            ).addState(
+                "Intake 2",
+                {shootingState == Shoot.IDLE},
+                {follower!!.followPath(intake2, 0.7, true)}
+            ).addState(
+                "DScore 2",
+                {!follower!!.isBusy},
+                {follower!!.followPath(score2, 1.0, true)}
+            ).addState(
+                "Shoot 2",
+                {!follower!!.isBusy},
+                ::shootAllArtifacts
+            ).addState(
+                "DIntake 3",
+                {shootingState == Shoot.IDLE},
+                {follower!!.followPath(intake3, 0.7, true)}
+            ).addState(
+                "DScore 3",
+                {!follower!!.isBusy},
+                {follower!!.followPath(score3, 1.0, true)}
+            ).addState(
+                "Shoot 3",
+                {!follower!!.isBusy},
+                ::shootAllArtifacts
+            ).addState(
+                "Park",
+                {shootingState == Shoot.IDLE},
+                {follower!!.followPath(park, 1.0, true)}
+            )
 
         while (opModeIsActive()) {
-            autonomousPathUpdate()
+            finiteStateMachine.run()
             updateShootingFSM()
 
             val artifactDetected =
@@ -224,93 +264,6 @@ class Blue12 : LinearOpMode() {
         .build()
 
     val timer = ElapsedTime()
-    fun autonomousPathUpdate() {
-        when (pathState) {
-            PathState.Start         -> {} // do nothing
-            PathState.DScorePreload -> {
-                follower!!.followPath(scorePreload, 1.0, true)
-                intake.off()
-                pathState = PathState.ScorePreload
-            }
-
-            PathState.ScorePreload  -> {
-                if (!follower!!.isBusy) {
-                    shootAllArtifacts()
-                    pathState = PathState.DIntake1
-                }
-            }
-
-            PathState.DIntake1      -> {
-                if (shootingState == Shoot.IDLE) {
-                    follower!!.followPath(intake1, 0.7, true)
-                    pathState = PathState.DScore1
-                }
-            }
-
-            PathState.DScore1       -> {
-                if (!follower!!.isBusy) {
-                    follower!!.followPath(score1, 1.0, true)
-                    pathState = PathState.Score1
-                }
-            }
-
-            PathState.Score1        -> {
-                if (!follower!!.isBusy) {
-                    shootAllArtifacts()
-                    pathState = PathState.DIntake2
-                }
-            }
-
-            PathState.DIntake2      -> {
-                if (shootingState == Shoot.IDLE) {
-                    follower!!.followPath(intake2, 0.7, true)
-                    pathState = PathState.DScore2
-                }
-            }
-
-            PathState.DScore2       -> {
-                if (!follower!!.isBusy) {
-                    follower!!.followPath(score2, 1.0, true)
-                    pathState = PathState.Score2
-                }
-            }
-
-            PathState.Score2        -> {
-                if (!follower!!.isBusy) {
-                    shootAllArtifacts()
-                    pathState = PathState.DIntake3
-                }
-            }
-
-            PathState.DIntake3      -> {
-                if (shootingState == Shoot.IDLE) {
-                    follower!!.followPath(intake3, 0.7, true)
-                    pathState = PathState.DScore3
-                }
-            }
-
-            PathState.DScore3       -> {
-                if (!follower!!.isBusy) {
-                    follower!!.followPath(score3, 1.0, true)
-                    pathState = PathState.Score3
-                }
-            }
-
-            PathState.Score3        -> {
-                if (!follower!!.isBusy) {
-                    shootAllArtifacts()
-                    pathState = PathState.DPark
-                    timer.reset()
-                }
-            }
-
-            PathState.DPark         -> {
-                if (shootingState == Shoot.IDLE || timer.seconds() > 2.5) {
-                    follower!!.followPath(park, 1.0, true)
-                }
-            }
-        }
-    }
 
     fun shootAllArtifacts() {
         if (!spindexer.isEmpty) {
@@ -322,38 +275,19 @@ class Blue12 : LinearOpMode() {
         when (shootingState) {
             Shoot.MOVE_SPINDEXER      -> {
                 spindexer.toFirstFullOuttakePosition()
-                Log.d(
-                    "FSM",
-                    "MOVING SPINDEXER TO ${spindexer.state.name}, ${spindexer.getArtifactString()}"
-                )
                 shootingState = Shoot.TRANSFER_ARTIFACT
             }
 
             Shoot.TRANSFER_ARTIFACT   -> {
-                Log.d("FSM", "Waiting for shooter or spindexer")
-                Log.d(
-                    "FSM",
-                    "sp: ${spindexer.currentAngle}, ${spindexer.targetAngle}, sh: ${shooter.flywheelRPM}, ${shooter.targetFlywheelRPM}"
-                )
                 if (shooter.atSetPoint() && spindexer.atSetPoint()) {
                     transfer.transferArtifact()
-                    Log.d("FSM", "TRANSFERING")
                     shootingState = Shoot.WAIT_FOR_COMPLETION
                 }
             }
 
             Shoot.WAIT_FOR_COMPLETION -> {
-                Log.d(
-                    "FSM",
-                    "WAITING FOR TRANSFER, ${transfer.currentPosition}, ${transfer.targetPosition}"
-                )
                 if (transfer.atSetPoint()) {
                     spindexer.recordOuttake()
-                    Log.d("FSM", "EVALUATING SPINDEXER FULLNESS")
-                    Log.d(
-                        "FSM",
-                        "Spindexer isEmpty: " + spindexer.isEmpty + ", isFull: " + spindexer.isFull + ", Str: " + spindexer.getArtifactString()
-                    )
 
                     if (spindexer.isEmpty) {
                         shootingState = Shoot.IDLE

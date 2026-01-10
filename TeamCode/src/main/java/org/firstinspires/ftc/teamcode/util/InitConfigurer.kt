@@ -14,7 +14,6 @@ object InitConfigurer : Component {
     private var hasSelectedStartingPosition = false
 
     var selectedAlliance: Alliance? = null
-        private set
     var selectedStartingPosition: StartingPosition? = null
         private set
 

@@ -12,12 +12,14 @@ import com.qualcomm.hardware.lynx.LynxModule
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import com.qualcomm.robotcore.hardware.Gamepad
+import org.firstinspires.ftc.teamcode.opmodes.auto.nearStartPose
 import org.firstinspires.ftc.teamcode.opmodes.auto.redHPCorner
 import org.firstinspires.ftc.teamcode.opmodes.auto.redPark
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants
 import org.firstinspires.ftc.teamcode.pedroPathing.Drawing
 import org.firstinspires.ftc.teamcode.subsystems.ArtifactColorSensor
 import org.firstinspires.ftc.teamcode.subsystems.Intake
+import org.firstinspires.ftc.teamcode.subsystems.OV9281
 import org.firstinspires.ftc.teamcode.subsystems.Shooter
 import org.firstinspires.ftc.teamcode.subsystems.Spindexer
 import org.firstinspires.ftc.teamcode.subsystems.Transfer
@@ -33,6 +35,8 @@ class CombinedTeleOp : LinearOpMode() {
         var follower: Follower? = null
         var motifPattern: MotifPattern? = null
     }
+
+    // TODO add a way to get the motif!!!! detect the motif with a camera and light up the driver LEDS!!!! use camera!!!!
 
     enum class Shoot {
         IDLE,
@@ -97,8 +101,7 @@ class CombinedTeleOp : LinearOpMode() {
     val spindexer = Spindexer()
     val shooter = Shooter()
     val turret = Turret()
-
-    //       val camera = OV9281()
+    val camera = OV9281()
     val colorSensor = ArtifactColorSensor()
     val subsystems = listOf(
         intake,
@@ -106,7 +109,7 @@ class CombinedTeleOp : LinearOpMode() {
         spindexer,
         shooter,
         turret,
-        colorSensor
+        colorSensor,
     )
 
     var reverseIntake = false
@@ -118,12 +121,15 @@ class CombinedTeleOp : LinearOpMode() {
     override fun runOpMode() {
         val fol = follower ?: Constants.createFollower(hardwareMap).apply { 
             setStartingPose(Pose(72.0,72.0,Math.toRadians(90.0)))
+            follower = this
         }
+
         spindexer.motifPattern = motifPattern
         telemetry = JoinedTelemetry(PanelsTelemetry.ftcTelemetry, telemetry)
         val loopTimer = LoopTimer(10)
 
         subsystems.forEach { it.initialize() }
+        camera.initialize()
         fol.update()
         Drawing.init()
         var automatedDriving = false
@@ -190,7 +196,8 @@ class CombinedTeleOp : LinearOpMode() {
 
             // transfer
             if (gamepad1.triangleWasPressed()) {
-                transfer.transferArtifact(); gamepad1.rumble(500)
+                transfer.transferArtifact();
+                spindexer.recordOuttake()
             }
 
             // spindexer
@@ -211,6 +218,7 @@ class CombinedTeleOp : LinearOpMode() {
             if (reverseIntake && !lastReverseIntake) {
                 intake.reversed = true
             }
+
             if (!reverseIntake && lastReverseIntake) {
                 intake.reversed = false
             }
@@ -226,27 +234,26 @@ class CombinedTeleOp : LinearOpMode() {
 
             if (gamepad1.backWasPressed()) {
                 automatedDriving = true
-                fol.followPath(goToPark())
+                fol.followPath(goToPark(), true)
                 gamepad1.setLedColor(0.0,0.0,255.0, Gamepad.LED_DURATION_CONTINUOUS)
             }
 
             if (gamepad1.optionsWasPressed()) {
-                fol.pose = if (InitConfigurer.selectedAlliance == Alliance.RED) redHPCorner else redHPCorner.mirror()
+//                fol.pose = if (InitConfigurer.selectedAlliance == Alliance.RED) redHPCorner else redHPCorner.mirror()
+                fol.pose = if (turret.selectedAlliance == Alliance.RED) nearStartPose else nearStartPose.mirror()
             }
 
-            if (automatedDriving && (!fol.isBusy || gamepad1.psWasPressed())) {
+            if (automatedDriving && (!fol.isBusy || gamepad1.circleWasPressed())) {
                 automatedDriving = false
                 fol.startTeleopDrive(true)
                 gamepad1.setLedColor(255.0, 136.0, 30.0, Gamepad.LED_DURATION_CONTINUOUS)
             }
 
             // update all mechanisms
-            lastSpindexerFull = spindexer.isFull
 
             if (spindexer.isFull && !lastSpindexerFull) {
                 spindexer.toMotifOuttakePosition()
                 intake.reversed = true
-                gamepad1.rumbleBlips(3)
             } else if (!spindexer.isFull && lastSpindexerFull) {
                 intake.reversed = false
             }
@@ -255,25 +262,26 @@ class CombinedTeleOp : LinearOpMode() {
             shootArtifacts = gamepad1.right_trigger > 0.15
             if (shootArtifacts && !lastShootArtifacts) {
                 shootAllArtifacts()
+                gamepad1.rumble(250)
             }
 
-//            if (gamepad1.dpadDownWasPressed()) {
-//                shooter.targetFlywheelRPM -= 125
-//            }
-//
-//            if (gamepad1.dpadUpWasPressed()) {
-//                shooter.targetFlywheelRPM += 125
-//            }
-//
-//            if (gamepad1.dpadRightWasPressed()) {
-//                shooter.hoodPosition += 0.05
-//            }
-//
-//            if (gamepad1.dpadLeftWasPressed()) {
-//                shooter.hoodPosition -= 0.05
-//            }
+            if (gamepad1.dpadDownWasPressed()) {
+                shooter.targetFlywheelRPM -= 125
+            }
 
-            shooter.setTargetState(turret.goalPose.distanceFrom(fol.pose))
+            if (gamepad1.dpadUpWasPressed()) {
+                shooter.targetFlywheelRPM += 125
+            }
+
+            if (gamepad1.dpadRightWasPressed()) {
+                shooter.hoodPosition += 0.05
+            }
+
+            if (gamepad1.dpadLeftWasPressed()) {
+                shooter.hoodPosition -= 0.05
+            }
+//
+//            shooter.setTargetState(turret.goalPose.distanceFrom(fol.pose))
 
             updateShootingFSM()
 
@@ -287,13 +295,14 @@ class CombinedTeleOp : LinearOpMode() {
                 spindexer.recordIntake(colorSensor.detectedArtifact!!)
 //                Log.d("FSM","new artifact string: ${spindexer.getArtifactString()}, current state: ${spindexer.state.name}")
                 spindexer.toFirstEmptyIntakePosition()
-                gamepad1.rumble(250)
+                gamepad1.rumbleBlips(spindexer.totalFullSlots)
             }
 
+            lastSpindexerFull = spindexer.isFull
             subsystems.forEach { it.periodic() }
 
             fol.update()
-            Drawing.drawDebug(follower)
+            Drawing.drawDebug(fol)
             turret.robotPose = fol.pose
             telemetry.addData("Loop Hz", "%05.2f", loopTimer.hz)
             telemetry.addData("Loop ms", "%05.2f", loopTimer.ms.toDouble())

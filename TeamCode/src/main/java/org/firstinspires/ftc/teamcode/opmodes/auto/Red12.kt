@@ -21,9 +21,11 @@ import org.firstinspires.ftc.teamcode.subsystems.Shooter
 import org.firstinspires.ftc.teamcode.subsystems.Spindexer
 import org.firstinspires.ftc.teamcode.subsystems.Transfer
 import org.firstinspires.ftc.teamcode.subsystems.Turret
+import org.firstinspires.ftc.teamcode.util.Alliance
 import org.firstinspires.ftc.teamcode.util.Artifact
 import org.firstinspires.ftc.teamcode.util.BetterLoopTimeComponent
 import org.firstinspires.ftc.teamcode.util.FiniteStateMachine
+import org.firstinspires.ftc.teamcode.util.InitConfigurer
 
 @Suppress("UNUSED")
 @Autonomous(name = "12 ball red near", preselectTeleOp = "Combined TeleOp")
@@ -58,9 +60,11 @@ class Red12 : LinearOpMode() {
         follower!!.update()
         Drawing.init()
         Drawing.drawDebug(follower)
+        InitConfigurer.selectedAlliance = Alliance.RED
 
         subsystems.forEach { it.initialize() }
         camera.initialize()
+        turret.selectedAlliance = Alliance.RED
 
         while (opModeInInit()) {
             follower!!.update()
@@ -259,6 +263,7 @@ class Red12 : LinearOpMode() {
         .build()
 
     val timer = ElapsedTime()
+
     fun shootAllArtifacts() {
         if (!spindexer.isEmpty) {
             shootingState = Shoot.MOVE_SPINDEXER
@@ -269,38 +274,19 @@ class Red12 : LinearOpMode() {
         when (shootingState) {
             Shoot.MOVE_SPINDEXER      -> {
                 spindexer.toFirstFullOuttakePosition()
-                Log.d(
-                    "FSM",
-                    "MOVING SPINDEXER TO ${spindexer.state.name}, ${spindexer.getArtifactString()}"
-                )
                 shootingState = Shoot.TRANSFER_ARTIFACT
             }
 
             Shoot.TRANSFER_ARTIFACT   -> {
-                Log.d("FSM", "Waiting for shooter or spindexer")
-                Log.d(
-                    "FSM",
-                    "sp: ${spindexer.currentAngle}, ${spindexer.targetAngle}, sh: ${shooter.flywheelRPM}, ${shooter.targetFlywheelRPM}"
-                )
                 if (shooter.atSetPoint() && spindexer.atSetPoint()) {
                     transfer.transferArtifact()
-                    Log.d("FSM", "TRANSFERING")
                     shootingState = Shoot.WAIT_FOR_COMPLETION
                 }
             }
 
             Shoot.WAIT_FOR_COMPLETION -> {
-                Log.d(
-                    "FSM",
-                    "WAITING FOR TRANSFER, ${transfer.currentPosition}, ${transfer.targetPosition}"
-                )
                 if (transfer.atSetPoint()) {
                     spindexer.recordOuttake()
-                    Log.d("FSM", "EVALUATING SPINDEXER FULLNESS")
-                    Log.d(
-                        "FSM",
-                        "Spindexer isEmpty: " + spindexer.isEmpty + ", isFull: " + spindexer.isFull + ", Str: " + spindexer.getArtifactString()
-                    )
 
                     if (spindexer.isEmpty) {
                         shootingState = Shoot.IDLE
