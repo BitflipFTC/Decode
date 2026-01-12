@@ -116,18 +116,18 @@ class Blue12 : LinearOpMode() {
                 "Shoot 2",
                 {!follower!!.isBusy},
                 ::shootAllArtifacts
-            ).addState(
-                "DIntake 3",
-                {shootingState == Shoot.IDLE},
-                {follower!!.followPath(intake3, 0.7, true)}
-            ).addState(
-                "DScore 3",
-                {!follower!!.isBusy},
-                {follower!!.followPath(score3, 1.0, true)}
-            ).addState(
-                "Shoot 3",
-                {!follower!!.isBusy},
-                ::shootAllArtifacts
+//            ).addState(
+//                "DIntake 3",
+//                {shootingState == Shoot.IDLE},
+//                {follower!!.followPath(intake3, 0.7, true)}
+//            ).addState(
+//                "DScore 3",
+//                {!follower!!.isBusy},
+//                {follower!!.followPath(score3, 1.0, true)}
+//            ).addState(
+//                "Shoot 3",
+//                {!follower!!.isBusy},
+//                ::shootAllArtifacts
             ).addState(
                 "Park",
                 {shootingState == Shoot.IDLE},

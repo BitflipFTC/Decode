@@ -36,8 +36,6 @@ class CombinedTeleOp : LinearOpMode() {
         var motifPattern: MotifPattern? = null
     }
 
-    // TODO add a way to get the motif!!!! detect the motif with a camera and light up the driver LEDS!!!! use camera!!!!
-
     enum class Shoot {
         IDLE,
         MOVE_SPINDEXER,
@@ -239,7 +237,6 @@ class CombinedTeleOp : LinearOpMode() {
             }
 
             if (gamepad1.optionsWasPressed()) {
-//                fol.pose = if (InitConfigurer.selectedAlliance == Alliance.RED) redHPCorner else redHPCorner.mirror()
                 fol.pose = if (turret.selectedAlliance == Alliance.RED) nearStartPose else nearStartPose.mirror()
             }
 
@@ -251,12 +248,12 @@ class CombinedTeleOp : LinearOpMode() {
 
             // update all mechanisms
 
-            if (spindexer.isFull && !lastSpindexerFull) {
-                spindexer.toMotifOuttakePosition()
-                intake.reversed = true
-            } else if (!spindexer.isFull && lastSpindexerFull) {
-                intake.reversed = false
-            }
+//            if (spindexer.isFull && !lastSpindexerFull) {
+//                spindexer.toMotifOuttakePosition()
+//                intake.reversed = true
+//            } else if (!spindexer.isFull && lastSpindexerFull) {
+//                intake.reversed = false
+//            }
 
             lastShootArtifacts = shootArtifacts
             shootArtifacts = gamepad1.right_trigger > 0.15
@@ -265,44 +262,66 @@ class CombinedTeleOp : LinearOpMode() {
                 gamepad1.rumble(250)
             }
 
-            if (gamepad1.dpadDownWasPressed()) {
-                shooter.targetFlywheelRPM -= 125
+//            if (gamepad1.dpadDownWasPressed()) {
+//                shooter.targetFlywheelRPM -= 125
+//            }
+//
+//            if (gamepad1.dpadUpWasPressed()) {
+//                shooter.targetFlywheelRPM += 125
+//            }
+//
+//            if (gamepad1.dpadRightWasPressed()) {
+//                shooter.hoodPosition += 0.05
+//            }
+
+//            if (gamepad1.dpadLeftWasPressed()) {
+//                shooter.hoodPosition -= 0.05
+//            }
+
+            if (gamepad1.dpadLeftWasPressed()) {
+                spindexer.motifPattern = MotifPattern.GPP
+                motifPattern = MotifPattern.GPP
             }
 
             if (gamepad1.dpadUpWasPressed()) {
-                shooter.targetFlywheelRPM += 125
+                spindexer.motifPattern = MotifPattern.PGP
+                motifPattern = MotifPattern.PGP
             }
 
             if (gamepad1.dpadRightWasPressed()) {
-                shooter.hoodPosition += 0.05
+                spindexer.motifPattern = MotifPattern.PPG
+                motifPattern = MotifPattern.PPG
             }
 
-            if (gamepad1.dpadLeftWasPressed()) {
-                shooter.hoodPosition -= 0.05
-            }
-//
-//            shooter.setTargetState(turret.goalPose.distanceFrom(fol.pose))
+            shooter.setTargetState(turret.goalPose.distanceFrom(fol.pose))
 
             updateShootingFSM()
 
-            lastArtifactDetected = artifactDetected
-            artifactDetected =
-                colorSensor.detectedArtifact != null && !spindexer.isFull && spindexer.slotsToIntakes.contains(
-                    spindexer.state
-                ) && spindexer.atSetPoint()
-            if (artifactDetected && !lastArtifactDetected) {
-//                Log.d("FSM", "detected artifact: ${colorSensor.detectedArtifact?.name}, spindexer not full: ${!spindexer.isFull}, spindexer state not null: ${spindexer.slotsToIntakes.contains(spindexer.state)}, spindexer at set point: ${spindexer.atSetPoint()}")
-                spindexer.recordIntake(colorSensor.detectedArtifact!!)
-//                Log.d("FSM","new artifact string: ${spindexer.getArtifactString()}, current state: ${spindexer.state.name}")
-                spindexer.toFirstEmptyIntakePosition()
-                gamepad1.rumbleBlips(spindexer.totalFullSlots)
-            }
+//            lastArtifactDetected = artifactDetected
+//            artifactDetected =
+//                colorSensor.detectedArtifact != null && !spindexer.isFull && spindexer.slotsToIntakes.contains(
+//                    spindexer.state
+//                ) && spindexer.atSetPoint()
+//            if (artifactDetected && !lastArtifactDetected) {
+////                Log.d("FSM", "detected artifact: ${colorSensor.detectedArtifact?.name}, spindexer not full: ${!spindexer.isFull}, spindexer state not null: ${spindexer.slotsToIntakes.contains(spindexer.state)}, spindexer at set point: ${spindexer.atSetPoint()}")
+//                spindexer.recordIntake(colorSensor.detectedArtifact!!)
+////                Log.d("FSM","new artifact string: ${spindexer.getArtifactString()}, current state: ${spindexer.state.name}")
+//                spindexer.toFirstEmptyIntakePosition()
+//                gamepad1.rumbleBlips(spindexer.totalFullSlots)
+//            }
 
-            lastSpindexerFull = spindexer.isFull
+//            lastSpindexerFull = spindexer.isFull
             subsystems.forEach { it.periodic() }
 
             fol.update()
             Drawing.drawDebug(fol)
+            if (gamepad1.touchpadWasPressed() && turret.automatic){
+                turret.automatic = false
+                turret.angle = 0.0
+            }
+            if (gamepad1.touchpadWasPressed() && !turret.automatic) {
+                turret.automatic = true
+            }
             turret.robotPose = fol.pose
             telemetry.addData("Loop Hz", "%05.2f", loopTimer.hz)
             telemetry.addData("Loop ms", "%05.2f", loopTimer.ms.toDouble())

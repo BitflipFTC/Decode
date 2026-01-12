@@ -94,7 +94,7 @@ class Red12 : LinearOpMode() {
             ).addState(
                 "Intake 1",
                 {shootingState == Shoot.IDLE},
-                {follower!!.followPath(intake1, 0.7, true)}
+                {follower!!.followPath(intake1, 0.55, true)}
             ).addState(
                 "DScore 1",
                 {!follower!!.isBusy},
@@ -106,7 +106,7 @@ class Red12 : LinearOpMode() {
             ).addState(
                 "Intake 2",
                 {shootingState == Shoot.IDLE},
-                {follower!!.followPath(intake2, 0.7, true)}
+                {follower!!.followPath(intake2, 0.55, true)}
             ).addState(
                 "DScore 2",
                 {!follower!!.isBusy},
@@ -115,18 +115,18 @@ class Red12 : LinearOpMode() {
                 "Shoot 2",
                 {!follower!!.isBusy},
                 ::shootAllArtifacts
-            ).addState(
-                "DIntake 3",
-                {shootingState == Shoot.IDLE},
-                {follower!!.followPath(intake3, 0.7, true)}
-            ).addState(
-                "DScore 3",
-                {!follower!!.isBusy},
-                {follower!!.followPath(score3, 1.0, true)}
-            ).addState(
-                "Shoot 3",
-                {!follower!!.isBusy},
-                ::shootAllArtifacts
+//            ).addState(
+//                "DIntake 3",
+//                {shootingState == Shoot.IDLE},
+//                {follower!!.followPath(intake3, 0.7, true)}
+//            ).addState(
+//                "DScore 3",
+//                {!follower!!.isBusy},
+//                {follower!!.followPath(score3, 1.0, true)}
+//            ).addState(
+//                "Shoot 3",
+//                {!follower!!.isBusy},
+//                ::shootAllArtifacts
             ).addState(
                 "Park",
                 {shootingState == Shoot.IDLE},

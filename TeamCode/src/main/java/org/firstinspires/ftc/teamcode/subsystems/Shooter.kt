@@ -38,11 +38,6 @@ class Shooter(): Subsystem {
         var tuning = false
     }
 
-    class ShooterState (
-        val angle: Double,
-        val rpm: Double,
-    )
-
     private lateinit var vSensor: VoltageSensor
     private lateinit var hoodServo: ServoEx
     private lateinit var flywheelMotor: MotorEx
@@ -60,18 +55,18 @@ class Shooter(): Subsystem {
     )
 
     val speedArray = doubleArrayOf(
-        2500.0,
+        2650.0,
         3000.0,
-        3000.0,
-        3425.0,
-        4000.0
+        3300.0,
+        3500.0,
+        4100.0
     )
 
     val angleArray = doubleArrayOf(
-        0.0,
         0.05,
-        0.15,
-        0.225,
+        0.067,
+        0.14,
+        0.175,
         0.6,
     )
 
@@ -111,7 +106,7 @@ class Shooter(): Subsystem {
             position = hoodPosition
         }
 
-        flywheelController.setPointTolerance = 45.toDouble()
+        flywheelController.setPointTolerance = 25.0
 
         vSensor = ActiveOpMode.hardwareMap.get(VoltageSensor::class.java, "Control Hub")
     }

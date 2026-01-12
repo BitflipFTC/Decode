@@ -6,7 +6,6 @@ import dev.nextftc.core.commands.utility.LambdaCommand
 import dev.nextftc.core.subsystems.Subsystem
 import dev.nextftc.ftc.ActiveOpMode
 import org.firstinspires.ftc.teamcode.util.Artifact
-import org.firstinspires.ftc.teamcode.util.commands.IfElseCommand
 import org.firstinspires.ftc.teamcode.util.MotifPattern
 import org.firstinspires.ftc.teamcode.util.PIDController
 import org.firstinspires.ftc.teamcode.util.hardware.MotorEx
@@ -55,7 +54,6 @@ class Spindexer(): Subsystem {
 
         @JvmField
         var maxPower = 0.6
-
 
         @JvmField
         var staticFrictionDeadband = 1.5
@@ -112,7 +110,6 @@ class Spindexer(): Subsystem {
         null,
         null
     )
-
 
     // ------------------ EXPOSED FUNCTIONS AND VARIABLES ------------------
 

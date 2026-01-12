@@ -29,7 +29,7 @@ public class Transfer implements Subsystem {
     public static double kP = 0.008;
     public static double kI = 0.05;
     public static double kD = 0.0002;
-    public static double maxPower = 0.6;
+    public static double maxPower = 0.67;
     public static boolean tuning = true;
 
     boolean debugTelemetry = true;
@@ -40,7 +40,7 @@ public class Transfer implements Subsystem {
 
     @Override
     public void initialize() {
-        controller.setSetPointTolerance(10);
+        controller.setSetPointTolerance(5.0);
         motor = new MotorEx("transfer").zeroed().brake();
     }
 
