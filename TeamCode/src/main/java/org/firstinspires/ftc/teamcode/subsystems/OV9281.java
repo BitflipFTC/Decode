@@ -5,9 +5,6 @@ import android.util.Size;
 import androidx.annotation.Nullable;
 
 import com.bylazar.configurables.annotations.Configurable;
-import com.pedropathing.ftc.InvertedFTCCoordinates;
-import com.pedropathing.ftc.PoseConverter;
-import com.pedropathing.geometry.PedroCoordinates;
 import com.pedropathing.geometry.Pose;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
@@ -16,14 +13,12 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.GainCon
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
-import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.teamcode.util.MotifPattern;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagGameDatabase;
-import org.firstinspires.ftc.vision.apriltag.AprilTagMetadata;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
 import java.util.ArrayList;
@@ -55,6 +50,9 @@ public class OV9281 implements Subsystem {
             0.03380, 212.51288, 271.44038, 0);
 
     private Pose robotPose = new Pose();
+    private Pose newPose = new Pose();
+    private Pose2D robotPose2d;
+    private boolean newReading = false;
 
     /*
         If all values are zero (no rotation), that implies the camera is pointing straight up.
@@ -78,25 +76,23 @@ public class OV9281 implements Subsystem {
         return visionPortal;
     }
 
-    private final double lowPass = 0.075;
-
     // exposure: 1-7
     // gain: 1-6
     @Override
     public void initialize () {
         aprilTag = new AprilTagProcessor.Builder()
                 .setTagLibrary(AprilTagGameDatabase.getDecodeTagLibrary())
-//                .setDrawTagOutline(true)
+                .setDrawTagOutline(true)
                 .setDrawTagID(true)
-//                .setDrawAxes(true)
+                .setDrawAxes(true)
                 .setDrawCubeProjection(true)
                 .setLensIntrinsics(fx,fy,cx,cy)
+                .setNumThreads(3)
                 .setCameraPose(cameraPosition,cameraOrientation)
                 .setOutputUnits(DistanceUnit.INCH, AngleUnit.DEGREES)
                 .build();
 
-        aprilTag.setDecimation(3f);
-        aprilTag.setPoseSolver(AprilTagProcessor.PoseSolver.OPENCV_SOLVEPNP_EPNP);
+        aprilTag.setDecimation(1f);
 
         visionPortal = new VisionPortal.Builder()
                 .setCamera(ActiveOpMode.hardwareMap().get(WebcamName.class, "camera"))
@@ -122,8 +118,8 @@ public class OV9281 implements Subsystem {
         exposureControl.setMode(ExposureControl.Mode.Manual);
         defaultExposure = exposureControl.getExposure(TimeUnit.MILLISECONDS);
         defaultGain = gainControl.getGain();
-        exposureControl.setExposure(4, TimeUnit.MILLISECONDS);
-        gainControl.setGain(6);
+        exposureControl.setExposure(6, TimeUnit.MILLISECONDS);
+        gainControl.setGain(7);
     }
 
     public void resetExposureGain () {
@@ -184,6 +180,7 @@ public class OV9281 implements Subsystem {
         if (count == 0) {
             if (debugTelemetry)
                 ActiveOpMode.telemetry().addData("Detected April Tags", 0);
+            newReading = false;
             return;
         }
 
@@ -193,16 +190,26 @@ public class OV9281 implements Subsystem {
             if (detection.metadata == null) {
                 if (debugTelemetry)
                     ActiveOpMode.telemetry().addData("Current tag", "No metadata");
+                newReading = false;
                 continue;
             }
 
-            if (debugTelemetry)
-                ActiveOpMode.telemetry().addData("TAG NAME", detection.metadata.name);
 
-            if ((detection.id == 20 || detection.id == 24) && detection.decisionMargin > 30f) {
-                robotPose = PoseConverter.pose2DToPose(new Pose2D(
+            if (debugTelemetry) {
+                ActiveOpMode.telemetry().addData("TAG NAME", detection.metadata.name);
+                ActiveOpMode.telemetry().addData("ID", detection.id);
+                ActiveOpMode.telemetry().addData("Sureness", detection.decisionMargin);
+            }
+
+            if ((detection.id == 20 || detection.id == 24) && detection.decisionMargin > 35) {
+                robotPose2d = new Pose2D(
                         DistanceUnit.INCH, detection.robotPose.getPosition().x, detection.robotPose.getPosition().y, AngleUnit.DEGREES, detection.robotPose.getOrientation().getYaw(AngleUnit.DEGREES)
-                ), InvertedFTCCoordinates.INSTANCE).getAsCoordinateSystem(PedroCoordinates.INSTANCE);
+                );
+                robotPose = new Pose(robotPose2d.getY(DistanceUnit.INCH) + 72.0, (-1 * robotPose2d.getX(DistanceUnit.INCH)) + 72.0, robotPose2d.getHeading(AngleUnit.RADIANS));
+
+                newReading = true;
+            } else {
+                newReading = false;
             }
         }
     }
@@ -217,5 +224,17 @@ public class OV9281 implements Subsystem {
 
     public Pose getRobotPose() {
         return robotPose;
+    }
+
+    public Pose getNewPose() {
+        return newPose;
+    }
+
+    public Pose2D getRobotPose2d () {
+        return robotPose2d;
+    }
+
+    public boolean getHasNewReading() {
+        return newReading;
     }
 }

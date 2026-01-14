@@ -86,6 +86,11 @@ public class UtilityAprilTagOptimizeExposure extends LinearOpMode
     boolean lastExpDn = false;
     boolean lastGainUp = false;
     boolean lastGainDn = false;
+
+    double fx = 549.993552641,
+            fy = 549.993552641,
+            cx = 327.021677114,
+            cy = 255.879397051;
     @Override public void runOpMode()
     {
         // Initialize the Apriltag Detection process
@@ -159,7 +164,13 @@ public class UtilityAprilTagOptimizeExposure extends LinearOpMode
      */
     private void initAprilTag() {
         // Create the AprilTag processor by using a builder.
-        aprilTag = new AprilTagProcessor.Builder().build();
+        aprilTag = new AprilTagProcessor.Builder()
+                .setDrawTagID(true)
+                .setDrawAxes(true)
+                .setDrawCubeProjection(true)
+                .setLensIntrinsics(
+                        fx,fy,cx,cy
+                ).build();
 
         // Create the WEBCAM vision portal by using a builder.
         visionPortal = new VisionPortal.Builder()
@@ -167,6 +178,7 @@ public class UtilityAprilTagOptimizeExposure extends LinearOpMode
                 .addProcessor(aprilTag)
                 .setCameraResolution(new Size(640,480))
                 .setStreamFormat(VisionPortal.StreamFormat.MJPEG)
+                .enableLiveView(true)
                 .build();
     }
 

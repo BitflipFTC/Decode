@@ -13,7 +13,6 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import com.qualcomm.robotcore.hardware.Gamepad
 import org.firstinspires.ftc.teamcode.opmodes.auto.nearStartPose
-import org.firstinspires.ftc.teamcode.opmodes.auto.redHPCorner
 import org.firstinspires.ftc.teamcode.opmodes.auto.redPark
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants
 import org.firstinspires.ftc.teamcode.pedroPathing.Drawing
@@ -25,6 +24,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Spindexer
 import org.firstinspires.ftc.teamcode.subsystems.Transfer
 import org.firstinspires.ftc.teamcode.subsystems.Turret
 import org.firstinspires.ftc.teamcode.util.Alliance
+import org.firstinspires.ftc.teamcode.util.BetterLoopTimeComponent
 import org.firstinspires.ftc.teamcode.util.InitConfigurer
 import org.firstinspires.ftc.teamcode.util.MotifPattern
 
@@ -34,8 +34,10 @@ class CombinedTeleOp : LinearOpMode() {
     companion object {
         var follower: Follower? = null
         var motifPattern: MotifPattern? = null
-    }
 
+        @JvmField
+        var lowpass = 0.01
+    }
     enum class Shoot {
         IDLE,
         MOVE_SPINDEXER,
@@ -108,6 +110,7 @@ class CombinedTeleOp : LinearOpMode() {
         shooter,
         turret,
         colorSensor,
+        camera
     )
 
     var reverseIntake = false
@@ -127,7 +130,6 @@ class CombinedTeleOp : LinearOpMode() {
         val loopTimer = LoopTimer(10)
 
         subsystems.forEach { it.initialize() }
-        camera.initialize()
         fol.update()
         Drawing.init()
         var automatedDriving = false
@@ -262,21 +264,21 @@ class CombinedTeleOp : LinearOpMode() {
                 gamepad1.rumble(250)
             }
 
-//            if (gamepad1.dpadDownWasPressed()) {
-//                shooter.targetFlywheelRPM -= 125
-//            }
-//
-//            if (gamepad1.dpadUpWasPressed()) {
-//                shooter.targetFlywheelRPM += 125
-//            }
-//
-//            if (gamepad1.dpadRightWasPressed()) {
-//                shooter.hoodPosition += 0.05
-//            }
+            if (gamepad1.dpadDownWasPressed()) {
+                shooter.targetFlywheelRPM -= 125
+            }
 
-//            if (gamepad1.dpadLeftWasPressed()) {
-//                shooter.hoodPosition -= 0.05
-//            }
+            if (gamepad1.dpadUpWasPressed()) {
+                shooter.targetFlywheelRPM += 125
+            }
+
+            if (gamepad1.dpadRightWasPressed()) {
+                shooter.hoodPosition += 0.05
+            }
+//
+            if (gamepad1.dpadLeftWasPressed()) {
+                shooter.hoodPosition -= 0.05
+            }
 
             if (gamepad1.dpadLeftWasPressed()) {
                 spindexer.motifPattern = MotifPattern.GPP
@@ -293,7 +295,7 @@ class CombinedTeleOp : LinearOpMode() {
                 motifPattern = MotifPattern.PPG
             }
 
-            shooter.setTargetState(turret.goalPose.distanceFrom(fol.pose))
+//            shooter.setTargetState(turret.goalPose.distanceFrom(fol.pose))
 
             updateShootingFSM()
 
@@ -313,8 +315,20 @@ class CombinedTeleOp : LinearOpMode() {
 //            lastSpindexerFull = spindexer.isFull
             subsystems.forEach { it.periodic() }
 
+            if (camera.hasNewReading && fol.velocity.magnitude < 1.0 && fol.angularVelocity < 3 ) {
+                fol.pose = Pose(
+                    (1-lowpass) * fol.pose.x + lowpass * camera.robotPose.x,
+                    (1-lowpass) * fol.pose.y + lowpass * camera.robotPose.y,
+                    (1-lowpass) * fol.pose.heading + lowpass * camera.robotPose.heading
+                )
+
+                telemetry.run {
+                    addData("We", "Are relocalizing")
+                }
+            }
+
             fol.update()
-            Drawing.drawDebug(fol)
+//            Drawing.drawDebug(fol)
             if (gamepad1.touchpadWasPressed() && turret.automatic){
                 turret.automatic = false
                 turret.angle = 0.0
