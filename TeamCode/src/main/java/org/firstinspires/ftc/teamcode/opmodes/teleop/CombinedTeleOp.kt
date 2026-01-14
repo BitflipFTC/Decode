@@ -321,14 +321,10 @@ class CombinedTeleOp : LinearOpMode() {
                     (1-lowpass) * fol.pose.y + lowpass * camera.robotPose.y,
                     (1-lowpass) * fol.pose.heading + lowpass * camera.robotPose.heading
                 )
-
-                telemetry.run {
-                    addData("We", "Are relocalizing")
-                }
             }
 
             fol.update()
-//            Drawing.drawDebug(fol)
+            Drawing.drawDebug(fol)
             if (gamepad1.touchpadWasPressed() && turret.automatic){
                 turret.automatic = false
                 turret.angle = 0.0

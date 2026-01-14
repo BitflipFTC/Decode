@@ -78,6 +78,11 @@ class Spindexer(): Subsystem {
         OUTTAKE_TWO(60.0);
     }
 
+    enum class Directions(val multiplier: Int) {
+        CLOCKWISE(-1),
+        COUNTERCLOCKWISE(1)
+    }
+
     // specifies the focus slot of each preset (intake / outtake slot)
     val statesToSlotsMap = mapOf(
         States.INTAKE_ZERO to 0,
@@ -120,18 +125,55 @@ class Spindexer(): Subsystem {
             // assign it to the backing field. if you assign it to state, infinite loop
             field = newState
 
+            // state reference angles are normalized within the interval [0, 360)
+
             // get current revolution or something
-            val errorInRevolutions = (currentAngle - field.referenceAngle) / 360.0
-            val nearestRevolution = errorInRevolutions.roundToInt()
+//            val errorInRevolutions = (currentAngle - field.referenceAngle) / 360.0
+//            val nearestRevolution = errorInRevolutions.roundToInt()
 
             // add that to the existing target to ensure it takes the shortest path
-            targetAngle = field.referenceAngle + (nearestRevolution * 360.0)
+//            targetAngle = field.referenceAngle + (nearestRevolution * 360.0)
+//            targetAngle = field.referenceAngle
 
             // resets atSetPoint() for commands
-            controller.calculate(currentTicks, targetTicks)
+//            controller.calculate(currentTicks, targetTicks)
 
             resetIntegral()
         }
+
+    private fun moveState (newState: States, direction: Directions) {
+        val inputAngle = newState.referenceAngle
+        val difference = (inputAngle - state.referenceAngle)
+
+        val normalizedDifference = if (direction == Directions.CLOCKWISE) {
+            if (difference < 0) {
+                difference + 360
+            } else {
+                difference
+            }
+        } else {
+            if (difference > 0) {
+                difference - 360
+            } else {
+                difference
+            }
+        }
+
+        // normalizes them within [0, 360) or (-360, 0], depending on the demanded direction
+        state = newState
+        targetAngle += normalizedDifference
+    }
+
+    fun shoot() {
+        if (slotsToOuttakes.contains(state)) {
+            when (slotsToOuttakes.indexOf(state)) {
+                0 -> moveState(States.OUTTAKE_ONE, Directions.COUNTERCLOCKWISE)
+                1 -> moveState(States.OUTTAKE_TWO, Directions.COUNTERCLOCKWISE)
+                2 -> moveState(States.OUTTAKE_ZERO, Directions.COUNTERCLOCKWISE)
+            }
+        }
+    }
+
     val isEmpty: Boolean
         get() = getArtifactString() == "NNN"
     val isFull: Boolean
@@ -139,19 +181,12 @@ class Spindexer(): Subsystem {
     val totalFullSlots: Int
         get() = findFullSlots().size
     var targetAngle = state.referenceAngle
-
-    //        private set
     val targetTicks // no backing
         get() = (targetAngle / 360) * TICKS_PER_REVOLUTION
     val currentTicks: Double  // no backing
         get() = motor.currentPosition.toDouble()
     val currentAngle
         get() = (currentTicks / TICKS_PER_REVOLUTION) * 360
-    var power: Double
-        get() = motor.power
-        set(power) {
-            motor.power = power
-        }
     val hasMotifAssortment: Boolean
         get() = findPurpleSlots().size == 2 && findGreenSlots().size == 1
     var robotTurningPower: Double = 0.0
@@ -200,7 +235,7 @@ class Spindexer(): Subsystem {
     fun toNextPosition() {
         allStatesIndex = if (allStatesIndex == allStates.size - 1) 0 else allStatesIndex + 1
 
-        state = allStates[allStatesIndex]
+        moveState(allStates[allStatesIndex], Directions.CLOCKWISE)
     }
 
     /**
@@ -216,7 +251,7 @@ class Spindexer(): Subsystem {
         }
         // otherwise, go to OUTTAKE_ZERO
 
-        state = slotsToIntakes[targetIndex]
+        moveState(slotsToIntakes[targetIndex], Directions.CLOCKWISE)
     }
 
     fun toFirstEmptyIntakePosition() {
@@ -245,7 +280,7 @@ class Spindexer(): Subsystem {
                 else -> targetIndex = 0
             }
         }
-        state = slotsToIntakes[targetIndex]
+        moveState(slotsToIntakes[targetIndex], Directions.CLOCKWISE)
     }
 
     /**
@@ -261,7 +296,7 @@ class Spindexer(): Subsystem {
         }
         // otherwise, go to OUTTAKE_ZERO
 
-        state = slotsToOuttakes[targetIndex]
+        moveState(slotsToOuttakes[targetIndex], Directions.CLOCKWISE)
     }
 
     fun toMotifOuttakePosition() {
@@ -270,18 +305,18 @@ class Spindexer(): Subsystem {
             val greenIndex = findGreenSlots()[0]
 
             // decide which slot should be set to outtake
-            // assuming the spindexer will be moving clockwise
+            // assuming the spindexer will be moving counterclockwise
             // while shooting
             // If the pattern is GPP, green should be shot first
             // If it's PGP, green should be shot second, etc
             val targetOuttakeIndex = when (motifPattern) {
                 MotifPattern.GPP  -> greenIndex
-                MotifPattern.PGP  -> if (greenIndex == 0) 2 else greenIndex - 1
-                MotifPattern.PPG  -> if (greenIndex == 2) 0 else greenIndex + 1
+                MotifPattern.PGP  -> if (greenIndex == 2) 0 else greenIndex + 1
+                MotifPattern.PPG  -> if (greenIndex == 0) 2 else greenIndex - 1
                 null -> 0
             }
 
-            state = slotsToOuttakes[targetOuttakeIndex]
+            moveState(slotsToOuttakes[targetOuttakeIndex], Directions.CLOCKWISE)
         } else {
             return toFirstFullOuttakePosition()
         }
@@ -299,7 +334,7 @@ class Spindexer(): Subsystem {
                     // for slots [0,2]
                     // empty = 1, so targets 2, then can go 2 -> 0
                     // for [1,2]
-                    // empty = 1, so targets 1, then can go 1 -> 2
+                    // empty = 0, so targets 1, then can go 1 -> 2
                     // for [0,1]
                     // empty = 2, so targets 0, then can go 0 -> 1
                     targetSlot = if (emptySlot == 2) 0 else emptySlot + 1
@@ -314,7 +349,7 @@ class Spindexer(): Subsystem {
                 }
             }
 
-            state = slotsToOuttakes[targetSlot]
+            moveState(slotsToOuttakes[targetSlot], Directions.CLOCKWISE)
         }
     }
 
