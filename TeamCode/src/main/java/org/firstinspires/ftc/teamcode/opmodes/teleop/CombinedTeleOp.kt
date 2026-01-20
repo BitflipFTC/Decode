@@ -1,6 +1,9 @@
 package org.firstinspires.ftc.teamcode.opmodes.teleop
 
+import android.util.Log
 import com.bylazar.configurables.annotations.Configurable
+import com.bylazar.field.Style
+import com.bylazar.gamepad.PanelsGamepad
 import com.bylazar.telemetry.JoinedTelemetry
 import com.bylazar.telemetry.PanelsTelemetry
 import com.bylazar.utils.LoopTimer
@@ -24,6 +27,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Spindexer
 import org.firstinspires.ftc.teamcode.subsystems.Transfer
 import org.firstinspires.ftc.teamcode.subsystems.Turret
 import org.firstinspires.ftc.teamcode.util.Alliance
+import org.firstinspires.ftc.teamcode.util.Artifact
 import org.firstinspires.ftc.teamcode.util.BetterLoopTimeComponent
 import org.firstinspires.ftc.teamcode.util.InitConfigurer
 import org.firstinspires.ftc.teamcode.util.MotifPattern
@@ -36,7 +40,7 @@ class CombinedTeleOp : LinearOpMode() {
         var motifPattern: MotifPattern? = null
 
         @JvmField
-        var lowpass = 0.01
+        var lowpass = 0.1
     }
     enum class Shoot {
         IDLE,
@@ -188,6 +192,7 @@ class CombinedTeleOp : LinearOpMode() {
         while (opModeIsActive()) {
             loopTimer.end()
             loopTimer.start()
+//            val gamepad1 = g1.asCombinedFTCGamepad(gamepad1)
             // more bulk caching
             allHubs.forEach { hub -> hub.clearBulkCache() }
 
@@ -195,8 +200,8 @@ class CombinedTeleOp : LinearOpMode() {
             // for gamepad layouts
 
             // transfer
-            if (gamepad1.triangleWasPressed()) {
-                transfer.transferArtifact();
+            if (gamepad1.triangleWasPressed() && spindexer.atSetPoint()) {
+                transfer.transferArtifact()
                 spindexer.recordOuttake()
             }
 
@@ -206,6 +211,7 @@ class CombinedTeleOp : LinearOpMode() {
             }
 
             if (gamepad1.rightBumperWasPressed()) {
+                spindexer.recordIntake(Artifact.PURPLE)
                 spindexer.toNextIntakePosition()
             }
 
@@ -238,9 +244,9 @@ class CombinedTeleOp : LinearOpMode() {
                 gamepad1.setLedColor(0.0,0.0,255.0, Gamepad.LED_DURATION_CONTINUOUS)
             }
 
-            if (gamepad1.optionsWasPressed()) {
-                fol.pose = if (turret.selectedAlliance == Alliance.RED) nearStartPose else nearStartPose.mirror()
-            }
+//            if (gamepad1.optionsWasPressed()) {
+//                fol.pose = if (turret.selectedAlliance == Alliance.RED) nearStartPose else nearStartPose.mirror()
+//            }
 
             if (automatedDriving && (!fol.isBusy || gamepad1.circleWasPressed())) {
                 automatedDriving = false
@@ -264,21 +270,21 @@ class CombinedTeleOp : LinearOpMode() {
                 gamepad1.rumble(250)
             }
 
-            if (gamepad1.dpadDownWasPressed()) {
-                shooter.targetFlywheelRPM -= 125
-            }
-
-            if (gamepad1.dpadUpWasPressed()) {
-                shooter.targetFlywheelRPM += 125
-            }
-
-            if (gamepad1.dpadRightWasPressed()) {
-                shooter.hoodPosition += 0.05
-            }
+//            if (gamepad1.dpadDownWasPressed()) {
+//                shooter.targetFlywheelRPM -= 125
+//            }
 //
-            if (gamepad1.dpadLeftWasPressed()) {
-                shooter.hoodPosition -= 0.05
-            }
+//            if (gamepad1.dpadUpWasPressed()) {
+//                shooter.targetFlywheelRPM += 125
+//            }
+//
+//            if (gamepad1.dpadRightWasPressed()) {
+//                shooter.hoodPosition += 0.05
+//            }
+//
+//            if (gamepad1.dpadLeftWasPressed()) {
+//                shooter.hoodPosition -= 0.05
+//            }
 
             if (gamepad1.dpadLeftWasPressed()) {
                 spindexer.motifPattern = MotifPattern.GPP
@@ -295,9 +301,7 @@ class CombinedTeleOp : LinearOpMode() {
                 motifPattern = MotifPattern.PPG
             }
 
-//            shooter.setTargetState(turret.goalPose.distanceFrom(fol.pose))
-
-            updateShootingFSM()
+            shooter.setTargetState(turret.goalPose.distanceFrom(fol.pose))
 
 //            lastArtifactDetected = artifactDetected
 //            artifactDetected =
@@ -305,9 +309,9 @@ class CombinedTeleOp : LinearOpMode() {
 //                    spindexer.state
 //                ) && spindexer.atSetPoint()
 //            if (artifactDetected && !lastArtifactDetected) {
-////                Log.d("FSM", "detected artifact: ${colorSensor.detectedArtifact?.name}, spindexer not full: ${!spindexer.isFull}, spindexer state not null: ${spindexer.slotsToIntakes.contains(spindexer.state)}, spindexer at set point: ${spindexer.atSetPoint()}")
+//                Log.d("FSM", "detected artifact: ${colorSensor.detectedArtifact?.name}, spindexer not full: ${!spindexer.isFull}, spindexer state not null: ${spindexer.slotsToIntakes.contains(spindexer.state)}, spindexer at set point: ${spindexer.atSetPoint()}")
 //                spindexer.recordIntake(colorSensor.detectedArtifact!!)
-////                Log.d("FSM","new artifact string: ${spindexer.getArtifactString()}, current state: ${spindexer.state.name}")
+//                Log.d("FSM","new artifact string: ${spindexer.getArtifactString()}, current state: ${spindexer.state.name}")
 //                spindexer.toFirstEmptyIntakePosition()
 //                gamepad1.rumbleBlips(spindexer.totalFullSlots)
 //            }
@@ -315,7 +319,7 @@ class CombinedTeleOp : LinearOpMode() {
 //            lastSpindexerFull = spindexer.isFull
             subsystems.forEach { it.periodic() }
 
-            if (camera.hasNewReading && fol.velocity.magnitude < 1.0 && fol.angularVelocity < 3 ) {
+            if (camera.hasNewReading && fol.velocity.magnitude < 1.0 && fol.angularVelocity < 1 * ((2 * Math.PI) / 360) ) {
                 fol.pose = Pose(
                     (1-lowpass) * fol.pose.x + lowpass * camera.robotPose.x,
                     (1-lowpass) * fol.pose.y + lowpass * camera.robotPose.y,
@@ -324,14 +328,12 @@ class CombinedTeleOp : LinearOpMode() {
             }
 
             fol.update()
-            Drawing.drawDebug(fol)
-            if (gamepad1.touchpadWasPressed() && turret.automatic){
-                turret.automatic = false
-                turret.angle = 0.0
-            }
-            if (gamepad1.touchpadWasPressed() && !turret.automatic) {
-                turret.automatic = true
-            }
+            Drawing.drawRobot(fol.pose)
+            Drawing.drawRobot(turret.turretPose, Style(
+                "", "#FF881E", 0.5
+            )
+            )
+            Drawing.sendPacket()
             turret.robotPose = fol.pose
             telemetry.addData("Loop Hz", "%05.2f", loopTimer.hz)
             telemetry.addData("Loop ms", "%05.2f", loopTimer.ms.toDouble())
