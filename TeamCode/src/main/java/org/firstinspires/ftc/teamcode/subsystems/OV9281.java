@@ -201,7 +201,7 @@ public class OV9281 implements Subsystem {
                 ActiveOpMode.telemetry().addData("Sureness", detection.decisionMargin);
             }
 
-            if ((detection.id == 20 || detection.id == 24) && detection.decisionMargin > 35) {
+            if ((detection.id == 20 || detection.id == 24) && detection.decisionMargin > 31) {
                 robotPose2d = new Pose2D(
                         DistanceUnit.INCH, detection.robotPose.getPosition().x, detection.robotPose.getPosition().y, AngleUnit.DEGREES, detection.robotPose.getOrientation().getYaw(AngleUnit.DEGREES)
                 );

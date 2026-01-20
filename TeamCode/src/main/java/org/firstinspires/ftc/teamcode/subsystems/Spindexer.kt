@@ -9,7 +9,6 @@ import org.firstinspires.ftc.teamcode.util.Artifact
 import org.firstinspires.ftc.teamcode.util.MotifPattern
 import org.firstinspires.ftc.teamcode.util.PIDController
 import org.firstinspires.ftc.teamcode.util.hardware.MotorEx
-import kotlin.math.roundToInt
 
 /**
  * Manages the "spindexer" mechanism, a rotating drum with multiple slots for holding artifacts.
@@ -35,16 +34,16 @@ class Spindexer(): Subsystem {
         const val TICKS_PER_REVOLUTION: Double = 537.7 * GEAR_RATIO
 
         @JvmField
-        var kP = 0.018
+        var kP = 0.009
 
         @JvmField
-        var kI = 0.0
+        var kI = 0.12 // TODO: Remove this when spindexer friction issue is solved.
 
         @JvmField
-        var kD = 0.00015
+        var kD = 0.000325
 
         @JvmField
-        var kS = 0.01
+        var kS = 0.025
 
         @JvmField
         var turningFeedforward = 0.0
@@ -53,10 +52,10 @@ class Spindexer(): Subsystem {
         var setpointTolerance = 3.0 // in degrees
 
         @JvmField
-        var maxPower = 0.6
+        var maxPower = 0.7
 
         @JvmField
-        var staticFrictionDeadband = 1.5
+        var staticFrictionDeadband = 2.0
 
         @JvmField
         var tuning = false
@@ -78,9 +77,9 @@ class Spindexer(): Subsystem {
         OUTTAKE_TWO(60.0);
     }
 
-    enum class Directions(val multiplier: Int) {
-        CLOCKWISE(-1),
-        COUNTERCLOCKWISE(1)
+    enum class Directions() {
+        CLOCKWISE(),
+        COUNTERCLOCKWISE()
     }
 
     // specifies the focus slot of each preset (intake / outtake slot)
@@ -145,7 +144,7 @@ class Spindexer(): Subsystem {
         val inputAngle = newState.referenceAngle
         val difference = (inputAngle - state.referenceAngle)
 
-        val normalizedDifference = if (direction == Directions.CLOCKWISE) {
+        val normalizedDifference = if (direction == Directions.COUNTERCLOCKWISE) {
             if (difference < 0) {
                 difference + 360
             } else {
@@ -160,8 +159,8 @@ class Spindexer(): Subsystem {
         }
 
         // normalizes them within [0, 360) or (-360, 0], depending on the demanded direction
-        state = newState
         targetAngle += normalizedDifference
+        state = newState
     }
 
     fun shoot() {
@@ -247,7 +246,7 @@ class Spindexer(): Subsystem {
         // if current state is an outtake, go to next outtake
         if (slotsToIntakes.indexOf(state) != -1) {
             val currentIndex = slotsToIntakes.indexOf(state)
-            targetIndex = if (currentIndex == 2) 0 else currentIndex + 1
+            targetIndex = if (currentIndex == 0) 2 else currentIndex - 1
         }
         // otherwise, go to OUTTAKE_ZERO
 
@@ -292,7 +291,7 @@ class Spindexer(): Subsystem {
         // if current state is an outtake, go to next outtake
         if (slotsToOuttakes.indexOf(state) != -1) {
             val currentIndex = slotsToOuttakes.indexOf(state)
-            targetIndex = if (currentIndex == 2) 0 else currentIndex + 1
+            targetIndex = if (currentIndex == 0) 2 else currentIndex - 1
         }
         // otherwise, go to OUTTAKE_ZERO
 
@@ -337,7 +336,7 @@ class Spindexer(): Subsystem {
                     // empty = 0, so targets 1, then can go 1 -> 2
                     // for [0,1]
                     // empty = 2, so targets 0, then can go 0 -> 1
-                    targetSlot = if (emptySlot == 2) 0 else emptySlot + 1
+                    targetSlot = if (emptySlot == 0) 2 else emptySlot - 1
                 }
 
                 1    -> {

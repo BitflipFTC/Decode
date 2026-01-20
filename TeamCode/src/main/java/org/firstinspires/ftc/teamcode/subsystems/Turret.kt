@@ -27,7 +27,7 @@ class Turret(): Subsystem {
         // the offset between the turret's center of rotation
         // and the robot's center of rotation in inches.
         // 75 is measured in mm, then converted to inches by dividing.
-        const val TURRET_OFFSET: Double = 75 / 25.4
+        const val TURRET_OFFSET: Double = 80 / 25.4
 
         // 667.4157303371 total degrees of freedom for turret
         // manually limit it from
@@ -60,7 +60,7 @@ class Turret(): Subsystem {
     // EVER
     // DO NOT DO IT
     // BAD
-    private var turretPose = Pose()
+    var turretPose = Pose()
         set(pose) {
             val r = TURRET_OFFSET
             val theta = pose.heading

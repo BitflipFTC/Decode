@@ -76,7 +76,7 @@ class FlywheelTest : LinearOpMode() {
                 shooter.targetFlywheelRPM = 0.0
             }
 
-            if (gamepad1.triangleWasPressed()) {
+            if (gamepad1.triangleWasPressed() && spindexer.atSetPoint()) {
                 transfer.transferArtifact()
             }
 

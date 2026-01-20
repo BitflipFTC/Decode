@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.subsystems
 
 import android.util.Log
+import com.bylazar.configurables.annotations.Sorter
 import com.qualcomm.hardware.rev.RevColorSensorV3
 import com.qualcomm.robotcore.hardware.NormalizedRGBA
 import dev.nextftc.core.subsystems.Subsystem
@@ -28,6 +29,7 @@ class ArtifactColorSensor(): Subsystem {
 
     override fun initialize() {
         colorSensor = ActiveOpMode.hardwareMap.get(RevColorSensorV3::class.java, "colorSensor")
+        colorSensor.gain = 20.0f
     }
 
     override fun periodic() {
@@ -36,12 +38,14 @@ class ArtifactColorSensor(): Subsystem {
         distance = colorSensor.getDistance(DistanceUnit.CM)
 
         detectedArtifact = if (distance < 3.0) {
-            Log.d("FSM", "colors, b: $blue, g: $green, d: $distance")
-            if (blue > green) {
-                Artifact.PURPLE
-            } else {
-                Artifact.GREEN
-            }
+            if ((red < blue) && (red < green)) {
+                Log.d("FSM", "colors, b: $blue, g: $green, d: $distance")
+                if ((blue > green)) {
+                    Artifact.PURPLE
+                } else {
+                    Artifact.GREEN
+                }
+            } else null
         } else {
             null
         }
@@ -50,6 +54,9 @@ class ArtifactColorSensor(): Subsystem {
             ActiveOpMode.telemetry.run {
                 addData("Detected Artifact", detectedArtifact?.name ?: "none")
                 addData("Distance", "%05.2fcm", distance)
+                addData("green","%07.4f", green)
+                addData("red","%07.4f", red)
+                addData("blue","%07.4f", blue)
                 addLine("------------------------------")
             }
         }

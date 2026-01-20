@@ -30,9 +30,9 @@ class Shooter(): Subsystem {
         const val LOW_PASS = 0.05
 
         @JvmField
-        var kP = 0.025
+        var kP = 0.01
         @JvmField
-        var kV = 0.0026
+        var kV = 0.0025
 
         @JvmField
         var tuning = false
@@ -49,25 +49,25 @@ class Shooter(): Subsystem {
     val distanceArray = doubleArrayOf(
         41.0,
         60.0,
-        75.0,
-        84.0,
-        130.0
+        82.0,
+        104.0,
+        139.0
     )
 
     val speedArray = doubleArrayOf(
-        2650.0,
+        2750.0,
         3000.0,
         3300.0,
         3500.0,
-        4100.0
+        3875.0
     )
 
     val angleArray = doubleArrayOf(
+        0.01,
         0.05,
-        0.067,
-        0.14,
         0.175,
-        0.6,
+        0.3,
+        0.6
     )
 
     private val velocityLookupTable = InterpolatedLookupTable(
