@@ -8,5 +8,7 @@ class ResetFollower: LinearOpMode() {
     override fun runOpMode() {
         CombinedTeleOp.follower = null
         CombinedTeleOp.motifPattern = null
+
+        terminateOpModeNow()
     }
 }
