@@ -7,9 +7,6 @@ import android.graphics.Paint;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.internal.camera.calibration.CameraCalibration;
 import org.firstinspires.ftc.vision.VisionProcessor;
@@ -19,7 +16,6 @@ import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
-import org.openftc.easyopencv.OpenCvPipeline;
 
 public class ColorSensorPipeline implements VisionProcessor {
     @Override
@@ -32,6 +28,7 @@ public class ColorSensorPipeline implements VisionProcessor {
          * Get the Cb channel of the input frame after conversion to YCrCb
          */
         splitInput(frame);
+        frame.adjustROI((int) region_pointA.y, (int)region_pointB.y,(int) region_pointA.x, (int)region_pointB.x);
 
         if (firstRun) {
             region_H = H.submat(new Rect(region_pointA, region_pointB));
@@ -51,7 +48,7 @@ public class ColorSensorPipeline implements VisionProcessor {
         avgS = (int) Core.mean(region_S).val[0];
         avgV = (int) Core.mean(region_V).val[0];
 
-        if (avgS > 150) {
+        if (avgV > 100) {
             if (avgH > 100) {
                 artifact = Artifact.PURPLE;
             } else {
