@@ -13,7 +13,7 @@ import org.firstinspires.ftc.vision.VisionPortal
 class ColorSensorTest : LinearOpMode() {
     override fun runOpMode() {
 //        val colorSensor = ArtifactColorSensor()
-        val colorProcessor = ColorSensorPipeline(this.telemetry)
+        val colorProcessor = ColorSensorPipeline()
         val visionPortal = VisionPortal.Builder()
             .setCamera(hardwareMap.get(WebcamName::class.java, "Webcam 1"))
             .setCameraResolution(Size(160, 120))
@@ -29,11 +29,10 @@ class ColorSensorTest : LinearOpMode() {
         while (opModeIsActive()) {
 //            colorSensor.periodic()
 
-            telemetry.addData("Detected Artifact", colorProcessor.analysis)
-            telemetry.addData("FPS", visionPortal.fps)
-            telemetry.addData("H", colorProcessor.avgH)
-            telemetry.addData("S", colorProcessor.avgS)
-            telemetry.addData("V", colorProcessor.avgV)
+            telemetry.addData("Artifact", colorProcessor.artifact)
+            telemetry.addData("H", "%.1f", colorProcessor.averages.hue)
+            telemetry.addData("S", "%.1f", colorProcessor.averages.saturation)
+            telemetry.addData("V", "%.1f", colorProcessor.averages.value)
 
             telemetry.update()
         }
