@@ -26,6 +26,7 @@ import org.firstinspires.ftc.teamcode.util.Artifact
 import org.firstinspires.ftc.teamcode.util.BetterLoopTimeComponent
 import org.firstinspires.ftc.teamcode.util.FiniteStateMachine
 import org.firstinspires.ftc.teamcode.util.InitConfigurer
+import org.firstinspires.ftc.teamcode.util.MotifPattern
 
 @Suppress("UNUSED")
 @Autonomous(name = "12 ball red near", preselectTeleOp = "Combined TeleOp")
@@ -66,6 +67,7 @@ class Red12 : LinearOpMode() {
         camera.initialize()
         turret.selectedAlliance = Alliance.RED
 
+        Log.d("FSM", "auto inited")
         while (opModeInInit()) {
             follower!!.update()
             telemetry.update()
@@ -90,11 +92,16 @@ class Red12 : LinearOpMode() {
             ).addState(
                 "Shoot preload",
                 {!follower!!.isBusy },
-                ::shootAllArtifacts
+                {
+                    spindexer.motifPattern = camera.motif
+                    CombinedTeleOp.motifPattern = spindexer.motifPattern
+                    Log.d("FSM", "motif pattern detected: ${spindexer.motifPattern}")
+                    shootAllArtifacts()
+                }
             ).addState(
                 "Intake 1",
                 {shootingState == Shoot.IDLE},
-                {follower!!.followPath(intake1, 0.55, true)}
+                {follower!!.followPath(intake1, 0.4, true)}
             ).addState(
                 "DScore 1",
                 {!follower!!.isBusy},
@@ -106,7 +113,7 @@ class Red12 : LinearOpMode() {
             ).addState(
                 "Intake 2",
                 {shootingState == Shoot.IDLE},
-                {follower!!.followPath(intake2, 0.55, true)}
+                {follower!!.followPath(intake2, 0.4, true)}
             ).addState(
                 "DScore 2",
                 {!follower!!.isBusy},
@@ -138,12 +145,11 @@ class Red12 : LinearOpMode() {
             updateShootingFSM()
 
             val artifactDetected =
-                colorSensor.detectedArtifact != null && !spindexer.isFull && spindexer.slotsToIntakes.contains(
-                    spindexer.state
-                ) && spindexer.atSetPoint()
+                colorSensor.detectedArtifact != null && !spindexer.isFull && spindexer.slotsToIntakes.contains(spindexer.state) && spindexer.atSetPoint()
             if (artifactDetected) {
                 spindexer.recordIntake(colorSensor.detectedArtifact!!)
                 spindexer.toFirstEmptyIntakePosition()
+                Log.d("FSM", "DETECTED ARTIFACT ${colorSensor.detectedArtifact!!}")
             }
 
             shooter.setTargetState(turret.goalPose.distanceFrom(follower!!.pose))
@@ -179,12 +185,13 @@ class Red12 : LinearOpMode() {
                     nearShootPose
                 )
             )
-            .setLinearHeadingInterpolation(nearStartPose.heading, Math.toRadians(90.0))
+            .setLinearHeadingInterpolation(nearStartPose.heading, nearShootPose.heading)
             .addParametricCallback(0.0) { intake.intake() }
-            .addParametricCallback(1.0) {
-                spindexer.motifPattern = camera.motif
-                CombinedTeleOp.motifPattern = spindexer.motifPattern
-            }
+//            .addParametricCallback(1.0) {
+//                spindexer.motifPattern = camera.motif
+//                CombinedTeleOp.motifPattern = spindexer.motifPattern
+//                Log.d("FSM", "motif pattern detected: ${spindexer.motifPattern}")
+//            }
             .build()
 
         intake1 = follower!!.pathBuilder()
@@ -195,7 +202,7 @@ class Red12 : LinearOpMode() {
                     startIntake1
                 )
             )
-            .setLinearHeadingInterpolation(Math.toRadians(90.0), startIntake1.heading)
+            .setLinearHeadingInterpolation(nearShootPose.heading, startIntake1.heading)
             .addPath(
                 BezierLine(startIntake1, endIntake1)
             )
@@ -267,13 +274,14 @@ class Red12 : LinearOpMode() {
     fun shootAllArtifacts() {
         if (!spindexer.isEmpty) {
             shootingState = Shoot.MOVE_SPINDEXER
+            Log.d("FSM", "Shooting: spindexer has ${spindexer.getArtifactString()}, motif is ${spindexer.motifPattern}")
         }
     }
 
     fun updateShootingFSM() {
         when (shootingState) {
             Shoot.MOVE_SPINDEXER      -> {
-                spindexer.toFirstFullOuttakePosition()
+                spindexer.toMotifOuttakePosition()
                 shootingState = Shoot.TRANSFER_ARTIFACT
             }
 

@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.opmodes.auto
 
 import com.pedropathing.geometry.Pose
+import kotlin.math.atan2
 
 private const val horizontalIntakeStart = 100.0
 private const val horizontalIntakeEnd = 129.0
@@ -15,11 +16,11 @@ val farStartPose = Pose(88.0, 8.5, Math.toRadians(90.0))
 val farShootPose = Pose(88.0, 14.0, Math.toRadians(0.0))
 val farParkPose = Pose(105.500, 33.500, Math.toRadians(90.0))
 val nearStartPose = Pose(117.4, 128.9, 0.7188)
-val nearShootPose = Pose(110.0, 110.0, intakeHeading)
+val nearShootPose = Pose(110.0, 110.0, atan2(144.0 - 110.0, 72.0 - 110.0))
 val nearParkPose = Pose(125.0, 90.0, intakeHeading)
 val intake1Control = Pose(horizontalIntakeStart, nearShootPose.y)
 val startIntake1 = Pose(horizontalIntakeStart, intake1Vertical, intakeHeading)
-val endIntake1 = Pose(127.5, intake1Vertical, intakeHeading)
+val endIntake1 = Pose(129.0, intake1Vertical, intakeHeading)
 val intake2Control = Pose(horizontalIntakeStart, nearShootPose.y)
 val startIntake2 = Pose(horizontalIntakeStart, intake2Vertical, intakeHeading)
 val endIntake2 = Pose(horizontalIntakeEnd, intake2Vertical, intakeHeading)
