@@ -22,7 +22,7 @@ class FiniteStateMachine {
     }
 }
 
-class State @JvmOverloads constructor(
+class State (
     val name: String,
     val startCondition: () -> Boolean,
     val run: () -> Unit
