@@ -1,20 +1,11 @@
 package org.firstinspires.ftc.teamcode.subsystems
 
 import android.annotation.SuppressLint
-import com.qualcomm.hardware.rev.RevHubOrientationOnRobot
-import com.qualcomm.robotcore.hardware.DcMotor
-import com.qualcomm.robotcore.hardware.DcMotorEx
-import com.qualcomm.robotcore.hardware.DcMotorSimple
-import com.qualcomm.robotcore.hardware.IMU
-import dev.nextftc.core.subsystems.Subsystem
-import dev.nextftc.ftc.ActiveOpMode
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit
+import com.qualcomm.robotcore.hardware.HardwareMap
 import org.firstinspires.ftc.teamcode.util.hardware.MotorEx
-import kotlin.math.cos
 import kotlin.math.max
-import kotlin.math.sin
 
-class Drivetrain(): Subsystem {
+class Drivetrain(val hardwareMap: HardwareMap): Subsystem {
     class DrivePowers(val fl: Double, val fr: Double, val bl: Double, val br: Double) {
         @SuppressLint("DefaultLocale")
         override fun toString(): String {

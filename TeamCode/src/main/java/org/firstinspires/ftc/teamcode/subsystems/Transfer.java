@@ -6,10 +6,6 @@ import com.qualcomm.robotcore.util.Range;
 import org.firstinspires.ftc.teamcode.util.PIDController;
 import org.firstinspires.ftc.teamcode.util.hardware.MotorEx;
 
-import dev.nextftc.core.commands.utility.LambdaCommand;
-import dev.nextftc.core.subsystems.Subsystem;
-import dev.nextftc.ftc.ActiveOpMode;
-
 /**
  * Manages the transfer mechanism, which moves artifacts from the spindexer to the shooter.
  * This class uses a PID controller to precisely control the rotation of the transfer motor.
@@ -38,8 +34,7 @@ public class Transfer implements Subsystem {
 
     private final PIDController controller = new PIDController(kP, kI, kD);
 
-    @Override
-    public void initialize() {
+    public Transfer() {
         controller.setSetPointTolerance(5.0);
         motor = new MotorEx("transfer").zeroed().brake();
     }

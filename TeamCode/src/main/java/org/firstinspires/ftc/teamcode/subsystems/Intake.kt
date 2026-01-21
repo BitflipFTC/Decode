@@ -1,11 +1,6 @@
 package org.firstinspires.ftc.teamcode.subsystems
 
-import com.qualcomm.robotcore.hardware.DcMotor
-import com.qualcomm.robotcore.hardware.DcMotorEx
-import com.qualcomm.robotcore.hardware.DcMotorSimple
-import dev.nextftc.core.commands.utility.LambdaCommand
-import dev.nextftc.core.subsystems.Subsystem
-import dev.nextftc.ftc.ActiveOpMode
+import com.qualcomm.robotcore.hardware.HardwareMap
 import org.firstinspires.ftc.teamcode.util.hardware.MotorEx
 
 /**
@@ -14,7 +9,7 @@ import org.firstinspires.ftc.teamcode.util.hardware.MotorEx
  * This class provides a simple interface for controlling the intake motor.
  * It exposes a `power` property that can be set directly.
  */
-class Intake(): Subsystem {
+class Intake(val hardwareMap: HardwareMap): Subsystem {
     enum class State (val value: Double) {
         OFF(0.0),
         INTAKE(1.0 ),

@@ -2,9 +2,7 @@ package org.firstinspires.ftc.teamcode.subsystems
 
 import com.bylazar.configurables.annotations.Configurable
 import com.qualcomm.robotcore.util.Range
-import dev.nextftc.core.commands.utility.LambdaCommand
-import dev.nextftc.core.subsystems.Subsystem
-import dev.nextftc.ftc.ActiveOpMode
+import com.seattlesolvers.solverslib.command.Subsystem
 import org.firstinspires.ftc.teamcode.util.Artifact
 import org.firstinspires.ftc.teamcode.util.MotifPattern
 import org.firstinspires.ftc.teamcode.util.PIDController
@@ -355,11 +353,10 @@ class Spindexer(): Subsystem {
 
     // ------------------ INTERNAL HARDWARE CONTROL ------------------
 
-    private lateinit var motor: MotorEx
+    private var motor: MotorEx = MotorEx("spindexer").zeroed().brake()
     private val controller = PIDController(kP, kI, kD, 0.0, kS, staticFrictionDeadband = staticFrictionDeadband)
 
-    override fun initialize() {
-        motor = MotorEx("spindexer").zeroed().brake()
+    init {
         // convert from degrees to ticks
         controller.setPointTolerance = (setpointTolerance / 360) * TICKS_PER_REVOLUTION
     }

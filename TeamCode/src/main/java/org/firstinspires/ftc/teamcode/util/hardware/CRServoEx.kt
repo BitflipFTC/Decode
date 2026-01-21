@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode.util.hardware
 
 import com.qualcomm.robotcore.hardware.CRServoImplEx
 import com.qualcomm.robotcore.hardware.PwmControl
-import dev.nextftc.ftc.ActiveOpMode
 import kotlin.math.abs
 
 /**

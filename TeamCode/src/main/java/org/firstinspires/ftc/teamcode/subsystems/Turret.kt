@@ -2,8 +2,6 @@ package org.firstinspires.ftc.teamcode.subsystems
 
 import com.bylazar.configurables.annotations.Configurable
 import com.pedropathing.geometry.Pose
-import dev.nextftc.core.subsystems.Subsystem
-import dev.nextftc.ftc.ActiveOpMode
 import org.firstinspires.ftc.teamcode.util.Alliance
 import org.firstinspires.ftc.teamcode.util.hardware.ServoEx
 import org.firstinspires.ftc.teamcode.util.normalizeRadians

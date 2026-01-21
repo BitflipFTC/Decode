@@ -1,9 +1,8 @@
 package org.firstinspires.ftc.teamcode.subsystems
 
 import com.bylazar.configurables.annotations.Configurable
+import com.qualcomm.robotcore.hardware.HardwareMap
 import com.qualcomm.robotcore.hardware.VoltageSensor
-import dev.nextftc.core.subsystems.Subsystem
-import dev.nextftc.ftc.ActiveOpMode
 import org.firstinspires.ftc.teamcode.util.InterpolatedLookupTable
 import org.firstinspires.ftc.teamcode.util.PIDController
 import org.firstinspires.ftc.teamcode.util.hardware.MotorEx
@@ -24,7 +23,7 @@ import org.firstinspires.ftc.teamcode.util.hardware.ServoEx
  * can be tuned.
  */
 @Configurable
-class Shooter(): Subsystem {
+class Shooter(val hardwareMap: HardwareMap): Subsystem {
     companion object {
         const val FLYWHEEL_PPR = 28
         const val LOW_PASS = 0.05

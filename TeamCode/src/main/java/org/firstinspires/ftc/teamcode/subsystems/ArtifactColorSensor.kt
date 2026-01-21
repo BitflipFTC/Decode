@@ -1,16 +1,15 @@
 package org.firstinspires.ftc.teamcode.subsystems
 
 import android.util.Log
-import com.bylazar.configurables.annotations.Sorter
 import com.qualcomm.hardware.rev.RevColorSensorV3
+import com.qualcomm.robotcore.hardware.HardwareMap
 import com.qualcomm.robotcore.hardware.NormalizedRGBA
-import dev.nextftc.core.subsystems.Subsystem
-import dev.nextftc.ftc.ActiveOpMode
+import com.seattlesolvers.solverslib.command.Subsystem
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit
 import org.firstinspires.ftc.teamcode.util.Artifact
 
-class ArtifactColorSensor(): Subsystem {
-    private lateinit var colorSensor: RevColorSensorV3
+class ArtifactColorSensor(val hardwareMap: HardwareMap): Subsystem {
+    private val colorSensor: RevColorSensorV3 = hardwareMap.get(RevColorSensorV3::class.java, "colorSensor")
     var colors: NormalizedRGBA = NormalizedRGBA()
         private set
 
@@ -27,8 +26,7 @@ class ArtifactColorSensor(): Subsystem {
 
     var debugTelemetry = true
 
-    override fun initialize() {
-        colorSensor = ActiveOpMode.hardwareMap.get(RevColorSensorV3::class.java, "colorSensor")
+    init {
         colorSensor.gain = 20.0f
     }
 
