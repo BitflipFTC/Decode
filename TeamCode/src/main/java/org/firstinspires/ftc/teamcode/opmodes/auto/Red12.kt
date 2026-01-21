@@ -6,6 +6,7 @@ import com.bylazar.telemetry.PanelsTelemetry
 import com.pedropathing.geometry.BezierCurve
 import com.pedropathing.geometry.BezierLine
 import com.pedropathing.geometry.Pose
+import com.pedropathing.paths.PathBuilder
 import com.pedropathing.paths.PathChain
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
@@ -26,7 +27,9 @@ import org.firstinspires.ftc.teamcode.util.Artifact
 import org.firstinspires.ftc.teamcode.util.BetterLoopTimeComponent
 import org.firstinspires.ftc.teamcode.util.FiniteStateMachine
 import org.firstinspires.ftc.teamcode.util.InitConfigurer
-import org.firstinspires.ftc.teamcode.util.MotifPattern
+import org.firstinspires.ftc.teamcode.util.buildBasicLine
+import org.firstinspires.ftc.teamcode.util.buildCurvedLine
+import org.firstinspires.ftc.teamcode.util.buildTangentLine
 
 @Suppress("UNUSED")
 @Autonomous(name = "12 ball red near", preselectTeleOp = "Combined TeleOp")
@@ -87,7 +90,7 @@ class Red12 : LinearOpMode() {
                 ::opModeIsActive,
                 {
                     follower!!.followPath(scorePreload, 1.0, true)
-                    intake.off()
+                    intake.intake()
                 }
             ).addState(
                 "Shoot preload",
@@ -99,8 +102,12 @@ class Red12 : LinearOpMode() {
                     shootAllArtifacts()
                 }
             ).addState(
-                "Intake 1",
+                "DIntake 1",
                 {shootingState == Shoot.IDLE},
+                {follower!!.followPath(dIntake1, 0.8, true)}
+            ).addState(
+                "Intake 1",
+                {!follower!!.isBusy},
                 {follower!!.followPath(intake1, 0.4, true)}
             ).addState(
                 "DScore 1",
@@ -111,8 +118,12 @@ class Red12 : LinearOpMode() {
                 {!follower!!.isBusy},
                 ::shootAllArtifacts
             ).addState(
-                "Intake 2",
+                "DIntake 2",
                 {shootingState == Shoot.IDLE},
+                {follower!!.followPath(dIntake2, 0.8, true)}
+            ).addState(
+                "Intake 2",
+                {!follower!!.isBusy},
                 {follower!!.followPath(intake2, 0.4, true)}
             ).addState(
                 "DScore 2",
@@ -122,18 +133,22 @@ class Red12 : LinearOpMode() {
                 "Shoot 2",
                 {!follower!!.isBusy},
                 ::shootAllArtifacts
-//            ).addState(
-//                "DIntake 3",
-//                {shootingState == Shoot.IDLE},
-//                {follower!!.followPath(intake3, 0.7, true)}
-//            ).addState(
-//                "DScore 3",
-//                {!follower!!.isBusy},
-//                {follower!!.followPath(score3, 1.0, true)}
-//            ).addState(
-//                "Shoot 3",
-//                {!follower!!.isBusy},
-//                ::shootAllArtifacts
+            ).addState(
+                "DIntake 3",
+                {shootingState == Shoot.IDLE},
+                {follower!!.followPath(dIntake3, 0.8, true)}
+            ).addState(
+                "Intake 3",
+                {!follower!!.isBusy},
+                {follower!!.followPath(intake3, 0.4, true)}
+            ).addState(
+                "DScore 3",
+                {!follower!!.isBusy},
+                {follower!!.followPath(score3, 1.0, true)}
+            ).addState(
+                "Shoot 3",
+                {!follower!!.isBusy},
+                ::shootAllArtifacts
             ).addState(
                 "Park",
                 {shootingState == Shoot.IDLE},
@@ -169,105 +184,53 @@ class Red12 : LinearOpMode() {
     }
 
     lateinit var scorePreload: PathChain
+    lateinit var dIntake1: PathChain
     lateinit var intake1: PathChain
     lateinit var score1: PathChain
+    lateinit var dIntake2: PathChain
     lateinit var intake2: PathChain
     lateinit var score2: PathChain
+    lateinit var dIntake3: PathChain
     lateinit var intake3: PathChain
     lateinit var score3: PathChain
     lateinit var park: PathChain
 
     fun buildPaths() {
         scorePreload = follower!!.pathBuilder()
-            .addPath(
-                BezierLine(
-                    nearStartPose,
-                    nearShootPose
-                )
-            )
-            .setLinearHeadingInterpolation(nearStartPose.heading, nearShootPose.heading)
-            .addParametricCallback(0.0) { intake.intake() }
-//            .addParametricCallback(1.0) {
-//                spindexer.motifPattern = camera.motif
-//                CombinedTeleOp.motifPattern = spindexer.motifPattern
-//                Log.d("FSM", "motif pattern detected: ${spindexer.motifPattern}")
-//            }
-            .build()
+            .buildBasicLine(nearStartPose, nearShootPose).build()
+
+        dIntake1 = follower!!.pathBuilder()
+            .buildCurvedLine(nearShootPose, intake1Control, startIntake1).build()
 
         intake1 = follower!!.pathBuilder()
-            .addPath(
-                BezierCurve(
-                    nearShootPose,
-                    intake1Control,
-                    startIntake1
-                )
-            )
-            .setLinearHeadingInterpolation(nearShootPose.heading, startIntake1.heading)
-            .addPath(
-                BezierLine(startIntake1, endIntake1)
-            )
-            .setTangentHeadingInterpolation()
-            .build()
+            .buildTangentLine(startIntake1, endIntake1).build()
 
-        score1 = buildBasicLine(endIntake1, nearShootPose)
+        score1 = follower!!.pathBuilder()
+            .buildBasicLine(endIntake1, nearShootPose).build()
+
+        dIntake2 = follower!!.pathBuilder()
+            .buildCurvedLine(nearShootPose, intake2Control, startIntake2).build()
 
         intake2 = follower!!.pathBuilder()
-            .addPath(
-                BezierCurve(
-                    nearShootPose,
-                    intake2Control,
-                    startIntake2
-                )
-            )
-            .setLinearHeadingInterpolation(nearShootPose.heading, startIntake2.heading)
-            .addPath(
-                BezierLine(startIntake2, endIntake2)
-            )
-            .setTangentHeadingInterpolation()
-            .addPath(
-                BezierLine(
-                    endIntake2,
-                    endIntake2Move
-                )
-            )
-            .setTangentHeadingInterpolation().setReversed()
-            .build()
+            .buildTangentLine(startIntake2, endIntake2).build()
 
-        score2 = buildBasicLine(endIntake2Move, nearShootPose)
+        score2 = follower!!.pathBuilder()
+            .buildTangentLine(endIntake2, endIntake2Move).setReversed()
+            .buildBasicLine(endIntake2Move, nearShootPose).build()
+
+        dIntake3 = follower!!.pathBuilder()
+            .buildCurvedLine(nearShootPose, intake3Control, startIntake3).build()
 
         intake3 = follower!!.pathBuilder()
-            .addPath(
-                BezierCurve(
-                    nearShootPose,
-                    intake3Control,
-                    startIntake3
-                )
-            )
-            .setLinearHeadingInterpolation(nearShootPose.heading, startIntake3.heading)
-            .addPath(
-                BezierLine(startIntake3, endIntake3)
-            )
-            .setTangentHeadingInterpolation()
-            .addPath(
-                BezierLine(endIntake3, endIntake3Move)
-            )
-            .setTangentHeadingInterpolation().setReversed()
-            .build()
+            .buildTangentLine(startIntake3, endIntake3).build()
 
-        score3 = buildBasicLine(endIntake3, nearShootPose)
+        score3 = follower!!.pathBuilder()
+            .buildTangentLine(endIntake3, endIntake3Move).setReversed()
+            .buildBasicLine(endIntake3, nearShootPose).build()
 
-        park = buildBasicLine(nearShootPose, nearParkPose)
+        park = follower!!.pathBuilder()
+            .buildBasicLine(nearShootPose, nearParkPose).build()
     }
-
-    fun buildBasicLine(p1: Pose, p2: Pose): PathChain = follower!!.pathBuilder()
-        .addPath(BezierLine(p1, p2))
-        .setLinearHeadingInterpolation(p1.heading, p2.heading)
-        .build()
-
-    fun buildTangentLine(p1: Pose, p2: Pose): PathChain = follower!!.pathBuilder()
-        .addPath(BezierLine(p1, p2))
-        .setTangentHeadingInterpolation()
-        .build()
 
     val timer = ElapsedTime()
 
