@@ -1,37 +1,43 @@
 package org.firstinspires.ftc.teamcode.opmodes.auto
 
 import com.pedropathing.geometry.Pose
+import org.firstinspires.ftc.teamcode.util.Alliance
 import kotlin.math.atan2
 
-private const val horizontalIntakeStart = 100.0
-private const val horizontalIntakeEnd = 129.0
-private const val horizontalIntakeMoveBack = 125.0
+class AutoPoses(
+    val alliance: Alliance
+) {
+    private fun p (p: Pose): Pose = if (alliance == Alliance.RED) p else p.mirror()
 
-private const val intake1Vertical = 84.0
-private const val intake2Vertical = 58.5
-private const val intake3Vertical = 34.0
-private val intakeHeading = Math.toRadians(0.0)
+    private val HORIZONTAL_INTAKE_START = 100.0
+    private val HORIZONTAL_INTAKE_END = 129.0
+    private val HORIZONTAL_INTAKE_MOVE_BACK = 125.0
 
-val farStartPose = Pose(88.0, 8.5, Math.toRadians(90.0))
-val farShootPose = Pose(88.0, 14.0, Math.toRadians(0.0))
-val farParkPose = Pose(105.500, 33.500, Math.toRadians(90.0))
-val nearStartPose = Pose(117.4, 128.9, 0.7188)
-val nearShootPose = Pose(110.0, 110.0, atan2(144.0 - 110.0, 72.0 - 110.0))
-val nearParkPose = Pose(125.0, 90.0, intakeHeading)
-val intake1Control = Pose(horizontalIntakeStart, nearShootPose.y)
-val startIntake1 = Pose(horizontalIntakeStart, intake1Vertical, intakeHeading)
-val endIntake1 = Pose(129.0, intake1Vertical, intakeHeading)
-val intake2Control = Pose(horizontalIntakeStart, nearShootPose.y)
-val startIntake2 = Pose(horizontalIntakeStart, intake2Vertical, intakeHeading)
-val endIntake2 = Pose(horizontalIntakeEnd, intake2Vertical, intakeHeading)
-val endIntake2Move = Pose(horizontalIntakeMoveBack, endIntake2.y, intakeHeading)
-val intake3Control = Pose(horizontalIntakeStart, nearShootPose.y)
-val startIntake3 = Pose(horizontalIntakeStart, intake3Vertical, intakeHeading)
-val endIntake3 = Pose(horizontalIntakeEnd, intake3Vertical, intakeHeading)
-val endIntake3Move = Pose(horizontalIntakeMoveBack, endIntake3.y, intakeHeading)
+    private val INTAKE_1_VERTICAL = 84.0
+    private val INTAKE_2_VERTICAL = 58.5
+    private val INTAKE_3_VERTICAL = 34.0
+    private val INTAKE_HEADING = 0.0
 
-val emptyRampStart = Pose(120.0, 77.0, Math.toRadians(90.0))
-val emptyRamp = Pose(127.5, 77.0, Math.toRadians(90.0))
-
-val redPark = Pose(38.75, 33.25, Math.toRadians(90.0))
-val redHPCorner = Pose(8.4, 7.5, Math.toRadians(90.0))
+    val farStartPose   = p(Pose(88.0, 8.5, Math.toRadians(90.0)))
+    val farShootPose   = p(Pose(88.0, 14.0, Math.toRadians(0.0)))
+    val farParkPose    = p(Pose(105.500, 33.500, Math.toRadians(90.0)))
+    val nearStartPose  = p(Pose(117.4, 128.9, 0.7188))
+    val nearShootPoseFacingObelisk = p(Pose(110.0, 110.0, atan2(144.0 - 110.0, 72.0 - 110.0)))
+    val nearShootPose  = p(Pose(110.0, 110.0, INTAKE_HEADING))
+    val nearParkPose   = p(Pose(125.0, 90.0, INTAKE_HEADING))
+    val intake1Control = p(Pose(HORIZONTAL_INTAKE_START, nearShootPose.y))
+    val startIntake1   = p(Pose(HORIZONTAL_INTAKE_START, INTAKE_1_VERTICAL, INTAKE_HEADING))
+    val endIntake1     = p(Pose(129.0, INTAKE_1_VERTICAL, INTAKE_HEADING))
+    val intake2Control = p(Pose(HORIZONTAL_INTAKE_START, nearShootPose.y))
+    val startIntake2   = p(Pose(HORIZONTAL_INTAKE_START, INTAKE_2_VERTICAL, INTAKE_HEADING))
+    val endIntake2     = p(Pose(HORIZONTAL_INTAKE_END, INTAKE_2_VERTICAL, INTAKE_HEADING))
+    val endIntake2Move = p(Pose(HORIZONTAL_INTAKE_MOVE_BACK, endIntake2.y, INTAKE_HEADING))
+    val intake3Control = p(Pose(HORIZONTAL_INTAKE_START, nearShootPose.y))
+    val startIntake3   = p(Pose(HORIZONTAL_INTAKE_START, INTAKE_3_VERTICAL, INTAKE_HEADING))
+    val endIntake3     = p(Pose(HORIZONTAL_INTAKE_END, INTAKE_3_VERTICAL, INTAKE_HEADING))
+    val endIntake3Move = p(Pose(HORIZONTAL_INTAKE_MOVE_BACK, endIntake3.y, INTAKE_HEADING))
+    val emptyRampStart = p(Pose(120.0, 77.0, Math.toRadians(90.0)))
+    val emptyRamp      = p(Pose(127.5, 77.0, Math.toRadians(90.0)))
+    val redPark        = p(Pose(38.75, 33.25, Math.toRadians(90.0)))
+    val redHPCorner    = p(Pose(8.4, 7.5, Math.toRadians(90.0)))
+}

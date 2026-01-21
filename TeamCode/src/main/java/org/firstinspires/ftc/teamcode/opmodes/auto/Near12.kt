@@ -3,11 +3,6 @@ package org.firstinspires.ftc.teamcode.opmodes.auto
 import android.util.Log
 import com.bylazar.telemetry.JoinedTelemetry
 import com.bylazar.telemetry.PanelsTelemetry
-import com.pedropathing.geometry.BezierCurve
-import com.pedropathing.geometry.BezierLine
-import com.pedropathing.geometry.Pose
-import com.pedropathing.paths.PathBuilder
-import com.pedropathing.paths.PathChain
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.util.ElapsedTime
@@ -22,18 +17,15 @@ import org.firstinspires.ftc.teamcode.subsystems.Shooter
 import org.firstinspires.ftc.teamcode.subsystems.Spindexer
 import org.firstinspires.ftc.teamcode.subsystems.Transfer
 import org.firstinspires.ftc.teamcode.subsystems.Turret
-import org.firstinspires.ftc.teamcode.util.Alliance
 import org.firstinspires.ftc.teamcode.util.Artifact
 import org.firstinspires.ftc.teamcode.util.BetterLoopTimeComponent
 import org.firstinspires.ftc.teamcode.util.FiniteStateMachine
 import org.firstinspires.ftc.teamcode.util.InitConfigurer
-import org.firstinspires.ftc.teamcode.util.buildBasicLine
-import org.firstinspires.ftc.teamcode.util.buildCurvedLine
-import org.firstinspires.ftc.teamcode.util.buildTangentLine
+import org.firstinspires.ftc.teamcode.util.followCustomPath
 
 @Suppress("UNUSED")
-@Autonomous(name = "12 ball red near", preselectTeleOp = "Combined TeleOp")
-class Red12 : LinearOpMode() {
+@Autonomous(name = "12 ball near", preselectTeleOp = "Combined TeleOp")
+class Near12 : LinearOpMode() {
     enum class Shoot {
         IDLE,
         MOVE_SPINDEXER,
@@ -59,18 +51,23 @@ class Red12 : LinearOpMode() {
         telemetry = JoinedTelemetry(PanelsTelemetry.ftcTelemetry, telemetry)
 
         follower = Constants.createFollower(hardwareMap)
-        buildPaths()
-        follower!!.setStartingPose(nearStartPose)
-        follower!!.update()
-        Drawing.init()
-        Drawing.drawDebug(follower)
-        InitConfigurer.selectedAlliance = Alliance.RED
+        InitConfigurer.preInit()
 
         subsystems.forEach { it.initialize() }
         camera.initialize()
-        turret.selectedAlliance = Alliance.RED
 
         Log.d("FSM", "auto inited")
+        while (opModeInInit() && !InitConfigurer.hasSelectedAlliance) {
+            InitConfigurer.postWaitForStart()
+            follower!!.update()
+            telemetry.update()
+        }
+
+        val pathSequence = Path12(InitConfigurer.selectedAlliance!!)
+        turret.selectedAlliance = InitConfigurer.selectedAlliance!!
+        follower!!.pose = pathSequence.poses.nearStartPose
+        val paths = pathSequence.buildPaths(follower!!)
+
         while (opModeInInit()) {
             follower!!.update()
             telemetry.update()
@@ -89,7 +86,7 @@ class Red12 : LinearOpMode() {
                 "DScore Preload",
                 ::opModeIsActive,
                 {
-                    follower!!.followPath(scorePreload, 1.0, true)
+                    follower!!.followCustomPath(paths[0])
                     intake.intake()
                 }
             ).addState(
@@ -104,15 +101,15 @@ class Red12 : LinearOpMode() {
             ).addState(
                 "DIntake 1",
                 {shootingState == Shoot.IDLE},
-                {follower!!.followPath(dIntake1, 0.8, true)}
+                {follower!!.followCustomPath(paths[1])}
             ).addState(
                 "Intake 1",
                 {!follower!!.isBusy},
-                {follower!!.followPath(intake1, 0.4, true)}
+                {follower!!.followCustomPath(paths[2])}
             ).addState(
                 "DScore 1",
                 {!follower!!.isBusy},
-                {follower!!.followPath(score1, 1.0, true)}
+                {follower!!.followCustomPath(paths[3])}
             ).addState(
                 "Shoot 1",
                 {!follower!!.isBusy},
@@ -120,15 +117,15 @@ class Red12 : LinearOpMode() {
             ).addState(
                 "DIntake 2",
                 {shootingState == Shoot.IDLE},
-                {follower!!.followPath(dIntake2, 0.8, true)}
+                {follower!!.followCustomPath(paths[4])}
             ).addState(
                 "Intake 2",
                 {!follower!!.isBusy},
-                {follower!!.followPath(intake2, 0.4, true)}
+                {follower!!.followCustomPath(paths[5])}
             ).addState(
                 "DScore 2",
                 {!follower!!.isBusy},
-                {follower!!.followPath(score2, 1.0, true)}
+                {follower!!.followCustomPath(paths[6])}
             ).addState(
                 "Shoot 2",
                 {!follower!!.isBusy},
@@ -136,15 +133,15 @@ class Red12 : LinearOpMode() {
             ).addState(
                 "DIntake 3",
                 {shootingState == Shoot.IDLE},
-                {follower!!.followPath(dIntake3, 0.8, true)}
+                {follower!!.followCustomPath(paths[7])}
             ).addState(
                 "Intake 3",
                 {!follower!!.isBusy},
-                {follower!!.followPath(intake3, 0.4, true)}
+                {follower!!.followCustomPath(paths[8])}
             ).addState(
                 "DScore 3",
                 {!follower!!.isBusy},
-                {follower!!.followPath(score3, 1.0, true)}
+                {follower!!.followCustomPath(paths[9])}
             ).addState(
                 "Shoot 3",
                 {!follower!!.isBusy},
@@ -152,7 +149,7 @@ class Red12 : LinearOpMode() {
             ).addState(
                 "Park",
                 {shootingState == Shoot.IDLE},
-                {follower!!.followPath(park, 1.0, true)}
+                {follower!!.followCustomPath(paths[10])}
             )
 
         while (opModeIsActive()) {
@@ -181,55 +178,6 @@ class Red12 : LinearOpMode() {
         }
 
         follower!!.breakFollowing()
-    }
-
-    lateinit var scorePreload: PathChain
-    lateinit var dIntake1: PathChain
-    lateinit var intake1: PathChain
-    lateinit var score1: PathChain
-    lateinit var dIntake2: PathChain
-    lateinit var intake2: PathChain
-    lateinit var score2: PathChain
-    lateinit var dIntake3: PathChain
-    lateinit var intake3: PathChain
-    lateinit var score3: PathChain
-    lateinit var park: PathChain
-
-    fun buildPaths() {
-        scorePreload = follower!!.pathBuilder()
-            .buildBasicLine(nearStartPose, nearShootPose).build()
-
-        dIntake1 = follower!!.pathBuilder()
-            .buildCurvedLine(nearShootPose, intake1Control, startIntake1).build()
-
-        intake1 = follower!!.pathBuilder()
-            .buildTangentLine(startIntake1, endIntake1).build()
-
-        score1 = follower!!.pathBuilder()
-            .buildBasicLine(endIntake1, nearShootPose).build()
-
-        dIntake2 = follower!!.pathBuilder()
-            .buildCurvedLine(nearShootPose, intake2Control, startIntake2).build()
-
-        intake2 = follower!!.pathBuilder()
-            .buildTangentLine(startIntake2, endIntake2).build()
-
-        score2 = follower!!.pathBuilder()
-            .buildTangentLine(endIntake2, endIntake2Move).setReversed()
-            .buildBasicLine(endIntake2Move, nearShootPose).build()
-
-        dIntake3 = follower!!.pathBuilder()
-            .buildCurvedLine(nearShootPose, intake3Control, startIntake3).build()
-
-        intake3 = follower!!.pathBuilder()
-            .buildTangentLine(startIntake3, endIntake3).build()
-
-        score3 = follower!!.pathBuilder()
-            .buildTangentLine(endIntake3, endIntake3Move).setReversed()
-            .buildBasicLine(endIntake3, nearShootPose).build()
-
-        park = follower!!.pathBuilder()
-            .buildBasicLine(nearShootPose, nearParkPose).build()
     }
 
     val timer = ElapsedTime()

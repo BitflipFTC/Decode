@@ -1,11 +1,13 @@
 package org.firstinspires.ftc.teamcode.util
 
+import com.pedropathing.follower.Follower
 import com.pedropathing.geometry.BezierCurve
 import com.pedropathing.geometry.BezierLine
 import com.pedropathing.geometry.Pose
 import com.pedropathing.paths.PathBuilder
 import com.qualcomm.robotcore.hardware.Gamepad
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit
+import org.firstinspires.ftc.teamcode.opmodes.auto.Path
 
 fun Boolean.toDouble(): Double {
     return if (this) 1.0 else 0.0
@@ -47,6 +49,8 @@ fun PathBuilder.buildCurvedLine(p1: Pose, c: Pose, p2: Pose): PathBuilder = this
 fun PathBuilder.buildTangentLine(p1: Pose, p2: Pose): PathBuilder = this
     .addPath(BezierLine(p1, p2))
     .setTangentHeadingInterpolation()
+
+fun Follower.followCustomPath(path: Path) = this.followPath(path.path, path.speed, true)
 
 /**
  * @author WPlib i think (copied from solverslib)
