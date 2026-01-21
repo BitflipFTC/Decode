@@ -1,23 +1,26 @@
-package org.firstinspires.ftc.teamcode.util
+package org.firstinspires.ftc.teamcode.util.components
 
+import com.qualcomm.robotcore.hardware.Gamepad
+import com.skeletonarmy.marrow.OpModeManager
 import org.firstinspires.ftc.robotcore.external.Telemetry
+import org.firstinspires.ftc.teamcode.util.Alliance
 
 object InitConfigurer : Component {
     private val telemetry: Telemetry
-        get() = ActiveOpMode.telemetry
-    private val gamepad1: com.qualcomm.robotcore.hardware.Gamepad
-        get() = ActiveOpMode.gamepad1
+        get() = OpModeManager.getTelemetry()!!
+    private val gamepad1: Gamepad
+        get() = OpModeManager.getActiveOpMode()!!.gamepad1
 
     var hasSelectedAlliance = false
 
     var selectedAlliance: Alliance? = null
 
-    override fun preInit() {
+    override fun init() {
         selectedAlliance = null
         hasSelectedAlliance = false
     }
 
-    override fun postWaitForStart() {
+    override fun initLoop() {
         telemetry.run {
             addLine("Selecting alliance")
             addLine()
@@ -33,6 +36,5 @@ object InitConfigurer : Component {
         if (gamepad1.touchpadWasPressed()) {
             hasSelectedAlliance = true
         }
-
     }
 }

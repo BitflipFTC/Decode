@@ -20,10 +20,10 @@ class FiniteStateMachine {
             currentState++
         }
     }
+    class State (
+        val name: String,
+        val startCondition: () -> Boolean,
+        val run: () -> Unit
+        )
 }
 
-class State (
-    val name: String,
-    val startCondition: () -> Boolean,
-    val run: () -> Unit
-    )

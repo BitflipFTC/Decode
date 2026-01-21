@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode.subsystems
 
 import com.qualcomm.robotcore.hardware.HardwareMap
+import com.seattlesolvers.solverslib.command.SubsystemBase
+import com.skeletonarmy.marrow.OpModeManager
 import org.firstinspires.ftc.teamcode.util.hardware.MotorEx
 
 /**
@@ -9,13 +11,13 @@ import org.firstinspires.ftc.teamcode.util.hardware.MotorEx
  * This class provides a simple interface for controlling the intake motor.
  * It exposes a `power` property that can be set directly.
  */
-class Intake(val hardwareMap: HardwareMap): Subsystem {
+class Intake(): SubsystemBase() {
     enum class State (val value: Double) {
         OFF(0.0),
         INTAKE(1.0 ),
     }
 
-    private lateinit var motor: MotorEx
+    private val motor: MotorEx = MotorEx("intake").reverse().brake().zeroed()
 
     var reversed = false
 
@@ -41,44 +43,42 @@ class Intake(val hardwareMap: HardwareMap): Subsystem {
         power = State.OFF
     }
 
-    fun runIntake() = LambdaCommand()
+//    fun runIntake() = LambdaCommand()
 //        .setStart { intake() }
 //        .setStop { interrupted -> if (!interrupted) {off()} }
 //        .setRequirements(this)
 //        .setInterruptible(true)
 //        .setName("Intake")
 //
-    fun toggleRun() = LambdaCommand()
+//    fun toggleRun() = LambdaCommand()
 //        .setStart { toggle() }
 //        .setRequirements(this)
 //        .setInterruptible(true)
 //        .setName("Toggle Intake")
 //
-    fun stopIntake() = LambdaCommand()
+//    fun stopIntake() = LambdaCommand()
 //        .setStart { off() }
 //        .setRequirements(this)
 //        .setInterruptible(true)
 //        .setName("Stop intake")
 //
-    fun reverse() = LambdaCommand()
+//    fun reverse() = LambdaCommand()
 //        .setStart { this.reversed = true }
 //        .setRequirements(this)
 //
-    fun forward() = LambdaCommand()
+//    fun forward() = LambdaCommand()
 //        .setStart { this.reversed = false }
 //        .setRequirements(this)
-
-    override fun initialize() {
-        motor = MotorEx("intake").reverse().brake().zeroed()
-    }
 
     override fun periodic() {
         motor.power = if (reversed) -power.value else power.value
 
         if (debugTelemetry) {
-            ActiveOpMode.telemetry.addData("Intake state", power.name)
-            ActiveOpMode.telemetry.addData("Reversed", reversed)
-            ActiveOpMode.telemetry.addLine("---------------------------")
+            OpModeManager.getTelemetry()?.run{
+                addData("Intake state", power.name)
+                addData("Reversed", reversed)
+                addLine("---------------------------")
+            }
         }
     }
 }

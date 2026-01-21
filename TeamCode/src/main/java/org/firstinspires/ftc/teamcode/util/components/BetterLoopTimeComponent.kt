@@ -1,17 +1,19 @@
-package org.firstinspires.ftc.teamcode.util
+package org.firstinspires.ftc.teamcode.util.components
 
 import com.bylazar.utils.LoopTimer
+import com.skeletonarmy.marrow.OpModeManager
+import org.firstinspires.ftc.teamcode.util.components.Component
 
 object BetterLoopTimeComponent : Component {
     private val loopTimer = LoopTimer(10)
-    override fun preStartButtonPressed() {
+    override fun init() {
         loopTimer.start()
     }
 
-    override fun postUpdate() {
+    override fun periodic() {
         loopTimer.end()
         loopTimer.start()
-        ActiveOpMode.telemetry.run {
+        OpModeManager.getTelemetry()?.run {
             addData("Loop ms", loopTimer.ms.toDouble())
             addData("Loop hz", loopTimer.hz)
         }

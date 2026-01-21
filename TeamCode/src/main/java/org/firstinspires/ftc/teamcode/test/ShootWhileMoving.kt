@@ -15,7 +15,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Transfer
 import org.firstinspires.ftc.teamcode.subsystems.Turret
 import org.firstinspires.ftc.teamcode.util.Alliance
 import org.firstinspires.ftc.teamcode.util.Artifact
-import org.firstinspires.ftc.teamcode.util.BetterLoopTimeComponent
+import org.firstinspires.ftc.teamcode.util.components.BetterLoopTimeComponent
 import kotlin.math.PI
 import kotlin.math.sin
 import kotlin.math.sqrt

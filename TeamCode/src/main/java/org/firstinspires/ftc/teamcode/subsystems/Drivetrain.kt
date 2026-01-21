@@ -2,10 +2,12 @@ package org.firstinspires.ftc.teamcode.subsystems
 
 import android.annotation.SuppressLint
 import com.qualcomm.robotcore.hardware.HardwareMap
+import com.seattlesolvers.solverslib.command.SubsystemBase
+import com.skeletonarmy.marrow.OpModeManager
 import org.firstinspires.ftc.teamcode.util.hardware.MotorEx
 import kotlin.math.max
 
-class Drivetrain(val hardwareMap: HardwareMap): Subsystem {
+class Drivetrain(val hardwareMap: HardwareMap): SubsystemBase() {
     class DrivePowers(val fl: Double, val fr: Double, val bl: Double, val br: Double) {
         @SuppressLint("DefaultLocale")
         override fun toString(): String {
@@ -40,17 +42,10 @@ class Drivetrain(val hardwareMap: HardwareMap): Subsystem {
     var fieldCentric = false
     var driveSpeed = 1.0
 
-    private lateinit var frontLeft : MotorEx
-    private lateinit var frontRight: MotorEx
-    private lateinit var backLeft  : MotorEx
-    private lateinit var backRight : MotorEx
-
-    override fun initialize() {
-        frontLeft = MotorEx("frontleft").reverse().zeroed().brake()
-        frontRight = MotorEx("frontright").reverse().brake().zeroed()
-        backLeft = MotorEx("backleft").zeroed().brake()
-        backRight = MotorEx("backright").reverse().zeroed().brake()
-    }
+    private val frontLeft : MotorEx = MotorEx("frontleft").reverse().zeroed().brake()
+    private val frontRight: MotorEx = MotorEx("frontright").reverse().brake().zeroed()
+    private val backLeft  : MotorEx = MotorEx("backleft").zeroed().brake()
+    private val backRight : MotorEx = MotorEx("backright").reverse().zeroed().brake()
 
     fun setDrivetrainPowers(powers: DrivePowers) {
         frontLeft.power = powers.fl
@@ -75,8 +70,10 @@ class Drivetrain(val hardwareMap: HardwareMap): Subsystem {
 
     override fun periodic() {
         if (debugTelemetry) {
-            ActiveOpMode.telemetry.addLine(currentDrivePowers.toString())
-            ActiveOpMode.telemetry.addData("Heading", heading)
+            OpModeManager.getTelemetry()?.run {
+                addLine(currentDrivePowers.toString())
+                addData("Heading", heading)
+            }
         }
     }
 }

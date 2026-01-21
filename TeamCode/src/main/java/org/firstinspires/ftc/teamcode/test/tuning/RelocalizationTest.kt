@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import org.firstinspires.ftc.teamcode.pedroPathing.Drawing
 import org.firstinspires.ftc.teamcode.subsystems.Drivetrain
 import org.firstinspires.ftc.teamcode.subsystems.OV9281
-import org.firstinspires.ftc.teamcode.util.BetterLoopTimeComponent
+import org.firstinspires.ftc.teamcode.util.components.BetterLoopTimeComponent
 
 @TeleOp(name = "Test: Camera", group = "Test")
 class RelocalizationTest: LinearOpMode() {

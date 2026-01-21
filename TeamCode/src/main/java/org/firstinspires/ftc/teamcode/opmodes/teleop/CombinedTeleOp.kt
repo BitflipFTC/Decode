@@ -1,9 +1,7 @@
 package org.firstinspires.ftc.teamcode.opmodes.teleop
 
-import android.util.Log
 import com.bylazar.configurables.annotations.Configurable
 import com.bylazar.field.Style
-import com.bylazar.gamepad.PanelsGamepad
 import com.bylazar.telemetry.JoinedTelemetry
 import com.bylazar.telemetry.PanelsTelemetry
 import com.bylazar.utils.LoopTimer
@@ -15,8 +13,6 @@ import com.qualcomm.hardware.lynx.LynxModule
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import com.qualcomm.robotcore.hardware.Gamepad
-import org.firstinspires.ftc.teamcode.opmodes.auto.nearStartPose
-import org.firstinspires.ftc.teamcode.opmodes.auto.redPark
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants
 import org.firstinspires.ftc.teamcode.pedroPathing.Drawing
 import org.firstinspires.ftc.teamcode.subsystems.ArtifactColorSensor
@@ -28,8 +24,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Transfer
 import org.firstinspires.ftc.teamcode.subsystems.Turret
 import org.firstinspires.ftc.teamcode.util.Alliance
 import org.firstinspires.ftc.teamcode.util.Artifact
-import org.firstinspires.ftc.teamcode.util.BetterLoopTimeComponent
-import org.firstinspires.ftc.teamcode.util.InitConfigurer
+import org.firstinspires.ftc.teamcode.util.components.InitConfigurer
 import org.firstinspires.ftc.teamcode.util.MotifPattern
 
 @Configurable

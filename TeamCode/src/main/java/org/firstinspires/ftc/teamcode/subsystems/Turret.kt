@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode.subsystems
 
 import com.bylazar.configurables.annotations.Configurable
 import com.pedropathing.geometry.Pose
+import com.seattlesolvers.solverslib.command.SubsystemBase
+import com.skeletonarmy.marrow.OpModeManager
 import org.firstinspires.ftc.teamcode.util.Alliance
 import org.firstinspires.ftc.teamcode.util.hardware.ServoEx
 import org.firstinspires.ftc.teamcode.util.normalizeRadians
@@ -10,7 +12,7 @@ import kotlin.math.cos
 import kotlin.math.sin
 
 @Configurable
-class Turret(): Subsystem {
+class Turret(): SubsystemBase() {
     companion object {
         const val GEAR_RATIO: Double = 33.0/89.0
 
@@ -29,8 +31,8 @@ class Turret(): Subsystem {
         const val SERVO_MAX = 0.5 + ((SERVO_LIMITS / 2) / 1800)
     }
 
-    private lateinit var servoL: ServoEx
-    private lateinit var servoR: ServoEx
+    private var servoL: ServoEx = ServoEx("turretL").apply { scaleRange(SERVO_MIN, SERVO_MAX) }
+    private var servoR: ServoEx = ServoEx("turretR").apply { scaleRange(SERVO_MIN, SERVO_MAX) }
 
     var debugTelemetry = true
     var automatic = true
@@ -86,14 +88,6 @@ class Turret(): Subsystem {
             position = scaledAngle
         }
 
-    override fun initialize() {
-        servoL = ServoEx("turretL")
-        servoR = ServoEx("turretR")
-
-        servoL.scaleRange(SERVO_MIN, SERVO_MAX)
-        servoR.scaleRange(SERVO_MIN, SERVO_MAX)
-    }
-
     override fun periodic() {
         // we assume robot is 0, 0 in a graph.
         // bearing is equal to the angle between the robot and the goal.
@@ -109,7 +103,7 @@ class Turret(): Subsystem {
         }
 
         if (debugTelemetry) {
-            ActiveOpMode.telemetry.run{
+            OpModeManager.getTelemetry()?.run{
                 addData("Turret calculated bearing", bearing)
                 addData("Turret robot heading", robotHeading)
                 addData("Turret target angle", angle)

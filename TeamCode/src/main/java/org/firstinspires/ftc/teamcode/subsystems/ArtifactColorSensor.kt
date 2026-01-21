@@ -4,12 +4,13 @@ import android.util.Log
 import com.qualcomm.hardware.rev.RevColorSensorV3
 import com.qualcomm.robotcore.hardware.HardwareMap
 import com.qualcomm.robotcore.hardware.NormalizedRGBA
-import com.seattlesolvers.solverslib.command.Subsystem
+import com.seattlesolvers.solverslib.command.SubsystemBase
+import com.skeletonarmy.marrow.OpModeManager
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit
 import org.firstinspires.ftc.teamcode.util.Artifact
 
-class ArtifactColorSensor(val hardwareMap: HardwareMap): Subsystem {
-    private val colorSensor: RevColorSensorV3 = hardwareMap.get(RevColorSensorV3::class.java, "colorSensor")
+class ArtifactColorSensor(): SubsystemBase() {
+    private val colorSensor: RevColorSensorV3 = OpModeManager.getHardwareMap().get(RevColorSensorV3::class.java, "colorSensor")
     var colors: NormalizedRGBA = NormalizedRGBA()
         private set
 
@@ -49,7 +50,7 @@ class ArtifactColorSensor(val hardwareMap: HardwareMap): Subsystem {
         }
 
         if (debugTelemetry) {
-            ActiveOpMode.telemetry.run {
+            OpModeManager.getTelemetry()?.run {
                 addData("Detected Artifact", detectedArtifact?.name ?: "none")
                 addData("Distance", "%05.2fcm", distance)
                 addData("green","%07.4f", green)

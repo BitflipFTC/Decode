@@ -66,4 +66,5 @@ dependencies {
     implementation("dev.frozenmilk.sinister:Sloth:0.2.4")
     implementation "org.solverslib:core:0.3.3" // core
     implementation "org.solverslib:pedroPathing:0.3.3" // pedroPathing
+    implementation 'com.skeletonarmyftc.marrow:core:1.0.0'
 }

@@ -6,6 +6,8 @@ import androidx.annotation.Nullable;
 
 import com.bylazar.configurables.annotations.Configurable;
 import com.pedropathing.geometry.Pose;
+import com.seattlesolvers.solverslib.command.SubsystemBase;
+import com.skeletonarmy.marrow.OpModeManager;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.ExposureControl;
@@ -26,7 +28,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Configurable
-public class OV9281 implements Subsystem {
+public class OV9281 extends SubsystemBase {
 
     private AprilTagProcessor aprilTag;
     private VisionPortal visionPortal;
@@ -75,8 +77,7 @@ public class OV9281 implements Subsystem {
 
     // exposure: 1-7
     // gain: 1-6
-    @Override
-    public void initialize () {
+    public OV9281 () {
         aprilTag = new AprilTagProcessor.Builder()
                 .setTagLibrary(AprilTagGameDatabase.getDecodeTagLibrary())
                 .setDrawTagOutline(true)
@@ -92,7 +93,7 @@ public class OV9281 implements Subsystem {
         aprilTag.setDecimation(1f);
 
         visionPortal = new VisionPortal.Builder()
-                .setCamera(ActiveOpMode.hardwareMap().get(WebcamName.class, "camera"))
+                .setCamera(OpModeManager.getHardwareMap().get(WebcamName.class, "camera"))
                 .setCameraResolution(new Size(640,480))
                 .setShowStatsOverlay(true)
                 .setStreamFormat(VisionPortal.StreamFormat.MJPEG)
@@ -176,26 +177,26 @@ public class OV9281 implements Subsystem {
 
         if (count == 0) {
             if (debugTelemetry)
-                ActiveOpMode.telemetry().addData("Detected April Tags", 0);
+                OpModeManager.getTelemetry().addData("Detected April Tags", 0);
             newReading = false;
             return;
         }
 
         if (debugTelemetry)
-            ActiveOpMode.telemetry().addData("Detected April Tags", detectionsBuffer.size());
+            OpModeManager.getTelemetry().addData("Detected April Tags", detectionsBuffer.size());
         for (AprilTagDetection detection : detectionsBuffer) {
             if (detection.metadata == null) {
                 if (debugTelemetry)
-                    ActiveOpMode.telemetry().addData("Current tag", "No metadata");
+                    OpModeManager.getTelemetry().addData("Current tag", "No metadata");
                 newReading = false;
                 continue;
             }
 
 
             if (debugTelemetry) {
-                ActiveOpMode.telemetry().addData("TAG NAME", detection.metadata.name);
-                ActiveOpMode.telemetry().addData("ID", detection.id);
-                ActiveOpMode.telemetry().addData("Sureness", detection.decisionMargin);
+                OpModeManager.getTelemetry().addData("TAG NAME", detection.metadata.name);
+                OpModeManager.getTelemetry().addData("ID", detection.id);
+                OpModeManager.getTelemetry().addData("Sureness", detection.decisionMargin);
             }
 
             if ((detection.id == 20 || detection.id == 24) && detection.decisionMargin > 31) {

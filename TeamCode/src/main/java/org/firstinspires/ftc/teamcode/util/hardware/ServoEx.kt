@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.util.hardware
 
 import com.qualcomm.robotcore.hardware.PwmControl
 import com.qualcomm.robotcore.hardware.ServoImplEx
+import com.skeletonarmy.marrow.OpModeManager
 import kotlin.math.abs
 
 /**
@@ -13,7 +14,7 @@ class ServoEx(
     var cacheTolerance: Double = 0.01
 ) {
     private val servo: ServoImplEx =
-        ActiveOpMode.hardwareMap.get(ServoImplEx::class.java, servoName).apply {
+        OpModeManager.getHardwareMap().get(ServoImplEx::class.java, servoName).apply {
             pwmRange = PwmControl.PwmRange(500.0, 2500.0)
         }
 

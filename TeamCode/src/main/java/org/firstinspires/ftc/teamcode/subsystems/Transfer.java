@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode.subsystems;
 
 import com.bylazar.configurables.annotations.Configurable;
 import com.qualcomm.robotcore.util.Range;
+import com.seattlesolvers.solverslib.command.SubsystemBase;
+import com.skeletonarmy.marrow.OpModeManager;
 
 import org.firstinspires.ftc.teamcode.util.PIDController;
 import org.firstinspires.ftc.teamcode.util.hardware.MotorEx;
@@ -13,7 +15,7 @@ import org.firstinspires.ftc.teamcode.util.hardware.MotorEx;
  * The [update] method must be called in a loop to drive the motor to its target position.
  */
 @Configurable
-public class Transfer implements Subsystem {
+public class Transfer extends SubsystemBase {
     // 1150rpm motor, so
     private final double TICKS_PER_REVOLUTION = 145.1;
     private double targetPosition = 0;
@@ -30,7 +32,7 @@ public class Transfer implements Subsystem {
 
     boolean debugTelemetry = true;
 
-    private MotorEx motor = null;
+    private final MotorEx motor;
 
     private final PIDController controller = new PIDController(kP, kI, kD);
 
@@ -95,10 +97,10 @@ public class Transfer implements Subsystem {
         }
 
         if (debugTelemetry) {
-            ActiveOpMode.telemetry().addData("Transfer current ticks", getCurrentPosition());
-            ActiveOpMode.telemetry().addData("Transfer target ticks", targetPosition);
-            ActiveOpMode.telemetry().addData("Transfer at set point", atSetPoint());
-            ActiveOpMode.telemetry().addLine("---------------------------");
+            OpModeManager.getTelemetry().addData("Transfer current ticks", getCurrentPosition());
+            OpModeManager.getTelemetry().addData("Transfer target ticks", targetPosition);
+            OpModeManager.getTelemetry().addData("Transfer at set point", atSetPoint());
+            OpModeManager.getTelemetry().addLine("---------------------------");
         }
     }
 
@@ -106,12 +108,12 @@ public class Transfer implements Subsystem {
         return controller.atSetPoint();
     }
 
-    public LambdaCommand shootArtifact() {
-        return new LambdaCommand()
-                .setStart(this::transferArtifact)
-                .setIsDone(this::atSetPoint)
-                .setName("Shoot artifact")
-                .setInterruptible(true)
-                .setRequirements(this);
-    }
+//    public LambdaCommand shootArtifact() {
+//        return new LambdaCommand()
+//                .setStart(this::transferArtifact)
+//                .setIsDone(this::atSetPoint)
+//                .setName("Shoot artifact")
+//                .setInterruptible(true)
+//                .setRequirements(this);
+//    }
 }

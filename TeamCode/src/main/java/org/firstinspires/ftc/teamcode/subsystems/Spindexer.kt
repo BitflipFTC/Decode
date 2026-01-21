@@ -2,7 +2,8 @@ package org.firstinspires.ftc.teamcode.subsystems
 
 import com.bylazar.configurables.annotations.Configurable
 import com.qualcomm.robotcore.util.Range
-import com.seattlesolvers.solverslib.command.Subsystem
+import com.seattlesolvers.solverslib.command.SubsystemBase
+import com.skeletonarmy.marrow.OpModeManager
 import org.firstinspires.ftc.teamcode.util.Artifact
 import org.firstinspires.ftc.teamcode.util.MotifPattern
 import org.firstinspires.ftc.teamcode.util.PIDController
@@ -26,7 +27,7 @@ import org.firstinspires.ftc.teamcode.util.hardware.MotorEx
  *
  */
 @Configurable
-class Spindexer(): Subsystem {
+class Spindexer(): SubsystemBase() {
     companion object {
         const val GEAR_RATIO: Double = 1.125 // 18t out to 16t in
         const val TICKS_PER_REVOLUTION: Double = 537.7 * GEAR_RATIO
@@ -354,11 +355,8 @@ class Spindexer(): Subsystem {
     // ------------------ INTERNAL HARDWARE CONTROL ------------------
 
     private var motor: MotorEx = MotorEx("spindexer").zeroed().brake()
-    private val controller = PIDController(kP, kI, kD, 0.0, kS, staticFrictionDeadband = staticFrictionDeadband)
-
-    init {
-        // convert from degrees to ticks
-        controller.setPointTolerance = (setpointTolerance / 360) * TICKS_PER_REVOLUTION
+    private val controller = PIDController(kP, kI, kD, 0.0, kS, staticFrictionDeadband = staticFrictionDeadband).apply {
+        setpointTolerance = (setpointTolerance / 360) * TICKS_PER_REVOLUTION
     }
 
     /**
@@ -376,14 +374,16 @@ class Spindexer(): Subsystem {
         motor.power = Range.clip(motorPower, -maxPower, maxPower)
 
         if (debugTelemetry) {
-            ActiveOpMode.telemetry.addData("Spindexer target angle", targetAngle)
-            ActiveOpMode.telemetry.addData("Spindexer current angle", currentAngle)
-            ActiveOpMode.telemetry.addData("Spindexer current state", state.name)
-            ActiveOpMode.telemetry.addData("Spindexer atSetPoint", atSetPoint())
-            ActiveOpMode.telemetry.addData("Spindexer indexed artifacts", getArtifactString())
-            ActiveOpMode.telemetry.addData("Spindexer has motif assortment?", hasMotifAssortment)
-            ActiveOpMode.telemetry.addData("Motif Pattern", motifPattern?.name ?: "NONE")
-            ActiveOpMode.telemetry.addLine("---------------------------")
+            OpModeManager.getTelemetry()?.run{
+                addData("Spindexer target angle", targetAngle)
+                addData("Spindexer current angle", currentAngle)
+                addData("Spindexer current state", state.name)
+                addData("Spindexer atSetPoint", atSetPoint())
+                addData("Spindexer indexed artifacts", getArtifactString())
+                addData("Spindexer has motif assortment?", hasMotifAssortment)
+                addData("Motif Pattern", motifPattern?.name ?: "NONE")
+                addLine("---------------------------")
+            }
         }
     }
 
@@ -406,74 +406,74 @@ class Spindexer(): Subsystem {
     /**
      * Moves to the next spindexer position, cycling through intakes then outtakes.
      */
-    fun goToNextPosition() = LambdaCommand()
-        .setStart(this::toNextPosition)
-        .setIsDone(this::atSetPoint)
-        .setRequirements(this)
-        .setName("To Next Position")
-        .setInterruptible(true)
-
+//    fun goToNextPosition() = LambdaCommand()
+//        .setStart(this::toNextPosition)
+//        .setIsDone(this::atSetPoint)
+//        .setRequirements(this)
+//        .setName("To Next Position")
+//        .setInterruptible(true)
+//
     /**
      * Moves to the next intake, or intake 0 if not at an intake.
      */
-    fun goToNextIntake() = LambdaCommand()
-        .setStart(this::toNextIntakePosition)
-        .setIsDone(this::atSetPoint)
-        .setRequirements(this)
-        .setName("To Next Intake")
-        .setInterruptible(true)
+//    fun goToNextIntake() = LambdaCommand()
+//        .setStart(this::toNextIntakePosition)
+//        .setIsDone(this::atSetPoint)
+//        .setRequirements(this)
+//        .setName("To Next Intake")
+//        .setInterruptible(true)
 
     /**
      * Moves to the first empty intake, or intake 0 if all intakes are full or empty.
      */
-    fun goToFirstEmptyIntake() = LambdaCommand()
-        .setStart(this::toFirstEmptyIntakePosition)
-        .setIsDone(this::atSetPoint)
-        .setRequirements(this)
-        .setName("To First Empty Intake")
-        .setInterruptible(true)
+//    fun goToFirstEmptyIntake() = LambdaCommand()
+//        .setStart(this::toFirstEmptyIntakePosition)
+//        .setIsDone(this::atSetPoint)
+//        .setRequirements(this)
+//        .setName("To First Empty Intake")
+//        .setInterruptible(true)
 
     /**
      * Moves to the next outtake, or outtake 0 if not at an outtake.
      */
-    fun goToNextOuttake() = LambdaCommand()
-        .setStart(this::toNextOuttakePosition)
-        .setIsDone(this::atSetPoint)
-        .setRequirements(this)
-        .setName("To Next Outtake")
-        .setInterruptible(true)
+//    fun goToNextOuttake() = LambdaCommand()
+//        .setStart(this::toNextOuttakePosition)
+//        .setIsDone(this::atSetPoint)
+//        .setRequirements(this)
+//        .setName("To Next Outtake")
+//        .setInterruptible(true)
 
     /**
      * Moves to the first full outtake, or outtake 0 if all outtakes are full or empty.
      */
-    fun goToFirstFullOuttake() = LambdaCommand()
-        .setStart(this::toFirstFullOuttakePosition)
-        .setIsDone(this::atSetPoint)
-        .setRequirements(this)
-        .setName("To Next Outtake")
-        .setInterruptible(true)
+//    fun goToFirstFullOuttake() = LambdaCommand()
+//        .setStart(this::toFirstFullOuttakePosition)
+//        .setIsDone(this::atSetPoint)
+//        .setRequirements(this)
+//        .setName("To Next Outtake")
+//        .setInterruptible(true)
 
     /**
      * Moves to an orientation in which the robot can outtake three artifacts in motif order.
      * If the spindexer does not have two purple artifacts and one green artifact, OR there is no motif pattern selected,
      * it will rotate to outtake 0.
      */
-    fun goToMotifOuttake() = LambdaCommand()
-        .setStart(this::toMotifOuttakePosition)
-        .setIsDone(this::atSetPoint)
-        .setRequirements(this)
-        .setName("To Motif Outtake")
-        .setInterruptible(true)
+//    fun goToMotifOuttake() = LambdaCommand()
+//        .setStart(this::toMotifOuttakePosition)
+//        .setIsDone(this::atSetPoint)
+//        .setRequirements(this)
+//        .setName("To Motif Outtake")
+//        .setInterruptible(true)
 
     /**
      * Tries to move to an orientation in which it can outtake artifacts in the motif order. If the spindexer
      * does not have the correct assortment of artifacts, it instead goes to the first full outtake, or outtake 0 if all slots are full or empty.
      */
-    fun tryMotifOuttake(): LambdaCommand {
-        return if (hasMotifAssortment) {
-            goToMotifOuttake()
-        } else {
-            goToFirstFullOuttake()
-        }
-    }
+//    fun tryMotifOuttake(): LambdaCommand {
+//        return if (hasMotifAssortment) {
+//            goToMotifOuttake()
+//        } else {
+//            goToFirstFullOuttake()
+//        }
+//    }
 }

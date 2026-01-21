@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.DcMotorEx
 import com.qualcomm.robotcore.hardware.DcMotorSimple
 import com.qualcomm.robotcore.util.Range
+import com.skeletonarmy.marrow.OpModeManager
 import kotlin.math.abs
 
 /**
@@ -16,7 +17,7 @@ class MotorEx @JvmOverloads constructor(
     var cacheTolerance: Double = 0.01,
     var maxSlewRate: Double = Double.POSITIVE_INFINITY
 ) {
-    private val motor: DcMotorEx = ActiveOpMode.hardwareMap.get(DcMotorEx::class.java, motorName)
+    private val motor: DcMotorEx = OpModeManager.getHardwareMap().get(DcMotorEx::class.java, motorName)
 
     private var lastPower = 0.0
     var power: Double
