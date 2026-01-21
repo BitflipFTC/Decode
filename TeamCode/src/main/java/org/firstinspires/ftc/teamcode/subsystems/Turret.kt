@@ -1,20 +1,12 @@
 package org.firstinspires.ftc.teamcode.subsystems
 
 import com.bylazar.configurables.annotations.Configurable
-import com.pedropathing.ftc.PoseConverter
-import com.pedropathing.geometry.PedroCoordinates
 import com.pedropathing.geometry.Pose
-import com.qualcomm.robotcore.util.Range
 import dev.nextftc.core.subsystems.Subsystem
 import dev.nextftc.ftc.ActiveOpMode
-import org.firstinspires.ftc.robotcore.external.navigation.Pose2D
 import org.firstinspires.ftc.teamcode.util.Alliance
-import org.firstinspires.ftc.teamcode.util.PIDController
-import org.firstinspires.ftc.teamcode.util.hardware.CRServoEx
 import org.firstinspires.ftc.teamcode.util.hardware.ServoEx
-import org.firstinspires.ftc.vision.apriltag.AprilTagGameDatabase
-import org.firstinspires.ftc.vision.apriltag.AprilTagLibrary
-import org.firstinspires.ftc.vision.apriltag.AprilTagMetadata
+import org.firstinspires.ftc.teamcode.util.normalizeRadians
 import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.sin
@@ -68,7 +60,7 @@ class Turret(): Subsystem {
             val x = r * cos(theta)
             val y = r * sin(theta)
 
-            field = Pose(pose.x - x, pose.y - y, pose.heading)
+            field = Pose(pose.x - x, pose.y - y, normalizeRadians(pose.heading + angle, false))
         }
 
     // this lazily initialies the goal pose, so if it's not manually set in the opmode, it assumes RED.
