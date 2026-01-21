@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.opmodes.auto
+package org.firstinspires.ftc.teamcode.util.auto
 
 import org.firstinspires.ftc.teamcode.util.Alliance
 
