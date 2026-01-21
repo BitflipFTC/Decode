@@ -7,7 +7,7 @@ import com.pedropathing.geometry.Pose
 import com.pedropathing.paths.PathBuilder
 import com.qualcomm.robotcore.hardware.Gamepad
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit
-import org.firstinspires.ftc.teamcode.opmodes.auto.Path
+import org.firstinspires.ftc.teamcode.util.auto.Path
 
 fun Boolean.toDouble(): Double {
     return if (this) 1.0 else 0.0

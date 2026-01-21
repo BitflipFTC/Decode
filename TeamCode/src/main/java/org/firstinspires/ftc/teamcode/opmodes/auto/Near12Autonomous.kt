@@ -6,6 +6,7 @@ import com.bylazar.telemetry.PanelsTelemetry
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.util.ElapsedTime
+import org.firstinspires.ftc.teamcode.opmodes.auto.paths.Path12
 import org.firstinspires.ftc.teamcode.opmodes.teleop.CombinedTeleOp
 import org.firstinspires.ftc.teamcode.opmodes.teleop.CombinedTeleOp.Companion.follower
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants
@@ -25,7 +26,7 @@ import org.firstinspires.ftc.teamcode.util.followCustomPath
 
 @Suppress("UNUSED")
 @Autonomous(name = "12 ball near", preselectTeleOp = "Combined TeleOp")
-class Near12 : LinearOpMode() {
+class Near12Autonomous : LinearOpMode() {
     enum class Shoot {
         IDLE,
         MOVE_SPINDEXER,

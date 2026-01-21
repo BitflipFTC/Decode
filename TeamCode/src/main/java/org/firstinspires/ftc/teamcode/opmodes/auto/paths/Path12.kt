@@ -1,8 +1,10 @@
-package org.firstinspires.ftc.teamcode.opmodes.auto
+package org.firstinspires.ftc.teamcode.opmodes.auto.paths
 
 import com.pedropathing.follower.Follower
 import com.pedropathing.paths.PathChain
 import org.firstinspires.ftc.teamcode.util.Alliance
+import org.firstinspires.ftc.teamcode.util.auto.BaseAutoPath
+import org.firstinspires.ftc.teamcode.util.auto.Path
 import org.firstinspires.ftc.teamcode.util.buildBasicLine
 import org.firstinspires.ftc.teamcode.util.buildCurvedLine
 import org.firstinspires.ftc.teamcode.util.buildTangentLine
@@ -65,16 +67,16 @@ class Path12 (
 
         return listOf(
             Path(scorePreload, fullSpeed),
-            Path(dIntake1,     fullSpeed),
-            Path(intake1,      intakeSpeed),
-            Path(score1,       fullSpeed),
-            Path(dIntake2,     fullSpeed),
-            Path(intake2,      intakeSpeed),
-            Path(score2,       fullSpeed),
-            Path(dIntake3,     fullSpeed),
-            Path(intake3,      intakeSpeed),
-            Path(score3,       fullSpeed),
-            Path(park,         fullSpeed)
+            Path(dIntake1, fullSpeed),
+            Path(intake1, intakeSpeed),
+            Path(score1, fullSpeed),
+            Path(dIntake2, fullSpeed),
+            Path(intake2, intakeSpeed),
+            Path(score2, fullSpeed),
+            Path(dIntake3, fullSpeed),
+            Path(intake3, intakeSpeed),
+            Path(score3, fullSpeed),
+            Path(park, fullSpeed)
             )
     }
 }
