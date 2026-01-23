@@ -60,7 +60,7 @@ class Turret(): Subsystem {
             val x = r * cos(theta)
             val y = r * sin(theta)
 
-            field = Pose(pose.x - x, pose.y - y, normalizeRadians(pose.heading + angle, false))
+            field = Pose(pose.x - x, pose.y - y, pose.heading)
         }
 
     // this lazily initialies the goal pose, so if it's not manually set in the opmode, it assumes RED.

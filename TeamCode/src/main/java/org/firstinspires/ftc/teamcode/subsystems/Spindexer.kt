@@ -260,7 +260,7 @@ class Spindexer(): Subsystem {
         if (!emptySlots.isEmpty()) {
             when (emptySlots.size) {
                 2    -> {
-                    val emptySlot = findEmptySlots().first()
+                    val emptySlot = findEmptySlots().last()
 
                     // for slots [0,2]
                     // full = 1, so targets 2, then can go 2 -> 0

@@ -38,6 +38,7 @@ public class OV9281 implements Subsystem {
     private long defaultExposure;
     private int defaultGain;
     boolean debugTelemetry = true;
+    public int viewContainerId = -1;
 
     private final ArrayList<AprilTagDetection> detectionsBuffer = new ArrayList<>();
 
@@ -94,15 +95,27 @@ public class OV9281 implements Subsystem {
 
         aprilTag.setDecimation(1f);
 
-        visionPortal = new VisionPortal.Builder()
-                .setCamera(ActiveOpMode.hardwareMap().get(WebcamName.class, "camera"))
-                .setCameraResolution(new Size(640,480))
-                .setShowStatsOverlay(true)
-                .setStreamFormat(VisionPortal.StreamFormat.MJPEG)
-                .enableLiveView(true)
-                .addProcessor(aprilTag)
-                .setAutoStopLiveView(true)
-                .build();
+        if (viewContainerId == -1) {
+            visionPortal = new VisionPortal.Builder()
+                    .setCamera(ActiveOpMode.hardwareMap().get(WebcamName.class, "camera"))
+                    .setCameraResolution(new Size(640, 480))
+                    .setShowStatsOverlay(true)
+                    .setStreamFormat(VisionPortal.StreamFormat.MJPEG)
+                    .enableLiveView(true)
+                    .addProcessor(aprilTag)
+                    .setAutoStopLiveView(true)
+                    .build();
+        } else {
+            visionPortal = new VisionPortal.Builder()
+                    .setCamera(ActiveOpMode.hardwareMap().get(WebcamName.class, "camera"))
+                    .setCameraResolution(new Size(640, 480))
+                    .setShowStatsOverlay(true)
+                    .setStreamFormat(VisionPortal.StreamFormat.MJPEG)
+                    .setLiveViewContainerId(viewContainerId)
+                    .addProcessor(aprilTag)
+                    .setAutoStopLiveView(true)
+                    .build();
+        }
 
         while (visionPortal.getCameraState() != VisionPortal.CameraState.STREAMING) {
             try {

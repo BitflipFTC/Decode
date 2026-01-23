@@ -16,11 +16,11 @@ import org.opencv.imgproc.Imgproc;
 
 public class ColorSensorPipeline implements VisionProcessor {
     /*
-     * The core values which define the location and size of the sample regions
+     * The core values which define the location and size o1f the sample regions
      */
-    static final Point REGION1_TOPLEFT_ANCHOR_POINT = new Point(65,10);
-    static final int REGION_WIDTH = 40;
-    static final int REGION_HEIGHT = 100;
+    static final Point REGION1_TOPLEFT_ANCHOR_POINT = new Point(60,5);
+    static final int REGION_WIDTH = 50;
+    static final int REGION_HEIGHT = 50;
 
     /*
      * Points which actually define the sample region rectangles, derived from above values
@@ -115,7 +115,7 @@ public class ColorSensorPipeline implements VisionProcessor {
 
         averages.setValues(Core.mean(HSV).val);
 
-        if (averages.getValue() > 100) {
+        if (averages.getValue() > 80 && averages.getHue() > 55) {
             if (averages.getHue() > 100) {
                 artifact = Artifact.PURPLE;
             } else {

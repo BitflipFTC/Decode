@@ -19,10 +19,12 @@ class ColorSensorTest : LinearOpMode() {
             .setCameraResolution(Size(160, 120))
             .setShowStatsOverlay(true)
             .setStreamFormat(VisionPortal.StreamFormat.MJPEG)
-            .enableLiveView(true)
+            .enableLiveView(    true)
             .addProcessor(colorProcessor)
             .setAutoStopLiveView(true)
             .build()
+
+
 //        colorSensor.initialize()
         telemetry = JoinedTelemetry(PanelsTelemetry.ftcTelemetry, telemetry)
         waitForStart()
@@ -33,6 +35,7 @@ class ColorSensorTest : LinearOpMode() {
             telemetry.addData("H", "%.1f", colorProcessor.averages.hue)
             telemetry.addData("S", "%.1f", colorProcessor.averages.saturation)
             telemetry.addData("V", "%.1f", colorProcessor.averages.value)
+            telemetry.addData("FPS", visionPortal.fps)
 
             telemetry.update()
         }

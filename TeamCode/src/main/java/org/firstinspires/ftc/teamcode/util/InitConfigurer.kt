@@ -10,7 +10,7 @@ object InitConfigurer : Component {
     private val gamepad1: com.qualcomm.robotcore.hardware.Gamepad
         get() = ActiveOpMode.gamepad1
 
-    private var hasSelectedAlliance = false
+    var hasSelectedAlliance = false
 
     var selectedAlliance: Alliance? = null
 
