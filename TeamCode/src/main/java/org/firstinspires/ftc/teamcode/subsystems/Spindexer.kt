@@ -37,7 +37,7 @@ class Spindexer(): Subsystem {
         var kP = 0.009
 
         @JvmField
-        var kI = 0.12 // TODO: Remove this when spindexer friction issue is solved.
+        var kI = 0.05
 
         @JvmField
         var kD = 0.000325
@@ -78,8 +78,8 @@ class Spindexer(): Subsystem {
     }
 
     enum class Directions() {
-        CLOCKWISE(),
-        COUNTERCLOCKWISE()
+        CLOCKWISE,
+        COUNTERCLOCKWISE
     }
 
     // specifies the focus slot of each preset (intake / outtake slot)
@@ -310,8 +310,8 @@ class Spindexer(): Subsystem {
             // If it's PGP, green should be shot second, etc
             val targetOuttakeIndex = when (motifPattern) {
                 MotifPattern.GPP  -> greenIndex
-                MotifPattern.PGP  -> if (greenIndex == 2) 0 else greenIndex + 1
-                MotifPattern.PPG  -> if (greenIndex == 0) 2 else greenIndex - 1
+                MotifPattern.PGP  -> if (greenIndex == 0) 2 else greenIndex - 1
+                MotifPattern.PPG  -> if (greenIndex == 2) 0 else greenIndex + 1
                 null -> 0
             }
 
@@ -336,7 +336,7 @@ class Spindexer(): Subsystem {
                     // empty = 0, so targets 1, then can go 1 -> 2
                     // for [0,1]
                     // empty = 2, so targets 0, then can go 0 -> 1
-                    targetSlot = if (emptySlot == 0) 2 else emptySlot - 1
+                    targetSlot = if (emptySlot == 2) 0 else emptySlot + 1
                 }
 
                 1    -> {
