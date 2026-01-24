@@ -32,7 +32,7 @@ class Shooter(): Subsystem {
         @JvmField
         var kP = 0.01
         @JvmField
-        var kV = 0.0025
+        var kV = 0.00245
 
         @JvmField
         var tuning = false
@@ -56,7 +56,7 @@ class Shooter(): Subsystem {
 
     val speedArray = doubleArrayOf(
         2750.0,
-        3000.0,
+        3100.0,
         3300.0,
         3500.0,
         3875.0
@@ -65,7 +65,7 @@ class Shooter(): Subsystem {
     val angleArray = doubleArrayOf(
         0.01,
         0.05,
-        0.175,
+        0.1875,
         0.3,
         0.6
     )
@@ -106,7 +106,7 @@ class Shooter(): Subsystem {
             position = hoodPosition
         }
 
-        flywheelController.setPointTolerance = 25.0
+        flywheelController.setPointTolerance = 35.0
 
         vSensor = ActiveOpMode.hardwareMap.get(VoltageSensor::class.java, "Control Hub")
     }
@@ -130,7 +130,7 @@ class Shooter(): Subsystem {
         pidOutput = flywheelController.calculate(filteredFlywheelRPM, targetFlywheelRPM)
         
         // allow it to stop SLOWLY when target is 0
-        flywheelMotor.power = if (flywheelController.error <= -500) 0.0 else pidOutput / cachedVoltage
+        flywheelMotor.power = pidOutput / cachedVoltage
 
         hoodServo.position = hoodPosition
 

@@ -12,15 +12,16 @@ import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
+import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
 public class ColorSensorPipeline implements VisionProcessor {
     /*
      * The core values which define the location and size o1f the sample regions
      */
-    static final Point REGION1_TOPLEFT_ANCHOR_POINT = new Point(60,5);
-    static final int REGION_WIDTH = 50;
-    static final int REGION_HEIGHT = 50;
+    static final Point REGION1_TOPLEFT_ANCHOR_POINT = new Point(55,1);
+    static final int REGION_WIDTH = 35;
+    static final int REGION_HEIGHT = 25;
 
     /*
      * Points which actually define the sample region rectangles, derived from above values
@@ -55,6 +56,9 @@ public class ColorSensorPipeline implements VisionProcessor {
     private final Paint purplePaint = new Paint();
     private final Paint greenPaint = new Paint();
     private final Paint outlinePaint = new Paint();
+
+    private final double lowPass = 0.0025;
+
 
     public ColorSensorPipeline () {
         purplePaint.setColor(Color.MAGENTA);
@@ -115,7 +119,7 @@ public class ColorSensorPipeline implements VisionProcessor {
 
         averages.setValues(Core.mean(HSV).val);
 
-        if (averages.getValue() > 80 && averages.getHue() > 55) {
+        if (averages.getValue() > 80 && averages.getHue() > 65) {
             if (averages.getHue() > 100) {
                 artifact = Artifact.PURPLE;
             } else {
@@ -169,5 +173,9 @@ public class ColorSensorPipeline implements VisionProcessor {
     public Artifact getArtifact()
     {
         return artifact;
+    }
+
+    public void setArtifact(@Nullable Artifact artifact) {
+        this.artifact = artifact;
     }
 }
