@@ -6,7 +6,7 @@ import com.bylazar.telemetry.PanelsTelemetry
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.util.ElapsedTime
-import org.firstinspires.ftc.teamcode.opmodes.auto.paths.Near12
+import org.firstinspires.ftc.teamcode.opmodes.auto.paths.Far9
 import org.firstinspires.ftc.teamcode.opmodes.teleop.CombinedTeleOp
 import org.firstinspires.ftc.teamcode.opmodes.teleop.CombinedTeleOp.Companion.follower
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants
@@ -25,8 +25,8 @@ import org.firstinspires.ftc.teamcode.util.InitConfigurer
 import org.firstinspires.ftc.teamcode.util.followCustomPath
 
 @Suppress("UNUSED")
-@Autonomous(name = "12 ball near", preselectTeleOp = "Combined TeleOp")
-class Near12Autonomous : LinearOpMode() {
+@Autonomous(name = "9 ball far", preselectTeleOp = "Combined TeleOp")
+class Far9Autonomous : LinearOpMode() {
     private enum class Shoot {
         IDLE,
         MOVE_SPINDEXER,
@@ -57,14 +57,13 @@ class Near12Autonomous : LinearOpMode() {
         subsystems.forEach { it.initialize() }
         camera.initialize()
 
-        Log.d("FSM", "auto inited")
         while (opModeInInit() && !InitConfigurer.hasSelectedAlliance) {
             InitConfigurer.postWaitForStart()
             follower!!.update()
             telemetry.update()
         }
 
-        val pathSequence = Near12(InitConfigurer.selectedAlliance!!)
+        val pathSequence = Far9(InitConfigurer.selectedAlliance!!)
         turret.selectedAlliance = InitConfigurer.selectedAlliance!!
         follower!!.pose = pathSequence.poses.nearStartPose
         val paths = pathSequence.buildPaths(follower!!)
@@ -87,18 +86,16 @@ class Near12Autonomous : LinearOpMode() {
                 "DScore Preload",
                 ::opModeIsActive,
                 {
+                    spindexer.motifPattern = camera.motif
+                    CombinedTeleOp.motifPattern = spindexer.motifPattern
+                    Log.d("FSM", "motif pattern detected: ${spindexer.motifPattern}")
                     follower!!.followCustomPath(paths[0])
                     intake.intake()
                 }
             ).addState(
                 "Shoot preload",
                 {!follower!!.isBusy },
-                {
-                    spindexer.motifPattern = camera.motif
-                    CombinedTeleOp.motifPattern = spindexer.motifPattern
-                    Log.d("FSM", "motif pattern detected: ${spindexer.motifPattern}")
-                    shootAllArtifacts()
-                }
+                ::shootAllArtifacts
             ).addState(
                 "DIntake 1",
                 {shootingState == Shoot.IDLE},
@@ -132,25 +129,9 @@ class Near12Autonomous : LinearOpMode() {
                 {!follower!!.isBusy},
                 ::shootAllArtifacts
             ).addState(
-                "DIntake 3",
-                {shootingState == Shoot.IDLE},
-                {follower!!.followCustomPath(paths[7])}
-            ).addState(
-                "Intake 3",
-                {!follower!!.isBusy},
-                {follower!!.followCustomPath(paths[8])}
-            ).addState(
-                "DScore 3",
-                {!follower!!.isBusy},
-                {follower!!.followCustomPath(paths[9])}
-            ).addState(
-                "Shoot 3",
-                {!follower!!.isBusy},
-                ::shootAllArtifacts
-            ).addState(
                 "Park",
                 {shootingState == Shoot.IDLE},
-                {follower!!.followCustomPath(paths[10])}
+                {follower!!.followCustomPath(paths[7])}
             )
 
         while (opModeIsActive()) {
