@@ -46,16 +46,13 @@ class Spindexer(): Subsystem {
         var kS = 0.025
 
         @JvmField
-        var turningFeedforward = 0.0
-
-        @JvmField
-        var setpointTolerance = 3.0 // in degrees
+        var setpointTolerance = 1.0 // in degrees
 
         @JvmField
         var maxPower = 0.7
 
         @JvmField
-        var staticFrictionDeadband = 2.0
+        var staticFrictionDeadband = 1.0
 
         @JvmField
         var tuning = false
@@ -375,8 +372,7 @@ class Spindexer(): Subsystem {
         }
 
         val pidOutput = controller.calculate(currentTicks, targetTicks)
-        val motorPower = pidOutput + turningFeedforward * -robotTurningPower
-        motor.power = Range.clip(motorPower, -maxPower, maxPower)
+        motor.power = Range.clip(pidOutput, -maxPower, maxPower)
 
         if (debugTelemetry) {
             ActiveOpMode.telemetry.addData("Spindexer target angle", targetAngle)

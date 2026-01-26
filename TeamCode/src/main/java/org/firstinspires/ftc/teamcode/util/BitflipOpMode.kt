@@ -5,12 +5,10 @@ import com.bylazar.telemetry.PanelsTelemetry
 import dev.nextftc.core.commands.CommandManager
 import dev.nextftc.core.commands.delays.WaitUntil
 import dev.nextftc.core.commands.groups.SequentialGroup
-import dev.nextftc.core.commands.utility.InstantCommand
 import dev.nextftc.core.components.BindingsComponent
 import dev.nextftc.ftc.NextFTCOpMode
 import dev.nextftc.ftc.components.BulkReadComponent
-import dev.nextftc.ftc.components.LoopTimeComponent
-import org.firstinspires.ftc.teamcode.subsystems.ArtifactColorSensor
+import org.firstinspires.ftc.teamcode.subsystems.ColorSensor
 import org.firstinspires.ftc.teamcode.subsystems.Drivetrain
 import org.firstinspires.ftc.teamcode.subsystems.Intake
 import org.firstinspires.ftc.teamcode.subsystems.OV9281
@@ -19,10 +17,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Spindexer
 import org.firstinspires.ftc.teamcode.subsystems.Transfer
 import org.firstinspires.ftc.teamcode.subsystems.Turret
 import org.firstinspires.ftc.teamcode.util.commands.RepeatCommand
-import org.firstinspires.ftc.teamcode.util.commands.RetryCommand
 import java.lang.RuntimeException
-import kotlin.time.Duration
-import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Automatically updates telemetry in init and in loop
@@ -44,7 +39,7 @@ open class BitflipOpMode: NextFTCOpMode() {
     protected val spindexer = Spindexer()
     protected val transfer = Transfer()
     protected val turret = Turret()
-    protected val colorSensor = ArtifactColorSensor()
+    protected val colorSensor = ColorSensor()
 
     init {
         addComponents(

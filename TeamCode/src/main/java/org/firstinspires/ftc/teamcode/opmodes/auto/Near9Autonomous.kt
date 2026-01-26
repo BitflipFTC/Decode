@@ -11,7 +11,7 @@ import org.firstinspires.ftc.teamcode.opmodes.teleop.CombinedTeleOp
 import org.firstinspires.ftc.teamcode.opmodes.teleop.CombinedTeleOp.Companion.follower
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants
 import org.firstinspires.ftc.teamcode.pedroPathing.Drawing
-import org.firstinspires.ftc.teamcode.subsystems.ArtifactColorSensor
+import org.firstinspires.ftc.teamcode.subsystems.ColorSensor
 import org.firstinspires.ftc.teamcode.subsystems.Intake
 import org.firstinspires.ftc.teamcode.subsystems.OV9281
 import org.firstinspires.ftc.teamcode.subsystems.Shooter
@@ -41,7 +41,7 @@ class Near9Autonomous : LinearOpMode() {
     val transfer: Transfer = Transfer()
     val shooter: Shooter = Shooter()
     val intake: Intake = Intake()
-    val colorSensor: ArtifactColorSensor = ArtifactColorSensor()
+    val colorSensor: ColorSensor = ColorSensor()
     val camera: OV9281 = OV9281()
 
     val subsystems = setOf(spindexer, turret, transfer, shooter, intake, colorSensor)

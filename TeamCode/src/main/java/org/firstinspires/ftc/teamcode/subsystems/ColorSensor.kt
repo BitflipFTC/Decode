@@ -4,7 +4,6 @@ import android.graphics.Color
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
-import com.bylazar.configurables.annotations.Sorter
 import com.qualcomm.hardware.rev.RevColorSensorV3
 import com.qualcomm.robotcore.hardware.NormalizedRGBA
 import dev.nextftc.core.subsystems.Subsystem
@@ -12,7 +11,7 @@ import dev.nextftc.ftc.ActiveOpMode
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit
 import org.firstinspires.ftc.teamcode.util.Artifact
 
-class ArtifactColorSensor(): Subsystem {
+class ColorSensor(): Subsystem {
     private lateinit var colorSensor: RevColorSensorV3
     var colors: NormalizedRGBA = NormalizedRGBA()
         private set
@@ -47,14 +46,12 @@ class ArtifactColorSensor(): Subsystem {
         colorSensor.gain = 20.0f
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     override fun periodic() {
         // alternate reads to improve loop times
         colors = colorSensor.normalizedColors
         distance = colorSensor.getDistance(DistanceUnit.CM)
 
-        val color = Color.rgb(colors.red * 255, colors.green * 255, colors.blue * 255)
-        Color.colorToHSV(color, hsv.col)
+        Color.RGBToHSV((colors.red * 255).toInt(), (colors.green * 255).toInt(), (colors.blue * 255).toInt(), hsv.col)
 
         detectedArtifact = if (distance < 3.0) {
             Log.d("FSM", "colors, h: ${hsv.h}, s: ${hsv.s}, v: ${hsv.v}")
@@ -77,9 +74,9 @@ class ArtifactColorSensor(): Subsystem {
             ActiveOpMode.telemetry.run {
                 addData("Detected Artifact", detectedArtifact?.name ?: "none")
                 addData("Distance", "%05.2fcm", distance)
-                addData("green","%07.4f", green)
-                addData("red","%07.4f", red)
-                addData("blue","%07.4f", blue)
+                addData("hue","%07.4f", hsv.h)
+                addData("sat","%07.4f", hsv.s)
+                addData("val","%07.4f", hsv.v)
                 addLine("------------------------------")
             }
         }
