@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode.subsystems
 
 import com.bylazar.configurables.annotations.Configurable
 import com.qualcomm.robotcore.util.Range
+import com.seattlesolvers.solverslib.command.ConditionalCommand
+import com.seattlesolvers.solverslib.command.FunctionalCommand
 import com.seattlesolvers.solverslib.command.SubsystemBase
 import com.skeletonarmy.marrow.OpModeManager
 import org.firstinspires.ftc.teamcode.util.Artifact
@@ -402,74 +404,72 @@ class Spindexer(): SubsystemBase() {
     /**
      * Moves to the next spindexer position, cycling through intakes then outtakes.
      */
-//    fun goToNextPosition() = LambdaCommand()
-//        .setStart(this::toNextPosition)
-//        .setIsDone(this::atSetPoint)
-//        .setRequirements(this)
-//        .setName("To Next Position")
-//        .setInterruptible(true)
-//
+    fun goToNextPosition() = FunctionalCommand(
+        ::toNextPosition,
+        {},
+        {interrupted -> },
+        ::atSetPoint
+    )
+
     /**
      * Moves to the next intake, or intake 0 if not at an intake.
      */
-//    fun goToNextIntake() = LambdaCommand()
-//        .setStart(this::toNextIntakePosition)
-//        .setIsDone(this::atSetPoint)
-//        .setRequirements(this)
-//        .setName("To Next Intake")
-//        .setInterruptible(true)
+    fun goToNextIntake() = FunctionalCommand(
+        ::toNextIntakePosition,
+        {},
+        {interrupted -> },
+        ::atSetPoint
+    )
 
     /**
      * Moves to the first empty intake, or intake 0 if all intakes are full or empty.
      */
-//    fun goToFirstEmptyIntake() = LambdaCommand()
-//        .setStart(this::toFirstEmptyIntakePosition)
-//        .setIsDone(this::atSetPoint)
-//        .setRequirements(this)
-//        .setName("To First Empty Intake")
-//        .setInterruptible(true)
+    fun goToFirstEmptyIntake() = FunctionalCommand(
+        ::toFirstEmptyIntakePosition,
+        {},
+        {interrupted -> },
+        ::atSetPoint
+    )
 
     /**
      * Moves to the next outtake, or outtake 0 if not at an outtake.
      */
-//    fun goToNextOuttake() = LambdaCommand()
-//        .setStart(this::toNextOuttakePosition)
-//        .setIsDone(this::atSetPoint)
-//        .setRequirements(this)
-//        .setName("To Next Outtake")
-//        .setInterruptible(true)
+    fun goToNextOuttake() = FunctionalCommand(
+        ::toNextOuttakePosition,
+        {},
+        {interrupted -> },
+        ::atSetPoint
+    )
 
     /**
      * Moves to the first full outtake, or outtake 0 if all outtakes are full or empty.
      */
-//    fun goToFirstFullOuttake() = LambdaCommand()
-//        .setStart(this::toFirstFullOuttakePosition)
-//        .setIsDone(this::atSetPoint)
-//        .setRequirements(this)
-//        .setName("To Next Outtake")
-//        .setInterruptible(true)
+    fun goToFirstFullOuttake() = FunctionalCommand(
+        ::toFirstFullOuttakePosition,
+        {},
+        {interrupted -> },
+        ::atSetPoint
+    )
 
     /**
      * Moves to an orientation in which the robot can outtake three artifacts in motif order.
      * If the spindexer does not have two purple artifacts and one green artifact, OR there is no motif pattern selected,
      * it will rotate to outtake 0.
      */
-//    fun goToMotifOuttake() = LambdaCommand()
-//        .setStart(this::toMotifOuttakePosition)
-//        .setIsDone(this::atSetPoint)
-//        .setRequirements(this)
-//        .setName("To Motif Outtake")
-//        .setInterruptible(true)
+    fun goToMotifOuttake() = FunctionalCommand(
+    ::toMotifOuttakePosition,
+        {},
+        {interrupted -> },
+        ::atSetPoint
+    )
 
     /**
      * Tries to move to an orientation in which it can outtake artifacts in the motif order. If the spindexer
      * does not have the correct assortment of artifacts, it instead goes to the first full outtake, or outtake 0 if all slots are full or empty.
      */
-//    fun tryMotifOuttake(): LambdaCommand {
-//        return if (hasMotifAssortment) {
-//            goToMotifOuttake()
-//        } else {
-//            goToFirstFullOuttake()
-//        }
-//    }
+    fun tryMotifOuttake() = ConditionalCommand(
+        goToMotifOuttake(),
+        goToFirstFullOuttake(),
+        ::hasMotifAssortment
+    )
 }

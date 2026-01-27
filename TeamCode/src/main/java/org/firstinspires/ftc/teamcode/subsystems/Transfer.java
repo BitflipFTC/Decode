@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode.subsystems;
 
 import com.bylazar.configurables.annotations.Configurable;
 import com.qualcomm.robotcore.util.Range;
+import com.seattlesolvers.solverslib.command.Command;
+import com.seattlesolvers.solverslib.command.FunctionalCommand;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
 import com.skeletonarmy.marrow.OpModeManager;
 
@@ -71,6 +73,15 @@ public class Transfer extends SubsystemBase {
         double localTargetPosition = getTargetPosition() + MOTOR_TURNS * TICKS_PER_REVOLUTION; // ticks
 
         setMotorTarget(localTargetPosition);
+    }
+
+    public Command commandShoot() {
+        return new FunctionalCommand(
+                this::transferArtifact,
+                (() -> {}),
+                ((interrupted) -> {}),
+                this::atSetPoint
+        );
     }
 
     public void undoTransfer() {

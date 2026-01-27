@@ -97,13 +97,13 @@ class CombinedTeleOp : LinearOpMode() {
         }
     }
 
-    val intake = Intake()
-    val transfer = Transfer()
-    val spindexer = Spindexer()
-    val shooter = Shooter()
-    val turret = Turret()
-    val camera = OV9281()
-    val colorSensor = ColorSensor()
+    lateinit var intake: Intake
+    lateinit var transfer: Transfer
+    lateinit var spindexer: Spindexer
+    lateinit var shooter: Shooter
+    lateinit var turret: Turret
+    lateinit var camera: OV9281
+    lateinit var colorSensor: ColorSensor
     val subsystems = listOf(
         intake,
         transfer,
@@ -114,11 +114,15 @@ class CombinedTeleOp : LinearOpMode() {
         colorSensor
     )
 
-    var reverseIntake = false
-    var lastReverseIntake = false
-    var lastSpindexerIsFull = false
-
     override fun runOpMode() {
+        intake = Intake()
+        transfer = Transfer()
+        spindexer = Spindexer()
+        shooter = Shooter()
+        turret = Turret()
+        camera = OV9281()
+        colorSensor = ColorSensor()
+
         val fol = follower ?: Constants.createFollower(hardwareMap).apply {
             setStartingPose(Pose(72.0,72.0,Math.toRadians(90.0)))
             follower = this
@@ -129,7 +133,6 @@ class CombinedTeleOp : LinearOpMode() {
         spindexer.motifPattern = motifPattern
         gamepad1.triggerThreshold = 0.15f
         telemetry = JoinedTelemetry(PanelsTelemetry.ftcTelemetry, telemetry)
-        val loopTimer = LoopTimer(10)
 
 //        val portals = VisionPortal.makeMultiPortalView(2, VisionPortal.MultiPortalLayout.HORIZONTAL)
 
@@ -150,6 +153,8 @@ class CombinedTeleOp : LinearOpMode() {
         fol.update()
         Drawing.init()
         var automatedDriving = false
+
+        val loopTimer = LoopTimer(10)
 
         while (opModeInInit()) {
             components.forEach { it.initLoop() }
@@ -329,6 +334,7 @@ class CombinedTeleOp : LinearOpMode() {
             subsystems.forEach { it.periodic() }
 
             if (camera.hasNewReading && fol.velocity.magnitude < 1.0 && fol.angularVelocity < 1 * ((2 * Math.PI) / 360) ) {
+                // todo use a kalman filter if we go to worlds ! ! ! ! ! ! ! ! ! !
                 fol.pose = Pose(
                     (1-lowpass) * fol.pose.x + lowpass * camera.robotPose.x,
                     (1-lowpass) * fol.pose.y + lowpass * camera.robotPose.y,
