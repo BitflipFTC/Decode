@@ -20,7 +20,6 @@ class TurretTest : LinearOpMode() {
 
         val turret = Turret()
         val subsystems = setOf(turret)
-        subsystems.forEach { it.initialize() }
         turret.selectedAlliance = Alliance.RED
 
         // bulk caching
@@ -38,8 +37,13 @@ class TurretTest : LinearOpMode() {
             allHubs.forEach { hub -> hub.clearBulkCache() }
             turret.robotPose = Pose(72.0, 72.0, 90.0)
 
+            Drawing.drawRobot(turret.turretPose, Style(
+                "", "#FF881E", 0.5
+            ))
             Drawing.drawRobot(turret.robotPose)
-            Drawing.drawRobot(turret.goalPose)
+            Drawing.drawRobot(turret.goalPose, Style(
+                "", "#FFFFFF", 1.0
+            ))
             Drawing.sendPacket()
 
             subsystems.forEach { it.periodic() }

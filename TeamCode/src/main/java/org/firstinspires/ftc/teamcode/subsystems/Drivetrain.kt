@@ -7,7 +7,7 @@ import com.skeletonarmy.marrow.OpModeManager
 import org.firstinspires.ftc.teamcode.util.hardware.MotorEx
 import kotlin.math.max
 
-class Drivetrain(val hardwareMap: HardwareMap): SubsystemBase() {
+class Drivetrain(): SubsystemBase() {
     class DrivePowers(val fl: Double, val fr: Double, val bl: Double, val br: Double) {
         @SuppressLint("DefaultLocale")
         override fun toString(): String {

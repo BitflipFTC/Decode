@@ -178,9 +178,8 @@ class Near12Autonomous : LinearOpMode() {
             telemetry.addData("heading", follower!!.pose.heading)
             subsystems.forEach { it.periodic() }
             Drawing.drawDebug(follower)
-            telemetry.update()
-
             components.forEach { it.periodic() }
+            telemetry.update()
         }
 
         follower!!.breakFollowing()

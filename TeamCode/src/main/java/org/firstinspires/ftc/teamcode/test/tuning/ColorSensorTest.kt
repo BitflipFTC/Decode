@@ -27,9 +27,6 @@ class ColorSensorTest : LinearOpMode() {
 //            .build()
 //
 //
-        colorSensor.initialize()
-        intake.initialize()
-        spindexer.initialize()
         telemetry = JoinedTelemetry(PanelsTelemetry.ftcTelemetry, telemetry)
         waitForStart()
         while (opModeIsActive()) {

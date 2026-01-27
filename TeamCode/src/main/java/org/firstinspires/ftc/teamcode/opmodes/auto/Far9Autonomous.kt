@@ -19,9 +19,9 @@ import org.firstinspires.ftc.teamcode.subsystems.Spindexer
 import org.firstinspires.ftc.teamcode.subsystems.Transfer
 import org.firstinspires.ftc.teamcode.subsystems.Turret
 import org.firstinspires.ftc.teamcode.util.Artifact
-import org.firstinspires.ftc.teamcode.util.BetterLoopTimeComponent
+import org.firstinspires.ftc.teamcode.util.components.BetterLoopTimeComponent
 import org.firstinspires.ftc.teamcode.util.FiniteStateMachine
-import org.firstinspires.ftc.teamcode.util.InitConfigurer
+import org.firstinspires.ftc.teamcode.util.components.InitConfigurer
 import org.firstinspires.ftc.teamcode.util.followCustomPath
 
 @Suppress("UNUSED")
@@ -36,29 +36,34 @@ class Far9Autonomous : LinearOpMode() {
 
     private var shootingState = Shoot.IDLE
 
-    val spindexer: Spindexer = Spindexer()
-    val turret: Turret = Turret()
-    val transfer: Transfer = Transfer()
-    val shooter: Shooter = Shooter()
-    val intake: Intake = Intake()
-    val colorSensor: ColorSensor = ColorSensor()
-    val camera: OV9281 = OV9281()
-
-    val subsystems = setOf(spindexer, turret, transfer, shooter, intake, colorSensor)
+    val components = setOf(BetterLoopTimeComponent, InitConfigurer)
 
     val finiteStateMachine: FiniteStateMachine = FiniteStateMachine()
+    lateinit var spindexer: Spindexer
+    lateinit var turret: Turret
+    lateinit var transfer: Transfer
+    lateinit var shooter: Shooter
+    lateinit var intake: Intake
+    lateinit var colorSensor: ColorSensor
+    lateinit var camera: OV9281
 
     override fun runOpMode() {
+        spindexer = Spindexer()
+        turret = Turret()
+        transfer = Transfer()
+        shooter = Shooter()
+        intake = Intake()
+        colorSensor = ColorSensor()
+        camera = OV9281()
+        val subsystems = setOf(spindexer, turret, transfer, shooter, intake, colorSensor)
         telemetry = JoinedTelemetry(PanelsTelemetry.ftcTelemetry, telemetry)
 
         follower = Constants.createFollower(hardwareMap)
-        InitConfigurer.preInit()
 
-        subsystems.forEach { it.initialize() }
-        camera.initialize()
+        components.forEach { it.init() }
 
         while (opModeInInit() && !InitConfigurer.hasSelectedAlliance) {
-            InitConfigurer.postWaitForStart()
+            components.forEach { it.initLoop() }
             follower!!.update()
             telemetry.update()
         }
@@ -73,7 +78,6 @@ class Far9Autonomous : LinearOpMode() {
             telemetry.update()
         }
 
-        BetterLoopTimeComponent.preStartButtonPressed()
         // set up preloads
         spindexer.setCollectedArtifacts(
             Artifact.GREEN,
@@ -155,8 +159,8 @@ class Far9Autonomous : LinearOpMode() {
             telemetry.addData("heading", follower!!.pose.heading)
             subsystems.forEach { it.periodic() }
             Drawing.drawDebug(follower)
+            components.forEach { it.periodic() }
             telemetry.update()
-            BetterLoopTimeComponent.postUpdate()
         }
 
         follower!!.breakFollowing()

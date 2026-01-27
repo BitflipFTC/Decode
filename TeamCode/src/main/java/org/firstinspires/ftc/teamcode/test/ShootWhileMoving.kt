@@ -91,7 +91,7 @@ class ShootWhileMoving : LinearOpMode() {
 
         var holdingPose = false
 
-        subsystems.forEach { it.initialize() }
+//        subsystems.forEach { it.initialize() }
 
 //        camera.targetID = 24
         turret.selectedAlliance = Alliance.RED
@@ -104,7 +104,7 @@ class ShootWhileMoving : LinearOpMode() {
         val allHubs = hardwareMap.getAll(LynxModule::class.java)
         allHubs.forEach { hub -> hub.bulkCachingMode = LynxModule.BulkCachingMode.MANUAL }
 
-        BetterLoopTimeComponent.preStartButtonPressed()
+//        BetterLoopTimeComponent.preStartButtonPressed()
         follower.startTeleopDrive(true)
 
         while (opModeIsActive()) {
@@ -204,7 +204,7 @@ class ShootWhileMoving : LinearOpMode() {
             updateShootingFSM(spindexer,transfer,shooter)
             subsystems.forEach { it.periodic() }
             follower.update()
-            BetterLoopTimeComponent.postUpdate()
+//            BetterLoopTimeComponent.postUpdate()
             telemetry.update()
         }
     }

@@ -341,8 +341,10 @@ class CombinedTeleOp : LinearOpMode() {
             Drawing.drawRobot(fol.pose)
             Drawing.drawRobot(turret.turretPose, Style(
                 "", "#FF881E", 0.5
-            )
-            )
+            ))
+            Drawing.drawRobot(turret.goalPose, Style(
+                "", "#FFFFFF", 1.0
+            ))
             Drawing.sendPacket()
             turret.robotPose = fol.pose
             telemetry.run{
