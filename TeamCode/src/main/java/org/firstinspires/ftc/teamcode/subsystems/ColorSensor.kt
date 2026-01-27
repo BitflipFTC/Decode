@@ -15,7 +15,7 @@ class ColorSensor(): SubsystemBase() {
         private set
 
     var detectedArtifact: Artifact? = null
-        private set
+
     // make sure this starts above 5.0 to avoid the color sensor making a fake read on the first loop
     var distance: Double = 10.0
     val red: Double
