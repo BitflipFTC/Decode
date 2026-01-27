@@ -36,7 +36,7 @@ class Spindexer(): SubsystemBase() {
         var kP = 0.009
 
         @JvmField
-        var kI = 0.12 // TODO: Remove this when spindexer friction issue is solved.
+        var kI = 0.05
 
         @JvmField
         var kD = 0.000325
@@ -45,16 +45,13 @@ class Spindexer(): SubsystemBase() {
         var kS = 0.025
 
         @JvmField
-        var turningFeedforward = 0.0
-
-        @JvmField
-        var setpointTolerance = 3.0 // in degrees
+        var setpointTolerance = 1.0 // in degrees
 
         @JvmField
         var maxPower = 0.7
 
         @JvmField
-        var staticFrictionDeadband = 2.0
+        var staticFrictionDeadband = 1.0
 
         @JvmField
         var tuning = false
@@ -77,8 +74,8 @@ class Spindexer(): SubsystemBase() {
     }
 
     enum class Directions() {
-        CLOCKWISE(),
-        COUNTERCLOCKWISE()
+        CLOCKWISE,
+        COUNTERCLOCKWISE
     }
 
     // specifies the focus slot of each preset (intake / outtake slot)
@@ -259,7 +256,7 @@ class Spindexer(): SubsystemBase() {
         if (!emptySlots.isEmpty()) {
             when (emptySlots.size) {
                 2    -> {
-                    val emptySlot = findEmptySlots().first()
+                    val emptySlot = findEmptySlots().last()
 
                     // for slots [0,2]
                     // full = 1, so targets 2, then can go 2 -> 0
@@ -309,8 +306,8 @@ class Spindexer(): SubsystemBase() {
             // If it's PGP, green should be shot second, etc
             val targetOuttakeIndex = when (motifPattern) {
                 MotifPattern.GPP  -> greenIndex
-                MotifPattern.PGP  -> if (greenIndex == 2) 0 else greenIndex + 1
-                MotifPattern.PPG  -> if (greenIndex == 0) 2 else greenIndex - 1
+                MotifPattern.PGP  -> if (greenIndex == 0) 2 else greenIndex - 1
+                MotifPattern.PPG  -> if (greenIndex == 2) 0 else greenIndex + 1
                 null -> 0
             }
 
@@ -335,7 +332,7 @@ class Spindexer(): SubsystemBase() {
                     // empty = 0, so targets 1, then can go 1 -> 2
                     // for [0,1]
                     // empty = 2, so targets 0, then can go 0 -> 1
-                    targetSlot = if (emptySlot == 0) 2 else emptySlot - 1
+                    targetSlot = if (emptySlot == 2) 0 else emptySlot + 1
                 }
 
                 1    -> {
@@ -370,8 +367,7 @@ class Spindexer(): SubsystemBase() {
         }
 
         val pidOutput = controller.calculate(currentTicks, targetTicks)
-        val motorPower = pidOutput + turningFeedforward * -robotTurningPower
-        motor.power = Range.clip(motorPower, -maxPower, maxPower)
+        motor.power = Range.clip(pidOutput, -maxPower, maxPower)
 
         if (debugTelemetry) {
             OpModeManager.getTelemetry()?.run{

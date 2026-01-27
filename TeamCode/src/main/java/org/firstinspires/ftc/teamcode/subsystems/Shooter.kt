@@ -33,7 +33,7 @@ class Shooter(): SubsystemBase() {
         @JvmField
         var kP = 0.01
         @JvmField
-        var kV = 0.0025
+        var kV = 0.00245
 
         @JvmField
         var tuning = false
@@ -48,22 +48,25 @@ class Shooter(): SubsystemBase() {
         60.0,
         82.0,
         104.0,
-        139.0
+        139.0,
+        150.0
     )
 
     val speedArray = doubleArrayOf(
         2750.0,
-        3000.0,
-        3300.0,
+        2875.0,
+        3150.0,
         3500.0,
-        3875.0
+        3875.0,
+        4000.0
     )
 
     val angleArray = doubleArrayOf(
         0.01,
-        0.05,
         0.175,
         0.3,
+        0.35,
+        0.6,
         0.6
     )
 
@@ -103,7 +106,7 @@ class Shooter(): SubsystemBase() {
         maxSlewRate = 0.2
     }
     private val flywheelController = PIDController(kP, 0.0, 0.0, kV).apply {
-        setPointTolerance = 25.0
+        setPointTolerance = 35.0
     }
 
     private var cachedVoltage = 13.0
@@ -125,7 +128,7 @@ class Shooter(): SubsystemBase() {
         pidOutput = flywheelController.calculate(filteredFlywheelRPM, targetFlywheelRPM)
         
         // allow it to stop SLOWLY when target is 0
-        flywheelMotor.power = if (flywheelController.error <= -500) 0.0 else pidOutput / cachedVoltage
+        flywheelMotor.power = pidOutput / cachedVoltage
 
         hoodServo.position = hoodPosition
 

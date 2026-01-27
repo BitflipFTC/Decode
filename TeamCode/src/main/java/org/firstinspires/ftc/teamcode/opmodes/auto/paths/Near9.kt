@@ -9,7 +9,7 @@ import org.firstinspires.ftc.teamcode.util.buildBasicLine
 import org.firstinspires.ftc.teamcode.util.buildCurvedLine
 import org.firstinspires.ftc.teamcode.util.buildTangentLine
 
-class Path12 (
+class Near9 (
     alliance: Alliance
 ) : BaseAutoPath(
     alliance
@@ -24,9 +24,6 @@ class Path12 (
     lateinit var dIntake2: PathChain
     lateinit var intake2: PathChain
     lateinit var score2: PathChain
-    lateinit var dIntake3: PathChain
-    lateinit var intake3: PathChain
-    lateinit var score3: PathChain
     lateinit var park: PathChain
 
     override fun buildPaths(follower: Follower): List<Path> {
@@ -34,7 +31,7 @@ class Path12 (
             .buildBasicLine(poses.nearStartPose, poses.nearShootPoseFacingObelisk).build()
 
         dIntake1 = follower.pathBuilder()
-            .buildCurvedLine(poses.nearShootPoseFacingObelisk, poses.intake1Control, poses.startIntake1).build()
+            .buildCurvedLine(poses.nearShootPoseFacingObelisk, poses.nearIntake1Control, poses.startIntake1).build()
 
         intake1 = follower.pathBuilder()
             .buildTangentLine(poses.startIntake1, poses.endIntake1).build()
@@ -43,7 +40,7 @@ class Path12 (
             .buildBasicLine(poses.endIntake1, poses.nearShootPose).build()
 
         dIntake2 = follower.pathBuilder()
-            .buildCurvedLine(poses.nearShootPose, poses.intake2Control, poses.startIntake2).build()
+            .buildCurvedLine(poses.nearShootPose, poses.nearIntake2Control, poses.startIntake2).build()
 
         intake2 = follower.pathBuilder()
             .buildTangentLine(poses.startIntake2, poses.endIntake2).build()
@@ -51,16 +48,6 @@ class Path12 (
         score2 = follower.pathBuilder()
             .buildTangentLine(poses.endIntake2, poses.endIntake2Move).setReversed()
             .buildBasicLine(poses.endIntake2Move, poses.nearShootPose).build()
-
-        dIntake3 = follower.pathBuilder()
-            .buildCurvedLine(poses.nearShootPose, poses.intake3Control, poses.startIntake3).build()
-
-        intake3 = follower.pathBuilder()
-            .buildTangentLine(poses.startIntake3, poses.endIntake3).build()
-
-        score3 = follower.pathBuilder()
-            .buildTangentLine(poses.endIntake3, poses.endIntake3Move).setReversed()
-            .buildBasicLine(poses.endIntake3, poses.nearShootPose).build()
 
         park = follower.pathBuilder()
             .buildBasicLine(poses.nearShootPose, poses.nearParkPose).build()
@@ -73,10 +60,7 @@ class Path12 (
             Path(dIntake2, fullSpeed),
             Path(intake2, intakeSpeed),
             Path(score2, fullSpeed),
-            Path(dIntake3, fullSpeed),
-            Path(intake3, intakeSpeed),
-            Path(score3, fullSpeed),
             Path(park, fullSpeed)
-            )
+        )
     }
 }

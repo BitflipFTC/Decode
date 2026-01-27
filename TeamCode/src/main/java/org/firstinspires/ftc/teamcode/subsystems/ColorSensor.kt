@@ -1,15 +1,15 @@
 package org.firstinspires.ftc.teamcode.subsystems
 
+import android.graphics.Color
 import android.util.Log
 import com.qualcomm.hardware.rev.RevColorSensorV3
-import com.qualcomm.robotcore.hardware.HardwareMap
 import com.qualcomm.robotcore.hardware.NormalizedRGBA
 import com.seattlesolvers.solverslib.command.SubsystemBase
 import com.skeletonarmy.marrow.OpModeManager
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit
 import org.firstinspires.ftc.teamcode.util.Artifact
 
-class ArtifactColorSensor(): SubsystemBase() {
+class ColorSensor(): SubsystemBase() {
     private val colorSensor: RevColorSensorV3 = OpModeManager.getHardwareMap().get(RevColorSensorV3::class.java, "colorSensor")
     var colors: NormalizedRGBA = NormalizedRGBA()
         private set
@@ -25,6 +25,18 @@ class ArtifactColorSensor(): SubsystemBase() {
     val blue: Double
         get() = colors.blue.toDouble()
 
+    class HSV() {
+        val col = floatArrayOf(0f,0f,0f)
+        val h: Float
+            get() = col[0]
+        val s: Float
+            get() = col[1]
+        val v: Float
+            get() = col[2]
+    }
+
+    val hsv = HSV()
+
     var debugTelemetry = true
 
     init {
@@ -36,15 +48,21 @@ class ArtifactColorSensor(): SubsystemBase() {
         colors = colorSensor.normalizedColors
         distance = colorSensor.getDistance(DistanceUnit.CM)
 
+        Color.RGBToHSV((colors.red * 255).toInt(), (colors.green * 255).toInt(), (colors.blue * 255).toInt(), hsv.col)
+
         detectedArtifact = if (distance < 3.0) {
-            if ((red < blue) && (red < green)) {
-                Log.d("FSM", "colors, b: $blue, g: $green, d: $distance")
-                if ((blue > green)) {
-                    Artifact.PURPLE
-                } else {
+            Log.d("FSM", "colors, h: ${hsv.h}, s: ${hsv.s}, v: ${hsv.v}")
+            when (hsv.h) {
+                in 150.0..185.0     -> {
                     Artifact.GREEN
                 }
-            } else null
+                in 200.0..250.0 -> {
+                    Artifact.PURPLE
+                }
+                else            -> {
+                    null
+                }
+            }
         } else {
             null
         }
@@ -53,9 +71,9 @@ class ArtifactColorSensor(): SubsystemBase() {
             OpModeManager.getTelemetry()?.run {
                 addData("Detected Artifact", detectedArtifact?.name ?: "none")
                 addData("Distance", "%05.2fcm", distance)
-                addData("green","%07.4f", green)
-                addData("red","%07.4f", red)
-                addData("blue","%07.4f", blue)
+                addData("hue","%07.4f", hsv.h)
+                addData("sat","%07.4f", hsv.s)
+                addData("val","%07.4f", hsv.v)
                 addLine("------------------------------")
             }
         }

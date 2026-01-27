@@ -4,10 +4,9 @@ import com.pedropathing.geometry.Pose
 import com.qualcomm.hardware.lynx.LynxModule
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
-import org.firstinspires.ftc.robotcore.external.Const
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants
-import org.firstinspires.ftc.teamcode.subsystems.ArtifactColorSensor
 import org.firstinspires.ftc.teamcode.subsystems.Intake
+import org.firstinspires.ftc.teamcode.subsystems.ColorSensor
 import org.firstinspires.ftc.teamcode.subsystems.OV9281
 import org.firstinspires.ftc.teamcode.subsystems.Shooter
 import org.firstinspires.ftc.teamcode.subsystems.Spindexer
@@ -85,7 +84,7 @@ class ShootWhileMoving : LinearOpMode() {
         val spindexer = Spindexer()
         val transfer = Transfer()
         val turret = Turret()
-        val colorSensor = ArtifactColorSensor()
+        val colorSensor = ColorSensor()
         val follower = Constants.createFollower(hardwareMap)
 
         val subsystems = setOf(intake, camera, shooter, spindexer, transfer, turret, colorSensor)

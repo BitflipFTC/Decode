@@ -19,7 +19,7 @@ class Turret(): SubsystemBase() {
         // the offset between the turret's center of rotation
         // and the robot's center of rotation in inches.
         // 75 is measured in mm, then converted to inches by dividing.
-        const val TURRET_OFFSET: Double = 80 / 25.4
+        const val TURRET_OFFSET: Double = 79 / 25.4
 
         // 667.4157303371 total degrees of freedom for turret
         // manually limit it from
@@ -53,14 +53,14 @@ class Turret(): SubsystemBase() {
     // DO NOT DO IT
     // BAD
     var turretPose = Pose()
-        set(pose) {
+        private set(pose) {
             val r = TURRET_OFFSET
             val theta = pose.heading
 
             val x = r * cos(theta)
             val y = r * sin(theta)
 
-            field = Pose(pose.x - x, pose.y - y, normalizeRadians(pose.heading + angle, false))
+            field = Pose(pose.x - x, pose.y - y, pose.heading)
         }
 
     // this lazily initialies the goal pose, so if it's not manually set in the opmode, it assumes RED.

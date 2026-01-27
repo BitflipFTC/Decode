@@ -6,7 +6,7 @@ import com.bylazar.telemetry.PanelsTelemetry
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.util.ElapsedTime
-import org.firstinspires.ftc.teamcode.opmodes.auto.paths.Near12
+import org.firstinspires.ftc.teamcode.opmodes.auto.paths.Far9
 import org.firstinspires.ftc.teamcode.opmodes.teleop.CombinedTeleOp
 import org.firstinspires.ftc.teamcode.opmodes.teleop.CombinedTeleOp.Companion.follower
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants
@@ -19,14 +19,14 @@ import org.firstinspires.ftc.teamcode.subsystems.Spindexer
 import org.firstinspires.ftc.teamcode.subsystems.Transfer
 import org.firstinspires.ftc.teamcode.subsystems.Turret
 import org.firstinspires.ftc.teamcode.util.Artifact
-import org.firstinspires.ftc.teamcode.util.components.BetterLoopTimeComponent
+import org.firstinspires.ftc.teamcode.util.BetterLoopTimeComponent
 import org.firstinspires.ftc.teamcode.util.FiniteStateMachine
-import org.firstinspires.ftc.teamcode.util.components.InitConfigurer
+import org.firstinspires.ftc.teamcode.util.InitConfigurer
 import org.firstinspires.ftc.teamcode.util.followCustomPath
 
 @Suppress("UNUSED")
-@Autonomous(name = "12 ball near", preselectTeleOp = "Combined TeleOp")
-class Near12Autonomous : LinearOpMode() {
+@Autonomous(name = "9 ball far", preselectTeleOp = "Combined TeleOp")
+class Far9Autonomous : LinearOpMode() {
     private enum class Shoot {
         IDLE,
         MOVE_SPINDEXER,
@@ -36,41 +36,36 @@ class Near12Autonomous : LinearOpMode() {
 
     private var shootingState = Shoot.IDLE
 
-    val components = setOf(BetterLoopTimeComponent, InitConfigurer)
+    val spindexer: Spindexer = Spindexer()
+    val turret: Turret = Turret()
+    val transfer: Transfer = Transfer()
+    val shooter: Shooter = Shooter()
+    val intake: Intake = Intake()
+    val colorSensor: ColorSensor = ColorSensor()
+    val camera: OV9281 = OV9281()
+
+    val subsystems = setOf(spindexer, turret, transfer, shooter, intake, colorSensor)
 
     val finiteStateMachine: FiniteStateMachine = FiniteStateMachine()
-    lateinit var spindexer: Spindexer
-    lateinit var turret: Turret
-    lateinit var transfer: Transfer
-    lateinit var shooter: Shooter
-    lateinit var intake: Intake
-    lateinit var colorSensor: ColorSensor
-    lateinit var camera: OV9281
 
     override fun runOpMode() {
-        spindexer = Spindexer()
-        turret = Turret()
-        transfer = Transfer()
-        shooter = Shooter()
-        intake = Intake()
-        colorSensor = ColorSensor()
-        camera = OV9281()
-        val subsystems = setOf(spindexer, turret, transfer, shooter, intake, colorSensor)
-
         telemetry = JoinedTelemetry(PanelsTelemetry.ftcTelemetry, telemetry)
 
         follower = Constants.createFollower(hardwareMap)
-        Log.d("FSM", "auto inited")
-        components.forEach { it.init() }
+        InitConfigurer.preInit()
+
+        subsystems.forEach { it.initialize() }
+        camera.initialize()
+
         while (opModeInInit() && !InitConfigurer.hasSelectedAlliance) {
-            components.forEach { it.initLoop() }
+            InitConfigurer.postWaitForStart()
             follower!!.update()
             telemetry.update()
         }
 
-        val pathSequence = Near12(InitConfigurer.selectedAlliance!!)
+        val pathSequence = Far9(InitConfigurer.selectedAlliance!!)
         turret.selectedAlliance = InitConfigurer.selectedAlliance!!
-        follower!!.pose = pathSequence.poses.nearStartPose
+        follower!!.pose = pathSequence.poses.farStartPose
         val paths = pathSequence.buildPaths(follower!!)
 
         while (opModeInInit()) {
@@ -78,7 +73,7 @@ class Near12Autonomous : LinearOpMode() {
             telemetry.update()
         }
 
-
+        BetterLoopTimeComponent.preStartButtonPressed()
         // set up preloads
         spindexer.setCollectedArtifacts(
             Artifact.GREEN,
@@ -91,18 +86,16 @@ class Near12Autonomous : LinearOpMode() {
                 "DScore Preload",
                 ::opModeIsActive,
                 {
+                    spindexer.motifPattern = camera.motif
+                    CombinedTeleOp.motifPattern = spindexer.motifPattern
+                    Log.d("FSM", "motif pattern detected: ${spindexer.motifPattern}")
                     follower!!.followCustomPath(paths[0])
                     intake.intake()
                 }
             ).addState(
                 "Shoot preload",
                 {!follower!!.isBusy },
-                {
-                    spindexer.motifPattern = camera.motif
-                    CombinedTeleOp.motifPattern = spindexer.motifPattern
-                    Log.d("FSM", "motif pattern detected: ${spindexer.motifPattern}")
-                    shootAllArtifacts()
-                }
+                ::shootAllArtifacts
             ).addState(
                 "DIntake 1",
                 {shootingState == Shoot.IDLE},
@@ -136,25 +129,9 @@ class Near12Autonomous : LinearOpMode() {
                 {!follower!!.isBusy},
                 ::shootAllArtifacts
             ).addState(
-                "DIntake 3",
-                {shootingState == Shoot.IDLE},
-                {follower!!.followCustomPath(paths[7])}
-            ).addState(
-                "Intake 3",
-                {!follower!!.isBusy},
-                {follower!!.followCustomPath(paths[8])}
-            ).addState(
-                "DScore 3",
-                {!follower!!.isBusy},
-                {follower!!.followCustomPath(paths[9])}
-            ).addState(
-                "Shoot 3",
-                {!follower!!.isBusy},
-                ::shootAllArtifacts
-            ).addState(
                 "Park",
                 {shootingState == Shoot.IDLE},
-                {follower!!.followCustomPath(paths[10])}
+                {follower!!.followCustomPath(paths[7])}
             )
 
         while (opModeIsActive()) {
@@ -179,8 +156,7 @@ class Near12Autonomous : LinearOpMode() {
             subsystems.forEach { it.periodic() }
             Drawing.drawDebug(follower)
             telemetry.update()
-
-            components.forEach { it.periodic() }
+            BetterLoopTimeComponent.postUpdate()
         }
 
         follower!!.breakFollowing()
