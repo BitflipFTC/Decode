@@ -49,7 +49,7 @@ class Shooter(): Subsystem {
     val distanceArray = doubleArrayOf(
         41.0,
         60.0,
-        82.0,
+        88.0,
         104.0,
         139.0,
         150.0
@@ -57,16 +57,16 @@ class Shooter(): Subsystem {
     val speedArray = doubleArrayOf(
         2750.0,
         2875.0,
-        3150.0,
+        3250.0,
         3500.0,
         3875.0,
         4000.0
     )
     val angleArray = doubleArrayOf(
-        0.01,
-        0.175,
+        0.05,
         0.3,
-        0.35,
+        0.45,
+        0.5,
         0.6,
         0.6
     )
@@ -107,7 +107,7 @@ class Shooter(): Subsystem {
             position = hoodPosition
         }
 
-        flywheelController.setPointTolerance = 35.0
+        flywheelController.setPointTolerance = 55.0
 
         vSensor = ActiveOpMode.hardwareMap.get(VoltageSensor::class.java, "Control Hub")
     }
