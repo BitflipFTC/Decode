@@ -200,8 +200,11 @@ class CombinedTeleOp : LinearOpMode() {
             // more bulk caching
             allHubs.forEach { hub -> hub.clearBulkCache() }
 
-            // see https://www.padcrafter.com/?templates=Driver+1%7CDriver+2&plat=1%7C1&col=%23242424%2C%23606A6E%2C%23FFFFFF&leftStick=Drivetrain+translation%7CTurret+Manual+Control&rightStick=Drivetrain+rotation%7CSpindexer+Manual+Control&yButton=Actuate+Transfer&xButton=Toggle+intake&rightTrigger=Auto+adjust+shooter%7CTransfer+forward&rightBumper=Spindexer%3A+Next+Outtake&leftBumper=Spindexer%3A+Next+Intake%7CAutoaim+turret&leftTrigger=Reverse+Intake%7CTransfer+backward&bButton=Reset+yaw+%28TO+BE+REMOVED%29%7CLong+shooting+preset&backButton=Toggle+field+centric&dpadLeft=%7CHoodPosition+-+0.05&dpadRight=%7CHoodPosition+%2B+0.05&dpadUp=%7CFlywheel+RPM+%2B+250&dpadDown=%7CFlywheel+RPM+-+250&aButton=%7CClose+shooting+preset
-            // for gamepad layouts
+            // gets it until it is gotten :tm:
+            if (motifPattern == null && camera.detectionsAmount > 0) {
+                motifPattern = camera.motif
+                spindexer.motifPattern = motifPattern
+            }
 
             // transfer
             if (gamepad1.triangleWasPressed() && spindexer.atSetPoint()) {
