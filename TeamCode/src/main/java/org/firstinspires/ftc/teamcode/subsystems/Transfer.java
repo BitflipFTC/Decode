@@ -27,7 +27,7 @@ public class Transfer implements Subsystem {
     public static int MOTOR_TURNS = 1;
 
     public static double kP = 0.005;
-    public static double kI = 0.07;
+    public static double kI = 0.03;
     public static double kD = 0.0002;
     public static double maxPower = 0.67;
     public static boolean tuning = true;

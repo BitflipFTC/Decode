@@ -30,7 +30,7 @@ import org.firstinspires.ftc.teamcode.util.hardware.MotorEx
 @Configurable
 class Spindexer(): Subsystem {
     companion object {
-        const val GEAR_RATIO: Double = 1.125 // 18t out to 16t in
+        const val GEAR_RATIO: Double = 1.125 // 18t spndexer to 16t motor
         const val TICKS_PER_REVOLUTION: Double = 537.7 * GEAR_RATIO
 
         @JvmField
@@ -180,12 +180,21 @@ class Spindexer(): Subsystem {
     val targetTicks // no backing
         get() = (targetAngle / 360) * TICKS_PER_REVOLUTION
     val currentTicks: Double  // no backing
-        get() = motor.currentPosition.toDouble()
+        get() = motor.currentPosition.toDouble() + spindexerOffset
     val currentAngle
         get() = (currentTicks / TICKS_PER_REVOLUTION) * 360
     val hasMotifAssortment: Boolean
         get() = findPurpleSlots().size == 2 && findGreenSlots().size == 1
-    var robotTurningPower: Double = 0.0
+
+    var spindexerOffset: Double = 0.0
+
+    fun increaseOffset() {
+        spindexerOffset += (1.0/18.0) * TICKS_PER_REVOLUTION
+    }
+
+    fun decreaseOffset() {
+        spindexerOffset -= (1.0/18.0) * TICKS_PER_REVOLUTION
+    }
 
     var motifPattern: MotifPattern? = null
 
