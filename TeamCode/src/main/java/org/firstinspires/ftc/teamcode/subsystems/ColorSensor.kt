@@ -54,7 +54,7 @@ class ColorSensor(): Subsystem {
         Color.RGBToHSV((colors.red * 255).toInt(), (colors.green * 255).toInt(), (colors.blue * 255).toInt(), hsv.col)
 
         detectedArtifact = if (distance < 3.0) {
-            Log.d("FSM", "colors, h: ${hsv.h}, s: ${hsv.s}, v: ${hsv.v}")
+            Log.d("CS", "colors, h: ${hsv.h}, s: ${hsv.s}, v: ${hsv.v}")
             when (hsv.h) {
                 in 150.0..185.0     -> {
                     Artifact.GREEN
