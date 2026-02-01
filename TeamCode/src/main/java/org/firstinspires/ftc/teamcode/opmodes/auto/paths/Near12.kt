@@ -15,7 +15,7 @@ class Near12 (
     alliance
 ) {
     val fullSpeed = 1.0
-    val intakeSpeed = 0.5
+    val intakeSpeed = 0.3
 
     lateinit var scorePreload: PathChain
     lateinit var dIntake1: PathChain

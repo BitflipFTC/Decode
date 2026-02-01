@@ -15,7 +15,7 @@ class Far9 (
     alliance
 ) {
     val fullSpeed = 1.0
-    val intakeSpeed = 0.5
+    val intakeSpeed = 0.3
 
     lateinit var scorePreload: PathChain
     lateinit var dIntake3: PathChain
@@ -37,7 +37,7 @@ class Far9 (
             .buildTangentLine(poses.startIntake3, poses.endIntake3).build()
 
         score3 = follower.pathBuilder()
-            .buildBasicLine(poses.endIntake3, poses.farShootPose).build()
+            .buildTangentLine(poses.endIntake3, poses.farShootPose).setReversed().build()
 
         dIntake2 = follower.pathBuilder()
             .buildCurvedLine(poses.farShootPose, poses.farIntake2Control, poses.startIntake2).build()
@@ -46,7 +46,7 @@ class Far9 (
             .buildTangentLine(poses.startIntake2, poses.endIntake2).build()
 
         score2 = follower.pathBuilder()
-            .buildBasicLine(poses.endIntake2, poses.farShootPose).build()
+            .buildTangentLine(poses.endIntake2, poses.farShootPose).setReversed().build()
 
         park = follower.pathBuilder()
             .buildBasicLine(poses.farShootPose, poses.farParkPose).build()
