@@ -36,5 +36,10 @@ object InitConfigurer : Component {
             hasSelectedAlliance = true
         }
 
+        if (hasSelectedAlliance) {
+            telemetry.addLine("Alliance confirmed.")
+            gamepad1.rumble(100)
+        }
+
     }
 }
