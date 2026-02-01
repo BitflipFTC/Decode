@@ -14,6 +14,7 @@ import com.qualcomm.hardware.lynx.LynxModule
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import com.qualcomm.robotcore.hardware.Gamepad
+import com.qualcomm.robotcore.util.ElapsedTime
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants
 import org.firstinspires.ftc.teamcode.pedroPathing.Drawing
 import org.firstinspires.ftc.teamcode.subsystems.ColorSensor
@@ -24,7 +25,6 @@ import org.firstinspires.ftc.teamcode.subsystems.Spindexer
 import org.firstinspires.ftc.teamcode.subsystems.Transfer
 import org.firstinspires.ftc.teamcode.subsystems.Turret
 import org.firstinspires.ftc.teamcode.util.Alliance
-import org.firstinspires.ftc.teamcode.util.Artifact
 import org.firstinspires.ftc.teamcode.util.InitConfigurer
 import org.firstinspires.ftc.teamcode.util.MotifPattern
 import org.firstinspires.ftc.teamcode.util.auto.AutoPoses
@@ -47,6 +47,7 @@ class CombinedTeleOp : LinearOpMode() {
     }
 
     private var shootingState = Shoot.IDLE
+    val timer = ElapsedTime()
 
     var artifactDetected = false
     var lastArtifactDetected = false
@@ -63,25 +64,30 @@ class CombinedTeleOp : LinearOpMode() {
                 spindexer.toMotifOuttakePosition()
                 Log.d("FSM", "MOVING SPINDEXER TO ${spindexer.state.name}, ${spindexer.getArtifactString()}")
                 shootingState = Shoot.TRANSFER_ARTIFACT
+                timer.reset()
             }
 
             Shoot.TRANSFER_ARTIFACT   -> {
                 Log.d("FSM", "Waiting for shooter or spindexer")
                 Log.d("FSM", "sp: ${spindexer.currentAngle}, ${spindexer.targetAngle}, sh: ${shooter.flywheelRPM}, ${shooter.targetFlywheelRPM}")
                 if (shooter.atSetPoint() && spindexer.atSetPoint()) {
+                    Log.d("FSM", "Moving spindexer / shooter took ${timer.milliseconds()}")
                     transfer.transferArtifact()
                     Log.d("FSM", "TRANSFERING")
                     shootingState = Shoot.WAIT_FOR_COMPLETION
+                    timer.reset()
                 }
             }
 
             Shoot.WAIT_FOR_COMPLETION -> {
-                Log.d("FSM", "WAITING FOR TRANSFER, ${transfer.currentPosition}, ${transfer.targetPosition}")
+                Log.d("FSM", "WAITING FOR TRANSFER, current: ${transfer.currentPosition}, target: ${transfer.targetPosition}, diff: ${transfer.targetPosition - transfer.currentPosition}")
                 if (transfer.atSetPoint()) {
+                    Log.d("FSM", "transferring took ${timer.milliseconds()}")
                     spindexer.recordOuttake()
                     Log.d("FSM", "EVALUATING SPINDEXER FULLNESS")
                     Log.d("FSM", "Spindexer isEmpty: " + spindexer.isEmpty + ", isFull: " + spindexer.isFull + ", Str: " + spindexer.getArtifactString())
 
+                    timer.reset()
                     if (spindexer.isEmpty) {
                         shootingState = Shoot.IDLE
                         spindexer.toFirstEmptyIntakePosition()
@@ -115,6 +121,7 @@ class CombinedTeleOp : LinearOpMode() {
     var reverseIntake = false
     var lastReverseIntake = false
     var lastSpindexerIsFull = false
+    var tuningFlywheel = false
 
     override fun runOpMode() {
         val fol = follower ?: Constants.createFollower(hardwareMap).apply {
@@ -127,21 +134,6 @@ class CombinedTeleOp : LinearOpMode() {
         telemetry = JoinedTelemetry(PanelsTelemetry.ftcTelemetry, telemetry)
         val loopTimer = LoopTimer(10)
 
-//        val portals = VisionPortal.makeMultiPortalView(2, VisionPortal.MultiPortalLayout.HORIZONTAL)
-
-//        val colorProcessor = ColorSensorPipeline()
-//        val visionPortal = VisionPortal.Builder()
-//            .setCamera(hardwareMap.get(WebcamName::class.java, "Webcam 1"))
-//            .setCameraResolution(Size(160, 120))
-//            .setShowStatsOverlay(true)
-//            .setStreamFormat(VisionPortal.StreamFormat.MJPEG)
-//            .addProcessor(colorProcessor)
-//            .setAutoStopLiveView(true)
-//            .setLiveViewContainerId(portals[0])
-//            .build()
-
-//        camera.viewContainerId = portals[1]
-
         subsystems.forEach { it.initialize() }
         fol.update()
         Drawing.init()
@@ -152,6 +144,7 @@ class CombinedTeleOp : LinearOpMode() {
             InitConfigurer.postWaitForStart()
             telemetry.update()
         }
+
         val autoPoses = AutoPoses(InitConfigurer.selectedAlliance ?: Alliance.RED)
         val goToFarShoot = {
             fol.pathBuilder()
@@ -191,6 +184,7 @@ class CombinedTeleOp : LinearOpMode() {
                 .build()
         }
 
+
         // bulk caching
         val allHubs = hardwareMap.getAll(LynxModule::class.java)
         allHubs.forEach { hub -> hub.bulkCachingMode = LynxModule.BulkCachingMode.MANUAL }
@@ -199,10 +193,10 @@ class CombinedTeleOp : LinearOpMode() {
         loopTimer.start()
 
         fol.startTeleopDrive(true)
+
         while (opModeIsActive()) {
             loopTimer.end()
             loopTimer.start()
-//            val gamepad1 = g1.asCombinedFTCGamepad(gamepad1)
             // more bulk caching
             allHubs.forEach { hub -> hub.clearBulkCache() }
 
@@ -216,22 +210,19 @@ class CombinedTeleOp : LinearOpMode() {
             }
 
             // spindexer
-            if (gamepad1.leftBumperWasPressed() && transfer.atSetPoint() && intake.power == Intake.State.INTAKE) {
+            if (gamepad1.leftBumperWasPressed() && transfer.atSetPoint() && intake.power != Intake.State.OFF) {
                 spindexer.toNextOuttakePosition()
             }
 
-            if (gamepad1.rightBumperWasPressed() && transfer.atSetPoint() && intake.power == Intake.State.INTAKE) {
+            if (gamepad1.rightBumperWasPressed() && transfer.atSetPoint() && intake.power != Intake.State.OFF) {
                 spindexer.toNextIntakePosition()
             }
 
             // intake
             if (gamepad1.squareWasPressed()) intake.toggle()
 
-//            lastReverseIntake = reverseIntake
-//            reverseIntake = gamepad1.left_trigger > 0.15
             // while held, reversed
             if (gamepad1.leftTriggerWasPressed()) {
-//                spindexer.toMotifOuttakePosition()
                 intake.reversed = true
             }
 //
@@ -277,59 +268,59 @@ class CombinedTeleOp : LinearOpMode() {
                 gamepad1.rumble(250)
             }
 
-//            if (gamepad1.dpadDownWasPressed()) {
-//                shooter.targetFlywheelRPM -= 125
+            if (!tuningFlywheel) {
+                if (gamepad1.dpadRightWasPressed()) {
+                    spindexer.increaseOffset()
+                }
+
+                if (gamepad1.dpadLeftWasPressed()) {
+                    spindexer.decreaseOffset()
+                }
+            }
+
+            if (tuningFlywheel) {
+                if (gamepad1.dpadDownWasPressed()) {
+                    shooter.targetFlywheelRPM -= 125
+                }
+
+                if (gamepad1.dpadUpWasPressed()) {
+                    shooter.targetFlywheelRPM += 125
+                }
+
+                if (gamepad1.dpadRightWasPressed()) {
+                    shooter.hoodPosition += 0.025
+                }
+
+                if (gamepad1.dpadLeftWasPressed()) {
+                    shooter.hoodPosition -= 0.025
+                }
+
+            }
+//
+//            if (gamepad1.dpadLeftWasPressed()) {
+//                spindexer.motifPattern = MotifPattern.GPP
+//                motifPattern = MotifPattern.GPP
 //            }
 //
 //            if (gamepad1.dpadUpWasPressed()) {
-//                shooter.targetFlywheelRPM += 125
+//                spindexer.motifPattern = MotifPattern.PGP
+//                motifPattern = MotifPattern.PGP
 //            }
 //
 //            if (gamepad1.dpadRightWasPressed()) {
-//                shooter.hoodPosition += 0.025
+//                spindexer.motifPattern = MotifPattern.PPG
+//                motifPattern = MotifPattern.PPG
 //            }
 //
-//            if (gamepad1.dpadLeftWasPressed()) {
-//                shooter.hoodPosition -= 0.025
-//            }
-
-            if (gamepad1.dpadLeftWasPressed()) {
-                spindexer.motifPattern = MotifPattern.GPP
-                motifPattern = MotifPattern.GPP
+            if (!tuningFlywheel) {
+                shooter.setTargetState(turret.goalPose.distanceFrom(fol.pose))
             }
-
-            if (gamepad1.dpadUpWasPressed()) {
-                spindexer.motifPattern = MotifPattern.PGP
-                motifPattern = MotifPattern.PGP
-            }
-
-            if (gamepad1.dpadRightWasPressed()) {
-                spindexer.motifPattern = MotifPattern.PPG
-                motifPattern = MotifPattern.PPG
-            }
-
-            shooter.setTargetState(turret.goalPose.distanceFrom(fol.pose))
-
-//            val localDetectedArtifact: Artifact? = colorProcessor.artifact
-//            lastArtifactDetected = artifactDetected
-//            artifactDetected =
-//                localDetectedArtifact != null && !spindexer.isFull && spindexer.slotsToIntakes.contains(
-//                    spindexer.state
-//                ) && spindexer.atSetPoint()
-//            if (artifactDetected && !lastArtifactDetected) {
-////                Log.d("FSM", "detected artifact: ${localDetectedArtifact?.name}, spindexer not full: ${!spindexer.isFull}, spindexer state not null: ${spindexer.slotsToIntakes.contains(spindexer.state)}, spindexer at set point: ${spindexer.atSetPoint()}")
-//                spindexer.recordIntake(localDetectedArtifact!!)
-////                Log.d("FSM","new artifact string: ${spindexer.getArtifactString()}, current state: ${spindexer.state.name}")
-//                spindexer.toFirstEmptyIntakePosition()
-//                gamepad1.rumbleBlips(spindexer.totalFullSlots)
-//                colorProcessor.artifact = null
-//            }
 
             lastArtifactDetected = artifactDetected
             artifactDetected =
                 colorSensor.detectedArtifact != null && !spindexer.isFull && spindexer.slotsToIntakes.contains(
                     spindexer.state
-                ) && spindexer.atSetPoint()
+                ) && spindexer.atSetPoint() && intake.power != Intake.State.OFF
             if (artifactDetected && !lastArtifactDetected) {
 //                Log.d("FSM", "detected artifact: ${localDetectedArtifact?.name}, spindexer not full: ${!spindexer.isFull}, spindexer state not null: ${spindexer.slotsToIntakes.contains(spindexer.state)}, spindexer at set point: ${spindexer.atSetPoint()}")
                 spindexer.recordIntake(colorSensor.detectedArtifact!!)
@@ -340,7 +331,6 @@ class CombinedTeleOp : LinearOpMode() {
             }
 
 //            lastSpindexerFull = spindexer.isFull
-            subsystems.forEach { it.periodic() }
 
             if (camera.hasNewReading && fol.velocity.magnitude < 1.0 && fol.angularVelocity < 1 * ((2 * Math.PI) / 360) ) {
                 fol.pose = Pose(
@@ -359,6 +349,7 @@ class CombinedTeleOp : LinearOpMode() {
             )
             Drawing.sendPacket()
             turret.robotPose = fol.pose
+            subsystems.forEach { it.periodic() }
             telemetry.run{
                 addData("Loop Hz", "%05.2f", loopTimer.hz)
                 addData("Loop ms", "%05.2f", loopTimer.ms.toDouble())
