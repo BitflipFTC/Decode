@@ -73,66 +73,69 @@ class Far9Autonomous : LinearOpMode() {
             telemetry.update()
         }
 
-        BetterLoopTimeComponent.preStartButtonPressed()
-        // set up preloads
-        spindexer.setCollectedArtifacts(
-            Artifact.GREEN,
-            Artifact.PURPLE,
-            Artifact.PURPLE,
-        )
+        if (opModeIsActive()) {
 
-        finiteStateMachine
-            .addState(
-                "DScore Preload",
-                ::opModeIsActive,
-                {
-                    spindexer.motifPattern = camera.motif
-                    CombinedTeleOp.motifPattern = spindexer.motifPattern
-                    Log.d("FSM", "motif pattern detected: ${spindexer.motifPattern}")
-                    follower!!.followCustomPath(paths[0])
-                    intake.intake()
-                }
-            ).addState(
-                "Shoot preload",
-                {!follower!!.isBusy },
-                ::shootAllArtifacts
-            ).addState(
-                "DIntake 1",
-                {shootingState == Shoot.IDLE},
-                {follower!!.followCustomPath(paths[1])}
-            ).addState(
-                "Intake 1",
-                {!follower!!.isBusy},
-                {follower!!.followCustomPath(paths[2])}
-            ).addState(
-                "DScore 1",
-                {!follower!!.isBusy},
-                {follower!!.followCustomPath(paths[3])}
-            ).addState(
-                "Shoot 1",
-                {!follower!!.isBusy},
-                ::shootAllArtifacts
-            ).addState(
-                "DIntake 2",
-                {shootingState == Shoot.IDLE},
-                {follower!!.followCustomPath(paths[4])}
-            ).addState(
-                "Intake 2",
-                {!follower!!.isBusy},
-                {follower!!.followCustomPath(paths[5])}
-            ).addState(
-                "DScore 2",
-                {!follower!!.isBusy},
-                {follower!!.followCustomPath(paths[6])}
-            ).addState(
-                "Shoot 2",
-                {!follower!!.isBusy},
-                ::shootAllArtifacts
-            ).addState(
-                "Park",
-                {shootingState == Shoot.IDLE},
-                {follower!!.followCustomPath(paths[7])}
+            BetterLoopTimeComponent.preStartButtonPressed()
+            // set up preloads
+            spindexer.setCollectedArtifacts(
+                Artifact.GREEN,
+                Artifact.PURPLE,
+                Artifact.PURPLE,
             )
+
+            finiteStateMachine
+                .addState(
+                    "DScore Preload",
+                    ::opModeIsActive,
+                    {
+                        spindexer.motifPattern = camera.motif
+                        CombinedTeleOp.motifPattern = spindexer.motifPattern
+                        Log.d("FSM", "motif pattern detected: ${spindexer.motifPattern}")
+                        follower!!.followCustomPath(paths[0])
+                        intake.intake()
+                    }
+                ).addState(
+                    "Shoot preload",
+                    { !follower!!.isBusy },
+                    ::shootAllArtifacts
+                ).addState(
+                    "DIntake 1",
+                    { shootingState == Shoot.IDLE },
+                    { follower!!.followCustomPath(paths[1]) }
+                ).addState(
+                    "Intake 1",
+                    { !follower!!.isBusy },
+                    { follower!!.followCustomPath(paths[2]) }
+                ).addState(
+                    "DScore 1",
+                    { !follower!!.isBusy },
+                    { follower!!.followCustomPath(paths[3]) }
+                ).addState(
+                    "Shoot 1",
+                    { !follower!!.isBusy },
+                    ::shootAllArtifacts
+                ).addState(
+                    "DIntake 2",
+                    { shootingState == Shoot.IDLE },
+                    { follower!!.followCustomPath(paths[4]) }
+                ).addState(
+                    "Intake 2",
+                    { !follower!!.isBusy },
+                    { follower!!.followCustomPath(paths[5]) }
+                ).addState(
+                    "DScore 2",
+                    { !follower!!.isBusy },
+                    { follower!!.followCustomPath(paths[6]) }
+                ).addState(
+                    "Shoot 2",
+                    { !follower!!.isBusy },
+                    ::shootAllArtifacts
+                ).addState(
+                    "Park",
+                    { shootingState == Shoot.IDLE },
+                    { follower!!.followCustomPath(paths[7]) }
+                )
+        }
 
         while (opModeIsActive()) {
             finiteStateMachine.run()
@@ -142,8 +145,8 @@ class Far9Autonomous : LinearOpMode() {
                 colorSensor.detectedArtifact != null && !spindexer.isFull && spindexer.slotsToIntakes.contains(spindexer.state) && spindexer.atSetPoint()
             if (artifactDetected) {
                 spindexer.recordIntake(colorSensor.detectedArtifact!!)
+                Log.d("FSM", "DETECTED ARTIFACT ${colorSensor.detectedArtifact!!} at spindexer ${spindexer.state}")
                 spindexer.toFirstEmptyIntakePosition()
-                Log.d("FSM", "DETECTED ARTIFACT ${colorSensor.detectedArtifact!!}")
             }
 
             shooter.setTargetState(turret.goalPose.distanceFrom(follower!!.pose))
@@ -155,8 +158,8 @@ class Far9Autonomous : LinearOpMode() {
             telemetry.addData("heading", follower!!.pose.heading)
             subsystems.forEach { it.periodic() }
             Drawing.drawDebug(follower)
-            telemetry.update()
             BetterLoopTimeComponent.postUpdate()
+            telemetry.update()
         }
 
         follower!!.breakFollowing()
@@ -170,25 +173,36 @@ class Far9Autonomous : LinearOpMode() {
             Log.d("FSM", "Shooting: spindexer has ${spindexer.getArtifactString()}, motif is ${spindexer.motifPattern}")
         }
     }
-
     fun updateShootingFSM() {
         when (shootingState) {
             Shoot.MOVE_SPINDEXER      -> {
                 spindexer.toMotifOuttakePosition()
+                Log.d("FSM", "MOVING SPINDEXER TO ${spindexer.state.name}, ${spindexer.getArtifactString()}")
                 shootingState = Shoot.TRANSFER_ARTIFACT
+                timer.reset()
             }
 
             Shoot.TRANSFER_ARTIFACT   -> {
+                Log.d("FSM", "Waiting for shooter or spindexer")
+                Log.d("FSM", "sp: ${spindexer.currentAngle}, ${spindexer.targetAngle}, sh: ${shooter.flywheelRPM}, ${shooter.targetFlywheelRPM}")
                 if (shooter.atSetPoint() && spindexer.atSetPoint()) {
+                    Log.d("FSM", "-------- Moving spindexer / shooter took ${timer.milliseconds()}")
                     transfer.transferArtifact()
+                    Log.d("FSM", "TRANSFERING")
                     shootingState = Shoot.WAIT_FOR_COMPLETION
+                    timer.reset()
                 }
             }
 
             Shoot.WAIT_FOR_COMPLETION -> {
+                Log.d("FSM", "WAITING FOR TRANSFER, current: ${transfer.currentPosition}, target: ${transfer.targetPosition}, diff: ${transfer.targetPosition - transfer.currentPosition}")
                 if (transfer.atSetPoint()) {
+                    Log.d("FSM", "------- transferring took ${timer.milliseconds()}")
                     spindexer.recordOuttake()
+                    Log.d("FSM", "EVALUATING SPINDEXER FULLNESS")
+                    Log.d("FSM", "Spindexer isEmpty: " + spindexer.isEmpty + ", isFull: " + spindexer.isFull + ", Str: " + spindexer.getArtifactString())
 
+                    timer.reset()
                     if (spindexer.isEmpty) {
                         shootingState = Shoot.IDLE
                         spindexer.toFirstEmptyIntakePosition()

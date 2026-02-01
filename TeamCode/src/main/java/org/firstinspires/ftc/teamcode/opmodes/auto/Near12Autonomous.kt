@@ -74,84 +74,87 @@ class Near12Autonomous : LinearOpMode() {
             telemetry.update()
         }
 
-        BetterLoopTimeComponent.preStartButtonPressed()
-        // set up preloads
-        spindexer.setCollectedArtifacts(
-            Artifact.GREEN,
-            Artifact.PURPLE,
-            Artifact.PURPLE,
-        )
+        if (opModeIsActive()) {
 
-        finiteStateMachine
-            .addState(
-                "DScore Preload",
-                ::opModeIsActive,
-                {
-                    follower!!.followCustomPath(paths[0])
-                    intake.intake()
-                }
-            ).addState(
-                "Shoot preload",
-                {!follower!!.isBusy },
-                {
-                    spindexer.motifPattern = camera.motif
-                    CombinedTeleOp.motifPattern = spindexer.motifPattern
-                    Log.d("FSM", "motif pattern detected: ${spindexer.motifPattern}")
-                    shootAllArtifacts()
-                }
-            ).addState(
-                "DIntake 1",
-                {shootingState == Shoot.IDLE},
-                {follower!!.followCustomPath(paths[1])}
-            ).addState(
-                "Intake 1",
-                {!follower!!.isBusy},
-                {follower!!.followCustomPath(paths[2])}
-            ).addState(
-                "DScore 1",
-                {!follower!!.isBusy},
-                {follower!!.followCustomPath(paths[3])}
-            ).addState(
-                "Shoot 1",
-                {!follower!!.isBusy},
-                ::shootAllArtifacts
-            ).addState(
-                "DIntake 2",
-                {shootingState == Shoot.IDLE},
-                {follower!!.followCustomPath(paths[4])}
-            ).addState(
-                "Intake 2",
-                {!follower!!.isBusy},
-                {follower!!.followCustomPath(paths[5])}
-            ).addState(
-                "DScore 2",
-                {!follower!!.isBusy},
-                {follower!!.followCustomPath(paths[6])}
-            ).addState(
-                "Shoot 2",
-                {!follower!!.isBusy},
-                ::shootAllArtifacts
-            ).addState(
-                "DIntake 3",
-                {shootingState == Shoot.IDLE},
-                {follower!!.followCustomPath(paths[7])}
-            ).addState(
-                "Intake 3",
-                {!follower!!.isBusy},
-                {follower!!.followCustomPath(paths[8])}
-            ).addState(
-                "DScore 3",
-                {!follower!!.isBusy},
-                {follower!!.followCustomPath(paths[9])}
-            ).addState(
-                "Shoot 3",
-                {!follower!!.isBusy},
-                ::shootAllArtifacts
-            ).addState(
-                "Park",
-                {shootingState == Shoot.IDLE},
-                {follower!!.followCustomPath(paths[10])}
+            BetterLoopTimeComponent.preStartButtonPressed()
+            // set up preloads
+            spindexer.setCollectedArtifacts(
+                Artifact.GREEN,
+                Artifact.PURPLE,
+                Artifact.PURPLE,
             )
+
+            finiteStateMachine
+                .addState(
+                    "DScore Preload",
+                    ::opModeIsActive,
+                    {
+                        follower!!.followCustomPath(paths[0])
+                        intake.intake()
+                    }
+                ).addState(
+                    "Shoot preload",
+                    { !follower!!.isBusy },
+                    {
+                        spindexer.motifPattern = camera.motif
+                        CombinedTeleOp.motifPattern = spindexer.motifPattern
+                        Log.d("FSM", "motif pattern detected: ${spindexer.motifPattern}")
+                        shootAllArtifacts()
+                    }
+                ).addState(
+                    "DIntake 1",
+                    { shootingState == Shoot.IDLE },
+                    { follower!!.followCustomPath(paths[1]) }
+                ).addState(
+                    "Intake 1",
+                    { !follower!!.isBusy },
+                    { follower!!.followCustomPath(paths[2]) }
+                ).addState(
+                    "DScore 1",
+                    { !follower!!.isBusy },
+                    { follower!!.followCustomPath(paths[3]) }
+                ).addState(
+                    "Shoot 1",
+                    { !follower!!.isBusy },
+                    ::shootAllArtifacts
+                ).addState(
+                    "DIntake 2",
+                    { shootingState == Shoot.IDLE },
+                    { follower!!.followCustomPath(paths[4]) }
+                ).addState(
+                    "Intake 2",
+                    { !follower!!.isBusy },
+                    { follower!!.followCustomPath(paths[5]) }
+                ).addState(
+                    "DScore 2",
+                    { !follower!!.isBusy },
+                    { follower!!.followCustomPath(paths[6]) }
+                ).addState(
+                    "Shoot 2",
+                    { !follower!!.isBusy },
+                    ::shootAllArtifacts
+                ).addState(
+                    "DIntake 3",
+                    { shootingState == Shoot.IDLE },
+                    { follower!!.followCustomPath(paths[7]) }
+                ).addState(
+                    "Intake 3",
+                    { !follower!!.isBusy },
+                    { follower!!.followCustomPath(paths[8]) }
+                ).addState(
+                    "DScore 3",
+                    { !follower!!.isBusy },
+                    { follower!!.followCustomPath(paths[9]) }
+                ).addState(
+                    "Shoot 3",
+                    { !follower!!.isBusy },
+                    ::shootAllArtifacts
+                ).addState(
+                    "Park",
+                    { shootingState == Shoot.IDLE },
+                    { follower!!.followCustomPath(paths[10]) }
+                )
+        }
 
         while (opModeIsActive()) {
             finiteStateMachine.run()
