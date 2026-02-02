@@ -91,6 +91,7 @@ class CombinedTeleOp : LinearOpMode() {
                     timer.reset()
                     if (spindexer.isEmpty) {
                         shootingState = Shoot.IDLE
+                        gamepad1.rumble(250)
                         spindexer.toFirstEmptyIntakePosition()
                     } else {
                         shootingState = Shoot.MOVE_SPINDEXER
@@ -269,17 +270,6 @@ class CombinedTeleOp : LinearOpMode() {
 
             if (gamepad1.rightTriggerWasPressed() && transfer.atSetPoint()) {
                 shootAllArtifacts()
-                gamepad1.rumble(250)
-            }
-
-            if (!tuningFlywheel) {
-                if (gamepad1.dpadRightWasPressed()) {
-                    spindexer.increaseOffset()
-                }
-
-                if (gamepad1.dpadLeftWasPressed()) {
-                    spindexer.decreaseOffset()
-                }
             }
 
             if (tuningFlywheel) {
@@ -300,23 +290,16 @@ class CombinedTeleOp : LinearOpMode() {
                 }
 
             }
-//
-//            if (gamepad1.dpadLeftWasPressed()) {
-//                spindexer.motifPattern = MotifPattern.GPP
-//                motifPattern = MotifPattern.GPP
-//            }
-//
-//            if (gamepad1.dpadUpWasPressed()) {
-//                spindexer.motifPattern = MotifPattern.PGP
-//                motifPattern = MotifPattern.PGP
-//            }
-//
-//            if (gamepad1.dpadRightWasPressed()) {
-//                spindexer.motifPattern = MotifPattern.PPG
-//                motifPattern = MotifPattern.PPG
-//            }
-//
+
             if (!tuningFlywheel) {
+                if (gamepad1.dpadRightWasPressed()) {
+                    spindexer.increaseOffset()
+                }
+
+                if (gamepad1.dpadLeftWasPressed()) {
+                    spindexer.decreaseOffset()
+                }
+
                 shooter.setTargetState(turret.goalPose.distanceFrom(fol.pose))
             }
 
@@ -326,15 +309,10 @@ class CombinedTeleOp : LinearOpMode() {
                     spindexer.state
                 ) && spindexer.atSetPoint() && intake.power != Intake.State.OFF
             if (artifactDetected && !lastArtifactDetected) {
-//                Log.d("FSM", "detected artifact: ${localDetectedArtifact?.name}, spindexer not full: ${!spindexer.isFull}, spindexer state not null: ${spindexer.slotsToIntakes.contains(spindexer.state)}, spindexer at set point: ${spindexer.atSetPoint()}")
                 spindexer.recordIntake(colorSensor.detectedArtifact!!)
-//                Log.d("FSM","new artifact string: ${spindexer.getArtifactString()}, current state: ${spindexer.state.name}")
                 spindexer.toFirstEmptyIntakePosition()
-                gamepad1.rumbleBlips(spindexer.totalFullSlots)
                 colorSensor.detectedArtifact = null
             }
-
-            lastSpindexerIsFull = spindexer.isFull
 
             if (camera.hasNewReading && fol.velocity.magnitude < 1.0 && fol.angularVelocity < 1 * ((2 * Math.PI) / 360) ) {
                 fol.pose = Pose(
@@ -344,17 +322,32 @@ class CombinedTeleOp : LinearOpMode() {
                 )
             }
 
+            if (spindexer.isFull && !lastSpindexerIsFull) {
+                gamepad1.runRumbleEffect(Gamepad.RumbleEffect.Builder()
+                    .addStep(0.0,1.0,167)
+                    .addStep(1.0,0.0,167)
+                    .addStep(0.0,1.0,167)
+                    .build())
+            }
+
             // timer rumble!!
+            if (timerForWhile(matchTimer, 100.0, 1.0)) {
+                gamepad1.rumble(100)
+            }
 
+            if (timerForWhile(matchTimer, 110.0, 1.0)) {
+                gamepad1.rumble(100)
+            }
 
-
-
-
+            if (timerForWhile(matchTimer, 115.0, 5.0)) {
+                gamepad1.rumble(100)
+            }
 
             updateShootingFSM()
             fol.update()
             Drawing.drawDebug(fol)
             turret.robotPose = fol.pose
+            lastSpindexerIsFull = spindexer.isFull
             subsystems.forEach { it.periodic() }
             telemetry.run{
                 addData("Loop ms", "%05.2f", loopTimer.ms.toDouble())
@@ -365,5 +358,9 @@ class CombinedTeleOp : LinearOpMode() {
                 update()
             }
         }
+    }
+
+    fun timerForWhile(timer: ElapsedTime, seconds: Double, trueTime: Double): Boolean {
+        return timer.seconds() in seconds..(seconds+trueTime)
     }
 }
