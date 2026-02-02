@@ -16,6 +16,8 @@ class ColorSensor(): Subsystem {
     var colors: NormalizedRGBA = NormalizedRGBA()
         private set
 
+    var readDistance = true
+
     var detectedArtifact: Artifact? = null
 
     // make sure this starts above 5.0 to avoid the color sensor making a fake read on the first loop
@@ -48,8 +50,13 @@ class ColorSensor(): Subsystem {
 
     override fun periodic() {
         // alternate reads to improve loop times
-        colors = colorSensor.normalizedColors
-        distance = colorSensor.getDistance(DistanceUnit.CM)
+        if (readDistance) {
+            distance = colorSensor.getDistance(DistanceUnit.CM)
+        } else {
+            colors = colorSensor.normalizedColors
+        }
+        readDistance = !readDistance
+
 
         Color.RGBToHSV((colors.red * 255).toInt(), (colors.green * 255).toInt(), (colors.blue * 255).toInt(), hsv.col)
 
