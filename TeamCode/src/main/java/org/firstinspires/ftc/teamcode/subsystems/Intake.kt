@@ -80,10 +80,10 @@ class Intake(): Subsystem {
     override fun periodic() {
         motor.power = if (reversed) -power.value * 1.0 else power.value
 
-        if (debugTelemetry) {
-            ActiveOpMode.telemetry.addData("Intake state", power.name)
-            ActiveOpMode.telemetry.addData("Reversed", reversed)
-            ActiveOpMode.telemetry.addLine("---------------------------")
-        }
+//        if (debugTelemetry) {
+//            ActiveOpMode.telemetry.addData("Intake state", power.name)
+//            ActiveOpMode.telemetry.addData("Reversed", reversed)
+//            ActiveOpMode.telemetry.addLine("---------------------------")
+//        }
     }
 }

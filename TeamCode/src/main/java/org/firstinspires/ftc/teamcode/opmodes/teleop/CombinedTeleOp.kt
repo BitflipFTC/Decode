@@ -48,6 +48,7 @@ class CombinedTeleOp : LinearOpMode() {
 
     private var shootingState = Shoot.IDLE
     val timer = ElapsedTime()
+    val matchTimer = ElapsedTime()
 
     var artifactDetected = false
     var lastArtifactDetected = false
@@ -193,6 +194,7 @@ class CombinedTeleOp : LinearOpMode() {
         loopTimer.start()
 
         fol.startTeleopDrive(true)
+        matchTimer.reset()
 
         while (opModeIsActive()) {
             loopTimer.end()
@@ -232,7 +234,6 @@ class CombinedTeleOp : LinearOpMode() {
             if (gamepad1.leftTriggerWasReleased()) {
                 intake.reversed = false
             }
-            lastSpindexerIsFull = spindexer.isFull
 
             if (!automatedDriving) {
                 fol.setTeleOpDrive(
@@ -333,7 +334,7 @@ class CombinedTeleOp : LinearOpMode() {
                 colorSensor.detectedArtifact = null
             }
 
-//            lastSpindexerFull = spindexer.isFull
+            lastSpindexerIsFull = spindexer.isFull
 
             if (camera.hasNewReading && fol.velocity.magnitude < 1.0 && fol.angularVelocity < 1 * ((2 * Math.PI) / 360) ) {
                 fol.pose = Pose(
@@ -343,23 +344,24 @@ class CombinedTeleOp : LinearOpMode() {
                 )
             }
 
+            // timer rumble!!
+
+
+
+
+
+
             updateShootingFSM()
             fol.update()
-            Drawing.drawRobot(fol.pose)
-            Drawing.drawRobot(turret.turretPose, Style(
-                "", "#FF881E", 0.5
-            )
-            )
-            Drawing.sendPacket()
+            Drawing.drawDebug(fol)
             turret.robotPose = fol.pose
             subsystems.forEach { it.periodic() }
             telemetry.run{
-                addData("Loop Hz", "%05.2f", loopTimer.hz)
                 addData("Loop ms", "%05.2f", loopTimer.ms.toDouble())
                 addData("x", fol.pose.x)
                 addData("y", fol.pose.y)
                 addData("heading", fol.pose.heading)
-                addLine()
+                addData("Time Elapsed", matchTimer.seconds())
                 update()
             }
         }

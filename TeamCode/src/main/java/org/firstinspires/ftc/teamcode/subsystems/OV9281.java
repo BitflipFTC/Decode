@@ -218,7 +218,7 @@ public class OV9281 implements Subsystem {
 
             if (debugTelemetry) {
                 ActiveOpMode.telemetry().addData("TAG NAME", detection.metadata.name);
-                ActiveOpMode.telemetry().addData("ID", detection.id);
+//                ActiveOpMode.telemetry().addData("ID", detection.id);
                 ActiveOpMode.telemetry().addData("Sureness", detection.decisionMargin);
             }
 

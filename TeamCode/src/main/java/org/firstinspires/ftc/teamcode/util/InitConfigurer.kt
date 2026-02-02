@@ -34,11 +34,11 @@ object InitConfigurer : Component {
 
         if (gamepad1.touchpadWasPressed()) {
             hasSelectedAlliance = true
+            gamepad1.rumble(100)
         }
 
         if (hasSelectedAlliance) {
             telemetry.addLine("Alliance confirmed.")
-            gamepad1.rumble(100)
         }
 
     }

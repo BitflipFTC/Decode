@@ -107,7 +107,7 @@ class Shooter(): Subsystem {
             position = hoodPosition
         }
 
-        flywheelController.setPointTolerance = 75.0
+        flywheelController.setPointTolerance = 55.0
 
         vSensor = ActiveOpMode.hardwareMap.get(VoltageSensor::class.java, "Control Hub")
     }
@@ -139,7 +139,7 @@ class Shooter(): Subsystem {
             ActiveOpMode.telemetry.addData("Flywheel target RPM", targetFlywheelRPM)
             ActiveOpMode.telemetry.addData("Flywheel current RPM", flywheelRPM)
             ActiveOpMode.telemetry.addData("Flywheel at set point", atSetPoint())
-            ActiveOpMode.telemetry.addData("Hood position", hoodPosition)
+//            ActiveOpMode.telemetry.addData("Hood position", hoodPosition)
             ActiveOpMode.telemetry.addLine("---------------------------")
         }
     }

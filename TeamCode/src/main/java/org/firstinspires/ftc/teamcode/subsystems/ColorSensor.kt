@@ -79,11 +79,11 @@ class ColorSensor(): Subsystem {
 
         if (debugTelemetry) {
             ActiveOpMode.telemetry.run {
-                addData("Detected Artifact", detectedArtifact?.name ?: "none")
-                addData("Distance", "%05.2fcm", distance)
-                addData("hue","%07.4f", hsv.h)
-                addData("sat","%07.4f", hsv.s)
-                addData("val","%07.4f", hsv.v)
+                addData("Color Sensor Detected Artifact", detectedArtifact?.name ?: "none")
+//                addData("Distance", "%05.2fcm", distance)
+//                addData("hue","%07.4f", hsv.h)
+//                addData("sat","%07.4f", hsv.s)
+//                addData("val","%07.4f", hsv.v)
                 addLine("------------------------------")
             }
         }

@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.test.tuning
 
-import android.util.Size
 import com.bylazar.telemetry.JoinedTelemetry
 import com.bylazar.telemetry.PanelsTelemetry
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
