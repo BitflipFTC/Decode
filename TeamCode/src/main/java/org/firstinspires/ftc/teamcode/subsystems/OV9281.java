@@ -41,6 +41,7 @@ public class OV9281 implements Subsystem {
     public int viewContainerId = -1;
 
     private final ArrayList<AprilTagDetection> detectionsBuffer = new ArrayList<>();
+    private final ArrayList<AprilTagDetection> obeliskDetections = new ArrayList<>();
 
     // https://ftc-docs.firstinspires.org/en/latest/apriltag/vision_portal/apriltag_localization/apriltag-localization.html
     /*
@@ -164,7 +165,14 @@ public class OV9281 implements Subsystem {
     }
 
     public MotifPattern getMotif() {
-        ArrayList<AprilTagDetection> obeliskDetections = this.aprilTag.getDetections().stream().filter((detection) -> detection.metadata.name.contains("Obelisk")).collect(Collectors.toCollection(ArrayList::new));
+        obeliskDetections.clear();
+
+        for (AprilTagDetection d : this.aprilTag.getDetections()) {
+            if (d.metadata != null && d.id >= 21 && d.id <= 23) {
+                obeliskDetections.add(d);
+            }
+        }
+
         @Nullable
         MotifPattern pattern = null;
 
