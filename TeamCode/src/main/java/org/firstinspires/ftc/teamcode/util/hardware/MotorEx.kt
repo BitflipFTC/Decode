@@ -20,15 +20,16 @@ class MotorEx @JvmOverloads constructor(
 ) {
     private val motor: DcMotorEx = ActiveOpMode.hardwareMap.get(DcMotorEx::class.java, motorName)
 
-    private var lastPower = 0.0
+    private var lastSetPower = 0.0
     var power: Double
-        get() = motor.power
+        get() = lastSetPower
         set(power) {
-            lastPower = motor.power
-            if (abs(power - lastPower) > cacheTolerance) {
-                val desiredChange = power - lastPower
+            if (abs(power - lastSetPower) > cacheTolerance) {
+                val desiredChange = power - lastSetPower
                 val limitedChange = Range.clip(desiredChange, -maxSlewRate, maxSlewRate)
-                motor.power += limitedChange
+                val newPower = lastSetPower + limitedChange
+                motor.power = newPower
+                lastSetPower = newPower
             }
         }
     val currentPosition: Int

@@ -21,6 +21,7 @@ public class Transfer implements Subsystem {
     // 1150rpm motor, so
     private final double TICKS_PER_REVOLUTION = 145.1;
     private double targetPosition = 0;
+    private double currentPosition = 0;
 
     // amount of times the motor should turn every time it transfers an
     // artifact to the flywheel
@@ -54,7 +55,7 @@ public class Transfer implements Subsystem {
     }
 
     public double getCurrentPosition() {
-        return motor.getCurrentPosition();
+        return currentPosition;
     }
 
     public double getTargetPosition() {
@@ -86,7 +87,7 @@ public class Transfer implements Subsystem {
     }
 
     public double getTransferMotorAngle() {
-        double degreesPosition = (motor.getCurrentPosition() / TICKS_PER_REVOLUTION) * 360;
+        double degreesPosition = (currentPosition / TICKS_PER_REVOLUTION) * 360;
         degreesPosition %= 360;
         degreesPosition = (degreesPosition + 360) % 360;
         return degreesPosition;
@@ -97,7 +98,8 @@ public class Transfer implements Subsystem {
      */
     @Override
     public void periodic() {
-        double pidOutput = controller.calculate(getCurrentPosition(), targetPosition);
+        currentPosition = motor.getCurrentPosition();
+        double pidOutput = controller.calculate(currentPosition, targetPosition);
         motor.setPower(Range.clip(pidOutput, -maxPower, maxPower));
 
         if (tuning) {
@@ -105,7 +107,7 @@ public class Transfer implements Subsystem {
         }
 
         if (debugTelemetry) {
-            ActiveOpMode.telemetry().addData("Transfer current ticks", getCurrentPosition());
+            ActiveOpMode.telemetry().addData("Transfer current ticks", currentPosition);
             ActiveOpMode.telemetry().addData("Transfer target ticks", targetPosition);
             ActiveOpMode.telemetry().addData("Transfer at set point", atSetPoint());
             ActiveOpMode.telemetry().addLine("---------------------------");

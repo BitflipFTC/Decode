@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode.opmodes.teleop
 
 import android.util.Log
 import com.bylazar.configurables.annotations.Configurable
-import com.bylazar.field.Style
 import com.bylazar.telemetry.JoinedTelemetry
 import com.bylazar.telemetry.PanelsTelemetry
 import com.bylazar.utils.LoopTimer
@@ -38,6 +37,9 @@ class CombinedTeleOp : LinearOpMode() {
 
         @JvmField
         var lowpass = 0.1
+
+        const val TUNING_FLYWHEEL = false
+        const val DEBUG_FSM = false
     }
     enum class Shoot {
         IDLE,
@@ -63,30 +65,34 @@ class CombinedTeleOp : LinearOpMode() {
         when (shootingState) {
             Shoot.MOVE_SPINDEXER      -> {
                 spindexer.toMotifOuttakePosition()
-                Log.d("FSM", "MOVING SPINDEXER TO ${spindexer.state.name}, ${spindexer.getArtifactString()}")
+                if (DEBUG_FSM) Log.d("FSM", "MOVING SPINDEXER TO ${spindexer.state.name}, ${spindexer.getArtifactString()}")
                 shootingState = Shoot.TRANSFER_ARTIFACT
                 timer.reset()
             }
 
             Shoot.TRANSFER_ARTIFACT   -> {
-                Log.d("FSM", "Waiting for shooter or spindexer")
-                Log.d("FSM", "sp: ${spindexer.currentAngle}, ${spindexer.targetAngle}, sh: ${shooter.flywheelRPM}, ${shooter.targetFlywheelRPM}")
+                if (DEBUG_FSM) {
+                    Log.d("FSM", "Waiting for shooter or spindexer")
+                    Log.d("FSM", "sp: ${spindexer.currentAngle}, ${spindexer.targetAngle}, sh: ${shooter.flywheelRPM}, ${shooter.targetFlywheelRPM}")
+                }
                 if (shooter.atSetPoint() && spindexer.atSetPoint()) {
-                    Log.d("FSM", "Moving spindexer / shooter took ${timer.milliseconds()}")
+                    if (DEBUG_FSM) Log.d("FSM", "Moving spindexer / shooter took ${timer.milliseconds()}")
                     transfer.transferArtifact()
-                    Log.d("FSM", "TRANSFERING")
+                    if (DEBUG_FSM) Log.d("FSM", "TRANSFERING")
                     shootingState = Shoot.WAIT_FOR_COMPLETION
                     timer.reset()
                 }
             }
 
             Shoot.WAIT_FOR_COMPLETION -> {
-                Log.d("FSM", "WAITING FOR TRANSFER, current: ${transfer.currentPosition}, target: ${transfer.targetPosition}, diff: ${transfer.targetPosition - transfer.currentPosition}")
+                if (DEBUG_FSM) Log.d("FSM", "WAITING FOR TRANSFER, current: ${transfer.currentPosition}, target: ${transfer.targetPosition}, diff: ${transfer.targetPosition - transfer.currentPosition}")
                 if (transfer.atSetPoint()) {
-                    Log.d("FSM", "transferring took ${timer.milliseconds()}")
+                    if (DEBUG_FSM) Log.d("FSM", "transferring took ${timer.milliseconds()}")
                     spindexer.recordOuttake()
-                    Log.d("FSM", "EVALUATING SPINDEXER FULLNESS")
-                    Log.d("FSM", "Spindexer isEmpty: " + spindexer.isEmpty + ", isFull: " + spindexer.isFull + ", Str: " + spindexer.getArtifactString())
+                    if (DEBUG_FSM) {
+                        Log.d("FSM", "EVALUATING SPINDEXER FULLNESS")
+                        Log.d("FSM", "Spindexer isEmpty: " + spindexer.isEmpty + ", isFull: " + spindexer.isFull + ", Str: " + spindexer.getArtifactString())
+                    }
 
                     timer.reset()
                     if (spindexer.isEmpty) {
@@ -120,10 +126,15 @@ class CombinedTeleOp : LinearOpMode() {
         colorSensor
     )
 
-    var reverseIntake = false
-    var lastReverseIntake = false
     var lastSpindexerIsFull = false
-    var tuningFlywheel = false
+
+    private val spindexerFullRumbleEffect: Gamepad.RumbleEffect by lazy {
+        Gamepad.RumbleEffect.Builder()
+            .addStep(0.0, 1.0, 167)
+            .addStep(1.0, 0.0, 167)
+            .addStep(0.0, 1.0, 167)
+            .build()
+    }
 
     override fun runOpMode() {
         val fol = follower ?: Constants.createFollower(hardwareMap).apply {
@@ -235,7 +246,7 @@ class CombinedTeleOp : LinearOpMode() {
             if (gamepad1.leftTriggerWasPressed()) {
                 intake.reversed = true
             }
-//
+
             if (gamepad1.leftTriggerWasReleased()) {
                 intake.reversed = false
             }
@@ -276,7 +287,7 @@ class CombinedTeleOp : LinearOpMode() {
                 shootAllArtifacts()
             }
 
-            if (tuningFlywheel) {
+            if (TUNING_FLYWHEEL) {
                 if (gamepad1.dpadDownWasPressed()) {
                     shooter.targetFlywheelRPM -= 125
                 }
@@ -295,7 +306,7 @@ class CombinedTeleOp : LinearOpMode() {
 
             }
 
-            if (!tuningFlywheel) {
+            if (!TUNING_FLYWHEEL) {
                 if (gamepad1.dpadRightWasPressed()) {
                     spindexer.increaseOffset()
                 }
@@ -327,11 +338,7 @@ class CombinedTeleOp : LinearOpMode() {
             }
 
             if (spindexer.isFull && !lastSpindexerIsFull) {
-                gamepad1.runRumbleEffect(Gamepad.RumbleEffect.Builder()
-                    .addStep(0.0,1.0,167)
-                    .addStep(1.0,0.0,167)
-                    .addStep(0.0,1.0,167)
-                    .build())
+                gamepad1.runRumbleEffect(spindexerFullRumbleEffect)
             }
 
             // timer rumble!!

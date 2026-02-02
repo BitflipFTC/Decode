@@ -18,17 +18,17 @@ class ServoEx(
             pwmRange = PwmControl.PwmRange(500.0, 2500.0)
         }
 
-    private var lastPosition = 0.0
+    private var lastSetPosition = 0.5
 
     /**
      * @param position the position to set the servo to
      */
     var position: Double
-        get() = servo.position
+        get() = lastSetPosition
         set(position) {
-            lastPosition = servo.position
-            if (abs(position - lastPosition) > cacheTolerance) {
+            if (abs(position - lastSetPosition) > cacheTolerance) {
                 servo.position = position
+                lastSetPosition = position
             }
         }
 

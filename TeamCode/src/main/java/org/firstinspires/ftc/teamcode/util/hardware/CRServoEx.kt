@@ -17,17 +17,17 @@ class CRServoEx(
         pwmRange = PwmControl.PwmRange(500.0, 2500.0)
     }
 
-    private var lastPower = 0.0
+    private var lastSetPower = 0.0
 
     /**
      * @param power the power to set the servo to
      */
     var power: Double
-        get() = crServo.power
+        get() = lastSetPower
         set(power) {
-            lastPower = crServo.power
-            if (abs(power - lastPower) > cacheTolerance) {
+            if (abs(power - lastSetPower) > cacheTolerance) {
                 crServo.power = power
+                lastSetPower = power
             }
         }
 }

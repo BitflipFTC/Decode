@@ -179,8 +179,8 @@ class Spindexer(): Subsystem {
     var targetAngle = state.referenceAngle
     val targetTicks // no backing
         get() = (targetAngle / 360) * TICKS_PER_REVOLUTION
-    val currentTicks: Double  // no backing
-        get() = motor.currentPosition.toDouble() + spindexerOffset
+    var currentTicks: Double = 0.0
+        private set
     val currentAngle
         get() = (currentTicks / TICKS_PER_REVOLUTION) * 360
     val hasMotifAssortment: Boolean
@@ -375,6 +375,8 @@ class Spindexer(): Subsystem {
      * This method must be called in a loop for the spindexer to move to its target.
      */
     override fun periodic() {
+        currentTicks = motor.currentPosition.toDouble() + spindexerOffset
+
         if (tuning) {
             controller.setCoeffs(kP, kI, kD, 0.0, kS)
             controller.staticFrictionDeadband = staticFrictionDeadband
@@ -389,7 +391,6 @@ class Spindexer(): Subsystem {
             ActiveOpMode.telemetry.addData("Spindexer current state", state.name)
             ActiveOpMode.telemetry.addData("Spindexer atSetPoint", atSetPoint())
             ActiveOpMode.telemetry.addData("Spindexer indexed artifacts", getArtifactString())
-//            ActiveOpMode.telemetry.addData("Spindexer has motif assortment?", hasMotifAssortment)
             ActiveOpMode.telemetry.addData("Motif Pattern", motifPattern?.name ?: "NONE")
             ActiveOpMode.telemetry.addLine("---------------------------")
         }
