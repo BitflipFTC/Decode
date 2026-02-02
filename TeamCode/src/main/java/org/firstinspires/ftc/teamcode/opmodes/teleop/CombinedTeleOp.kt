@@ -215,6 +215,10 @@ class CombinedTeleOp : LinearOpMode() {
                 spindexer.recordOuttake()
             }
 
+            if (gamepad1.crossWasPressed() && spindexer.atSetPoint()) {
+                transfer.undoTransfer()
+            }
+
             // spindexer
             if (gamepad1.leftBumperWasPressed() && transfer.atSetPoint() && intake.power != Intake.State.OFF) {
                 spindexer.toNextOuttakePosition()

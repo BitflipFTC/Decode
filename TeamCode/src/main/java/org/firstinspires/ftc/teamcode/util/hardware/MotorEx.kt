@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx
 import com.qualcomm.robotcore.hardware.DcMotorSimple
 import com.qualcomm.robotcore.util.Range
 import dev.nextftc.ftc.ActiveOpMode
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit
 import kotlin.math.abs
 
 /**
@@ -71,4 +72,10 @@ class MotorEx @JvmOverloads constructor(
         motor.direction = DcMotorSimple.Direction.REVERSE
         return this
     }
+
+    fun setCurrentAlert(amps: Double) {
+        motor.setCurrentAlert(amps, CurrentUnit.AMPS)
+    }
+
+    fun isOverCurrent() = motor.isOverCurrent
 }

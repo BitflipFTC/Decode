@@ -42,6 +42,7 @@ public class Transfer implements Subsystem {
     public void initialize() {
         controller.setSetPointTolerance(5.0);
         motor = new MotorEx("transfer").zeroed().brake();
+        motor.setCurrentAlert(8.5);
     }
 
     public void setPower (double power) {
@@ -64,6 +65,10 @@ public class Transfer implements Subsystem {
         targetPosition = t;
     }
 
+    public boolean isStalling() {
+        return motor.isOverCurrent();
+    }
+
     /**
      * Initiates the transfer of an artifact. The motor will turn at least a specified number of times,
      * turning (at most) one additional time in order to return to the nearest rotation
@@ -77,7 +82,7 @@ public class Transfer implements Subsystem {
     }
 
     public void undoTransfer() {
-        setMotorTarget(getCurrentPosition() - TICKS_PER_REVOLUTION * MOTOR_TURNS);
+        setMotorTarget(getTargetPosition() - TICKS_PER_REVOLUTION * MOTOR_TURNS);
     }
 
     public double getTransferMotorAngle() {
