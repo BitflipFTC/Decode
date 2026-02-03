@@ -318,6 +318,13 @@ class CombinedTeleOp : LinearOpMode() {
                 shooter.setTargetState(turret.goalPose.distanceFrom(fol.pose))
             }
 
+            if (turret.automatic && gamepad1.touchpadWasPressed()) {
+                turret.automatic = false
+                turret.angle = 0.0
+            } else if (!turret.automatic && gamepad1.touchpadWasPressed()){
+                turret.automatic = true
+            }
+
             lastArtifactDetected = artifactDetected
             artifactDetected =
                 colorSensor.detectedArtifact != null && !spindexer.isFull && spindexer.slotsToIntakes.contains(

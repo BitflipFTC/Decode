@@ -38,8 +38,8 @@ class Turret(): Subsystem {
     var automatic = true
 
     private val goalPositions = mapOf(
-        20 to Pose(2.0, 140.0),
-        24 to Pose(142.0, 140.0)
+        20 to Pose(4.0, 140.0),
+        24 to Pose(140.0, 140.0)
     )
 
     var robotPose = Pose()
