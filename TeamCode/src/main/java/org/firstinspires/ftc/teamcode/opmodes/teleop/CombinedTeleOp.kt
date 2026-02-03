@@ -138,7 +138,7 @@ class CombinedTeleOp : LinearOpMode() {
 
     override fun runOpMode() {
         val fol = follower ?: Constants.createFollower(hardwareMap).apply {
-            setStartingPose(Pose(72.0,72.0,Math.toRadians(90.0)))
+            setStartingPose(Pose(72.0,72.0,Math.PI))
             follower = this
         }
 

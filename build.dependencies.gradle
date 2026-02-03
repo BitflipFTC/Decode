@@ -22,10 +22,6 @@ dependencies {
 
     // pedropathing + panels
     implementation('com.pedropathing:ftc:2.0.6')
-    // removed in order to remove sloth for pp tuning
-//            {
-//        exclude group: 'com.acmerobotics.dashboard'
-//    }
     implementation 'com.pedropathing:telemetry:1.0.0'
 }
 
