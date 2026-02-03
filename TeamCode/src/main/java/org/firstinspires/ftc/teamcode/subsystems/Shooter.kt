@@ -8,6 +8,7 @@ import org.firstinspires.ftc.teamcode.util.InterpolatedLookupTable
 import org.firstinspires.ftc.teamcode.util.PIDController
 import org.firstinspires.ftc.teamcode.util.hardware.MotorEx
 import org.firstinspires.ftc.teamcode.util.hardware.ServoEx
+import kotlin.math.exp
 
 /**
  * Manages the robot's shooter mechanism, controlling a flywheel and an adjustable hood servo.
@@ -70,6 +71,14 @@ class Shooter(): Subsystem {
         0.6,
         0.6
     )
+    val timeInAirArray = doubleArrayOf(
+        0.8,
+        0.833,
+        0.867,
+        0.9,
+        0.95,
+        1.0
+    )
 
     private val velocityLookupTable = InterpolatedLookupTable(
         distanceArray,
@@ -81,10 +90,18 @@ class Shooter(): Subsystem {
         angleArray
     )
 
+    private val timeInAirLookupTable = InterpolatedLookupTable(
+        distanceArray,
+        timeInAirArray
+    )
+
     // main two adjustable params
 
     var targetFlywheelRPM = 0.0
     var hoodPosition = 0.0
+
+    var expectedTimeInAir = 0.0
+        private set
 
     var flywheelRPM = 0.0
         private set
@@ -151,6 +168,7 @@ class Shooter(): Subsystem {
         if (distance > 0.0) {
             targetFlywheelRPM = velocityLookupTable.calculate(distance)
             hoodPosition = angleLookupTable.calculate(distance)
+            expectedTimeInAir = timeInAirLookupTable.calculate(distance)
         }
 
         this.distance = distance

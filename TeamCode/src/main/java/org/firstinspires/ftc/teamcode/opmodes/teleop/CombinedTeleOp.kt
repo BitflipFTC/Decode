@@ -357,7 +357,12 @@ class CombinedTeleOp : LinearOpMode() {
             updateShootingFSM()
             fol.update()
             Drawing.drawDebug(fol)
-            turret.robotPose = fol.pose
+            val futurePose: Pose = Pose(
+                fol.pose.x + shooter.expectedTimeInAir * fol.velocity.xComponent,
+                fol.pose.y + shooter.expectedTimeInAir * fol.velocity.yComponent,
+                fol.pose.heading + shooter.expectedTimeInAir * fol.angularVelocity
+            )
+            turret.robotPose = futurePose
             lastSpindexerIsFull = spindexer.isFull
             subsystems.forEach { it.periodic() }
             telemetry.run{
