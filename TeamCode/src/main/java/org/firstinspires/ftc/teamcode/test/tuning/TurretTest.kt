@@ -12,11 +12,12 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Drawing
 import org.firstinspires.ftc.teamcode.subsystems.OV9281
 import org.firstinspires.ftc.teamcode.subsystems.Turret
 import org.firstinspires.ftc.teamcode.util.Alliance
+import org.firstinspires.ftc.teamcode.util.TelemetryImplUpstreamSubmission
 
 @TeleOp(name = "Test: Turret", group = "Test")
 class TurretTest : LinearOpMode() {
     override fun runOpMode() {
-        telemetry = JoinedTelemetry(PanelsTelemetry.ftcTelemetry, telemetry)
+        telemetry = JoinedTelemetry(PanelsTelemetry.ftcTelemetry, TelemetryImplUpstreamSubmission(this))
 
         val turret = Turret()
         val subsystems = setOf(turret)

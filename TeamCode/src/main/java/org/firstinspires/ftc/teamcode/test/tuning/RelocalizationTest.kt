@@ -8,6 +8,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Drawing
 import org.firstinspires.ftc.teamcode.subsystems.Drivetrain
 import org.firstinspires.ftc.teamcode.subsystems.OV9281
 import org.firstinspires.ftc.teamcode.util.BetterLoopTimeComponent
+import org.firstinspires.ftc.teamcode.util.TelemetryImplUpstreamSubmission
 
 @TeleOp(name = "Test: Camera", group = "Test")
 class RelocalizationTest: LinearOpMode() {
@@ -17,7 +18,7 @@ class RelocalizationTest: LinearOpMode() {
         dt.initialize()
         camera.initialize()
         Drawing.init()
-        telemetry = JoinedTelemetry(PanelsTelemetry.ftcTelemetry, telemetry)
+        telemetry = JoinedTelemetry(PanelsTelemetry.ftcTelemetry, TelemetryImplUpstreamSubmission(this))
         waitForStart()
         BetterLoopTimeComponent.preStartButtonPressed()
         while (opModeIsActive()) {

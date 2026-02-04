@@ -26,6 +26,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Turret
 import org.firstinspires.ftc.teamcode.util.Alliance
 import org.firstinspires.ftc.teamcode.util.InitConfigurer
 import org.firstinspires.ftc.teamcode.util.MotifPattern
+import org.firstinspires.ftc.teamcode.util.TelemetryImplUpstreamSubmission
 import org.firstinspires.ftc.teamcode.util.auto.AutoPoses
 
 @Configurable
@@ -144,7 +145,7 @@ class CombinedTeleOp : LinearOpMode() {
 
         spindexer.motifPattern = motifPattern
         gamepad1.triggerThreshold = 0.15f
-        telemetry = JoinedTelemetry(PanelsTelemetry.ftcTelemetry, telemetry)
+        telemetry = JoinedTelemetry(PanelsTelemetry.ftcTelemetry, TelemetryImplUpstreamSubmission(this))
         val loopTimer = LoopTimer(10)
 
         subsystems.forEach { it.initialize() }

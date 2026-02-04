@@ -22,6 +22,7 @@ import org.firstinspires.ftc.teamcode.util.Artifact
 import org.firstinspires.ftc.teamcode.util.BetterLoopTimeComponent
 import org.firstinspires.ftc.teamcode.util.FiniteStateMachine
 import org.firstinspires.ftc.teamcode.util.InitConfigurer
+import org.firstinspires.ftc.teamcode.util.TelemetryImplUpstreamSubmission
 import org.firstinspires.ftc.teamcode.util.followCustomPath
 
 @Suppress("UNUSED")
@@ -51,7 +52,8 @@ class Near9Autonomous : LinearOpMode() {
     val finiteStateMachine: FiniteStateMachine = FiniteStateMachine()
 
     override fun runOpMode() {
-        telemetry = JoinedTelemetry(PanelsTelemetry.ftcTelemetry, telemetry)
+        telemetry = JoinedTelemetry(PanelsTelemetry.ftcTelemetry, TelemetryImplUpstreamSubmission(this))
+
 
         follower = Constants.createFollower(hardwareMap)
         InitConfigurer.preInit()

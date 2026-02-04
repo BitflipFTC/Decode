@@ -11,6 +11,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Shooter
 import org.firstinspires.ftc.teamcode.subsystems.Spindexer
 import org.firstinspires.ftc.teamcode.subsystems.Transfer
 import org.firstinspires.ftc.teamcode.subsystems.Turret
+import org.firstinspires.ftc.teamcode.util.TelemetryImplUpstreamSubmission
 
 @TeleOp(name = "Test: Flywheel", group = "Test")
 class FlywheelTest : LinearOpMode() {
@@ -26,7 +27,7 @@ class FlywheelTest : LinearOpMode() {
         val spindexer = Spindexer()
         val turret = Turret().apply { automatic = false }
         val subsystems = setOf(shooter,transfer,intake,spindexer, drivetrain, turret)
-        telemetry = JoinedTelemetry(PanelsTelemetry.ftcTelemetry, telemetry)
+        telemetry = JoinedTelemetry(PanelsTelemetry.ftcTelemetry, TelemetryImplUpstreamSubmission(this))
 
         turret.initialize()
         subsystems.forEach { it.initialize() }

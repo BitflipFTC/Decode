@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import org.firstinspires.ftc.teamcode.subsystems.ColorSensor
 import org.firstinspires.ftc.teamcode.subsystems.Intake
 import org.firstinspires.ftc.teamcode.subsystems.Spindexer
+import org.firstinspires.ftc.teamcode.util.TelemetryImplUpstreamSubmission
 
 @TeleOp(name = "Test: Color Sensor", group = "Test")
 class ColorSensorTest : LinearOpMode() {
@@ -29,7 +30,7 @@ class ColorSensorTest : LinearOpMode() {
         colorSensor.initialize()
         intake.initialize()
         spindexer.initialize()
-        telemetry = JoinedTelemetry(PanelsTelemetry.ftcTelemetry, telemetry)
+        telemetry = JoinedTelemetry(PanelsTelemetry.ftcTelemetry, TelemetryImplUpstreamSubmission(this))
         waitForStart()
         while (opModeIsActive()) {
             colorSensor.periodic()
