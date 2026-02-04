@@ -28,7 +28,7 @@ import kotlin.math.exp
 class Shooter(): Subsystem {
     companion object {
         const val FLYWHEEL_PPR = 28
-        const val LOW_PASS = 0.05
+        const val LOW_PASS = 0.1
 
         @JvmField
         var kP = 0.1
@@ -105,8 +105,6 @@ class Shooter(): Subsystem {
 
     var flywheelRPM = 0.0
         private set
-    var lastFlywheelRPM = 0.0
-        private set
     var filteredFlywheelRPM = 0.0
         private set
     var pidOutput = 0.0
@@ -123,7 +121,7 @@ class Shooter(): Subsystem {
 
     override fun initialize() {
         flywheelMotor = MotorEx("flywheel").zeroed().float().reverse().apply {
-            maxSlewRate = 0.2
+            maxSlewRate = 0.5
         }
 
         hoodServo = ServoEx("hood").apply{
@@ -143,15 +141,14 @@ class Shooter(): Subsystem {
             cachedVoltage = vSensor.voltage
         }
 
-        lastFlywheelRPM = flywheelRPM
         flywheelRPM = (flywheelMotor.velocity / FLYWHEEL_PPR) * 60
-        filteredFlywheelRPM = flywheelRPM * LOW_PASS + lastFlywheelRPM * (1 - LOW_PASS)
+        filteredFlywheelRPM = flywheelRPM * LOW_PASS + filteredFlywheelRPM * (1 - LOW_PASS)
 
         if (tuning) {
             flywheelController.setCoeffs(kP, 0.0, 0.0, kV, 0.0)
         }
 
-        if (flywheelRPM >= targetFlywheelRPM && compensatingForShot) {
+        if (filteredFlywheelRPM >= targetFlywheelRPM && compensatingForShot) {
             compensatingForShot = false
         }
 
@@ -168,7 +165,7 @@ class Shooter(): Subsystem {
 
         if (debugTelemetry) {
             ActiveOpMode.telemetry.addData("Flywheel target RPM", targetFlywheelRPM)
-            ActiveOpMode.telemetry.addData("Flywheel current RPM", flywheelRPM)
+            ActiveOpMode.telemetry.addData("Flywheel current RPM", filteredFlywheelRPM)
             ActiveOpMode.telemetry.addData("Flywheel at set point", atSetPoint())
 //            ActiveOpMode.telemetry.addData("Hood position", hoodPosition)
             ActiveOpMode.telemetry.addLine("---------------------------")
