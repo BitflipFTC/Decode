@@ -37,6 +37,7 @@ import com.bylazar.telemetry.JoinedTelemetry;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.utils.LoopTimer;
 import com.qualcomm.hardware.lynx.LynxModule;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -54,6 +55,7 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
 import java.util.List;
 
+@Disabled
 @Configurable
 @TeleOp(name = "Concept: AprilTag Auto", group = "Concept")
 public class AprilTagAuto extends LinearOpMode {

@@ -6,6 +6,7 @@ import com.bylazar.configurables.annotations.Configurable
 import com.bylazar.telemetry.JoinedTelemetry
 import com.bylazar.telemetry.PanelsTelemetry
 import com.qualcomm.hardware.lynx.LynxModule
+import com.qualcomm.robotcore.eventloop.opmode.Disabled
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import com.qualcomm.robotcore.hardware.DcMotorEx
@@ -23,6 +24,7 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor
 import kotlin.math.pow
 import kotlin.math.sqrt
 
+@Disabled
 @Configurable
 @TeleOp(name = "Concept: AprilTag Driver", group = "Concept")
 class AprilTagDriver : LinearOpMode() {

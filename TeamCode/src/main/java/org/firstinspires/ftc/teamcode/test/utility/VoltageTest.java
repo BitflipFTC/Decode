@@ -2,12 +2,14 @@ package org.firstinspires.ftc.teamcode.test.utility;
 
 import com.bylazar.telemetry.JoinedTelemetry;
 import com.bylazar.telemetry.PanelsTelemetry;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
+@Disabled
 @TeleOp(name = "Utility: Voltage kS Tuning", group = "Utility")
 public class VoltageTest extends LinearOpMode {
     @Override

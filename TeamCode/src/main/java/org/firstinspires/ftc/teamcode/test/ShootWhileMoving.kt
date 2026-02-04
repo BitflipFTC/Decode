@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.test
 
 import com.pedropathing.geometry.Pose
 import com.qualcomm.hardware.lynx.LynxModule
+import com.qualcomm.robotcore.eventloop.opmode.Disabled
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants
@@ -17,6 +18,7 @@ import org.firstinspires.ftc.teamcode.util.BetterLoopTimeComponent
 import kotlin.math.sin
 import kotlin.math.sqrt
 
+@Disabled
 @TeleOp(name = "Shoot While Moving")
 class ShootWhileMoving : LinearOpMode() {
     companion object {

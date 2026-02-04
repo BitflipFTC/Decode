@@ -7,6 +7,7 @@ import com.bylazar.telemetry.PanelsTelemetry
 import com.bylazar.utils.LoopTimer
 import com.qualcomm.hardware.lynx.LynxModule
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot
+import com.qualcomm.robotcore.eventloop.opmode.Disabled
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import com.qualcomm.robotcore.hardware.DcMotor
@@ -19,6 +20,7 @@ import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.sin
 
+@Disabled
 @Configurable
 @TeleOp(name = "Heading Correct Drive", group = "TeleOp")
 class HeadingCorrectDrive : LinearOpMode() {
