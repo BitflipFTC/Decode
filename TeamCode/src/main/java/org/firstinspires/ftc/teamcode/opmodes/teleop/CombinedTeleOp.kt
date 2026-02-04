@@ -140,7 +140,7 @@ class CombinedTeleOp : LinearOpMode() {
 
     override fun runOpMode() {
         val fol = follower ?: Constants.createFollower(hardwareMap).apply {
-            setStartingPose(Pose(72.0,72.0,Math.PI))
+            setStartingPose(Pose(72.0,72.0,Math.PI/2))
             follower = this
         }
 
@@ -258,7 +258,8 @@ class CombinedTeleOp : LinearOpMode() {
                     -gamepad1.left_stick_y.toDouble(),
                     -gamepad1.left_stick_x.toDouble(),
                     -gamepad1.right_stick_x.toDouble(),
-                    false
+                    false,
+                    if (turret.selectedAlliance == Alliance.BLUE) Math.PI else 0.0
                 )
             }
 
