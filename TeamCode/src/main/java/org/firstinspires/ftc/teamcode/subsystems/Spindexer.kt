@@ -34,10 +34,10 @@ class Spindexer(): Subsystem {
         const val TICKS_PER_REVOLUTION: Double = 537.7 * GEAR_RATIO
 
         @JvmField
-        var kP = 0.009
+        var kP = 0.007
 
         @JvmField
-        var kI = 0.05
+        var kI = 0.0267
 
         @JvmField
         var kD = 0.000325
@@ -342,7 +342,7 @@ class Spindexer(): Subsystem {
                     // empty = 0, so targets 1, then can go 1 -> 2
                     // for [0,1]
                     // empty = 2, so targets 0, then can go 0 -> 1
-                    targetSlot = if (emptySlot == 2) 0 else emptySlot + 1
+                    targetSlot = if (emptySlot == 0) 2 else emptySlot - 1
                 }
 
                 1    -> {

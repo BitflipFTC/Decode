@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.util.ElapsedTime
 import org.firstinspires.ftc.teamcode.opmodes.auto.paths.Near9
 import org.firstinspires.ftc.teamcode.opmodes.teleop.CombinedTeleOp
 import org.firstinspires.ftc.teamcode.opmodes.teleop.CombinedTeleOp.Companion.follower
+import org.firstinspires.ftc.teamcode.opmodes.teleop.CombinedTeleOp.Companion.motifPattern
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants
 import org.firstinspires.ftc.teamcode.pedroPathing.Drawing
 import org.firstinspires.ftc.teamcode.subsystems.ColorSensor
@@ -152,6 +153,10 @@ class Near9Autonomous : LinearOpMode() {
             // in this order to let spindexer call a periodic
             updateShootingFSM()
             finiteStateMachine.run()
+            if (motifPattern == null) {
+                motifPattern = camera.motif
+                spindexer.motifPattern = motifPattern
+            }
 
             val artifactDetected =
                 colorSensor.detectedArtifact != null && !spindexer.isFull && spindexer.slotsToIntakes.contains(spindexer.state) && spindexer.atSetPoint()

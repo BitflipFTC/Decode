@@ -139,7 +139,7 @@ class CombinedTeleOp : LinearOpMode() {
 
     override fun runOpMode() {
         val fol = follower ?: Constants.createFollower(hardwareMap).apply {
-            setStartingPose(Pose(72.0,72.0,Math.toRadians(90.0)))
+            setStartingPose(Pose(72.0,72.0,Math.PI))
             follower = this
         }
 
@@ -317,6 +317,13 @@ class CombinedTeleOp : LinearOpMode() {
                 }
 
                 shooter.setTargetState(turret.goalPose.distanceFrom(fol.pose))
+            }
+
+            if (turret.automatic && gamepad1.touchpadWasPressed()) {
+                turret.automatic = false
+                turret.angle = 0.0
+            } else if (!turret.automatic && gamepad1.touchpadWasPressed()){
+                turret.automatic = true
             }
 
             lastArtifactDetected = artifactDetected

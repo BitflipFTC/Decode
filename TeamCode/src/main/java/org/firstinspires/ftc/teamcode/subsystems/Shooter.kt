@@ -21,7 +21,7 @@ import kotlin.math.exp
  * Setting these properties will cause the [periodic] method to adjust the physical
  * hardware to match the targets.
  *
- * The flywheel speed is managed by a PID controller, and its constants ([kP], [kI], [kD], [kV])
+ * The flywheel speed is managed by a PID controller, and its constants ([kP], [kV])
  * can be tuned.
  */
 @Configurable
@@ -31,7 +31,7 @@ class Shooter(): Subsystem {
         const val LOW_PASS = 0.05
 
         @JvmField
-        var kP = 0.01
+        var kP = 0.1
         @JvmField
         var kV = 0.00245
 
@@ -58,7 +58,7 @@ class Shooter(): Subsystem {
     val speedArray = doubleArrayOf(
         2750.0,
         3000.0,
-        3325.0,
+        3267.0,
         3500.0,
         3875.0,
         4000.0
@@ -66,7 +66,7 @@ class Shooter(): Subsystem {
     val angleArray = doubleArrayOf(
         0.05,
         0.3,
-        0.475,
+        0.45,
         0.55,
         0.6,
         0.6
