@@ -113,6 +113,12 @@ class Shooter(): Subsystem {
         private set
     var distance = 0.0
 
+    private var compensatingForShot = false
+
+    fun compensateForShot() {
+        compensatingForShot = true
+    }
+
     var debugTelemetry = true
 
     override fun initialize() {
@@ -145,10 +151,18 @@ class Shooter(): Subsystem {
             flywheelController.setCoeffs(kP, 0.0, 0.0, kV, 0.0)
         }
 
-        pidOutput = flywheelController.calculate(filteredFlywheelRPM, targetFlywheelRPM)
-        
-        // allow it to stop SLOWLY when target is 0
-        flywheelMotor.power = pidOutput / cachedVoltage
+        if (flywheelRPM >= targetFlywheelRPM && compensatingForShot) {
+            compensatingForShot = false
+        }
+
+        if (!compensatingForShot) {
+            pidOutput = flywheelController.calculate(filteredFlywheelRPM, targetFlywheelRPM)
+
+            // allow it to stop SLOWLY when target is 0
+            flywheelMotor.power = pidOutput / cachedVoltage
+        } else {
+            flywheelMotor.power = 1.0
+        }
 
         hoodServo.position = hoodPosition
 

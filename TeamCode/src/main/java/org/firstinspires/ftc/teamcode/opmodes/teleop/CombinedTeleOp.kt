@@ -79,6 +79,7 @@ class CombinedTeleOp : LinearOpMode() {
                 if (shooter.atSetPoint() && spindexer.atSetPoint()) {
                     if (DEBUG_FSM) Log.d("FSM", "Moving spindexer / shooter took ${timer.milliseconds()}")
                     transfer.transferArtifact()
+                    shooter.compensateForShot()
                     if (DEBUG_FSM) Log.d("FSM", "TRANSFERING")
                     shootingState = Shoot.WAIT_FOR_COMPLETION
                     timer.reset()
@@ -225,6 +226,7 @@ class CombinedTeleOp : LinearOpMode() {
             if (gamepad1.triangleWasPressed() && spindexer.atSetPoint()) {
                 transfer.transferArtifact()
                 spindexer.recordOuttake()
+                shooter.compensateForShot()
             }
 
             if (gamepad1.crossWasPressed() && spindexer.atSetPoint()) {
