@@ -48,12 +48,12 @@ class Shooter(): Subsystem {
     // longest short zone is approx. 80 in. from peak to center
     // shortest we can see from is about 25.0.
     val distanceArray = doubleArrayOf(
-        41.0,
-        60.0,
-        88.0,
-        104.0,
-        139.0,
-        150.0
+        40.0,
+        59.0,
+        87.0,
+        103.0,
+        138.0,
+        149.0
     )
     val speedArray = doubleArrayOf(
         2750.0,
