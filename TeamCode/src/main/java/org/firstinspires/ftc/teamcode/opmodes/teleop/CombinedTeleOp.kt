@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.opmodes.teleop
 
 import android.util.Log
 import com.bylazar.configurables.annotations.Configurable
+import com.bylazar.field.Style
 import com.bylazar.telemetry.JoinedTelemetry
 import com.bylazar.telemetry.PanelsTelemetry
 import com.bylazar.utils.LoopTimer
@@ -137,6 +138,8 @@ class CombinedTeleOp : LinearOpMode() {
             .addStep(0.0, 1.0, 167)
             .build()
     }
+
+    private var futurePose = Pose()
 
     override fun runOpMode() {
         val fol = follower ?: Constants.createFollower(hardwareMap).apply {
@@ -317,8 +320,6 @@ class CombinedTeleOp : LinearOpMode() {
                 if (gamepad1.dpadLeftWasPressed()) {
                     spindexer.decreaseOffset()
                 }
-
-                shooter.setTargetState(turret.goalPose.distanceFrom(fol.pose))
             }
 
             if (turret.automatic && gamepad1.touchpadWasPressed()) {
@@ -366,12 +367,40 @@ class CombinedTeleOp : LinearOpMode() {
 
             updateShootingFSM()
             fol.update()
-            Drawing.drawDebug(fol)
-            val futurePose: Pose = Pose(
+
+            shooter.setTargetState(turret.goalPose.distanceFrom(fol.pose))
+
+            // like repeat a bit yknow
+            repeat(3) {
+                futurePose = Pose(
+                    fol.pose.x + shooter.expectedTimeInAir * fol.velocity.xComponent,
+                    fol.pose.y + shooter.expectedTimeInAir * fol.velocity.yComponent,
+                    fol.pose.heading + shooter.expectedTimeInAir * fol.angularVelocity
+                )
+
+                shooter.setTargetState(turret.goalPose.distanceFrom(futurePose))
+            }
+
+            futurePose = Pose(
                 fol.pose.x + shooter.expectedTimeInAir * fol.velocity.xComponent,
                 fol.pose.y + shooter.expectedTimeInAir * fol.velocity.yComponent,
                 fol.pose.heading + shooter.expectedTimeInAir * fol.angularVelocity
             )
+
+            Drawing.drawRobot(fol.pose,
+                Style(
+                    "",
+                    "#FFFFFF",
+                    0.75
+                ))
+            Drawing.drawRobot(futurePose,
+                Style(
+                    "",
+                    "#FF881E",
+                    0.75
+                ))
+            Drawing.sendPacket()
+
             turret.robotPose = futurePose
             lastSpindexerIsFull = spindexer.isFull
             subsystems.forEach { it.periodic() }
