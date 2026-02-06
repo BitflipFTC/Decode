@@ -37,6 +37,8 @@ class Shooter(): Subsystem {
 
         @JvmField
         var tuning = false
+
+        val lpfilter = 0.01
     }
 
     private lateinit var vSensor: VoltageSensor
@@ -133,12 +135,12 @@ class Shooter(): Subsystem {
         vSensor = ActiveOpMode.hardwareMap.get(VoltageSensor::class.java, "Control Hub")
     }
 
-    private var cachedVoltage = 13.0
+    private var cachedVoltage: Double = 13.0
     private var voltageTimer = 0
 
     override fun periodic() {
         if (voltageTimer++ % 50 == 0) {
-            cachedVoltage = vSensor.voltage
+            cachedVoltage = lpfilter * vSensor.voltage + (1 - lpfilter) * cachedVoltage
         }
 
         flywheelRPM = (flywheelMotor.velocity / FLYWHEEL_PPR) * 60
@@ -167,6 +169,7 @@ class Shooter(): Subsystem {
             ActiveOpMode.telemetry.addData("Flywheel target RPM", targetFlywheelRPM)
             ActiveOpMode.telemetry.addData("Flywheel current RPM", filteredFlywheelRPM)
             ActiveOpMode.telemetry.addData("Flywheel at set point", atSetPoint())
+            ActiveOpMode.telemetry.addData("Voltage", "%06.2fV", cachedVoltage)
 //            ActiveOpMode.telemetry.addData("Hood position", hoodPosition)
             ActiveOpMode.telemetry.addLine("---------------------------")
         }
