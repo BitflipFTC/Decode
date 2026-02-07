@@ -51,7 +51,7 @@ class MotorEx @JvmOverloads constructor(
      * Sets the motor to FLOAT.
      * @return `this` - for method chaining
      */
-    fun float(): MotorEx {
+    fun floa(): MotorEx {
         motor.zeroPowerBehavior = DcMotor.ZeroPowerBehavior.FLOAT
         return this
     }

@@ -27,8 +27,8 @@ class Turret(): Subsystem {
         const val TURRET_RANGE: Double = 360.0 // degrees
 
         const val SERVO_LIMITS = TURRET_RANGE / GEAR_RATIO
-        const val SERVO_MIN = 0.5 - ((SERVO_LIMITS / 2) / 1800)
-        const val SERVO_MAX = 0.5 + ((SERVO_LIMITS / 2) / 1800)
+        const val SERVO_MIN = 0.5 - ((SERVO_LIMITS / 2.0) / 1800.0)
+        const val SERVO_MAX = 0.5 + ((SERVO_LIMITS / 2.0) / 1800.0)
     }
 
     private lateinit var servoL: ServoEx
@@ -38,8 +38,8 @@ class Turret(): Subsystem {
     var automatic = true
 
     private val goalPositions = mapOf(
-        20 to Pose(4.0, 140.0),
-        24 to Pose(140.0, 140.0)
+        20 to Pose(9.0, 135.0),
+        24 to Pose(135.0, 135.0)
     )
 
     var robotPose = Pose()
@@ -112,9 +112,9 @@ class Turret(): Subsystem {
 
         if (debugTelemetry) {
             ActiveOpMode.telemetry.run{
-//                addData("Turret calculated bearing", bearing)
+                addData("Turret calculated bearing", bearing)
 //                addData("Turret robot heading", robotHeading)
-//                addData("Turret target angle", angle)
+                addData("Turret target angle", angle)
 //                addData("Turret current position", position)
                 addData("Turret Distance", goalPose.distanceFrom(turretPose))
                 addLine("---------------------------")

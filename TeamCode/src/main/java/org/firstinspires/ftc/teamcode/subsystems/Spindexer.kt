@@ -43,7 +43,7 @@ class Spindexer(): Subsystem {
         var kD = 0.000325
 
         @JvmField
-        var kS = 0.025
+        var kS = 0.03
 
         @JvmField
         var setpointTolerance = 1.0 // in degrees

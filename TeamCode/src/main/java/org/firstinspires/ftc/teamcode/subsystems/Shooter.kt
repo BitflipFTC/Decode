@@ -8,7 +8,6 @@ import org.firstinspires.ftc.teamcode.util.InterpolatedLookupTable
 import org.firstinspires.ftc.teamcode.util.PIDController
 import org.firstinspires.ftc.teamcode.util.hardware.MotorEx
 import org.firstinspires.ftc.teamcode.util.hardware.ServoEx
-import kotlin.math.exp
 
 /**
  * Manages the robot's shooter mechanism, controlling a flywheel and an adjustable hood servo.
@@ -31,14 +30,14 @@ class Shooter(): Subsystem {
         const val LOW_PASS = 0.1
 
         @JvmField
-        var kP = 0.1
+        var kP = 0.02
         @JvmField
-        var kV = 0.00245
+        var kV = 0.00246
 
         @JvmField
         var tuning = false
 
-        val lpfilter = 0.01
+        const val LP_FILTER = 0.01
     }
 
     private lateinit var vSensor: VoltageSensor
@@ -50,36 +49,40 @@ class Shooter(): Subsystem {
     // longest short zone is approx. 80 in. from peak to center
     // shortest we can see from is about 25.0.
     val distanceArray = doubleArrayOf(
-        40.0,
-        59.0,
-        87.0,
-        103.0,
-        138.0,
-        149.0
+        39.0,
+        52.0,
+        58.0,
+        67.0,
+        102.0,
+        137.0,
+        152.0
     )
     val speedArray = doubleArrayOf(
         2750.0,
+        2875.0,
+        2999.0,
         3000.0,
-        3267.0,
-        3500.0,
-        3875.0,
-        4000.0
+        3677.0,
+        4005.0,
+        4175.0
     )
     val angleArray = doubleArrayOf(
-        0.05,
-        0.3,
+        0.1,
         0.45,
+        0.5,
+        0.55,
         0.55,
         0.6,
         0.6
     )
     val timeInAirArray = doubleArrayOf(
-        0.8,
-        0.833,
-        0.867,
+        0.5,
+        0.57,
+        0.64,
+        0.67,
+        0.83,
         0.9,
-        0.95,
-        1.0
+        0.9
     )
 
     private val velocityLookupTable = InterpolatedLookupTable(
@@ -113,16 +116,16 @@ class Shooter(): Subsystem {
         private set
     var distance = 0.0
 
-    private var compensatingForShot = false
+//    private var compensatingForShot = false
 
-    fun compensateForShot() {
-        compensatingForShot = true
-    }
+//    fun compensateForShot() {
+//        compensatingForShot = true
+//    }
 
     var debugTelemetry = true
 
     override fun initialize() {
-        flywheelMotor = MotorEx("flywheel").zeroed().float().reverse().apply {
+        flywheelMotor = MotorEx("flywheel").zeroed().floa().reverse().apply {
             maxSlewRate = 0.5
         }
 
@@ -140,7 +143,7 @@ class Shooter(): Subsystem {
 
     override fun periodic() {
         if (voltageTimer++ % 50 == 0) {
-            cachedVoltage = lpfilter * vSensor.voltage + (1 - lpfilter) * cachedVoltage
+            cachedVoltage = LP_FILTER * vSensor.voltage + (1 - LP_FILTER) * cachedVoltage
         }
 
         flywheelRPM = (flywheelMotor.velocity / FLYWHEEL_PPR) * 60
@@ -150,18 +153,18 @@ class Shooter(): Subsystem {
             flywheelController.setCoeffs(kP, 0.0, 0.0, kV, 0.0)
         }
 
-        if (filteredFlywheelRPM >= targetFlywheelRPM && compensatingForShot) {
-            compensatingForShot = false
-        }
+//        if (filteredFlywheelRPM >= targetFlywheelRPM && compensatingForShot) {
+//            compensatingForShot = false
+//        }
 
-        if (!compensatingForShot) {
+//        if (!compensatingForShot) {
             pidOutput = flywheelController.calculate(filteredFlywheelRPM, targetFlywheelRPM)
 
             // allow it to stop SLOWLY when target is 0
             flywheelMotor.power = pidOutput / cachedVoltage
-        } else {
-            flywheelMotor.power = 1.0
-        }
+//        } else {
+//            flywheelMotor.power = 1.0
+//        }
 
         hoodServo.position = hoodPosition
 
@@ -170,7 +173,7 @@ class Shooter(): Subsystem {
             ActiveOpMode.telemetry.addData("Flywheel current RPM", filteredFlywheelRPM)
             ActiveOpMode.telemetry.addData("Flywheel at set point", atSetPoint())
             ActiveOpMode.telemetry.addData("Voltage", "%06.2fV", cachedVoltage)
-//            ActiveOpMode.telemetry.addData("Hood position", hoodPosition)
+            ActiveOpMode.telemetry.addData("Hood position", hoodPosition)
             ActiveOpMode.telemetry.addLine("---------------------------")
         }
     }

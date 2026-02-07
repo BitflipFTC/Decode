@@ -40,7 +40,7 @@ class CombinedTeleOp : LinearOpMode() {
         @JvmField
         var lowpass = 0.1
 
-        const val TUNING_FLYWHEEL = false
+        const val TUNING_FLYWHEEL = true
         const val DEBUG_FSM = false
     }
     enum class Shoot {
@@ -90,7 +90,7 @@ class CombinedTeleOp : LinearOpMode() {
                 if (DEBUG_FSM) Log.d("FSM", "WAITING FOR TRANSFER, current: ${transfer.currentPosition}, target: ${transfer.targetPosition}, diff: ${transfer.targetPosition - transfer.currentPosition}")
                 if (transfer.atSetPoint()) {
                     if (DEBUG_FSM) Log.d("FSM", "transferring took ${timer.milliseconds()}")
-                    shooter.compensateForShot()
+//                    shooter.compensateForShot()
                     spindexer.recordOuttake()
                     if (DEBUG_FSM) {
                         Log.d("FSM", "EVALUATING SPINDEXER FULLNESS")
@@ -368,40 +368,52 @@ class CombinedTeleOp : LinearOpMode() {
             updateShootingFSM()
             fol.update()
 
-            shooter.setTargetState(turret.goalPose.distanceFrom(fol.pose))
+            if (!fol.pose.roughlyEquals(Pose(0.0,0.0,0.0), 0.1)) {
+                if (!TUNING_FLYWHEEL) {
+                    shooter.setTargetState(turret.goalPose.distanceFrom(fol.pose))
+                }
 
-            // like repeat a bit yknow
-            repeat(3) {
+                // like repeat a bit yknow
+                repeat(3) {
+                    futurePose = Pose(
+                        fol.pose.x + shooter.expectedTimeInAir * fol.velocity.xComponent,
+                        fol.pose.y + shooter.expectedTimeInAir * fol.velocity.yComponent,
+                        fol.pose.heading
+                    )
+
+                    if (!TUNING_FLYWHEEL) {
+                        shooter.setTargetState(turret.goalPose.distanceFrom(futurePose))
+                    }
+                }
+
                 futurePose = Pose(
                     fol.pose.x + shooter.expectedTimeInAir * fol.velocity.xComponent,
                     fol.pose.y + shooter.expectedTimeInAir * fol.velocity.yComponent,
-                    fol.pose.heading + shooter.expectedTimeInAir * fol.angularVelocity
+                    fol.pose.heading
                 )
 
-                shooter.setTargetState(turret.goalPose.distanceFrom(futurePose))
+                Drawing.drawRobot(
+                    fol.pose,
+                    Style(
+                        "",
+                        "#FFFFFF",
+                        0.75
+                    )
+                )
+                Drawing.drawRobot(
+                    futurePose,
+                    Style(
+                        "",
+                        "#FF881E",
+                        0.75
+                    )
+                )
+                Drawing.sendPacket()
+
+
+                turret.robotPose = futurePose
             }
 
-            futurePose = Pose(
-                fol.pose.x + shooter.expectedTimeInAir * fol.velocity.xComponent,
-                fol.pose.y + shooter.expectedTimeInAir * fol.velocity.yComponent,
-                fol.pose.heading + shooter.expectedTimeInAir * fol.angularVelocity
-            )
-
-            Drawing.drawRobot(fol.pose,
-                Style(
-                    "",
-                    "#FFFFFF",
-                    0.75
-                ))
-            Drawing.drawRobot(futurePose,
-                Style(
-                    "",
-                    "#FF881E",
-                    0.75
-                ))
-            Drawing.sendPacket()
-
-            turret.robotPose = futurePose
             lastSpindexerIsFull = spindexer.isFull
             subsystems.forEach { it.periodic() }
             telemetry.run{
