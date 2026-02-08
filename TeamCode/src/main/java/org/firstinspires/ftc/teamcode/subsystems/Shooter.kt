@@ -59,7 +59,7 @@ class Shooter(): Subsystem {
     )
     val speedArray = doubleArrayOf(
         2750.0,
-        2875.0,
+        2855.0,
         2999.0,
         3000.0,
         3677.0,
@@ -68,7 +68,7 @@ class Shooter(): Subsystem {
     )
     val angleArray = doubleArrayOf(
         0.1,
-        0.45,
+        0.475,
         0.5,
         0.55,
         0.55,

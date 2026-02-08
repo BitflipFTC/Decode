@@ -43,10 +43,10 @@ class Spindexer(): Subsystem {
         var kD = 0.000325
 
         @JvmField
-        var kS = 0.03
+        var kS = 0.05
 
         @JvmField
-        var setpointTolerance = 1.0 // in degrees
+        var setpointTolerance = 4.0 // in degrees
 
         @JvmField
         var maxPower = 0.7
@@ -160,15 +160,15 @@ class Spindexer(): Subsystem {
         state = newState
     }
 
-    fun shoot() {
-        if (slotsToOuttakes.contains(state)) {
-            when (slotsToOuttakes.indexOf(state)) {
-                0 -> moveState(States.OUTTAKE_ONE, Directions.COUNTERCLOCKWISE)
-                1 -> moveState(States.OUTTAKE_TWO, Directions.COUNTERCLOCKWISE)
-                2 -> moveState(States.OUTTAKE_ZERO, Directions.COUNTERCLOCKWISE)
-            }
-        }
-    }
+//    fun shoot() {
+//        if (slotsToOuttakes.contains(state)) {
+//            when (slotsToOuttakes.indexOf(state)) {
+//                0 -> moveState(States.OUTTAKE_ONE, Directions.COUNTERCLOCKWISE)
+//                1 -> moveState(States.OUTTAKE_TWO, Directions.COUNTERCLOCKWISE)
+//                2 -> moveState(States.OUTTAKE_ZERO, Directions.COUNTERCLOCKWISE)
+//            }
+//        }
+//    }
 
     val isEmpty: Boolean
         get() = getArtifactString() == "NNN"
@@ -189,11 +189,11 @@ class Spindexer(): Subsystem {
     var spindexerOffset: Double = 0.0
 
     fun increaseOffset() {
-        spindexerOffset += (1.0/18.0) * TICKS_PER_REVOLUTION
+        spindexerOffset += (1.0/18.0) * TICKS_PER_REVOLUTION /2
     }
 
     fun decreaseOffset() {
-        spindexerOffset -= (1.0/18.0) * TICKS_PER_REVOLUTION
+        spindexerOffset -= (1.0/18.0) * TICKS_PER_REVOLUTION /2
     }
 
     var motifPattern: MotifPattern? = null
@@ -240,7 +240,7 @@ class Spindexer(): Subsystem {
     fun toNextPosition() {
         allStatesIndex = if (allStatesIndex == allStates.size - 1) 0 else allStatesIndex + 1
 
-        moveState(allStates[allStatesIndex], Directions.CLOCKWISE)
+        moveState(allStates[allStatesIndex], Directions.COUNTERCLOCKWISE)
     }
 
     /**
@@ -252,11 +252,11 @@ class Spindexer(): Subsystem {
         // if current state is an outtake, go to next outtake
         if (slotsToIntakes.indexOf(state) != -1) {
             val currentIndex = slotsToIntakes.indexOf(state)
-            targetIndex = if (currentIndex == 0) 2 else currentIndex - 1
+            targetIndex = if (currentIndex == 2) 0 else currentIndex + 1
         }
         // otherwise, go to OUTTAKE_ZERO
 
-        moveState(slotsToIntakes[targetIndex], Directions.CLOCKWISE)
+        moveState(slotsToIntakes[targetIndex], Directions.COUNTERCLOCKWISE)
     }
 
     fun toFirstEmptyIntakePosition() {
@@ -266,7 +266,8 @@ class Spindexer(): Subsystem {
         if (!emptySlots.isEmpty()) {
             when (emptySlots.size) {
                 2    -> {
-                    val emptySlot = findEmptySlots().last()
+                    val emptySlots = findEmptySlots()
+                    targetIndex = if ((emptySlots[0]) == 2) 2 else emptySlots.first()
 
                     // for slots [0,2]
                     // full = 1, so targets 2, then can go 2 -> 0
@@ -274,7 +275,6 @@ class Spindexer(): Subsystem {
                     // full = 1, so targets 1, then can go 1 -> 2
                     // for [0,1]
                     // full = 2, so targets 0, then can go 0 -> 1
-                    targetIndex = emptySlot
                 }
 
                 1    -> {
@@ -285,7 +285,7 @@ class Spindexer(): Subsystem {
                 else -> targetIndex = 0
             }
         }
-        moveState(slotsToIntakes[targetIndex], Directions.CLOCKWISE)
+        moveState(slotsToIntakes[targetIndex], Directions.COUNTERCLOCKWISE)
     }
 
     /**
@@ -297,11 +297,11 @@ class Spindexer(): Subsystem {
         // if current state is an outtake, go to next outtake
         if (slotsToOuttakes.indexOf(state) != -1) {
             val currentIndex = slotsToOuttakes.indexOf(state)
-            targetIndex = if (currentIndex == 0) 2 else currentIndex - 1
+            targetIndex = if (currentIndex == 2) 0 else currentIndex + 1
         }
         // otherwise, go to OUTTAKE_ZERO
 
-        moveState(slotsToOuttakes[targetIndex], Directions.CLOCKWISE)
+        moveState(slotsToOuttakes[targetIndex], Directions.COUNTERCLOCKWISE)
     }
 
     fun toMotifOuttakePosition() {
@@ -316,12 +316,12 @@ class Spindexer(): Subsystem {
             // If it's PGP, green should be shot second, etc
             val targetOuttakeIndex = when (motifPattern) {
                 MotifPattern.GPP  -> greenIndex
-                MotifPattern.PGP  -> if (greenIndex == 0) 2 else greenIndex - 1
-                MotifPattern.PPG  -> if (greenIndex == 2) 0 else greenIndex + 1
+                MotifPattern.PGP  -> if (greenIndex == 2) 0 else greenIndex + 1
+                MotifPattern.PPG  -> if (greenIndex == 0) 2 else greenIndex - 1
                 null -> 0
             }
 
-            moveState(slotsToOuttakes[targetOuttakeIndex], Directions.CLOCKWISE)
+            moveState(slotsToOuttakes[targetOuttakeIndex], Directions.COUNTERCLOCKWISE)
         } else {
             return toFirstFullOuttakePosition()
         }
@@ -354,7 +354,7 @@ class Spindexer(): Subsystem {
                 }
             }
 
-            moveState(slotsToOuttakes[targetSlot], Directions.CLOCKWISE)
+            moveState(slotsToOuttakes[targetSlot], Directions.COUNTERCLOCKWISE)
         }
     }
 

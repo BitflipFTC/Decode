@@ -127,7 +127,8 @@ class Near9Autonomous : LinearOpMode() {
                 ).addState(
                     "DIntake 2",
                     { shootingState == Shoot.IDLE },
-                    { follower!!.followCustomPath(paths[4]) }
+                    { follower!!.followCustomPath(paths[4])
+                    Log.d("AUTO", paths[4].path.toString())}
                 ).addState(
                     "Intake 2",
                     { !follower!!.isBusy },

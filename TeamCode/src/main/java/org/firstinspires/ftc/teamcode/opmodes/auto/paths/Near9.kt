@@ -40,7 +40,7 @@ class Near9 (
             .buildBasicLine(poses.endIntake1, poses.nearShootPose).build()
 
         dIntake2 = follower.pathBuilder()
-            .buildCurvedLine(poses.nearShootPose, poses.nearIntake2Control, poses.startIntake2).build()
+            .buildCurvedLine(poses.nearShootPoseFacingObelisk, poses.nearIntake2Control, poses.startIntake2).build()
 
         intake2 = follower.pathBuilder()
             .buildTangentLine(poses.startIntake2, poses.endIntake2).build()

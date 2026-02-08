@@ -40,7 +40,7 @@ class CombinedTeleOp : LinearOpMode() {
         @JvmField
         var lowpass = 0.1
 
-        const val TUNING_FLYWHEEL = true
+        const val TUNING_FLYWHEEL = false
         const val DEBUG_FSM = false
     }
     enum class Shoot {
@@ -61,6 +61,7 @@ class CombinedTeleOp : LinearOpMode() {
         if (!spindexer.isEmpty) {
             shootingState = Shoot.MOVE_SPINDEXER
         }
+        transfer.dead = false
     }
 
     fun updateShootingFSM() {
@@ -90,7 +91,6 @@ class CombinedTeleOp : LinearOpMode() {
                 if (DEBUG_FSM) Log.d("FSM", "WAITING FOR TRANSFER, current: ${transfer.currentPosition}, target: ${transfer.targetPosition}, diff: ${transfer.targetPosition - transfer.currentPosition}")
                 if (transfer.atSetPoint()) {
                     if (DEBUG_FSM) Log.d("FSM", "transferring took ${timer.milliseconds()}")
-//                    shooter.compensateForShot()
                     spindexer.recordOuttake()
                     if (DEBUG_FSM) {
                         Log.d("FSM", "EVALUATING SPINDEXER FULLNESS")
@@ -146,6 +146,9 @@ class CombinedTeleOp : LinearOpMode() {
             setStartingPose(Pose(72.0,72.0,Math.PI/2))
             follower = this
         }
+
+        fol.breakFollowing()
+        fol.setMaxPower(1.0)
 
         spindexer.motifPattern = motifPattern
         gamepad1.triggerThreshold = 0.15f
@@ -228,16 +231,17 @@ class CombinedTeleOp : LinearOpMode() {
             // transfer
             if (gamepad1.triangleWasPressed() && spindexer.atSetPoint()) {
                 transfer.transferArtifact()
+                transfer.dead = false
                 spindexer.recordOuttake()
             }
 
-            if (gamepad1.crossWasPressed() && spindexer.atSetPoint()) {
-                transfer.undoTransfer()
+            if (gamepad1.crossWasPressed()) {
+                transfer.dead()
             }
 
             // spindexer
             if (gamepad1.leftBumperWasPressed() && transfer.atSetPoint() && intake.power != Intake.State.OFF) {
-                spindexer.toNextOuttakePosition()
+                spindexer.toMotifOuttakePosition()
             }
 
             if (gamepad1.rightBumperWasPressed() && transfer.atSetPoint() && intake.power != Intake.State.OFF) {
