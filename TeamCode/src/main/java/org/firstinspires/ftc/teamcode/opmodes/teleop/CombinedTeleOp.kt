@@ -61,6 +61,7 @@ class CombinedTeleOp : LinearOpMode() {
         if (!spindexer.isEmpty) {
             shootingState = Shoot.MOVE_SPINDEXER
         }
+        transfer.dead = false
     }
 
     fun updateShootingFSM() {
@@ -90,7 +91,6 @@ class CombinedTeleOp : LinearOpMode() {
                 if (DEBUG_FSM) Log.d("FSM", "WAITING FOR TRANSFER, current: ${transfer.currentPosition}, target: ${transfer.targetPosition}, diff: ${transfer.targetPosition - transfer.currentPosition}")
                 if (transfer.atSetPoint()) {
                     if (DEBUG_FSM) Log.d("FSM", "transferring took ${timer.milliseconds()}")
-                    shooter.compensateForShot()
                     spindexer.recordOuttake()
                     if (DEBUG_FSM) {
                         Log.d("FSM", "EVALUATING SPINDEXER FULLNESS")
@@ -146,6 +146,9 @@ class CombinedTeleOp : LinearOpMode() {
             setStartingPose(Pose(72.0,72.0,Math.PI/2))
             follower = this
         }
+
+        fol.breakFollowing()
+        fol.setMaxPower(1.0)
 
         spindexer.motifPattern = motifPattern
         gamepad1.triggerThreshold = 0.15f
@@ -228,16 +231,17 @@ class CombinedTeleOp : LinearOpMode() {
             // transfer
             if (gamepad1.triangleWasPressed() && spindexer.atSetPoint()) {
                 transfer.transferArtifact()
+                transfer.dead = false
                 spindexer.recordOuttake()
             }
 
-            if (gamepad1.crossWasPressed() && spindexer.atSetPoint()) {
-                transfer.undoTransfer()
+            if (gamepad1.crossWasPressed()) {
+                transfer.dead()
             }
 
             // spindexer
             if (gamepad1.leftBumperWasPressed() && transfer.atSetPoint() && intake.power != Intake.State.OFF) {
-                spindexer.toNextOuttakePosition()
+                spindexer.toMotifOuttakePosition()
             }
 
             if (gamepad1.rightBumperWasPressed() && transfer.atSetPoint() && intake.power != Intake.State.OFF) {
@@ -368,40 +372,52 @@ class CombinedTeleOp : LinearOpMode() {
             updateShootingFSM()
             fol.update()
 
-            shooter.setTargetState(turret.goalPose.distanceFrom(fol.pose))
+            if (!fol.pose.roughlyEquals(Pose(0.0,0.0,0.0), 0.1)) {
+                if (!TUNING_FLYWHEEL) {
+                    shooter.setTargetState(turret.goalPose.distanceFrom(fol.pose))
+                }
 
-            // like repeat a bit yknow
-            repeat(3) {
+                // like repeat a bit yknow
+                repeat(3) {
+                    futurePose = Pose(
+                        fol.pose.x + shooter.expectedTimeInAir * fol.velocity.xComponent,
+                        fol.pose.y + shooter.expectedTimeInAir * fol.velocity.yComponent,
+                        fol.pose.heading
+                    )
+
+                    if (!TUNING_FLYWHEEL) {
+                        shooter.setTargetState(turret.goalPose.distanceFrom(futurePose))
+                    }
+                }
+
                 futurePose = Pose(
                     fol.pose.x + shooter.expectedTimeInAir * fol.velocity.xComponent,
                     fol.pose.y + shooter.expectedTimeInAir * fol.velocity.yComponent,
-                    fol.pose.heading + shooter.expectedTimeInAir * fol.angularVelocity
+                    fol.pose.heading
                 )
 
-                shooter.setTargetState(turret.goalPose.distanceFrom(futurePose))
+                Drawing.drawRobot(
+                    fol.pose,
+                    Style(
+                        "",
+                        "#FFFFFF",
+                        0.75
+                    )
+                )
+                Drawing.drawRobot(
+                    futurePose,
+                    Style(
+                        "",
+                        "#FF881E",
+                        0.75
+                    )
+                )
+                Drawing.sendPacket()
+
+
+                turret.robotPose = futurePose
             }
 
-            futurePose = Pose(
-                fol.pose.x + shooter.expectedTimeInAir * fol.velocity.xComponent,
-                fol.pose.y + shooter.expectedTimeInAir * fol.velocity.yComponent,
-                fol.pose.heading + shooter.expectedTimeInAir * fol.angularVelocity
-            )
-
-            Drawing.drawRobot(fol.pose,
-                Style(
-                    "",
-                    "#FFFFFF",
-                    0.75
-                ))
-            Drawing.drawRobot(futurePose,
-                Style(
-                    "",
-                    "#FF881E",
-                    0.75
-                ))
-            Drawing.sendPacket()
-
-            turret.robotPose = futurePose
             lastSpindexerIsFull = spindexer.isFull
             subsystems.forEach { it.periodic() }
             telemetry.run{

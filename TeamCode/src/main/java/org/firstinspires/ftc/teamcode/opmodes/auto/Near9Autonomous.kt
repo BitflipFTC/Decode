@@ -46,8 +46,6 @@ class Near9Autonomous : LinearOpMode() {
     val colorSensor: ColorSensor = ColorSensor()
     val camera: OV9281 = OV9281()
 
-    var shootingCycle = false
-
     val subsystems = setOf(spindexer, turret, transfer, shooter, intake, colorSensor)
 
     val finiteStateMachine: FiniteStateMachine = FiniteStateMachine()
@@ -129,7 +127,8 @@ class Near9Autonomous : LinearOpMode() {
                 ).addState(
                     "DIntake 2",
                     { shootingState == Shoot.IDLE },
-                    { follower!!.followCustomPath(paths[4]) }
+                    { follower!!.followCustomPath(paths[4])
+                    Log.d("AUTO", paths[4].path.toString())}
                 ).addState(
                     "Intake 2",
                     { !follower!!.isBusy },
@@ -201,9 +200,9 @@ class Near9Autonomous : LinearOpMode() {
             }
 
             Shoot.TRANSFER_ARTIFACT   -> {
-                Log.d("FSM", "Waiting for shooter or spindexer")
-                Log.d("FSM", "sp: ${spindexer.currentAngle}, ${spindexer.targetAngle}, sh: ${shooter.flywheelRPM}, ${shooter.targetFlywheelRPM}")
-                if ((shooter.atSetPoint() || shootingCycle) && spindexer.atSetPoint()) {
+//                Log.d("FSM", "Waiting for shooter or spindexer")
+//                Log.d("FSM", "sp: ${spindexer.currentAngle}, ${spindexer.targetAngle}, sh: ${shooter.flywheelRPM}, ${shooter.targetFlywheelRPM}")
+                if ((shooter.atSetPoint()) && spindexer.atSetPoint()) {
                     Log.d("FSM", "-------- Moving spindexer / shooter took ${timer.milliseconds()}")
                     transfer.transferArtifact()
                     Log.d("FSM", "TRANSFERING")
@@ -213,7 +212,7 @@ class Near9Autonomous : LinearOpMode() {
             }
 
             Shoot.WAIT_FOR_COMPLETION -> {
-                Log.d("FSM", "WAITING FOR TRANSFER, current: ${transfer.currentPosition}, target: ${transfer.targetPosition}, diff: ${transfer.targetPosition - transfer.currentPosition}")
+//                Log.d("FSM", "WAITING FOR TRANSFER, current: ${transfer.currentPosition}, target: ${transfer.targetPosition}, diff: ${transfer.targetPosition - transfer.currentPosition}")
                 if (transfer.atSetPoint()) {
                     Log.d("FSM", "------- transferring took ${timer.milliseconds()}")
                     spindexer.recordOuttake()
@@ -223,17 +222,14 @@ class Near9Autonomous : LinearOpMode() {
                     timer.reset()
                     if (spindexer.isEmpty) {
                         shootingState = Shoot.IDLE
-                        shootingCycle = false
                         spindexer.toFirstEmptyIntakePosition()
                     } else {
-                        shootingCycle = true
                         shootingState = Shoot.MOVE_SPINDEXER
                     }
                 }
             }
 
             Shoot.IDLE                -> {
-                shootingCycle = false
             }
         }
     }

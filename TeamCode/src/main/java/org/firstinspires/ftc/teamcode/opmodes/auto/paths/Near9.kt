@@ -37,10 +37,10 @@ class Near9 (
             .buildTangentLine(poses.startIntake1, poses.endIntake1).build()
 
         score1 = follower.pathBuilder()
-            .buildTangentLine(poses.endIntake1, poses.nearShootPose).setReversed().build()
+            .buildBasicLine(poses.endIntake1, poses.nearShootPose).build()
 
         dIntake2 = follower.pathBuilder()
-            .buildCurvedLine(poses.nearShootPose, poses.nearIntake2Control, poses.startIntake2).build()
+            .buildCurvedLine(poses.nearShootPoseFacingObelisk, poses.nearIntake2Control, poses.startIntake2).build()
 
         intake2 = follower.pathBuilder()
             .buildTangentLine(poses.startIntake2, poses.endIntake2).build()

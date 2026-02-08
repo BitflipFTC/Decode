@@ -25,12 +25,12 @@ public class Transfer implements Subsystem {
 
     // amount of times the motor should turn every time it transfers an
     // artifact to the flywheel
-    public static int MOTOR_TURNS = 1;
+    public static int MOTOR_TURNS = 2;
 
     public static double kP = 0.005;
     public static double kI = 0.03;
     public static double kD = 0.0002;
-    public static double maxPower = 0.67;
+    public static double maxPower = 1.0;
     public static boolean tuning = false;
 
     boolean debugTelemetry = true;
@@ -39,10 +39,11 @@ public class Transfer implements Subsystem {
 
     private final PIDController controller = new PIDController(kP, kI, kD);
 
+    public boolean dead = false;
     @Override
     public void initialize() {
         controller.setSetPointTolerance(6.7);
-        motor = new MotorEx("transfer").zeroed().brake();
+        motor = new MotorEx("transfer").zeroed().floa();
         motor.setCurrentAlert(8.5);
     }
 
@@ -86,6 +87,10 @@ public class Transfer implements Subsystem {
         setMotorTarget(getTargetPosition() - TICKS_PER_REVOLUTION * MOTOR_TURNS);
     }
 
+    public void dead() {
+        dead=true;
+    }
+
     public double getTransferMotorAngle() {
         double degreesPosition = (currentPosition / TICKS_PER_REVOLUTION) * 360;
         degreesPosition %= 360;
@@ -100,8 +105,9 @@ public class Transfer implements Subsystem {
     public void periodic() {
         currentPosition = motor.getCurrentPosition();
         double pidOutput = controller.calculate(currentPosition, targetPosition);
-        motor.setPower(Range.clip(pidOutput, -maxPower, maxPower));
-
+        if (!dead) {
+            motor.setPower(Range.clip(pidOutput, -maxPower, maxPower));
+        }
         if (tuning) {
             controller.setCoeffs(kP, kI, kD, 0.0, 0.0);
         }

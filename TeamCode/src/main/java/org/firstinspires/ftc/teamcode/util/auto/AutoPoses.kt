@@ -10,7 +10,7 @@ class AutoPoses(
     private fun p (p: Pose): Pose = if (alliance == Alliance.RED) p else p.mirror()
 
     private val HORIZONTAL_INTAKE_START = 100.0
-    private val HORIZONTAL_INTAKE_END = 134.0
+    private val HORIZONTAL_INTAKE_END = 139.0
     private val HORIZONTAL_INTAKE_MOVE_BACK = 110.0
 
     private val INTAKE_1_VERTICAL = 84.0
