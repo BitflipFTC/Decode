@@ -29,6 +29,7 @@ import org.firstinspires.ftc.teamcode.util.InitConfigurer
 import org.firstinspires.ftc.teamcode.util.MotifPattern
 import org.firstinspires.ftc.teamcode.util.TelemetryImplUpstreamSubmission
 import org.firstinspires.ftc.teamcode.util.auto.AutoPoses
+import kotlin.math.abs
 
 @Configurable
 @TeleOp(name = "Combined TeleOp")
@@ -378,17 +379,20 @@ class CombinedTeleOp : LinearOpMode() {
                 }
 
                 // like repeat a bit yknow
-                repeat(3) {
+
+                var lastInAirTime: Double = 0.0
+                do {
                     futurePose = Pose(
                         fol.pose.x + shooter.expectedTimeInAir * fol.velocity.xComponent,
                         fol.pose.y + shooter.expectedTimeInAir * fol.velocity.yComponent,
                         fol.pose.heading
                     )
+                    lastInAirTime = shooter.expectedTimeInAir
 
                     if (!TUNING_FLYWHEEL) {
                         shooter.setTargetState(turret.goalPose.distanceFrom(futurePose))
                     }
-                }
+                } while (abs(lastInAirTime - shooter.expectedTimeInAir) > 0.001)
 
                 futurePose = Pose(
                     fol.pose.x + shooter.expectedTimeInAir * fol.velocity.xComponent,
