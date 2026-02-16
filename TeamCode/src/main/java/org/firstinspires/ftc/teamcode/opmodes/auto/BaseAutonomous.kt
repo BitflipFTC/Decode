@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.util.ElapsedTime
 import com.skeletonarmy.marrow.prompts.OptionPrompt
 import com.skeletonarmy.marrow.prompts.Prompt
 import com.skeletonarmy.marrow.prompts.Prompter
+import org.firstinspires.ftc.teamcode.opmodes.teleop.CombinedTeleOp.Companion.alliance
 import org.firstinspires.ftc.teamcode.opmodes.teleop.CombinedTeleOp.Companion.follower
 import org.firstinspires.ftc.teamcode.opmodes.teleop.CombinedTeleOp.Companion.motifPattern
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants
@@ -57,7 +58,6 @@ abstract class BaseAutonomous : LinearOpMode() {
     protected lateinit var pathSequence: BaseAutoPath
     protected lateinit var finiteStateMachine: FiniteStateMachine
     protected lateinit var paths: List<Path>
-    protected var alliance: Alliance? = null
 
     override fun runOpMode() {
         telemetry =

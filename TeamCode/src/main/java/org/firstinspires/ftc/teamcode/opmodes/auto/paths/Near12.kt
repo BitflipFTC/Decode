@@ -7,6 +7,7 @@ import org.firstinspires.ftc.teamcode.util.auto.BaseAutoPath
 import org.firstinspires.ftc.teamcode.util.auto.Path
 import org.firstinspires.ftc.teamcode.util.buildBasicLine
 import org.firstinspires.ftc.teamcode.util.buildCurvedLine
+import org.firstinspires.ftc.teamcode.util.buildCurvedTangentLine
 import org.firstinspires.ftc.teamcode.util.buildTangentLine
 
 class Near12 (
@@ -15,7 +16,7 @@ class Near12 (
     alliance
 ) {
     val fullSpeed = 1.0
-    val intakeSpeed = 0.3
+    val intakeSpeed = 0.67
 
     lateinit var scorePreload: PathChain
     lateinit var dIntake1: PathChain
@@ -34,23 +35,24 @@ class Near12 (
             .buildBasicLine(poses.nearStartPose, poses.nearShootPoseFacingObelisk).build()
 
         dIntake1 = follower.pathBuilder()
-            .buildCurvedLine(poses.nearShootPoseFacingObelisk, poses.nearIntake1Control, poses.startIntake1).build()
+            .buildCurvedTangentLine(poses.nearShootPoseFacingObelisk, poses.nearIntake2Control, poses.startIntake2).build()
 
         intake1 = follower.pathBuilder()
-            .buildTangentLine(poses.startIntake1, poses.endIntake1).build()
+            .buildTangentLine(poses.startIntake2, poses.endIntake2)
+            .buildCurvedLine(poses.endIntake2, poses.endIntake2Move, poses.emptyRampStart)
+            .buildBasicLine(poses.emptyRampStart, poses.emptyRamp).build()
 
         score1 = follower.pathBuilder()
-            .buildBasicLine(poses.endIntake1, poses.nearShootPose).build()
+            .buildBasicLine(poses.emptyRamp, poses.nearShootPose).build()
 
         dIntake2 = follower.pathBuilder()
-            .buildCurvedLine(poses.nearShootPose, poses.nearIntake2Control, poses.startIntake2).build()
+            .buildCurvedTangentLine(poses.nearShootPose, poses.nearIntake1Control, poses.startIntake1).build()
 
         intake2 = follower.pathBuilder()
-            .buildTangentLine(poses.startIntake2, poses.endIntake2).build()
+            .buildTangentLine(poses.startIntake1, poses.endIntake1).build()
 
         score2 = follower.pathBuilder()
-            .buildTangentLine(poses.endIntake2, poses.endIntake2Move).setReversed()
-            .buildBasicLine(poses.endIntake2Move, poses.nearShootPose).build()
+            .buildBasicLine(poses.endIntake1, poses.nearShootPose).build()
 
         dIntake3 = follower.pathBuilder()
             .buildCurvedLine(poses.nearShootPose, poses.nearIntake3Control, poses.startIntake3).build()

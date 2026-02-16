@@ -46,6 +46,10 @@ fun PathBuilder.buildCurvedLine(p1: Pose, c: Pose, p2: Pose): PathBuilder = this
     .addPath(BezierCurve(p1, c, p2))
     .setLinearHeadingInterpolation(p1.heading, p2.heading)
 
+fun PathBuilder.buildCurvedTangentLine(p1: Pose, c: Pose, p2: Pose): PathBuilder = this
+    .addPath(BezierCurve(p1, c, p2))
+    .setTangentHeadingInterpolation()
+
 fun PathBuilder.buildTangentLine(p1: Pose, p2: Pose): PathBuilder = this
     .addPath(BezierLine(p1, p2))
     .setTangentHeadingInterpolation()

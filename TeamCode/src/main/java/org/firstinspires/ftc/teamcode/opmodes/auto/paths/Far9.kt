@@ -6,7 +6,7 @@ import org.firstinspires.ftc.teamcode.util.Alliance
 import org.firstinspires.ftc.teamcode.util.auto.BaseAutoPath
 import org.firstinspires.ftc.teamcode.util.auto.Path
 import org.firstinspires.ftc.teamcode.util.buildBasicLine
-import org.firstinspires.ftc.teamcode.util.buildCurvedLine
+import org.firstinspires.ftc.teamcode.util.buildCurvedTangentLine
 import org.firstinspires.ftc.teamcode.util.buildTangentLine
 
 class Far9 (
@@ -15,7 +15,7 @@ class Far9 (
     alliance
 ) {
     val fullSpeed = 1.0
-    val intakeSpeed = 0.3
+    val intakeSpeed = 0.67
 
     lateinit var scorePreload: PathChain
     lateinit var dIntake3: PathChain
@@ -31,7 +31,7 @@ class Far9 (
             .buildBasicLine(poses.farStartPose, poses.farShootPoseFacingObelisk).build()
 
         dIntake3 = follower.pathBuilder()
-            .buildCurvedLine(poses.farShootPoseFacingObelisk, poses.farIntake3Control, poses.startIntake3).build()
+            .buildCurvedTangentLine(poses.farShootPoseFacingObelisk, poses.farIntake3Control, poses.startIntake3).build()
 
         intake3 = follower.pathBuilder()
             .buildTangentLine(poses.startIntake3, poses.endIntake3).build()
@@ -40,7 +40,7 @@ class Far9 (
             .buildTangentLine(poses.endIntake3, poses.farShootPose).setReversed().build()
 
         dIntake2 = follower.pathBuilder()
-            .buildCurvedLine(poses.farShootPose, poses.farIntake2Control, poses.startIntake2).build()
+            .buildCurvedTangentLine(poses.farShootPose, poses.farIntake2Control, poses.startIntake2).build()
 
         intake2 = follower.pathBuilder()
             .buildTangentLine(poses.startIntake2, poses.endIntake2).build()
@@ -49,7 +49,7 @@ class Far9 (
             .buildTangentLine(poses.endIntake2, poses.farShootPose).setReversed().build()
 
         park = follower.pathBuilder()
-            .buildBasicLine(poses.farShootPose, poses.farParkPose).build()
+            .buildBasicLine(poses.farShootPose, poses.HPPark).build()
 
         return listOf(
             Path(scorePreload, fullSpeed),

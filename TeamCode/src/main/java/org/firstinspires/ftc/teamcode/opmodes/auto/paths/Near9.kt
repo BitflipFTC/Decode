@@ -7,6 +7,7 @@ import org.firstinspires.ftc.teamcode.util.auto.BaseAutoPath
 import org.firstinspires.ftc.teamcode.util.auto.Path
 import org.firstinspires.ftc.teamcode.util.buildBasicLine
 import org.firstinspires.ftc.teamcode.util.buildCurvedLine
+import org.firstinspires.ftc.teamcode.util.buildCurvedTangentLine
 import org.firstinspires.ftc.teamcode.util.buildTangentLine
 
 class Near9 (
@@ -15,7 +16,7 @@ class Near9 (
     alliance
 ) {
     val fullSpeed = 1.0
-    val intakeSpeed = 0.3
+    val intakeSpeed = 0.67
 
     lateinit var scorePreload: PathChain
     lateinit var dIntake1: PathChain
@@ -31,25 +32,25 @@ class Near9 (
             .buildBasicLine(poses.nearStartPose, poses.nearShootPoseFacingObelisk).build()
 
         dIntake1 = follower.pathBuilder()
-            .buildCurvedLine(poses.nearShootPoseFacingObelisk, poses.nearIntake1Control, poses.startIntake1).build()
+            .buildCurvedTangentLine(poses.nearShootPoseFacingObelisk, poses.nearIntake1Control, poses.startIntake1).build()
 
         intake1 = follower.pathBuilder()
             .buildTangentLine(poses.startIntake1, poses.endIntake1).build()
 
         score1 = follower.pathBuilder()
-            .buildBasicLine(poses.endIntake1, poses.nearShootPose).build()
+            .buildTangentLine(poses.endIntake1, poses.nearShootPose).build()
 
         dIntake2 = follower.pathBuilder()
-            .buildCurvedLine(poses.nearShootPoseFacingObelisk, poses.nearIntake2Control, poses.startIntake2).build()
+            .buildCurvedTangentLine(poses.nearShootPoseFacingObelisk, poses.nearIntake2Control, poses.startIntake2).build()
 
         intake2 = follower.pathBuilder()
             .buildTangentLine(poses.startIntake2, poses.endIntake2).build()
 
         score2 = follower.pathBuilder()
-            .buildCurvedLine(poses.endIntake2, poses.endIntake2Move, poses.nearShootPose).build()
+            .buildCurvedTangentLine(poses.endIntake2, poses.endIntake2Move, poses.nearShootPose).build()
 
         park = follower.pathBuilder()
-            .buildBasicLine(poses.nearShootPose, poses.nearParkPose).build()
+            .buildTangentLine(poses.nearShootPose, poses.nearParkPose).build()
 
         return listOf(
             Path(scorePreload, fullSpeed),

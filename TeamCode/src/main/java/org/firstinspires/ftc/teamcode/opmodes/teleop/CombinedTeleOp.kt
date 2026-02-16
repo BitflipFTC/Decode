@@ -25,7 +25,6 @@ import org.firstinspires.ftc.teamcode.subsystems.Spindexer
 import org.firstinspires.ftc.teamcode.subsystems.Transfer
 import org.firstinspires.ftc.teamcode.subsystems.Turret
 import org.firstinspires.ftc.teamcode.util.Alliance
-import org.firstinspires.ftc.teamcode.util.InitConfigurer
 import org.firstinspires.ftc.teamcode.util.MotifPattern
 import org.firstinspires.ftc.teamcode.util.TelemetryImplUpstreamSubmission
 import org.firstinspires.ftc.teamcode.util.auto.AutoPoses
@@ -37,6 +36,7 @@ class CombinedTeleOp : LinearOpMode() {
     companion object {
         var follower: Follower? = null
         var motifPattern: MotifPattern? = null
+        var alliance: Alliance? = null
 
         @JvmField
         var lowpass = 0.1
@@ -161,13 +161,11 @@ class CombinedTeleOp : LinearOpMode() {
         Drawing.init()
         var automatedDriving = false
 
-        InitConfigurer.preInit()
         while (opModeInInit()) {
-            InitConfigurer.postWaitForStart()
             telemetry.update()
         }
 
-        val autoPoses = AutoPoses(InitConfigurer.selectedAlliance ?: Alliance.RED)
+        val autoPoses = AutoPoses(alliance ?: Alliance.RED)
         val goToFarShoot = {
             fol.pathBuilder()
                 .addPath(BezierLine(fol::getPose, Pose(88.0, 14.0)))
@@ -199,7 +197,7 @@ class CombinedTeleOp : LinearOpMode() {
                 .addPath(
                     BezierLine(
                         fol::getPose,
-                        if (InitConfigurer.selectedAlliance == Alliance.RED) autoPoses.redPark else autoPoses.redPark.mirror()
+                        if (alliance == Alliance.RED) autoPoses.redPark else autoPoses.redPark.mirror()
                     )
                 )
                 .setConstantHeadingInterpolation(autoPoses.redPark.heading)
@@ -211,7 +209,7 @@ class CombinedTeleOp : LinearOpMode() {
         val allHubs = hardwareMap.getAll(LynxModule::class.java)
         allHubs.forEach { hub -> hub.bulkCachingMode = LynxModule.BulkCachingMode.MANUAL }
 
-        turret.selectedAlliance = InitConfigurer.selectedAlliance ?: Alliance.RED
+        turret.selectedAlliance = alliance ?: Alliance.RED
         loopTimer.start()
 
         fol.startTeleopDrive(true)
@@ -352,18 +350,18 @@ class CombinedTeleOp : LinearOpMode() {
                 gamepad1.runRumbleEffect(spindexerFullRumbleEffect)
             }
 
-            // timer rumble!!
-            if (timerForWhile(matchTimer, 100.0, 1.0)) {
-                gamepad1.rumble(100)
-            }
-
-            if (timerForWhile(matchTimer, 110.0, 1.0)) {
-                gamepad1.rumble(100)
-            }
-
-            if (timerForWhile(matchTimer, 115.0, 5.0)) {
-                gamepad1.rumble(100)
-            }
+//            // timer rumble!!
+//            if (timerForWhile(matchTimer, 100.0, 1.0)) {
+//                gamepad1.rumble(100)
+//            }
+//
+//            if (timerForWhile(matchTimer, 110.0, 1.0)) {
+//                gamepad1.rumble(100)
+//            }
+//
+//            if (timerForWhile(matchTimer, 115.0, 5.0)) {
+//                gamepad1.rumble(100)
+//            }
 
             updateShootingFSM()
             fol.update()
@@ -375,7 +373,7 @@ class CombinedTeleOp : LinearOpMode() {
 
                 // like repeat a bit yknow
 
-                var lastInAirTime: Double = 0.0
+                var lastInAirTime: Double
                 do {
                     futurePose = Pose(
                         fol.pose.x + shooter.expectedTimeInAir * fol.velocity.xComponent,
