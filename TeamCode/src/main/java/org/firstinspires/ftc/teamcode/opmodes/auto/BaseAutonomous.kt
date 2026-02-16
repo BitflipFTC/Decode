@@ -3,11 +3,11 @@ package org.firstinspires.ftc.teamcode.opmodes.auto
 import android.util.Log
 import com.bylazar.telemetry.JoinedTelemetry
 import com.bylazar.telemetry.PanelsTelemetry
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.util.ElapsedTime
-import org.firstinspires.ftc.teamcode.opmodes.auto.paths.Near9
-import org.firstinspires.ftc.teamcode.opmodes.teleop.CombinedTeleOp
+import com.skeletonarmy.marrow.prompts.OptionPrompt
+import com.skeletonarmy.marrow.prompts.Prompt
+import com.skeletonarmy.marrow.prompts.Prompter
 import org.firstinspires.ftc.teamcode.opmodes.teleop.CombinedTeleOp.Companion.follower
 import org.firstinspires.ftc.teamcode.opmodes.teleop.CombinedTeleOp.Companion.motifPattern
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants
@@ -19,16 +19,22 @@ import org.firstinspires.ftc.teamcode.subsystems.Shooter
 import org.firstinspires.ftc.teamcode.subsystems.Spindexer
 import org.firstinspires.ftc.teamcode.subsystems.Transfer
 import org.firstinspires.ftc.teamcode.subsystems.Turret
+import org.firstinspires.ftc.teamcode.util.Alliance
 import org.firstinspires.ftc.teamcode.util.Artifact
 import org.firstinspires.ftc.teamcode.util.BetterLoopTimeComponent
 import org.firstinspires.ftc.teamcode.util.FiniteStateMachine
 import org.firstinspires.ftc.teamcode.util.InitConfigurer
+import org.firstinspires.ftc.teamcode.util.InitializeState
+import org.firstinspires.ftc.teamcode.util.InstantState
+import org.firstinspires.ftc.teamcode.util.State
 import org.firstinspires.ftc.teamcode.util.TelemetryImplUpstreamSubmission
-import org.firstinspires.ftc.teamcode.util.followCustomPath
+import org.firstinspires.ftc.teamcode.util.auto.BaseAutoPath
+import org.firstinspires.ftc.teamcode.util.auto.Path
 
 @Suppress("UNUSED")
-@Autonomous(name = "9 ball near", preselectTeleOp = "Combined TeleOp")
-class Near9Autonomous : LinearOpMode() {
+abstract class BaseAutonomous : LinearOpMode() {
+    abstract fun initialize(alliance: Alliance)
+
     private enum class Shoot {
         IDLE,
         MOVE_SPINDEXER,
@@ -48,37 +54,39 @@ class Near9Autonomous : LinearOpMode() {
 
     val subsystems = setOf(spindexer, turret, transfer, shooter, intake, colorSensor)
 
-    val finiteStateMachine: FiniteStateMachine = FiniteStateMachine()
+    protected lateinit var pathSequence: BaseAutoPath
+    protected lateinit var finiteStateMachine: FiniteStateMachine
+    protected lateinit var paths: List<Path>
+    protected var alliance: Alliance? = null
 
     override fun runOpMode() {
-        telemetry = JoinedTelemetry(PanelsTelemetry.ftcTelemetry, TelemetryImplUpstreamSubmission(this))
-
+        telemetry =
+            JoinedTelemetry(PanelsTelemetry.ftcTelemetry, TelemetryImplUpstreamSubmission(this))
 
         follower = Constants.createFollower(hardwareMap)
-        InitConfigurer.preInit()
 
         subsystems.forEach { it.initialize() }
         camera.initialize()
 
         Log.d("FSM", "auto inited")
-        while (opModeInInit() && !InitConfigurer.hasSelectedAlliance) {
-            InitConfigurer.postWaitForStart()
-            follower!!.update()
-            telemetry.update()
-        }
+        val prompter = Prompter(this)
 
-        val pathSequence = Near9(InitConfigurer.selectedAlliance!!)
-        turret.selectedAlliance = InitConfigurer.selectedAlliance!!
-        follower!!.pose = pathSequence.poses.nearStartPose
-        val paths = pathSequence.buildPaths(follower!!)
+        prompter
+            .prompt("alliance", OptionPrompt("Select Alliance", Alliance.RED, Alliance.BLUE))
+            .onComplete {
+                alliance = prompter.get<Alliance>("alliance")
+                initialize(alliance!!)
+                turret.selectedAlliance = alliance!!
+                follower!!.pose = pathSequence.poses.nearStartPose
+            }
 
         while (opModeInInit()) {
+            prompter.run()
             follower!!.update()
             telemetry.update()
         }
 
         if (opModeIsActive()) {
-
             BetterLoopTimeComponent.preStartButtonPressed()
             // set up preloads
             spindexer.setCollectedArtifacts(
@@ -86,66 +94,6 @@ class Near9Autonomous : LinearOpMode() {
                 Artifact.PURPLE,
                 Artifact.PURPLE,
             )
-
-            finiteStateMachine
-                .addState(
-                    "DScore Preload",
-                    ::opModeIsActive,
-                    {
-                        follower!!.followCustomPath(paths[0])
-                        intake.intake()
-                    }
-                ).addState(
-                    "Wait",
-                    { !follower!!.isBusy },
-                    { timer.reset() }
-                ).addState(
-                    "Shoot preload",
-                    { timer.milliseconds() > 500 },
-                    {
-                        spindexer.motifPattern = camera.motif
-                        CombinedTeleOp.motifPattern = spindexer.motifPattern
-                        Log.d("FSM", "motif pattern detected: ${spindexer.motifPattern}")
-                        shootAllArtifacts()
-                    }
-                ).addState(
-                    "DIntake 1",
-                    { shootingState == Shoot.IDLE },
-                    { follower!!.followCustomPath(paths[1]) }
-                ).addState(
-                    "Intake 1",
-                    { !follower!!.isBusy },
-                    { follower!!.followCustomPath(paths[2]) }
-                ).addState(
-                    "DScore 1",
-                    { !follower!!.isBusy },
-                    { follower!!.followCustomPath(paths[3]) }
-                ).addState(
-                    "Shoot 1",
-                    { !follower!!.isBusy },
-                    ::shootAllArtifacts
-                ).addState(
-                    "DIntake 2",
-                    { shootingState == Shoot.IDLE },
-                    { follower!!.followCustomPath(paths[4])
-                    Log.d("AUTO", paths[4].path.toString())}
-                ).addState(
-                    "Intake 2",
-                    { !follower!!.isBusy },
-                    { follower!!.followCustomPath(paths[5]) }
-                ).addState(
-                    "DScore 2",
-                    { !follower!!.isBusy },
-                    { follower!!.followCustomPath(paths[6]) }
-                ).addState(
-                    "Shoot 2",
-                    { !follower!!.isBusy },
-                    ::shootAllArtifacts
-                ).addState(
-                    "Park",
-                    { shootingState == Shoot.IDLE },
-                    { follower!!.followCustomPath(paths[7]) }
-                )
         }
 
         while (opModeIsActive()) {
@@ -158,7 +106,9 @@ class Near9Autonomous : LinearOpMode() {
             }
 
             val artifactDetected =
-                colorSensor.detectedArtifact != null && !spindexer.isFull && spindexer.slotsToIntakes.contains(spindexer.state) && spindexer.atSetPoint()
+                colorSensor.detectedArtifact != null && !spindexer.isFull && spindexer.slotsToIntakes.contains(
+                    spindexer.state
+                ) && spindexer.atSetPoint()
             if (artifactDetected) {
                 spindexer.recordIntake(colorSensor.detectedArtifact!!)
                 spindexer.toFirstEmptyIntakePosition()
@@ -181,25 +131,31 @@ class Near9Autonomous : LinearOpMode() {
         follower!!.breakFollowing()
     }
 
-    val timer = ElapsedTime()
+    private val timer = ElapsedTime()
 
-    fun shootAllArtifacts() {
+    protected fun shootAllArtifacts() {
         if (!spindexer.isEmpty) {
             shootingState = Shoot.MOVE_SPINDEXER
-            Log.d("FSM", "Shooting: spindexer has ${spindexer.getArtifactString()}, motif is ${spindexer.motifPattern}")
+            Log.d(
+                "FSM",
+                "Shooting: spindexer has ${spindexer.getArtifactString()}, motif is ${spindexer.motifPattern}"
+            )
         }
     }
 
-    fun updateShootingFSM() {
+    private fun updateShootingFSM() {
         when (shootingState) {
             Shoot.MOVE_SPINDEXER      -> {
                 spindexer.toMotifOuttakePosition()
-                Log.d("FSM", "MOVING SPINDEXER TO ${spindexer.state.name}, ${spindexer.getArtifactString()}")
+                Log.d(
+                    "FSM",
+                    "MOVING SPINDEXER TO ${spindexer.state.name}, ${spindexer.getArtifactString()}"
+                )
                 shootingState = Shoot.TRANSFER_ARTIFACT
                 timer.reset()
             }
 
-            Shoot.TRANSFER_ARTIFACT   -> {
+            Shoot.TRANSFER_ARTIFACT -> {
 //                Log.d("FSM", "Waiting for shooter or spindexer")
 //                Log.d("FSM", "sp: ${spindexer.currentAngle}, ${spindexer.targetAngle}, sh: ${shooter.flywheelRPM}, ${shooter.targetFlywheelRPM}")
                 if ((shooter.atSetPoint()) && spindexer.atSetPoint()) {
@@ -217,7 +173,10 @@ class Near9Autonomous : LinearOpMode() {
                     Log.d("FSM", "------- transferring took ${timer.milliseconds()}")
                     spindexer.recordOuttake()
                     Log.d("FSM", "EVALUATING SPINDEXER FULLNESS")
-                    Log.d("FSM", "Spindexer isEmpty: " + spindexer.isEmpty + ", isFull: " + spindexer.isFull + ", Str: " + spindexer.getArtifactString())
+                    Log.d(
+                        "FSM",
+                        "Spindexer isEmpty: " + spindexer.isEmpty + ", isFull: " + spindexer.isFull + ", Str: " + spindexer.getArtifactString()
+                    )
 
                     timer.reset()
                     if (spindexer.isEmpty) {
@@ -233,4 +192,14 @@ class Near9Autonomous : LinearOpMode() {
             }
         }
     }
+
+    protected fun shootState(): State =
+        InitializeState("Shoot state", { shootingState == Shoot.IDLE }, ::shootAllArtifacts)
+
+    protected fun getMotifState(): State = InstantState("Motif", {
+        spindexer.motifPattern = camera.motif
+        motifPattern = spindexer.motifPattern
+    })
+
+    protected fun startIntake(): State = InstantState("Start intake", intake::intake)
 }
