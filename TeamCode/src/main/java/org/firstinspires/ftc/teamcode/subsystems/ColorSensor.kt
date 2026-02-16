@@ -49,9 +49,8 @@ class ColorSensor(): Subsystem {
     }
 
     override fun periodic() {
-        // alternate reads to improve loop times
-            distance = colorSensor.getDistance(DistanceUnit.CM)
-            colors = colorSensor.normalizedColors
+        distance = colorSensor.getDistance(DistanceUnit.CM)
+        colors = colorSensor.normalizedColors
         readDistance = !readDistance
 
 

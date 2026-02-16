@@ -41,7 +41,7 @@ class CombinedTeleOp : LinearOpMode() {
         var lowpass = 0.1
 
         const val TUNING_FLYWHEEL = false
-        const val DEBUG_FSM = false
+        const val DEBUG_FSM = true
     }
     enum class Shoot {
         IDLE,
@@ -61,7 +61,6 @@ class CombinedTeleOp : LinearOpMode() {
         if (!spindexer.isEmpty) {
             shootingState = Shoot.MOVE_SPINDEXER
         }
-        transfer.dead = false
     }
 
     fun updateShootingFSM() {
@@ -76,12 +75,13 @@ class CombinedTeleOp : LinearOpMode() {
             Shoot.TRANSFER_ARTIFACT   -> {
                 if (DEBUG_FSM) {
                     Log.d("FSM", "Waiting for shooter or spindexer")
-                    Log.d("FSM", "sp: ${spindexer.currentAngle}, ${spindexer.targetAngle}, sh: ${shooter.flywheelRPM}, ${shooter.targetFlywheelRPM}")
+                    Log.d("FSM", "spidnexer: ${spindexer.currentAngle}, ${spindexer.targetAngle}, ${spindexer.atSetPoint()},\n" +
+                            " shooter: ${shooter.flywheelRPM}, ${shooter.targetFlywheelRPM}, ${shooter.atSetPoint()}")
                 }
                 if (shooter.atSetPoint() && spindexer.atSetPoint()) {
                     if (DEBUG_FSM) Log.d("FSM", "Moving spindexer / shooter took ${timer.milliseconds()}")
                     transfer.transferArtifact()
-                    if (DEBUG_FSM) Log.d("FSM", "TRANSFERING")
+                    if (DEBUG_FSM) Log.d("FSM", "TRANSFERRING")
                     shootingState = Shoot.WAIT_FOR_COMPLETION
                     timer.reset()
                 }
@@ -231,12 +231,7 @@ class CombinedTeleOp : LinearOpMode() {
             // transfer
             if (gamepad1.triangleWasPressed() && spindexer.atSetPoint()) {
                 transfer.transferArtifact()
-                transfer.dead = false
                 spindexer.recordOuttake()
-            }
-
-            if (gamepad1.crossWasPressed()) {
-                transfer.dead()
             }
 
             // spindexer
