@@ -26,7 +26,8 @@ import org.firstinspires.ftc.teamcode.util.hardware.ServoEx
 @Configurable
 class Shooter(): Subsystem {
     companion object {
-        const val FLYWHEEL_PPR = 28
+        const val GEAR_RATIO = 58/60 // output / input
+        const val FLYWHEEL_PPR = 28 * GEAR_RATIO
         const val LOW_PASS = 0.1
 
         @JvmField

@@ -30,7 +30,7 @@ import org.firstinspires.ftc.teamcode.util.hardware.MotorEx
 @Configurable
 class Spindexer(): Subsystem {
     companion object {
-        const val GEAR_RATIO: Double = 1.125 // 18t spndexer to 16t motor
+        const val GEAR_RATIO: Double = 60.0 / 40.0 // 18t spndexer to 16t motor
         const val TICKS_PER_REVOLUTION: Double = 537.7 * GEAR_RATIO
 
         @JvmField
@@ -49,7 +49,7 @@ class Spindexer(): Subsystem {
         var setpointTolerance = 4.0 // in degrees
 
         @JvmField
-        var maxPower = 0.7
+        var maxPower = 1.0
 
         @JvmField
         var staticFrictionDeadband = 1.0
