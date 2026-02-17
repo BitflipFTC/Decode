@@ -21,19 +21,19 @@ class Near12AutonomousSimple: BaseAutonomous() {
             startIntake(),
             WaitState(250.0),
             shootState(),
-            FollowPathState("Dintake 1", paths[1]),
-            FollowPathState("intake 1", paths[2]),
-            FollowPathState("dscore1", paths[3]),
+            FollowPathState("intake 1", paths[1]),
+            WaitState(150.0),
+            FollowPathState("dscore1", paths[2]),
             shootState(),
-            FollowPathState("Dintake 2", paths[4]),
-            FollowPathState("Intake 2", paths[5]),
+            FollowPathState("Intake 2", paths[3]),
+            WaitState(150.0),
+            FollowPathState("DScore 3", paths[4]),
+            shootState(),
+            FollowPathState("Intake 3", paths[5]),
+            WaitState(150.0),
             FollowPathState("DScore 3", paths[6]),
             shootState(),
-            FollowPathState("Dintake 3", paths[7]),
-            FollowPathState("Intake 3", paths[8]),
-            FollowPathState("DScore 3", paths[9]),
-            shootState(),
-            FollowPathState("Park", paths[10])
+            FollowPathState("Park", paths[7])
         )
     }
 }

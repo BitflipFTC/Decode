@@ -22,14 +22,14 @@ class Far9AutonomousSimple: BaseAutonomous() {
             getMotifState(),
             shootState(),
             FollowPathState("D Intake 1", paths[1]),
-            FollowPathState("Intake 1", paths[2]),
-            FollowPathState("D Score 1", paths[3]),
+            WaitState(150.0),
+            FollowPathState("D Score 1", paths[2]),
             shootState(),
-            FollowPathState("D Intake 2", paths[4]),
-            FollowPathState("Intake 2", paths[5]),
-            FollowPathState("D Score 2", paths[6]),
+            FollowPathState("D Intake 2", paths[3]),
+            WaitState(150.0),
+            FollowPathState("D Score 2", paths[4]),
             shootState(),
-            FollowPathState("Park", paths[7])
+            FollowPathState("Park", paths[5])
         )
     }
 }

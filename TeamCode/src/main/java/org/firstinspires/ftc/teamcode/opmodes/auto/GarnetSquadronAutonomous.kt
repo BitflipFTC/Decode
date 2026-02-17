@@ -8,7 +8,6 @@ import org.firstinspires.ftc.teamcode.util.FiniteStateMachine
 import org.firstinspires.ftc.teamcode.util.FollowPathState
 import org.firstinspires.ftc.teamcode.util.WaitState
 
-
 @Suppress("Unused")
 @Autonomous(name = "Garnet Squadron Partner", preselectTeleOp = "Combined TeleOp")
 class GarnetSquadronAutonomous: BaseAutonomous() {
@@ -22,11 +21,11 @@ class GarnetSquadronAutonomous: BaseAutonomous() {
             getMotifState(),
             WaitState(100.0),
             shootState(),
-            FollowPathState("D HP", paths[1]),
-            FollowPathState("HP Intake", paths[2]),
-            FollowPathState("D Score", paths[3]),
+            FollowPathState("D HP & Intake", paths[1]),
+            WaitState(150.0),
+            FollowPathState("D Score", paths[2]),
             shootState(),
-            FollowPathState("Park", paths[4])
+            FollowPathState("Park", paths[3])
         )
     }
 }
