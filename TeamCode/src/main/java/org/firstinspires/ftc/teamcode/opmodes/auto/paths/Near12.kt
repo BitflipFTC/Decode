@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.opmodes.auto.paths
 import com.pedropathing.follower.Follower
 import com.pedropathing.paths.PathChain
 import com.pedropathing.paths.callbacks.ParametricCallback
+import org.firstinspires.ftc.teamcode.opmodes.auto.BaseAutonomous.Companion.PARAMETRIC_END
 import org.firstinspires.ftc.teamcode.util.Alliance
 import org.firstinspires.ftc.teamcode.util.auto.BaseAutoPath
 import org.firstinspires.ftc.teamcode.util.auto.Path
@@ -10,6 +11,7 @@ import org.firstinspires.ftc.teamcode.util.buildBasicLine
 import org.firstinspires.ftc.teamcode.util.buildCurvedLine
 import org.firstinspires.ftc.teamcode.util.buildCurvedTangentLine
 import org.firstinspires.ftc.teamcode.util.buildTangentLine
+import org.firstinspires.ftc.teamcode.util.doIntakeSpeed
 
 class Near12 (
     alliance: Alliance
@@ -37,11 +39,7 @@ class Near12 (
             .buildCurvedTangentLine(poses.nearShootPoseFacingObelisk, poses.nearIntake2Control, poses.startIntake2)
             .buildTangentLine(poses.startIntake2, poses.endIntake2).build()
 
-        intake1.setCallbacks(
-            ParametricCallback(0, 0.98, follower, {follower.setMaxPower(intakeSpeed)}),
-            ParametricCallback(1, 0.98, follower,{follower.setMaxPower(fullSpeed)})
-        )
-
+        intake1.doIntakeSpeed(follower, fullSpeed, intakeSpeed)
         emptyRamp = follower.pathBuilder()
             .buildCurvedLine(poses.endIntake2, poses.endIntake2Move, poses.emptyRampStart)
             .buildBasicLine(poses.emptyRampStart, poses.emptyRamp).build()
@@ -53,11 +51,7 @@ class Near12 (
             .buildCurvedTangentLine(poses.nearShootPose, poses.nearIntake1Control, poses.startIntake1)
             .buildTangentLine(poses.startIntake1, poses.endIntake1).build()
 
-        intake2.setCallbacks(
-            ParametricCallback(0, 0.98, follower, {follower.setMaxPower(intakeSpeed)}),
-            ParametricCallback(1, 0.98, follower,{follower.setMaxPower(fullSpeed)})
-        )
-
+        intake2.doIntakeSpeed(follower, fullSpeed, intakeSpeed)
         score2 = follower.pathBuilder()
             .buildBasicLine(poses.endIntake1, poses.nearShootPose).build()
 
@@ -65,11 +59,7 @@ class Near12 (
             .buildCurvedLine(poses.nearShootPose, poses.nearIntake3Control, poses.startIntake3)
             .buildTangentLine(poses.startIntake3, poses.endIntake3).build()
 
-        intake3.setCallbacks(
-            ParametricCallback(0, 0.98, follower, {follower.setMaxPower(intakeSpeed)}),
-            ParametricCallback(1, 0.98, follower,{follower.setMaxPower(fullSpeed)})
-        )
-
+        intake3.doIntakeSpeed(follower, fullSpeed, intakeSpeed)
         score3 = follower.pathBuilder()
             .buildTangentLine(poses.endIntake3, poses.endIntake3Move).setReversed()
             .buildBasicLine(poses.endIntake3, poses.nearShootPose).build()

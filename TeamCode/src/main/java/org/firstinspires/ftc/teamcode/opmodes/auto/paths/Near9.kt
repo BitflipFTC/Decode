@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.opmodes.auto.paths
 import com.pedropathing.follower.Follower
 import com.pedropathing.paths.PathChain
 import com.pedropathing.paths.callbacks.ParametricCallback
+import org.firstinspires.ftc.teamcode.opmodes.auto.BaseAutonomous.Companion.PARAMETRIC_END
 import org.firstinspires.ftc.teamcode.util.Alliance
 import org.firstinspires.ftc.teamcode.util.auto.BaseAutoPath
 import org.firstinspires.ftc.teamcode.util.auto.Path
@@ -10,6 +11,7 @@ import org.firstinspires.ftc.teamcode.util.buildBasicLine
 import org.firstinspires.ftc.teamcode.util.buildCurvedLine
 import org.firstinspires.ftc.teamcode.util.buildCurvedTangentLine
 import org.firstinspires.ftc.teamcode.util.buildTangentLine
+import org.firstinspires.ftc.teamcode.util.doIntakeSpeed
 
 class Near9 (
     alliance: Alliance
@@ -34,11 +36,7 @@ class Near9 (
             .buildCurvedTangentLine(poses.nearShootPoseFacingObelisk, poses.nearIntake1Control, poses.startIntake1)
             .buildTangentLine(poses.startIntake1, poses.endIntake1).build()
 
-        intake1.setCallbacks(
-            ParametricCallback(0, 0.98, follower, {follower.setMaxPower(intakeSpeed)}),
-            ParametricCallback(1, 0.98, follower,{follower.setMaxPower(fullSpeed)})
-        )
-
+        intake1.doIntakeSpeed(follower, fullSpeed, intakeSpeed)
         score1 = follower.pathBuilder()
             .buildTangentLine(poses.endIntake1, poses.nearShootPose).build()
 
@@ -46,11 +44,7 @@ class Near9 (
             .buildCurvedTangentLine(poses.nearShootPoseFacingObelisk, poses.nearIntake2Control, poses.startIntake2)
             .buildTangentLine(poses.startIntake2, poses.endIntake2).build()
 
-        intake2.setCallbacks(
-            ParametricCallback(0, 0.98, follower, {follower.setMaxPower(intakeSpeed)}),
-            ParametricCallback(1, 0.98, follower,{follower.setMaxPower(fullSpeed)})
-        )
-
+        intake2.doIntakeSpeed(follower, fullSpeed, intakeSpeed)
         score2 = follower.pathBuilder()
             .buildCurvedTangentLine(poses.endIntake2, poses.endIntake2Move, poses.nearShootPose).build()
 

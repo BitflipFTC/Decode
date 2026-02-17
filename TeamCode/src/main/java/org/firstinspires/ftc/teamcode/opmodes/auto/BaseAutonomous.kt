@@ -33,7 +33,10 @@ import org.firstinspires.ftc.teamcode.util.auto.BaseAutoPath
 import org.firstinspires.ftc.teamcode.util.auto.Path
 
 @Suppress("UNUSED")
-abstract class BaseAutonomous : LinearOpMode() {
+abstract class BaseAutonomous: LinearOpMode() {
+    companion object {
+        const val PARAMETRIC_END = 0.94
+    }
     abstract fun initialize(alliance: Alliance)
 
     private enum class Shoot {

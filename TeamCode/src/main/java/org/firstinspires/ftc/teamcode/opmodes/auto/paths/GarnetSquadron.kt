@@ -5,11 +5,13 @@ import com.pedropathing.paths.PathChain
 import com.pedropathing.paths.callbacks.ParametricCallback
 import com.pedropathing.paths.callbacks.PoseCallback
 import com.pedropathing.paths.callbacks.TemporalCallback
+import org.firstinspires.ftc.teamcode.opmodes.auto.BaseAutonomous.Companion.PARAMETRIC_END
 import org.firstinspires.ftc.teamcode.util.Alliance
 import org.firstinspires.ftc.teamcode.util.auto.BaseAutoPath
 import org.firstinspires.ftc.teamcode.util.auto.Path
 import org.firstinspires.ftc.teamcode.util.buildBasicLine
 import org.firstinspires.ftc.teamcode.util.buildTangentLine
+import org.firstinspires.ftc.teamcode.util.doIntakeSpeed
 
 class GarnetSquadron(alliance: Alliance): BaseAutoPath(alliance) {
 
@@ -29,11 +31,7 @@ class GarnetSquadron(alliance: Alliance): BaseAutoPath(alliance) {
             .buildTangentLine(poses.farShootPoseFacingObelisk, poses.HPIntakeStart)
             .buildTangentLine(poses.HPIntakeStart, poses.HPIntakeEnd).build()
 
-        dHP.setCallbacks(
-            ParametricCallback(0, 0.98, follower, {follower.setMaxPower(intakeSpeed)}),
-            ParametricCallback(1, 0.98, follower,{follower.setMaxPower(fullSpeed)})
-        )
-
+        dHP.doIntakeSpeed(follower, fullSpeed, intakeSpeed)
         dScore = follower.pathBuilder()
             .buildTangentLine(poses.HPIntakeEnd, poses.farShootPose).build()
 

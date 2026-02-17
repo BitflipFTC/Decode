@@ -5,8 +5,11 @@ import com.pedropathing.geometry.BezierCurve
 import com.pedropathing.geometry.BezierLine
 import com.pedropathing.geometry.Pose
 import com.pedropathing.paths.PathBuilder
+import com.pedropathing.paths.PathChain
+import com.pedropathing.paths.callbacks.ParametricCallback
 import com.qualcomm.robotcore.hardware.Gamepad
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit
+import org.firstinspires.ftc.teamcode.opmodes.auto.BaseAutonomous.Companion.PARAMETRIC_END
 import org.firstinspires.ftc.teamcode.util.auto.Path
 
 fun Boolean.toDouble(): Double {
@@ -55,6 +58,13 @@ fun PathBuilder.buildTangentLine(p1: Pose, p2: Pose): PathBuilder = this
     .setTangentHeadingInterpolation()
 
 fun Follower.followCustomPath(path: Path) = this.followPath(path.path, path.speed, true)
+
+fun PathChain.doIntakeSpeed(follower: Follower, fullSpeed: Double, intakeSpeed: Double) {
+    this.setCallbacks(
+        ParametricCallback(0, PARAMETRIC_END, follower, {follower.setMaxPower(intakeSpeed)}),
+        ParametricCallback(1, PARAMETRIC_END, follower,{follower.setMaxPower(fullSpeed)})
+    )
+}
 
 /**
  * @author WPlib i think (copied from solverslib)

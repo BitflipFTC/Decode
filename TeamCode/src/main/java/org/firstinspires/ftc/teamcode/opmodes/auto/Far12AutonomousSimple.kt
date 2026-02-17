@@ -11,16 +11,6 @@ import org.firstinspires.ftc.teamcode.util.WaitState
 @Suppress("Unused")
 @Autonomous(name = "FAR 12 Ball", preselectTeleOp = "Combined TeleOp")
 class Far12AutonomousSimple: BaseAutonomous() {
-    //             Path(scorePreload, fullSpeed),
-    //            Path(intake2, fullSpeed),
-    //            Path(emptyRamp, intakeSpeed),
-    //            Path(score2, fullSpeed),
-    //            Path(intake3, fullSpeed),
-    //            Path(score3, fullSpeed),
-    //            Path(dHP, fullSpeed),
-    //            Path(dScore, fullSpeed),
-    //            Path(park, fullSpeed)
-
     override fun initialize(alliance: Alliance) {
         pathSequence = Far12(alliance)
         paths = pathSequence.buildPaths(CombinedTeleOp.follower!!)

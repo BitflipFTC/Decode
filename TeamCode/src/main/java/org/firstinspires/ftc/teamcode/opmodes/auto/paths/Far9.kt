@@ -3,12 +3,14 @@ package org.firstinspires.ftc.teamcode.opmodes.auto.paths
 import com.pedropathing.follower.Follower
 import com.pedropathing.paths.PathChain
 import com.pedropathing.paths.callbacks.ParametricCallback
+import org.firstinspires.ftc.teamcode.opmodes.auto.BaseAutonomous.Companion.PARAMETRIC_END
 import org.firstinspires.ftc.teamcode.util.Alliance
 import org.firstinspires.ftc.teamcode.util.auto.BaseAutoPath
 import org.firstinspires.ftc.teamcode.util.auto.Path
 import org.firstinspires.ftc.teamcode.util.buildBasicLine
 import org.firstinspires.ftc.teamcode.util.buildCurvedTangentLine
 import org.firstinspires.ftc.teamcode.util.buildTangentLine
+import org.firstinspires.ftc.teamcode.util.doIntakeSpeed
 
 class Far9 (
     alliance: Alliance
@@ -33,10 +35,7 @@ class Far9 (
             .buildCurvedTangentLine(poses.farShootPoseFacingObelisk, poses.farIntake3Control, poses.startIntake3)
             .buildTangentLine(poses.startIntake3, poses.endIntake3).build()
 
-        intake3.setCallbacks(
-            ParametricCallback(0, 0.98, follower, {follower.setMaxPower(intakeSpeed)}),
-            ParametricCallback(1, 0.98, follower,{follower.setMaxPower(fullSpeed)})
-        )
+        intake3.doIntakeSpeed(follower, fullSpeed, intakeSpeed)
 
         score3 = follower.pathBuilder()
             .buildTangentLine(poses.endIntake3, poses.farShootPose).setReversed().build()
@@ -45,10 +44,7 @@ class Far9 (
             .buildCurvedTangentLine(poses.farShootPose, poses.farIntake2Control, poses.startIntake2)
             .buildTangentLine(poses.startIntake2, poses.endIntake2).build()
 
-        intake2.setCallbacks(
-            ParametricCallback(0, 0.98, follower, {follower.setMaxPower(intakeSpeed)}),
-            ParametricCallback(1, 0.98, follower,{follower.setMaxPower(fullSpeed)})
-        )
+        intake2.doIntakeSpeed(follower, fullSpeed, intakeSpeed)
 
         score2 = follower.pathBuilder()
             .buildTangentLine(poses.endIntake2, poses.farShootPose).setReversed().build()
