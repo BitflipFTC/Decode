@@ -21,6 +21,7 @@ class Near12 (
 
     lateinit var scorePreload: PathChain
     lateinit var intake1: PathChain
+    lateinit var emptyRamp: PathChain
     lateinit var score1: PathChain
     lateinit var intake2: PathChain
     lateinit var score2: PathChain
@@ -34,14 +35,16 @@ class Near12 (
 
         intake1 = follower.pathBuilder()
             .buildCurvedTangentLine(poses.nearShootPoseFacingObelisk, poses.nearIntake2Control, poses.startIntake2)
-            .buildTangentLine(poses.startIntake2, poses.endIntake2)
-            .buildCurvedLine(poses.endIntake2, poses.endIntake2Move, poses.emptyRampStart)
-            .buildBasicLine(poses.emptyRampStart, poses.emptyRamp).build()
+            .buildTangentLine(poses.startIntake2, poses.endIntake2).build()
 
         intake1.setCallbacks(
             ParametricCallback(0, 0.98, follower, {follower.setMaxPower(intakeSpeed)}),
             ParametricCallback(1, 0.98, follower,{follower.setMaxPower(fullSpeed)})
         )
+
+        emptyRamp = follower.pathBuilder()
+            .buildCurvedLine(poses.endIntake2, poses.endIntake2Move, poses.emptyRampStart)
+            .buildBasicLine(poses.emptyRampStart, poses.emptyRamp).build()
 
         score1 = follower.pathBuilder()
             .buildBasicLine(poses.emptyRamp, poses.nearShootPose).build()
@@ -77,6 +80,7 @@ class Near12 (
         return listOf(
             Path(scorePreload, fullSpeed),
             Path(intake1, fullSpeed),
+            Path(emptyRamp, intakeSpeed),
             Path(score1, fullSpeed),
             Path(intake2, fullSpeed),
             Path(score2, fullSpeed),
