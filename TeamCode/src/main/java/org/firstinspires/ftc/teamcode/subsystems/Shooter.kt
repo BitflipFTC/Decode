@@ -48,6 +48,8 @@ class Shooter(): Subsystem {
         const val HOOD_GEAR_RATIO = 167/21
         // now assuming hood 0.0 = 35 deg,
         // 0.8 is going to be 65 deg (dw abt the math)
+        // 37.7245508981 total range in degrees
+        // 0.53 is 55 deg
     }
 
     fun hoodPosToDegrees(pos: Double) = (30.0 / 0.8) * pos + 35
@@ -194,7 +196,7 @@ class Shooter(): Subsystem {
                 val hoodOffsetVeloCorrection = (-2.5 * flywheelDiff) / 125.0
                 val targetHoodPosition =
                     degreesToHoodPos(firstHoodDegrees + hoodOffsetVeloCorrection)
-                hoodPosition = targetHoodPosition.coerceIn(0.0..0.8)
+                hoodPosition = targetHoodPosition.coerceIn(0.0..0.662)
             } else {
                 hoodPosition = firstHoodPosition
             }

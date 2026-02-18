@@ -68,28 +68,29 @@ class CombinedTeleOp : LinearOpMode() {
         when (shootingState) {
             Shoot.MOVE_SPINDEXER      -> {
                 spindexer.toMotifOuttakePosition()
-                if (DEBUG_FSM) Log.d("FSM", "MOVING SPINDEXER TO ${spindexer.state.name}, ${spindexer.getArtifactString()}")
+                if (DEBUG_FSM) Log.d("FSM", " * * * * * NEW CYCLE: * * * * * moving spindexer to ${spindexer.state.name}, ${spindexer.getArtifactString()}")
                 shootingState = Shoot.TRANSFER_ARTIFACT
                 timer.reset()
             }
 
             Shoot.TRANSFER_ARTIFACT   -> {
                 if (DEBUG_FSM) {
-                    Log.d("FSM", "Waiting for shooter or spindexer")
-                    Log.d("FSM", "spidnexer: ${spindexer.currentAngle}, ${spindexer.targetAngle}, ${spindexer.atSetPoint()},\n" +
-                            " shooter: ${shooter.flywheelRPM}, ${shooter.targetFlywheelRPM}, ${shooter.atSetPoint()}")
+                    Log.d("FSM", "Waiting for shooter: ${shooter.atSetPoint()}\nWaiting for spindexer: ${spindexer.atSetPoint()}")
+                    Log.d("FSM", "spindexer: ${spindexer.currentAngle}, ${spindexer.targetAngle},\n" +
+                            "shooter: ${shooter.flywheelRPM}, ${shooter.targetFlywheelRPM}")
                 }
+
                 if (shooter.atSetPoint() && spindexer.atSetPoint()) {
                     if (DEBUG_FSM) Log.d("FSM", "Moving spindexer / shooter took ${timer.milliseconds()}")
                     transfer.transferArtifact()
-                    if (DEBUG_FSM) Log.d("FSM", "TRANSFERRING")
+                    if (DEBUG_FSM) Log.d("FSM", "= = = Transferring = = =")
                     shootingState = Shoot.WAIT_FOR_COMPLETION
                     timer.reset()
                 }
             }
 
             Shoot.WAIT_FOR_COMPLETION -> {
-                if (DEBUG_FSM) Log.d("FSM", "WAITING FOR TRANSFER, current: ${transfer.currentPosition}, target: ${transfer.targetPosition}, diff: ${transfer.targetPosition - transfer.currentPosition}")
+                if (DEBUG_FSM) Log.d("FSM", "Waiting for transfer, current: ${transfer.currentPosition}, target: ${transfer.targetPosition}, diff: ${transfer.targetPosition - transfer.currentPosition}")
                 if (transfer.atSetPoint()) {
                     if (DEBUG_FSM) Log.d("FSM", "transferring took ${timer.milliseconds()}")
                     spindexer.recordOuttake()
@@ -269,10 +270,6 @@ class CombinedTeleOp : LinearOpMode() {
                 fol.followPath(goToPark(), true)
                 gamepad1.setLedColor(0.0,0.0,255.0, Gamepad.LED_DURATION_CONTINUOUS)
             }
-
-//            if (gamepad1.optionsWasPressed()) {
-//                fol.pose = if (turret.selectedAlliance == Alliance.RED) nearStartPose else nearStartPose.mirror()
-//            }
 
             if (automatedDriving && (!fol.isBusy || gamepad1.circleWasPressed())) {
                 automatedDriving = false
