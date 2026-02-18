@@ -1,8 +1,8 @@
 package org.firstinspires.ftc.teamcode.subsystems
 
 import com.bylazar.configurables.annotations.Configurable
+import com.bylazar.utils.MovingAverageSmoother
 import com.qualcomm.robotcore.hardware.VoltageSensor
-import com.qualcomm.robotcore.util.Range
 import dev.nextftc.core.subsystems.Subsystem
 import dev.nextftc.ftc.ActiveOpMode
 import org.firstinspires.ftc.teamcode.util.InterpolatedLookupTable
@@ -42,7 +42,7 @@ class Shooter(): Subsystem {
         @JvmField
         var tuning = false
 
-        const val LP_FILTER = 0.01
+        const val VOLTAGE_FILTER = 0.01
 
         // 125 rpm change is approximately fixed by a 2.5 degree lowering of the hood
         const val HOOD_GEAR_RATIO = 167/21
@@ -129,11 +129,7 @@ class Shooter(): Subsystem {
         private set
     var distance = 0.0
 
-//    private var compensatingForShot = false
-
-//    fun compensateForShot() {
-//        compensatingForShot = true
-//    }
+    val velocityFilter = MovingAverageSmoother(15)
 
     var debugTelemetry = true
 
@@ -156,28 +152,19 @@ class Shooter(): Subsystem {
 
     override fun periodic() {
         if (voltageTimer++ % 50 == 0) {
-            cachedVoltage = LP_FILTER * vSensor.voltage + (1 - LP_FILTER) * cachedVoltage
+            cachedVoltage = VOLTAGE_FILTER * vSensor.voltage + (1 - VOLTAGE_FILTER) * cachedVoltage
         }
 
         flywheelRPM = (flywheelMotor.velocity / FLYWHEEL_PPR) * 60
-        filteredFlywheelRPM = flywheelRPM * LOW_PASS + filteredFlywheelRPM * (1 - LOW_PASS)
+        filteredFlywheelRPM = velocityFilter.addValue(flywheelRPM)
 
         if (tuning) {
             flywheelController.setCoeffs(kP, 0.0, 0.0, kV, 0.0)
         }
 
-//        if (filteredFlywheelRPM >= targetFlywheelRPM && compensatingForShot) {
-//            compensatingForShot = false
-//        }
+        pidOutput = flywheelController.calculate(filteredFlywheelRPM, targetFlywheelRPM)
 
-//        if (!compensatingForShot) {
-            pidOutput = flywheelController.calculate(filteredFlywheelRPM, targetFlywheelRPM)
-
-            // allow it to stop SLOWLY when target is 0
-            flywheelMotor.power = pidOutput / cachedVoltage
-//        } else {
-//            flywheelMotor.power = 1.0
-//        }
+        flywheelMotor.power = pidOutput / cachedVoltage
 
         hoodServo.position = hoodPosition
 
