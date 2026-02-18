@@ -37,7 +37,7 @@ class Shooter(): Subsystem {
         var kV = 0.00244
 
         @JvmField
-        var useVelocityCorrection = false
+        var useVelocityCorrection = true
 
         @JvmField
         var tuning = false
