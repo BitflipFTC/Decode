@@ -27,7 +27,7 @@ import org.firstinspires.ftc.teamcode.util.hardware.ServoEx
 @Configurable
 class Shooter(): Subsystem {
     companion object {
-        const val GEAR_RATIO = 58/60 // output / input
+        const val GEAR_RATIO = 64/48 // output / input
         const val FLYWHEEL_PPR = 28 * GEAR_RATIO
         const val LOW_PASS = 0.1
 
@@ -144,7 +144,7 @@ class Shooter(): Subsystem {
             position = hoodPosition
         }
 
-        flywheelController.setPointTolerance = 35.0
+        flywheelController.setPointTolerance = 205.0
 
         vSensor = ActiveOpMode.hardwareMap.get(VoltageSensor::class.java, "Control Hub")
     }

@@ -27,7 +27,7 @@ public class Transfer implements Subsystem {
     // artifact to the flywheel
     public static int MOTOR_TURNS = 1;
 
-    public static double kP = 0.006;
+    public static double kP = 0.0067;
     public static double kI = 0.03;
     public static double kD = 0.0001;
     public static double maxPower = 1.0;
@@ -41,7 +41,7 @@ public class Transfer implements Subsystem {
 
     @Override
     public void initialize() {
-        controller.setSetPointTolerance(3.125);
+        controller.setSetPointTolerance(5.125);
         motor = new MotorEx("transfer").zeroed().brake();
         motor.setCurrentAlert(8.5);
     }
@@ -52,6 +52,7 @@ public class Transfer implements Subsystem {
 
     private void setMotorTarget(double ticks) {
         targetPosition = ticks;
+        controller.resetTotalError();
     }
 
     public double getCurrentPosition() {
@@ -60,10 +61,6 @@ public class Transfer implements Subsystem {
 
     public double getTargetPosition() {
         return targetPosition;
-    }
-
-    public void setTargetPosition(double t) {
-        targetPosition = t;
     }
 
     public boolean isStalling() {
