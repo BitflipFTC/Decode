@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode.pedroPathing;
 
 import com.pedropathing.control.FilteredPIDFCoefficients;
 import com.pedropathing.control.PIDFCoefficients;
+import com.pedropathing.control.PredictiveBrakingCoefficients;
+import com.pedropathing.control.PredictiveBrakingController;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.follower.FollowerConstants;
 import com.pedropathing.ftc.FollowerBuilder;
@@ -17,12 +19,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 public class Constants {
     public static FollowerConstants followerConstants = new FollowerConstants()
             .mass(11.34)
-            .forwardZeroPowerAcceleration(-36.70)
-            .lateralZeroPowerAcceleration(-72.74)
-            .translationalPIDFCoefficients(new PIDFCoefficients(0.15, 0.0, 0.012, 0.015))
-            .headingPIDFCoefficients(new PIDFCoefficients(1.15, 0, 0.025, 0.01))
-            .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.0075, 0, 0.0001, 0.6, 0.01))
-            .centripetalScaling(0.0005)
+//            .predictiveBrakingCoefficients(new PredictiveBrakingCoefficients(
+//                    0.15, 0.01, 0.0
+//            ))
             ;
 
 
@@ -48,13 +47,16 @@ public class Constants {
             .forwardEncoderDirection(GoBildaPinpointDriver.EncoderDirection.REVERSED)
             .strafeEncoderDirection(GoBildaPinpointDriver.EncoderDirection.FORWARD);
 
-    public static PathConstraints pathConstraints = new PathConstraints(0.99, 100, 0.6, 1);
+    public static PathConstraints pathConstraints = new PathConstraints(0.95, 100, 0.6, 1);
 
     public static Follower createFollower(HardwareMap hardwareMap) {
-        return new FollowerBuilder(followerConstants, hardwareMap)
+        Follower fol = new FollowerBuilder(followerConstants, hardwareMap)
                 .pinpointLocalizer(localizerConstants)
                 .pathConstraints(pathConstraints)
                 .mecanumDrivetrain(driveConstants)
                 .build();
+
+        fol.useCentripetal = false;
+        return fol;
     }
 }
