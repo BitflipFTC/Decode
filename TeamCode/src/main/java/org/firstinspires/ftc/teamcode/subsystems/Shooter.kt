@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.subsystems
 
 import com.bylazar.configurables.annotations.Configurable
 import com.qualcomm.robotcore.hardware.VoltageSensor
+import com.qualcomm.robotcore.util.Range
 import dev.nextftc.core.subsystems.Subsystem
 import dev.nextftc.ftc.ActiveOpMode
 import org.firstinspires.ftc.teamcode.util.InterpolatedLookupTable
@@ -36,10 +37,21 @@ class Shooter(): Subsystem {
         var kV = 0.00244
 
         @JvmField
+        var useVelocityCorrection = false
+
+        @JvmField
         var tuning = false
 
         const val LP_FILTER = 0.01
+
+        // 125 rpm change is approximately fixed by a 2.5 degree lowering of the hood
+        const val HOOD_GEAR_RATIO = 167/21
+        // now assuming hood 0.0 = 35 deg,
+        // 0.8 is going to be 65 deg (dw abt the math)
     }
+
+    fun hoodPosToDegrees(pos: Double) = (30.0 / 0.8) * pos + 35
+    fun degreesToHoodPos(degrees: Double) = (degrees - 35) / (30.0 / 0.8)
 
     private lateinit var vSensor: VoltageSensor
     private lateinit var hoodServo: ServoEx
@@ -185,8 +197,20 @@ class Shooter(): Subsystem {
         // ensure the parameter distance is actually based on an apriltag reading
         if (distance > 0.0) {
             targetFlywheelRPM = velocityLookupTable.calculate(distance)
-            hoodPosition = angleLookupTable.calculate(distance)
             expectedTimeInAir = timeInAirLookupTable.calculate(distance)
+
+            val firstHoodPosition = angleLookupTable.calculate(distance)
+
+            if (useVelocityCorrection) {
+                val firstHoodDegrees = hoodPosToDegrees(firstHoodPosition)
+                val flywheelDiff = targetFlywheelRPM - filteredFlywheelRPM
+                val hoodOffsetVeloCorrection = (-2.5 * flywheelDiff) / 125.0
+                val targetHoodPosition =
+                    degreesToHoodPos(firstHoodDegrees + hoodOffsetVeloCorrection)
+                hoodPosition = targetHoodPosition.coerceIn(0.0..0.8)
+            } else {
+                hoodPosition = firstHoodPosition
+            }
         }
 
         this.distance = distance
