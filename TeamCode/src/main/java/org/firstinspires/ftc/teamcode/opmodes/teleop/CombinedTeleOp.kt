@@ -75,22 +75,25 @@ class CombinedTeleOp : LinearOpMode() {
 
             Shoot.TRANSFER_ARTIFACT   -> {
                 if (DEBUG_FSM) {
-                    Log.d("FSM", "Waiting for shooter: ${shooter.atSetPoint()}\nWaiting for spindexer: ${spindexer.atSetPoint()}")
-                    Log.d("FSM", "spindexer: ${spindexer.currentAngle}, ${spindexer.targetAngle},\n" +
-                            "shooter: ${shooter.flywheelRPM}, ${shooter.targetFlywheelRPM}")
+                    Log.d("FSM", "          Waiting for shooter: ${shooter.atSetPoint()}\n          Waiting for spindexer: ${spindexer.atSetPoint()}")
+                    Log.d("FSM", "          spindexer: ${spindexer.currentAngle}, ${spindexer.targetAngle},\n" +
+                            "          shooter: ${shooter.flywheelRPM}, ${shooter.targetFlywheelRPM}")
                 }
 
                 if (shooter.atSetPoint() && spindexer.atSetPoint()) {
                     if (DEBUG_FSM) Log.d("FSM", "Moving spindexer / shooter took ${timer.milliseconds()}")
                     transfer.transferArtifact()
-                    if (DEBUG_FSM) Log.d("FSM", "= = = Transferring = = =")
+                    if (DEBUG_FSM) {
+                        Log.d("FSM", "= = = Transferring = = =")
+                        Log.d("FSM", "RPM: ${shooter.flywheelRPM}, Hood angle: ${shooter.hoodPosToDegrees(shooter.hoodPosition)}")
+                    }
                     shootingState = Shoot.WAIT_FOR_COMPLETION
                     timer.reset()
                 }
             }
 
             Shoot.WAIT_FOR_COMPLETION -> {
-                if (DEBUG_FSM) Log.d("FSM", "Waiting for transfer, current: ${transfer.currentPosition}, target: ${transfer.targetPosition}, diff: ${transfer.targetPosition - transfer.currentPosition}")
+                if (DEBUG_FSM) Log.d("FSM", "          Waiting for transfer, current: ${transfer.currentPosition}, target: ${transfer.targetPosition}, diff: ${transfer.targetPosition - transfer.currentPosition}")
                 if (transfer.atSetPoint()) {
                     if (DEBUG_FSM) Log.d("FSM", "transferring took ${timer.milliseconds()}")
                     spindexer.recordOuttake()
