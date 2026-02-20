@@ -30,6 +30,7 @@ public class Transfer implements Subsystem {
     public static double kP = 0.0067;
     public static double kI = 0.03;
     public static double kD = 0.0001;
+    public static double kS = 0.0;
     public static double maxPower = 1.0;
     public static boolean tuning = false;
 
@@ -37,7 +38,7 @@ public class Transfer implements Subsystem {
 
     private MotorEx motor = null;
 
-    private final PIDController controller = new PIDController(kP, kI, kD);
+    private final PIDController controller = new PIDController(kP, kI, kD, 0.0, kS);
 
     @Override
     public void initialize() {
@@ -100,12 +101,13 @@ public class Transfer implements Subsystem {
         motor.setPower(Range.clip(pidOutput, -maxPower, maxPower));
 
         if (tuning) {
-            controller.setCoeffs(kP, kI, kD, 0.0, 0.0);
+            controller.setCoeffs(kP, kI, kD, 0.0, kS);
         }
 
         if (debugTelemetry) {
             ActiveOpMode.telemetry().addData("Transfer current ticks", currentPosition);
             ActiveOpMode.telemetry().addData("Transfer target ticks", targetPosition);
+            ActiveOpMode.telemetry().addData("Transfer motor power", pidOutput);
             ActiveOpMode.telemetry().addData("Transfer at set point", atSetPoint());
             ActiveOpMode.telemetry().addLine("---------------------------");
         }

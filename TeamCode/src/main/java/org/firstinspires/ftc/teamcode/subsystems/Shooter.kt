@@ -27,14 +27,14 @@ import org.firstinspires.ftc.teamcode.util.hardware.ServoEx
 @Configurable
 class Shooter(): Subsystem {
     companion object {
-        const val GEAR_RATIO = 64/48 // output / input
+        const val GEAR_RATIO = 60.0/58.0 // output / input
         const val FLYWHEEL_PPR = 28 * GEAR_RATIO
         const val LOW_PASS = 0.1
 
         @JvmField
-        var kP = 0.03
+        var kP = 0.02
         @JvmField
-        var kV = 0.00244
+        var kV = 0.0025
 
         @JvmField
         var useVelocityCorrection = true
@@ -45,6 +45,7 @@ class Shooter(): Subsystem {
         const val VOLTAGE_FILTER = 0.01
 
         // 125 rpm change is approximately fixed by a 2.5 degree lowering of the hood
+        // we have an angle range of exactly 35 degrees to 60 degrees.
         const val HOOD_GEAR_RATIO = 167/21
         // now assuming hood 0.0 = 35 deg,
         // 0.8 is going to be 65 deg (dw abt the math)
@@ -196,7 +197,7 @@ class Shooter(): Subsystem {
                 val hoodOffsetVeloCorrection = (-2.5 * flywheelDiff) / 125.0
                 val targetHoodPosition =
                     degreesToHoodPos(firstHoodDegrees + hoodOffsetVeloCorrection)
-                hoodPosition = targetHoodPosition.coerceIn(0.0..0.662)
+                hoodPosition = targetHoodPosition.coerceIn(0.0..0.53) // limit from 35 to 55 deg
             } else {
                 hoodPosition = firstHoodPosition
             }
