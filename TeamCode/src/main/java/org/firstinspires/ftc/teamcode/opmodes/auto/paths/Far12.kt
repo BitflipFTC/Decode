@@ -32,9 +32,8 @@ class Far12(alliance: Alliance): BaseAutoPath(alliance) {
         scorePreload = follower.pathBuilder()
             .buildBasicLine(poses.farStartPose, poses.farShootPoseFacingObelisk).build()
 
-
         intake2 = follower.pathBuilder()
-            .buildCurvedTangentLine(poses.farShootPoseFacingObelisk, poses.farIntake2Control, poses.startIntake2)
+            .buildCurvedLine(poses.farShootPoseFacingObelisk, poses.farIntake2Control, poses.startIntake2)
             .buildTangentLine(poses.startIntake2, poses.endIntake2).build()
 
         intake2.doIntakeSpeed(follower, fullSpeed, intakeSpeed)
@@ -47,7 +46,7 @@ class Far12(alliance: Alliance): BaseAutoPath(alliance) {
             .buildBasicLine(poses.emptyRamp, poses.farShootPose).build()
 
         intake3 = follower.pathBuilder()
-            .buildCurvedTangentLine(poses.farShootPose, poses.farIntake3Control, poses.startIntake3)
+            .buildCurvedLine(poses.farShootPose, poses.farIntake3Control, poses.startIntake3)
             .buildTangentLine(poses.startIntake3, poses.endIntake3).build()
 
         intake3.doIntakeSpeed(follower, fullSpeed, intakeSpeed)
@@ -62,7 +61,7 @@ class Far12(alliance: Alliance): BaseAutoPath(alliance) {
         dHP.doIntakeSpeed(follower, fullSpeed, intakeSpeed)
 
         dScore = follower.pathBuilder()
-            .buildTangentLine(poses.HPIntakeEnd, poses.farShootPose).build()
+            .buildTangentLine(poses.HPIntakeEnd, poses.farShootPose).setReversed().build()
 
         park = follower.pathBuilder()
             .buildBasicLine(poses.farShootPose, poses.farParkPose).build()

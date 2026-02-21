@@ -8,6 +8,7 @@ import org.firstinspires.ftc.teamcode.util.Alliance
 import org.firstinspires.ftc.teamcode.util.auto.BaseAutoPath
 import org.firstinspires.ftc.teamcode.util.auto.Path
 import org.firstinspires.ftc.teamcode.util.buildBasicLine
+import org.firstinspires.ftc.teamcode.util.buildCurvedLine
 import org.firstinspires.ftc.teamcode.util.buildCurvedTangentLine
 import org.firstinspires.ftc.teamcode.util.buildTangentLine
 import org.firstinspires.ftc.teamcode.util.doIntakeSpeed
@@ -32,7 +33,7 @@ class Far9 (
             .buildBasicLine(poses.farStartPose, poses.farShootPoseFacingObelisk).build()
 
         intake3 = follower.pathBuilder()
-            .buildCurvedTangentLine(poses.farShootPoseFacingObelisk, poses.farIntake3Control, poses.startIntake3)
+            .buildCurvedLine(poses.farShootPoseFacingObelisk, poses.farIntake3Control, poses.startIntake3)
             .buildTangentLine(poses.startIntake3, poses.endIntake3).build()
 
         intake3.doIntakeSpeed(follower, fullSpeed, intakeSpeed)
@@ -41,7 +42,7 @@ class Far9 (
             .buildTangentLine(poses.endIntake3, poses.farShootPose).setReversed().build()
 
         intake2 = follower.pathBuilder()
-            .buildCurvedTangentLine(poses.farShootPose, poses.farIntake2Control, poses.startIntake2)
+            .buildCurvedLine(poses.farShootPose, poses.farIntake2Control, poses.startIntake2)
             .buildTangentLine(poses.startIntake2, poses.endIntake2).build()
 
         intake2.doIntakeSpeed(follower, fullSpeed, intakeSpeed)
