@@ -47,6 +47,7 @@ class FlywheelTest : LinearOpMode() {
             allHubs.forEach { hub -> hub.clearBulkCache() }
 
 //            // reset the target rpm
+//            // reset the target rpm
             if (gamepad1.dpadDownWasPressed()) {
                 shooter.targetFlywheelRPM -= 250
             }
@@ -72,7 +73,7 @@ class FlywheelTest : LinearOpMode() {
             }
 
             if (gamepad1.circleWasPressed()) {
-                shooter.targetFlywheelRPM = 0.0
+                turret.angle = 0.0
             }
 
             if (gamepad1.triangleWasPressed() && spindexer.atSetPoint()) {

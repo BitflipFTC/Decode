@@ -36,7 +36,7 @@ public class DefaultDrive extends OpMode {
 
         front_right.setDirection(DcMotorSimple.Direction.REVERSE);
         back_right.setDirection(DcMotorSimple.Direction.REVERSE);
-        front_left.setDirection(DcMotorSimple.Direction.REVERSE);
+//        front_left.setDirection(DcMotorSimple.Direction.REVERSE);
 
         front_left.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         front_right.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);

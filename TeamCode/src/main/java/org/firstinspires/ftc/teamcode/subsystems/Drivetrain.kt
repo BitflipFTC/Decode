@@ -55,7 +55,7 @@ class Drivetrain(): Subsystem {
     private lateinit var backRight : MotorEx
 
     override fun initialize() {
-        frontLeft = MotorEx("frontleft").reverse().zeroed().brake()
+        frontLeft = MotorEx("frontleft").zeroed().brake()
         frontRight = MotorEx("frontright").reverse().brake().zeroed()
         backLeft = MotorEx("backleft").zeroed().brake()
         backRight = MotorEx("backright").reverse().zeroed().brake()

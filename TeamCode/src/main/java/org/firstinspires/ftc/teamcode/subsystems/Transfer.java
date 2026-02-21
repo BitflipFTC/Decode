@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
 import com.bylazar.configurables.annotations.Configurable;
+import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.teamcode.util.PIDController;
@@ -27,12 +28,13 @@ public class Transfer implements Subsystem {
     // artifact to the flywheel
     public static int MOTOR_TURNS = 1;
 
-    public static double kP = 0.0067;
+    public static double kP = 0.01;
     public static double kI = 0.03;
-    public static double kD = 0.0001;
-    public static double kS = 0.0;
+    public static double kD = 0.00015;
+    public static double kS = 0.03;
     public static double maxPower = 1.0;
     public static boolean tuning = false;
+    private ElapsedTime stallingTimer = new ElapsedTime();
 
     boolean debugTelemetry = true;
 
@@ -44,7 +46,7 @@ public class Transfer implements Subsystem {
     public void initialize() {
         controller.setSetPointTolerance(5.125);
         motor = new MotorEx("transfer").zeroed().brake();
-        motor.setCurrentAlert(8.5);
+        motor.setCurrentAlert(5.5);
     }
 
     public void setPower (double power) {
@@ -100,11 +102,17 @@ public class Transfer implements Subsystem {
         double pidOutput = controller.calculate(currentPosition, targetPosition);
         motor.setPower(Range.clip(pidOutput, -maxPower, maxPower));
 
+        if (isStalling() && stallingTimer.milliseconds() > 500.0) {
+            undoTransfer();
+            stallingTimer.reset();
+        }
+
         if (tuning) {
             controller.setCoeffs(kP, kI, kD, 0.0, kS);
         }
 
         if (debugTelemetry) {
+            ActiveOpMode.telemetry().addData("Current", motor.getCurrent());
             ActiveOpMode.telemetry().addData("Transfer current ticks", currentPosition);
             ActiveOpMode.telemetry().addData("Transfer target ticks", targetPosition);
             ActiveOpMode.telemetry().addData("Transfer motor power", pidOutput);

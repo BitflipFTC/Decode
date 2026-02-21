@@ -33,7 +33,7 @@ class Near9 (
             .buildBasicLine(poses.nearStartPose, poses.nearShootPoseFacingObelisk).build()
 
         intake1 = follower.pathBuilder()
-            .buildCurvedTangentLine(poses.nearShootPoseFacingObelisk, poses.nearIntake1Control, poses.startIntake1)
+            .buildCurvedLine(poses.nearShootPoseFacingObelisk, poses.nearIntake1Control, poses.startIntake1)
             .buildTangentLine(poses.startIntake1, poses.endIntake1).build()
 
         intake1.doIntakeSpeed(follower, fullSpeed, intakeSpeed)
@@ -41,7 +41,7 @@ class Near9 (
             .buildTangentLine(poses.endIntake1, poses.nearShootPose).build()
 
         intake2 = follower.pathBuilder()
-            .buildCurvedTangentLine(poses.nearShootPoseFacingObelisk, poses.nearIntake2Control, poses.startIntake2)
+            .buildCurvedLine(poses.nearShootPoseFacingObelisk, poses.nearIntake2Control, poses.startIntake2)
             .buildTangentLine(poses.startIntake2, poses.endIntake2).build()
 
         intake2.doIntakeSpeed(follower, fullSpeed, intakeSpeed)
@@ -49,7 +49,7 @@ class Near9 (
             .buildCurvedTangentLine(poses.endIntake2, poses.endIntake2Move, poses.nearShootPose).build()
 
         park = follower.pathBuilder()
-            .buildTangentLine(poses.nearShootPose, poses.nearParkPose).build()
+            .buildTangentLine(poses.nearShootPose, poses.nearParkPose).setReversed().build()
 
         return listOf(
             Path(scorePreload, fullSpeed),

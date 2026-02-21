@@ -41,7 +41,7 @@ class AutoPoses(
     val endIntake3     = p(Pose(HORIZONTAL_INTAKE_END, INTAKE_3_VERTICAL, INTAKE_HEADING))
     val endIntake3Move = p(Pose(HORIZONTAL_INTAKE_MOVE_BACK, endIntake3.y, INTAKE_HEADING))
     val emptyRampStart = p(Pose(120.0, 77.0, Math.toRadians(90.0)))
-    val emptyRamp      = p(Pose(127.5, 77.0, Math.toRadians(90.0)))
+    val emptyRamp      = p(Pose(130.5, 77.0, Math.toRadians(90.0)))
     val redPark        = p(Pose(38.75, 33.25, Math.toRadians(90.0)))
     val HPIntakeEnd    = p(Pose(129.0, 9.0, Math.toRadians(0.0)))
     val HPIntakeStart = p(Pose(120.0, 9.0, 0.0))

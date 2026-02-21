@@ -239,7 +239,7 @@ class CombinedTeleOp : LinearOpMode() {
 
             // spindexer
             if (gamepad1.leftBumperWasPressed() && transfer.atSetPoint() && intake.power != Intake.State.OFF) {
-                spindexer.toMotifOuttakePosition()
+                spindexer.toNextOuttakePosition()
             }
 
             if (gamepad1.rightBumperWasPressed() && transfer.atSetPoint() && intake.power != Intake.State.OFF) {
@@ -310,16 +310,6 @@ class CombinedTeleOp : LinearOpMode() {
 
             }
 
-            if (!TUNING_FLYWHEEL) {
-                if (gamepad1.dpadRightWasPressed()) {
-                    spindexer.increaseOffset()
-                }
-
-                if (gamepad1.dpadLeftWasPressed()) {
-                    spindexer.decreaseOffset()
-                }
-            }
-
             if (turret.automatic && gamepad1.touchpadWasPressed()) {
                 turret.automatic = false
                 turret.angle = 0.0
@@ -338,7 +328,7 @@ class CombinedTeleOp : LinearOpMode() {
                 colorSensor.detectedArtifact = null
             }
 
-            if (camera.hasNewReading && fol.velocity.magnitude < 1.0 && fol.angularVelocity < 1 * ((2 * Math.PI) / 360) ) {
+            if (camera.hasNewReading && fol.velocity.magnitude < 1.0 && (fol.angularVelocity < (1 * ((2 * Math.PI) / 360))) ) {
                 fol.pose = Pose(
                     (1-lowpass) * fol.pose.x + lowpass * camera.robotPose.x,
                     (1-lowpass) * fol.pose.y + lowpass * camera.robotPose.y,

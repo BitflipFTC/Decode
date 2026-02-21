@@ -79,4 +79,5 @@ class MotorEx @JvmOverloads constructor(
     }
 
     fun isOverCurrent() = motor.isOverCurrent
+    fun getCurrent() = motor.getCurrent(CurrentUnit.AMPS)
 }

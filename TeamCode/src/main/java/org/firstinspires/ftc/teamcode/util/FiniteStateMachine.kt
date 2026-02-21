@@ -24,7 +24,7 @@ class FiniteStateMachine (vararg inputStates: State) {
         if (states.isEmpty() || currentState >= states.size) return
 
         val activeState = states[currentState]
-        if (activeState.started) {
+        if (!activeState.started) {
             activeState.initialize()
             activeState.started = true
         } else {
