@@ -10,6 +10,7 @@ import com.pedropathing.follower.Follower
 import com.pedropathing.geometry.BezierLine
 import com.pedropathing.geometry.Pose
 import com.pedropathing.paths.HeadingInterpolator
+import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver
 import com.qualcomm.hardware.lynx.LynxModule
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
@@ -29,6 +30,7 @@ import org.firstinspires.ftc.teamcode.util.MotifPattern
 import org.firstinspires.ftc.teamcode.util.TelemetryImplUpstreamSubmission
 import org.firstinspires.ftc.teamcode.util.auto.AutoPoses
 import kotlin.math.abs
+import kotlin.math.max
 
 @Configurable
 @TeleOp(name = "Combined TeleOp")
@@ -263,7 +265,7 @@ class CombinedTeleOp : LinearOpMode() {
                     -gamepad1.left_stick_y.toDouble(),
                     -gamepad1.left_stick_x.toDouble(),
                     -gamepad1.right_stick_x.toDouble(),
-                    false,
+                    true,
                     if (turret.selectedAlliance == Alliance.BLUE) Math.PI else 0.0
                 )
             }
@@ -354,9 +356,12 @@ class CombinedTeleOp : LinearOpMode() {
 //            }
 
             updateShootingFSM()
+            val lastFolVel = fol.velocity.magnitude
+            val lastFolAcc = fol.acceleration.magnitude
+            val lastFolPose = fol.pose
             fol.update()
 
-            if (!fol.pose.roughlyEquals(Pose(0.0,0.0,0.0), 0.1)) {
+            if (!fol.pose.roughlyEquals(lastFolPose, max(lastFolVel + ((lastFolAcc * (loopTimer.ms/1000.0)) * loopTimer.ms / 1000.0) + 5.0, 5.0))) {
                 if (!TUNING_FLYWHEEL) {
                     shooter.setTargetState(turret.goalPose.distanceFrom(fol.pose))
                 }
@@ -400,7 +405,6 @@ class CombinedTeleOp : LinearOpMode() {
                     )
                 )
                 Drawing.sendPacket()
-
 
                 turret.robotPose = futurePose
             }
