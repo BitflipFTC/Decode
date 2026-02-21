@@ -64,15 +64,13 @@ abstract class BaseAutonomous: LinearOpMode() {
     protected lateinit var paths: List<Path>
 
     override fun runOpMode() {
-        telemetry =
-            JoinedTelemetry(PanelsTelemetry.ftcTelemetry, TelemetryImplUpstreamSubmission(this))
+        telemetry = JoinedTelemetry(PanelsTelemetry.ftcTelemetry, TelemetryImplUpstreamSubmission(this))
 
         follower = Constants.createFollower(hardwareMap)
 
         subsystems.forEach { it.initialize() }
         camera.initialize()
 
-        Log.d("FSM", "auto inited")
         val prompter = Prompter(this)
 
         prompter
@@ -119,6 +117,7 @@ abstract class BaseAutonomous: LinearOpMode() {
                 Log.d("FSM", "DETECTED ARTIFACT ${colorSensor.detectedArtifact!!}")
             }
 
+            //todo
 //            shooter.setTargetState(turret.goalPose.distanceFrom(follower!!.pose))
             turret.robotPose = follower!!.pose
 
@@ -196,16 +195,11 @@ abstract class BaseAutonomous: LinearOpMode() {
             }
         }
     }
-
+//todo
 //    protected fun shootState(): State =
 //        InitializeState("Shoot state", { shootingState == Shoot.IDLE }, ::shootAllArtifacts)
 
     protected fun shootState() = WaitState(1500.0)
-
-    protected fun getMotifState(): State = InstantState("Motif", {
-        spindexer.motifPattern = camera.motif
-        motifPattern = spindexer.motifPattern
-    })
 
 //    protected fun startIntake(): State = InstantState("Start intake", intake::intake)
 

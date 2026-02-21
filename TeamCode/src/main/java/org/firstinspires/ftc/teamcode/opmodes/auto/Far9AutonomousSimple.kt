@@ -19,7 +19,6 @@ class Far9AutonomousSimple: BaseAutonomous() {
             FollowPathState("D Score Preload", paths[0]),
             startIntake(),
             WaitState(250.0),
-            getMotifState(),
             shootState(),
             FollowPathState("D Intake 1", paths[1]),
             WaitState(150.0),

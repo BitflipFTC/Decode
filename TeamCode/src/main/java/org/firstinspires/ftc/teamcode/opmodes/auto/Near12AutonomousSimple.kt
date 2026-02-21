@@ -17,7 +17,6 @@ class Near12AutonomousSimple: BaseAutonomous() {
 
         finiteStateMachine = FiniteStateMachine(
             FollowPathState("Score preload", paths[0]),
-            getMotifState(),
             startIntake(),
             WaitState(250.0),
             shootState(),

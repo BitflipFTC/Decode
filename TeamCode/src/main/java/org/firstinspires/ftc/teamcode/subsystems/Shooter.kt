@@ -167,7 +167,7 @@ class Shooter(): Subsystem {
         // ensure the parameter distance is actually based on an apriltag reading
         if (distance > 0.0) {
             targetFlywheelRPM = velocityLookupTable.calculate(distance)
-            expectedTimeInAir = timeInAirLookupTable.calculate(distance)
+            setTimeInAir(distance)
 
             val firstHoodPosition = angleLookupTable.calculate(distance)
 
@@ -184,5 +184,9 @@ class Shooter(): Subsystem {
         }
 
         this.distance = distance
+    }
+
+    fun setTimeInAir(distance: Double) {
+        expectedTimeInAir = timeInAirLookupTable.calculate(distance)
     }
 }

@@ -84,9 +84,9 @@ class FlywheelTest : LinearOpMode() {
                 intake.toggle()
             }
 
-            if (gamepad1.leftBumperWasPressed()) {
+            if (gamepad1.leftBumperWasPressed() && transfer.atSetPoint()) {
                 spindexer.toNextOuttakePosition()
-            } else if (gamepad1.rightBumperWasPressed()) {
+            } else if (gamepad1.rightBumperWasPressed() && transfer.atSetPoint()) {
                 spindexer.toNextIntakePosition()
             }
 

@@ -18,7 +18,6 @@ class GarnetSquadronAutonomous: BaseAutonomous() {
         finiteStateMachine = FiniteStateMachine(
             FollowPathState("Score preload", paths[0]),
             startIntake(),
-            getMotifState(),
             WaitState(100.0),
             shootState(),
             FollowPathState("D HP & Intake", paths[1]),

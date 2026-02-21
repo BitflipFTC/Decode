@@ -240,11 +240,11 @@ class CombinedTeleOp : LinearOpMode() {
             }
 
             // spindexer
-            if (gamepad1.leftBumperWasPressed() && transfer.atSetPoint() && intake.power != Intake.State.OFF) {
+            if (gamepad1.leftBumperWasPressed() && transfer.atSetPoint()) {
                 spindexer.toNextOuttakePosition()
             }
 
-            if (gamepad1.rightBumperWasPressed() && transfer.atSetPoint() && intake.power != Intake.State.OFF) {
+            if (gamepad1.rightBumperWasPressed() && transfer.atSetPoint()) {
                 spindexer.toNextIntakePosition()
             }
 
@@ -260,26 +260,20 @@ class CombinedTeleOp : LinearOpMode() {
                 intake.reversed = false
             }
 
-            if (!automatedDriving) {
-                fol.setTeleOpDrive(
-                    -gamepad1.left_stick_y.toDouble(),
-                    -gamepad1.left_stick_x.toDouble(),
-                    -gamepad1.right_stick_x.toDouble(),
-                    true,
-                    if (turret.selectedAlliance == Alliance.BLUE) Math.PI else 0.0
-                )
+            fol.setTeleOpDrive(
+                -gamepad1.left_stick_y.toDouble(),
+                -gamepad1.left_stick_x.toDouble(),
+                -gamepad1.right_stick_x.toDouble(),
+                true,
+                if (turret.selectedAlliance == Alliance.BLUE) Math.PI else 0.0
+            )
+
+            if (gamepad1.backWasPressed() && !turret.automatic && !TUNING_FLYWHEEL) {
+                shooter.setTargetState(60.0)
             }
 
-            if (gamepad1.backWasPressed()) {
-                automatedDriving = true
-                fol.followPath(goToPark(), true)
-                gamepad1.setLedColor(0.0,0.0,255.0, Gamepad.LED_DURATION_CONTINUOUS)
-            }
-
-            if (automatedDriving && (!fol.isBusy || gamepad1.circleWasPressed())) {
-                automatedDriving = false
-                fol.startTeleopDrive(true)
-                gamepad1.setLedColor(255.0, 136.0, 30.0, Gamepad.LED_DURATION_CONTINUOUS)
+            if (gamepad1.startWasPressed() && !turret.automatic && !TUNING_FLYWHEEL){
+                shooter.setTargetState(130.0)
             }
 
             if (gamepad1.circleWasPressed()) {
@@ -361,7 +355,7 @@ class CombinedTeleOp : LinearOpMode() {
             val lastFolPose = fol.pose
             fol.update()
 
-            if (!fol.pose.roughlyEquals(lastFolPose, max(lastFolVel + ((lastFolAcc * (loopTimer.ms/1000.0)) * loopTimer.ms / 1000.0) + 5.0, 5.0))) {
+            if (!fol.pose.roughlyEquals(lastFolPose, lastFolVel * (loopTimer.ms/1000.0) + 0.5 *  (lastFolAcc * (loopTimer.ms/1000.0) * (loopTimer.ms/1000.0)) + 1.0)) {
                 if (!TUNING_FLYWHEEL) {
                     shooter.setTargetState(turret.goalPose.distanceFrom(fol.pose))
                 }
@@ -379,6 +373,8 @@ class CombinedTeleOp : LinearOpMode() {
 
                     if (!TUNING_FLYWHEEL) {
                         shooter.setTargetState(turret.goalPose.distanceFrom(futurePose))
+                    } else {
+                        shooter.setTimeInAir(turret.goalPose.distanceFrom(futurePose))
                     }
                 } while (abs(lastInAirTime - shooter.expectedTimeInAir) > 0.001)
 
