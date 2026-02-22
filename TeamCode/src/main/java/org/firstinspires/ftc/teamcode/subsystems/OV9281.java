@@ -21,7 +21,9 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagGameDatabase;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -52,6 +54,7 @@ public class OV9281 implements Subsystem {
             0.03380, 212.51288, 271.44038, 0);
 
     private Pose robotPose = new Pose();
+    private MedianPoseFilter filter = new MedianPoseFilter();
     private Pose newPose = new Pose();
     private Pose2D robotPose2d;
     private boolean newReading = false;
@@ -226,7 +229,7 @@ public class OV9281 implements Subsystem {
                 robotPose2d = new Pose2D(
                         DistanceUnit.INCH, detection.robotPose.getPosition().x, detection.robotPose.getPosition().y, AngleUnit.DEGREES, detection.robotPose.getOrientation().getYaw(AngleUnit.DEGREES)
                 );
-                robotPose = new Pose(robotPose2d.getY(DistanceUnit.INCH) + 72.0, (-1 * robotPose2d.getX(DistanceUnit.INCH)) + 72.0, robotPose2d.getHeading(AngleUnit.RADIANS));
+                robotPose = filter.update(new Pose(robotPose2d.getY(DistanceUnit.INCH) + 72.0, (-1 * robotPose2d.getX(DistanceUnit.INCH)) + 72.0, robotPose2d.getHeading(AngleUnit.RADIANS)));
 
                 newReading = true;
             } else {
@@ -257,5 +260,49 @@ public class OV9281 implements Subsystem {
 
     public boolean getHasNewReading() {
         return newReading;
+    }
+}
+
+class MedianPoseFilter {
+
+    private final Deque<Pose> buffer = new ArrayDeque<>(3);
+
+    public Pose update(Pose newPose) {
+        if (buffer.size() == 3) {
+            buffer.removeFirst();
+        }
+        buffer.addLast(newPose);
+
+        if (buffer.size() < 3) {
+            return newPose;
+        }
+
+        Pose[] p = buffer.toArray(new Pose[0]);
+
+        double x = median3(p[0].getX(), p[1].getX(), p[2].getX());
+        double y = median3(p[0].getY(), p[1].getY(), p[2].getY());
+        double heading = medianAngle3(
+                p[0].getHeading(),
+                p[1].getHeading(),
+                p[2].getHeading()
+        );
+
+        return new Pose(x, y, heading, newPose.getCoordinateSystem());
+    }
+
+    private double median3(double a, double b, double c) {
+        if (a > b) {
+            if (b > c) return b;
+            else return Math.min(a, c);
+        } else {
+            if (a > c) return a;
+            else return Math.min(b, c);
+        }
+    }
+
+    private double medianAngle3(double a, double b, double c) {
+        double mx = median3(Math.cos(a), Math.cos(b), Math.cos(c));
+        double my = median3(Math.sin(a), Math.sin(b), Math.sin(c));
+        return Math.atan2(my, mx);
     }
 }

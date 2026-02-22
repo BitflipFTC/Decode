@@ -42,7 +42,7 @@ class CombinedTeleOp : LinearOpMode() {
         var alliance: Alliance? = null
 
         @JvmField
-        var lowpass = 0.1
+        var lowpass = 0.2
 
         const val TUNING_FLYWHEEL = false
         const val DEBUG_FSM = true
