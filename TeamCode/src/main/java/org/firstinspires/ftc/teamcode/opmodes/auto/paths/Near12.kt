@@ -14,20 +14,20 @@ import org.firstinspires.ftc.teamcode.util.buildIntakeLine
 import org.firstinspires.ftc.teamcode.util.buildTangentLine
 import org.firstinspires.ftc.teamcode.util.doIntakeSpeed
 
-class Near12 (
-    alliance: Alliance
-) : BaseAutoPath(
-    alliance
-) {
-    val fullSpeed = 1.0
-    val intakeSpeed = 0.67
+class Near12(alliance: Alliance) : BaseAutoPath(alliance) {
+    val fullSpeed = 0.85
+    val intakeSpeed = 0.55
 
     lateinit var scorePreload: PathChain
+    lateinit var dintake1: PathChain
     lateinit var intake1: PathChain
+    lateinit var demptyRamp: PathChain
     lateinit var emptyRamp: PathChain
     lateinit var score1: PathChain
+    lateinit var dintake2: PathChain
     lateinit var intake2: PathChain
     lateinit var score2: PathChain
+    lateinit var dintake3: PathChain
     lateinit var intake3: PathChain
     lateinit var score3: PathChain
     lateinit var park: PathChain
@@ -36,46 +36,54 @@ class Near12 (
         scorePreload = follower.pathBuilder()
             .buildBasicLine(poses.nearStartPose, poses.nearShootPoseFacingObelisk).build()
 
+        dintake1 = follower.pathBuilder()
+            .buildCurvedLine(poses.nearShootPoseFacingObelisk, poses.farIntake2Control,poses.startIntake2).build()
+
         intake1 = follower.pathBuilder()
-            .buildCurvedTangentLine(poses.nearShootPoseFacingObelisk, poses.farIntake2Control,poses.startIntake2)
             .buildTangentLine(poses.startIntake2, poses.endIntake2).build()
 
-        intake1.doIntakeSpeed(follower, fullSpeed, intakeSpeed)
+        demptyRamp = follower.pathBuilder()
+            .buildCurvedLine(poses.endIntake2, poses.endIntake2Move, poses.emptyRampStart).build()
+
         emptyRamp = follower.pathBuilder()
-            .buildCurvedLine(poses.endIntake2, poses.endIntake2Move, poses.emptyRampStart)
             .buildBasicLine(poses.emptyRampStart, poses.emptyRamp).build()
 
         score1 = follower.pathBuilder()
-            .buildBasicLine(poses.emptyRamp, poses.nearShootPose).build()
+            .buildCurvedLine(poses.emptyRamp, poses.emptyRampControl, poses.nearShootPose).build()
+
+        dintake2 = follower.pathBuilder()
+            .buildCurvedLine(poses.nearShootPose,poses.farIntake1Control,poses.startIntake1).build()
 
         intake2 = follower.pathBuilder()
-            .buildCurvedTangentLine(poses.nearShootPose,poses.farIntake1Control,poses.startIntake1)
             .buildTangentLine(poses.startIntake1, poses.endIntake1).build()
 
-        intake2.doIntakeSpeed(follower, fullSpeed, intakeSpeed)
         score2 = follower.pathBuilder()
             .buildTangentLine(poses.endIntake1, poses.nearShootPose).setReversed().build()
 
-        intake3 = follower.pathBuilder()
-            .buildCurvedTangentLine(poses.nearShootPose,poses.farIntake3Control,  poses.startIntake3)
-            .buildTangentLine(poses.startIntake3, poses.endIntake3).build()
+        dintake3 = follower.pathBuilder()
+            .buildCurvedTangentLine(poses.nearShootPose,poses.farIntake3Control,  poses.startIntake3).build()
 
-        intake3.doIntakeSpeed(follower, fullSpeed, intakeSpeed)
+        intake3 = follower.pathBuilder()
+            .buildTangentLine(poses.startIntake3, poses.endIntake3).build()
 
         score3 = follower.pathBuilder()
             .buildCurvedTangentLine(poses.endIntake3, poses.endIntake3Move, poses.nearShootPose).setReversed().build()
 
         park = follower.pathBuilder()
-            .buildTangentLine(poses.nearShootPose, poses.nearParkPose).build()
+            .buildBasicLine(poses.nearShootPose, poses.nearParkPose).build()
 
         return listOf(
             Path(scorePreload, fullSpeed),
-            Path(intake1, fullSpeed),
+            Path(dintake1, fullSpeed),
+            Path(intake1, intakeSpeed),
+            Path(demptyRamp, fullSpeed),
             Path(emptyRamp, intakeSpeed),
             Path(score1, fullSpeed),
-            Path(intake2, fullSpeed),
+            Path(dintake2, fullSpeed),
+            Path(intake2, intakeSpeed),
             Path(score2, fullSpeed),
-            Path(intake3, fullSpeed),
+            Path(dintake3, fullSpeed),
+            Path(intake3, intakeSpeed),
             Path(score3, fullSpeed),
             Path(park, fullSpeed)
             )

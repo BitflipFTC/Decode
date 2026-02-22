@@ -19,22 +19,30 @@ class Near12AutonomousSimple: BaseAutonomous() {
         finiteStateMachine = FiniteStateMachine(
             FollowPathState("Score preload", paths[0]),
             startIntake(),
-            WaitState(250.0),
             shootState(),
-            FollowPathState("intake 1", paths[1]),
+
+            FollowPathState("dintake 1", paths[1]),
+            FollowPathState("intake 1", paths[2]),
             WaitState(150.0),
-            FollowPathState("ramp thing idk", paths[2]),
-            FollowPathState("dscore1", paths[3]),
+            FollowPathState("dramping it", paths[3]),
+            FollowPathState("ramping ", paths[4]),
+            WaitState(100.0),
+            FollowPathState("dscore1", paths[5]),
             shootState(),
-            FollowPathState("Intake 2", paths[4]),
+
+            FollowPathState("dintake 2", paths[6]),
+            FollowPathState("intake 2", paths[7]),
             WaitState(150.0),
-            FollowPathState("DScore 3", paths[5]),
+            FollowPathState("DScore 3", paths[8]),
             shootState(),
-            FollowPathState("Intake 3", paths[6]),
+
+            FollowPathState("dIntake 3", paths[9]),
+            FollowPathState("intake 3", paths[10]),
             WaitState(150.0),
-            FollowPathState("DScore 3", paths[7]),
+            FollowPathState("DScore 3", paths[11]),
             shootState(),
-            FollowPathState("Park", paths[8])
+
+            FollowPathState("Park", paths[12])
         )
     }
 }

@@ -13,6 +13,20 @@ import org.firstinspires.ftc.teamcode.util.WaitState
 @Autonomous(name = "FAR 12 Ball", preselectTeleOp = "Combined TeleOp")
 class Far12AutonomousSimple: BaseAutonomous() {
     override fun initialize(alliance: Alliance) {
+        //             Path(scorePreload, fullSpeed),
+        //            Path(dintake2, fullSpeed),
+        //            Path(intake2, intakeSpeed),
+        //            Path(demptyRamp, fullSpeed),
+        //            Path(emptyRamp, intakeSpeed),
+        //            Path(score2, fullSpeed),
+        //            Path(dintake3, fullSpeed),
+        //            Path(intake3, intakeSpeed),
+        //            Path(score3, fullSpeed),
+        //            Path(dHP, fullSpeed),
+        //            Path(HP, 0.25),
+        //            Path(dScoreHP, fullSpeed),
+        //            Path(park, fullSpeed)
+
         pathSequence = Far12(alliance)
         paths = pathSequence.buildPaths(CombinedTeleOp.follower!!)
         follower!!.setStartingPose(pathSequence.poses.farStartPose)
@@ -20,23 +34,30 @@ class Far12AutonomousSimple: BaseAutonomous() {
         finiteStateMachine = FiniteStateMachine(
             FollowPathState("D Score Preload", paths[0]),
             startIntake(),
-            WaitState(250.0),
             shootState(),
+
             FollowPathState("D Intake 2", paths[1]),
+            FollowPathState("Intake 2", paths[2]),
             WaitState(150.0),
-            FollowPathState("Empty Ramp", paths[2]),
+            FollowPathState("d empty ramp", paths[3]),
+            FollowPathState("Empty Ramp", paths[4]),
             WaitState(250.0),
-            FollowPathState("D Score 2", paths[3]),
+            FollowPathState("D Score 2", paths[5]),
             shootState(),
-            FollowPathState("D Intake 3", paths[4]),
+
+            FollowPathState("D Intake 3", paths[6]),
+            FollowPathState("intake 3", paths[7]),
             WaitState(150.0),
-            FollowPathState("D Score 3", paths[5]),
+            FollowPathState("D Score 3", paths[8]),
             shootState(),
-            FollowPathState("HP INTAKE", paths[6]),
+
+            FollowPathState("D hp intake", paths[9]),
+            FollowPathState("HP INTAKE", paths[10]),
             WaitState(150.0),
-            FollowPathState("D Score HP", paths[7]),
+            FollowPathState("D Score HP", paths[11]),
             shootState(),
-            FollowPathState("Park", paths[8])
+
+            FollowPathState("Park", paths[12])
         )
     }
 }
