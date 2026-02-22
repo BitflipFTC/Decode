@@ -166,8 +166,6 @@ class CombinedTeleOp : LinearOpMode() {
         subsystems.forEach { it.initialize() }
         fol.update()
         Drawing.init()
-        var automatedDriving = false
-
         while (opModeInInit()) {
             telemetry.update()
         }
@@ -219,6 +217,8 @@ class CombinedTeleOp : LinearOpMode() {
         turret.selectedAlliance = alliance ?: Alliance.RED
         loopTimer.start()
 
+        var turretAutomate = true
+
         fol.startTeleopDrive(true)
         matchTimer.reset()
 
@@ -268,12 +268,9 @@ class CombinedTeleOp : LinearOpMode() {
                 true
             )
 
-            if (gamepad1.backWasPressed() && !turret.automatic && !TUNING_FLYWHEEL) {
-                shooter.setTargetState(60.0)
-            }
-
-            if (gamepad1.startWasPressed() && !turret.automatic && !TUNING_FLYWHEEL){
-                shooter.setTargetState(130.0)
+            if (gamepad1.dpadUpWasPressed() && !turretAutomate) {
+                shooter.setTargetState(autoPoses.farShootTeleop.distanceFrom(turret.goalPose))
+                turret.robotPose = autoPoses.farShootTeleop
             }
 
             if (gamepad1.circleWasPressed()) {
@@ -308,11 +305,8 @@ class CombinedTeleOp : LinearOpMode() {
                 }
             }
 
-            if (turret.automatic && gamepad1.touchpadWasPressed()) {
-                turret.automatic = false
-                turret.angle = 0.0
-            } else if (!turret.automatic && gamepad1.touchpadWasPressed()){
-                turret.automatic = true
+            if (gamepad1.touchpadWasPressed()) {
+                turretAutomate = !turretAutomate
             }
 
             lastArtifactDetected = artifactDetected
@@ -360,35 +354,35 @@ class CombinedTeleOp : LinearOpMode() {
 //            if (!fol.pose.roughlyEquals(lastFolPose, lastFolVel * (loopTimer.ms/1000.0) + 0.5 *  (lastFolAcc * (loopTimer.ms/1000.0) * (loopTimer.ms/1000.0)) + 1.0)) {
 //                fol.pose = lastFolPose
 //            }
-            if(true){
-                // like repeat a bit yknow
+            // like repeat a bit yknow
 
-                var lastInAirTime: Double
-                do {
-                    futurePose = Pose(
-                        fol.pose.x + shooter.expectedTimeInAir * fol.velocity.xComponent,
-                        fol.pose.y + shooter.expectedTimeInAir * fol.velocity.yComponent,
-                        fol.pose.heading
-                    )
-                    lastInAirTime = shooter.expectedTimeInAir
-
-                    if (!TUNING_FLYWHEEL && turret.automatic) {
-                        shooter.setTargetState(turret.goalPose.distanceFrom(futurePose))
-                    } else {
-                        shooter.setTimeInAir(turret.goalPose.distanceFrom(futurePose))
-                    }
-                } while (abs(lastInAirTime - shooter.expectedTimeInAir) > 0.001)
-
+            var lastInAirTime: Double
+            do {
                 futurePose = Pose(
                     fol.pose.x + shooter.expectedTimeInAir * fol.velocity.xComponent,
                     fol.pose.y + shooter.expectedTimeInAir * fol.velocity.yComponent,
                     fol.pose.heading
                 )
+                lastInAirTime = shooter.expectedTimeInAir
 
+                if (!TUNING_FLYWHEEL && turretAutomate) {
+                    shooter.setTargetState(turret.goalPose.distanceFrom(futurePose))
+                } else {
+                    shooter.setTimeInAir(turret.goalPose.distanceFrom(futurePose))
+                }
+            } while (abs(lastInAirTime - shooter.expectedTimeInAir) > 0.001)
+
+            futurePose = Pose(
+                fol.pose.x + shooter.expectedTimeInAir * fol.velocity.xComponent,
+                fol.pose.y + shooter.expectedTimeInAir * fol.velocity.yComponent,
+                fol.pose.heading
+            )
+
+            if (turretAutomate) {
                 turret.robotPose = futurePose
             }
 
-                Drawing.drawRobot(
+            Drawing.drawRobot(
                     fol.pose,
                     Style(
                         "",
