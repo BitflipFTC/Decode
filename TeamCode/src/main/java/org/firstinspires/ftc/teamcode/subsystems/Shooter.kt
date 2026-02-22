@@ -32,9 +32,9 @@ class Shooter(): Subsystem {
         const val LOW_PASS = 0.1
 
         @JvmField
-        var kP = 0.02
+        var kP = 0.008
         @JvmField
-        var kV = 0.0025
+        var kV = 0.0026
 
         @JvmField
         var useVelocityCorrection = true
@@ -65,19 +65,31 @@ class Shooter(): Subsystem {
     // longest short zone is approx. 80 in. from peak to center
     // shortest we can see from is about 25.0.
     val distanceArray = doubleArrayOf(
-        50.0,
+        46.0,
+        72.0,
+        97.0,
         137.0,
+        152.0,
     )
     val speedArray = doubleArrayOf(
-        3250.0,
-        4250.0
+        3125.0,
+        3625.0,
+        3750.0,
+        4375.0,
+        4625.0,
     )
     val angleArray = doubleArrayOf(
-        0.175,
-        0.325
+        0.025,
+        0.35,
+        0.3875,
+        0.4,
+        0.425
     )
     val timeInAirArray = doubleArrayOf(
         0.5,
+        0.55,
+        0.65,
+        0.8,
         0.9
     )
 
@@ -125,7 +137,7 @@ class Shooter(): Subsystem {
             position = hoodPosition
         }
 
-        flywheelController.setPointTolerance = 205.0
+        flywheelController.setPointTolerance = 100.0
 
         vSensor = ActiveOpMode.hardwareMap.get(VoltageSensor::class.java, "Control Hub")
     }
@@ -174,10 +186,10 @@ class Shooter(): Subsystem {
             if (useVelocityCorrection) {
                 val firstHoodDegrees = hoodPosToDegrees(firstHoodPosition)
                 val flywheelDiff = targetFlywheelRPM - filteredFlywheelRPM
-                val hoodOffsetVeloCorrection = (-2.5 * flywheelDiff) / 125.0
+                val hoodOffsetVeloCorrection = (-1.0 * flywheelDiff) / 125.0
                 val targetHoodPosition =
                     degreesToHoodPos(firstHoodDegrees + hoodOffsetVeloCorrection)
-                hoodPosition = targetHoodPosition.coerceIn(0.0..0.53) // limit from 35 to 55 deg
+                hoodPosition = targetHoodPosition.coerceIn(0.025..0.45) // limit from 35 to 55 deg
             } else {
                 hoodPosition = firstHoodPosition
             }

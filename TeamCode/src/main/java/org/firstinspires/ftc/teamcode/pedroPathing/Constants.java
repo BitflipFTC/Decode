@@ -20,10 +20,10 @@ public class Constants {
     public static FollowerConstants followerConstants = new FollowerConstants()
             .mass(10.659)
             .predictiveBrakingCoefficients(new PredictiveBrakingCoefficients(
-                    0.03, 0.06465648557274474, 0.0015042964787405362
+                    0.035, 0.06465648557274474, 0.0015042964787405362
             ))
             .headingPIDFCoefficients(new PIDFCoefficients(
-                    0.7, 0, 0.035, 0.04
+                    0.5, 0, 0.035, 0.035
             ))
             ;
 
@@ -59,7 +59,6 @@ public class Constants {
                 .mecanumDrivetrain(driveConstants)
                 .build();
 
-        fol.useCentripetal = false;
         return fol;
     }
 }

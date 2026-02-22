@@ -14,8 +14,10 @@ class Far9AutonomousSimple: BaseAutonomous() {
     override fun initialize(alliance: Alliance) {
         pathSequence = Far9(alliance)
         paths = pathSequence.buildPaths(follower!!)
+        follower!!.setStartingPose(pathSequence.poses.farStartPose)
 
         finiteStateMachine = FiniteStateMachine(
+            WaitState(2000.0),
             FollowPathState("D Score Preload", paths[0]),
             startIntake(),
             WaitState(250.0),

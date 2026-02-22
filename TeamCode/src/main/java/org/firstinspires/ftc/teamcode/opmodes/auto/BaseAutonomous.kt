@@ -79,7 +79,6 @@ abstract class BaseAutonomous: LinearOpMode() {
                 alliance = prompter.get<Alliance>("alliance")
                 initialize(alliance!!)
                 turret.selectedAlliance = alliance!!
-                follower!!.pose = pathSequence.poses.nearStartPose
             }
 
         while (opModeInInit()) {
@@ -117,8 +116,7 @@ abstract class BaseAutonomous: LinearOpMode() {
                 Log.d("FSM", "DETECTED ARTIFACT ${colorSensor.detectedArtifact!!}")
             }
 
-            //todo
-//            shooter.setTargetState(turret.goalPose.distanceFrom(follower!!.pose))
+            shooter.setTargetState(turret.goalPose.distanceFrom(follower!!.pose))
             turret.robotPose = follower!!.pose
 
             follower!!.update()
@@ -196,12 +194,12 @@ abstract class BaseAutonomous: LinearOpMode() {
         }
     }
 //todo
-//    protected fun shootState(): State =
-//        InitializeState("Shoot state", { shootingState == Shoot.IDLE }, ::shootAllArtifacts)
+    protected fun shootState(): State =
+        InitializeState("Shoot state", { shootingState == Shoot.IDLE }, ::shootAllArtifacts)
 
-    protected fun shootState() = WaitState(1500.0)
+//    protected fun shootState() = WaitState(1500.0)
 
-//    protected fun startIntake(): State = InstantState("Start intake", intake::intake)
+    protected fun startIntake(): State = InstantState("Start intake", intake::intake)
 
-    protected  fun startIntake(): State = WaitState(1.0)
+//    protected  fun startIntake(): State = WaitState(1.0)
 }

@@ -14,6 +14,7 @@ class Near12AutonomousSimple: BaseAutonomous() {
     override fun initialize(alliance: Alliance) {
         pathSequence = Near12(alliance)
         paths = pathSequence.buildPaths(follower!!)
+        follower!!.setStartingPose(pathSequence.poses.nearStartPose)
 
         finiteStateMachine = FiniteStateMachine(
             FollowPathState("Score preload", paths[0]),

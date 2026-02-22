@@ -19,7 +19,7 @@ class Near9 (
 ) : BaseAutoPath(
     alliance
 ) {
-    val fullSpeed = 1.0
+    val fullSpeed = 0.8
     val intakeSpeed = 0.67
 
     lateinit var scorePreload: PathChain
@@ -34,7 +34,7 @@ class Near9 (
             .buildBasicLine(poses.nearStartPose, poses.nearShootPoseFacingObelisk).build()
 
         intake1 = follower.pathBuilder()
-            .buildIntakeLine(poses.nearShootPoseFacingObelisk, poses.startIntake1)
+            .buildCurvedTangentLine(poses.nearShootPoseFacingObelisk, poses.farIntake1Control, poses.startIntake1)
             .buildTangentLine(poses.startIntake1, poses.endIntake1).build()
 
         intake1.doIntakeSpeed(follower, fullSpeed, intakeSpeed)
@@ -43,7 +43,7 @@ class Near9 (
             .buildTangentLine(poses.endIntake1, poses.nearShootPose).setReversed().build()
 
         intake2 = follower.pathBuilder()
-            .buildIntakeLine(poses.nearShootPoseFacingObelisk, poses.startIntake2)
+            .buildCurvedTangentLine(poses.nearShootPoseFacingObelisk, poses.farIntake2Control, poses.startIntake2)
             .buildTangentLine(poses.startIntake2, poses.endIntake2).build()
 
         intake2.doIntakeSpeed(follower, fullSpeed, intakeSpeed)

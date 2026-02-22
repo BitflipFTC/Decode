@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.opmodes.teleop
 
 import android.util.Log
+import android.view.MotionPredictor
 import com.bylazar.configurables.annotations.Configurable
 import com.bylazar.field.Style
 import com.bylazar.telemetry.JoinedTelemetry
@@ -252,11 +253,11 @@ class CombinedTeleOp : LinearOpMode() {
             if (gamepad1.squareWasPressed()) intake.toggle()
 
             // while held, reversed
-            if (gamepad1.leftTriggerWasPressed()) {
+            if (gamepad1.aWasPressed()) {
                 intake.reversed = true
             }
 
-            if (gamepad1.leftTriggerWasReleased()) {
+            if (gamepad1.aWasReleased()) {
                 intake.reversed = false
             }
 
@@ -264,8 +265,7 @@ class CombinedTeleOp : LinearOpMode() {
                 -gamepad1.left_stick_y.toDouble(),
                 -gamepad1.left_stick_x.toDouble(),
                 -gamepad1.right_stick_x.toDouble(),
-                true,
-                if (turret.selectedAlliance == Alliance.BLUE) Math.PI else 0.0
+                true
             )
 
             if (gamepad1.backWasPressed() && !turret.automatic && !TUNING_FLYWHEEL) {
@@ -287,6 +287,9 @@ class CombinedTeleOp : LinearOpMode() {
                 shootAllArtifacts()
             }
 
+            if (gamepad1.circleWasPressed()) {
+                transfer.undoTransfer()
+            }
             if (TUNING_FLYWHEEL) {
                 if (gamepad1.dpadDownWasPressed()) {
                     shooter.targetFlywheelRPM -= 125
@@ -303,7 +306,6 @@ class CombinedTeleOp : LinearOpMode() {
                 if (gamepad1.dpadLeftWasPressed()) {
                     shooter.hoodPosition -= 0.025
                 }
-
             }
 
             if (turret.automatic && gamepad1.touchpadWasPressed()) {
@@ -324,7 +326,7 @@ class CombinedTeleOp : LinearOpMode() {
                 colorSensor.detectedArtifact = null
             }
 
-            if (camera.hasNewReading && fol.velocity.magnitude < 1.0 && (fol.angularVelocity < (1 * ((2 * Math.PI) / 360))) ) {
+            if (camera.hasNewReading && gamepad1.left_trigger > 0.2) {
                 fol.pose = Pose(
                     (1-lowpass) * fol.pose.x + lowpass * camera.robotPose.x,
                     (1-lowpass) * fol.pose.y + lowpass * camera.robotPose.y,
@@ -355,11 +357,10 @@ class CombinedTeleOp : LinearOpMode() {
             val lastFolPose = fol.pose
             fol.update()
 
-            if (!fol.pose.roughlyEquals(lastFolPose, lastFolVel * (loopTimer.ms/1000.0) + 0.5 *  (lastFolAcc * (loopTimer.ms/1000.0) * (loopTimer.ms/1000.0)) + 1.0)) {
-                if (!TUNING_FLYWHEEL) {
-                    shooter.setTargetState(turret.goalPose.distanceFrom(fol.pose))
-                }
-
+//            if (!fol.pose.roughlyEquals(lastFolPose, lastFolVel * (loopTimer.ms/1000.0) + 0.5 *  (lastFolAcc * (loopTimer.ms/1000.0) * (loopTimer.ms/1000.0)) + 1.0)) {
+//                fol.pose = lastFolPose
+//            }
+            if(true){
                 // like repeat a bit yknow
 
                 var lastInAirTime: Double
@@ -371,7 +372,7 @@ class CombinedTeleOp : LinearOpMode() {
                     )
                     lastInAirTime = shooter.expectedTimeInAir
 
-                    if (!TUNING_FLYWHEEL) {
+                    if (!TUNING_FLYWHEEL && turret.automatic) {
                         shooter.setTargetState(turret.goalPose.distanceFrom(futurePose))
                     } else {
                         shooter.setTimeInAir(turret.goalPose.distanceFrom(futurePose))
@@ -383,6 +384,9 @@ class CombinedTeleOp : LinearOpMode() {
                     fol.pose.y + shooter.expectedTimeInAir * fol.velocity.yComponent,
                     fol.pose.heading
                 )
+
+                turret.robotPose = futurePose
+            }
 
                 Drawing.drawRobot(
                     fol.pose,
@@ -401,9 +405,6 @@ class CombinedTeleOp : LinearOpMode() {
                     )
                 )
                 Drawing.sendPacket()
-
-                turret.robotPose = futurePose
-            }
 
             lastSpindexerIsFull = spindexer.isFull
             subsystems.forEach { it.periodic() }

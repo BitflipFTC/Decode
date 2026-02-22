@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.opmodes.auto
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous
 import org.firstinspires.ftc.teamcode.opmodes.auto.paths.Far12
 import org.firstinspires.ftc.teamcode.opmodes.teleop.CombinedTeleOp
+import org.firstinspires.ftc.teamcode.opmodes.teleop.CombinedTeleOp.Companion.follower
 import org.firstinspires.ftc.teamcode.util.Alliance
 import org.firstinspires.ftc.teamcode.util.FiniteStateMachine
 import org.firstinspires.ftc.teamcode.util.FollowPathState
@@ -14,6 +15,7 @@ class Far12AutonomousSimple: BaseAutonomous() {
     override fun initialize(alliance: Alliance) {
         pathSequence = Far12(alliance)
         paths = pathSequence.buildPaths(CombinedTeleOp.follower!!)
+        follower!!.setStartingPose(pathSequence.poses.farStartPose)
 
         finiteStateMachine = FiniteStateMachine(
             FollowPathState("D Score Preload", paths[0]),

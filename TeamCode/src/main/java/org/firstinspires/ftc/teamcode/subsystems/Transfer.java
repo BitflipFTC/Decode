@@ -23,16 +23,17 @@ public class Transfer implements Subsystem {
     private final double TICKS_PER_REVOLUTION = 145.1;
     private double targetPosition = 0;
     private double currentPosition = 0;
+    private double halfway = -1;
 
     // amount of times the motor should turn every time it transfers an
     // artifact to the flywheel
     public static int MOTOR_TURNS = 1;
 
-    public static double kP = 0.01;
-    public static double kI = 0.03;
-    public static double kD = 0.00015;
-    public static double kS = 0.03;
-    public static double maxPower = 1.0;
+    public static double kP = 0.006;
+    public static double kI = 0.0;
+    public static double kD = 0.00012;
+    public static double kS = 0.025;
+    public static double maxPower = 0.75;
     public static boolean tuning = false;
     private ElapsedTime stallingTimer = new ElapsedTime();
 
@@ -54,6 +55,7 @@ public class Transfer implements Subsystem {
     }
 
     private void setMotorTarget(double ticks) {
+//        halfway = (ticks - targetPosition) / 2 + targetPosition;
         targetPosition = ticks;
         controller.resetTotalError();
     }
@@ -100,21 +102,17 @@ public class Transfer implements Subsystem {
     public void periodic() {
         currentPosition = motor.getCurrentPosition();
         double pidOutput = controller.calculate(currentPosition, targetPosition);
-        motor.setPower(Range.clip(pidOutput, -maxPower, maxPower));
 
-        if (isStalling() && stallingTimer.milliseconds() > 500.0) {
-            undoTransfer();
-            stallingTimer.reset();
-        }
+        motor.setPower(Range.clip(pidOutput, -maxPower, maxPower));
 
         if (tuning) {
             controller.setCoeffs(kP, kI, kD, 0.0, kS);
         }
 
         if (debugTelemetry) {
-            ActiveOpMode.telemetry().addData("Current", motor.getCurrent());
             ActiveOpMode.telemetry().addData("Transfer current ticks", currentPosition);
             ActiveOpMode.telemetry().addData("Transfer target ticks", targetPosition);
+            ActiveOpMode.telemetry().addData("Halfway", halfway);
             ActiveOpMode.telemetry().addData("Transfer motor power", pidOutput);
             ActiveOpMode.telemetry().addData("Transfer at set point", atSetPoint());
             ActiveOpMode.telemetry().addLine("---------------------------");
