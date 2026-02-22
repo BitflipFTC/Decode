@@ -12,6 +12,14 @@ import org.firstinspires.ftc.teamcode.util.WaitState
 @Autonomous(name = "NEAR 9 Ball", preselectTeleOp = "Combined TeleOp")
 class Near9AutonomousSimple: BaseAutonomous() {
     override fun initialize(alliance: Alliance) {
+        //            Path(scorePreload, fullSpeed),
+        //            Path(dintake1, fullSpeed),
+        //            Path(intake1, intakeSpeed),
+        //            Path(score1, fullSpeed),
+        //            Path(dintake2, fullSpeed),
+        //            Path(intake2, intakeSpeed),
+        //            Path(score2, fullSpeed),
+        //            Path(park, fullSpeed)
         pathSequence = Near9(alliance)
         paths = pathSequence.buildPaths(follower!!)
         follower!!.setStartingPose(pathSequence.poses.nearStartPose)
@@ -19,17 +27,21 @@ class Near9AutonomousSimple: BaseAutonomous() {
         finiteStateMachine = FiniteStateMachine(
             FollowPathState("D Score Preload", paths[0]),
             startIntake(),
-            WaitState(250.0),
             shootState(),
-            FollowPathState("Intake 1", paths[1]),
+
+            FollowPathState("Dintake 1", paths[1]),
+            FollowPathState("Intake 1", paths[2]),
             WaitState(150.0),
-            FollowPathState("D Score 1", paths[2]),
+            FollowPathState("D Score 1", paths[3]),
             shootState(),
-            FollowPathState("Intake 2", paths[3]),
+
+            FollowPathState("Dintake 2", paths[4]),
+            FollowPathState("Intake 2", paths[5]),
             WaitState(150.0),
-            FollowPathState("D Score 2", paths[4]),
+            FollowPathState("D Score 2", paths[6]),
             shootState(),
-            FollowPathState("Park", paths[5])
+
+            FollowPathState("Park", paths[7])
         )
     }
 }

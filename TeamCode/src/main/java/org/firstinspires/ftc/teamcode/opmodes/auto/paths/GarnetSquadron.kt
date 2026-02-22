@@ -22,6 +22,7 @@ class GarnetSquadron(alliance: Alliance): BaseAutoPath(alliance) {
 
     lateinit var scorePreload: PathChain
     lateinit var dHP: PathChain
+    lateinit var HP: PathChain
     lateinit var dScore: PathChain
     lateinit var dIntakeGate: PathChain
     lateinit var intakeGate: PathChain
@@ -36,10 +37,11 @@ class GarnetSquadron(alliance: Alliance): BaseAutoPath(alliance) {
         ))
 
         dHP = follower.pathBuilder()
-            .buildTangentLine(poses.farShootPoseFacingObelisk, poses.HPIntakeStart)
+            .buildTangentLine(poses.farShootPoseFacingObelisk, poses.HPIntakeStart).build()
+
+        HP = follower.pathBuilder()
             .buildTangentLine(poses.HPIntakeStart, poses.HPIntakeEnd).build()
 
-        dHP.doIntakeSpeed(follower, fullSpeed, intakeSpeed)
         dScore = follower.pathBuilder()
             .buildTangentLine(poses.HPIntakeEnd, poses.farShootPose).setReversed().build()
 

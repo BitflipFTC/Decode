@@ -17,20 +17,23 @@ class Far9AutonomousSimple: BaseAutonomous() {
         follower!!.setStartingPose(pathSequence.poses.farStartPose)
 
         finiteStateMachine = FiniteStateMachine(
-            WaitState(2000.0),
             FollowPathState("D Score Preload", paths[0]),
             startIntake(),
-            WaitState(250.0),
             shootState(),
+
             FollowPathState("D Intake 1", paths[1]),
+            FollowPathState("Intake 1", paths[2]),
             WaitState(150.0),
-            FollowPathState("D Score 1", paths[2]),
+            FollowPathState("D Score 1", paths[3]),
             shootState(),
-            FollowPathState("D Intake 2", paths[3]),
+
+            FollowPathState("D Intake 2", paths[4]),
+            FollowPathState("Intake 2", paths[5]),
             WaitState(150.0),
-            FollowPathState("D Score 2", paths[4]),
+            FollowPathState("D Score 2", paths[6]),
             shootState(),
-            FollowPathState("Park", paths[5])
+
+            FollowPathState("Park", paths[7])
         )
     }
 }

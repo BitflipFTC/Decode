@@ -23,8 +23,10 @@ class Near9 (
     val intakeSpeed = 0.67
 
     lateinit var scorePreload: PathChain
+    lateinit var dintake1: PathChain
     lateinit var intake1: PathChain
     lateinit var score1: PathChain
+    lateinit var dintake2: PathChain
     lateinit var intake2: PathChain
     lateinit var score2: PathChain
     lateinit var park: PathChain
@@ -33,31 +35,34 @@ class Near9 (
         scorePreload = follower.pathBuilder()
             .buildBasicLine(poses.nearStartPose, poses.nearShootPoseFacingObelisk).build()
 
-        intake1 = follower.pathBuilder()
-            .buildCurvedTangentLine(poses.nearShootPoseFacingObelisk, poses.farIntake1Control, poses.startIntake1)
-            .buildTangentLine(poses.startIntake1, poses.endIntake1).build()
+        dintake1 = follower.pathBuilder()
+            .buildCurvedLine(poses.nearShootPoseFacingObelisk, poses.farIntake1Control, poses.startIntake1).build()
 
-        intake1.doIntakeSpeed(follower, fullSpeed, intakeSpeed)
+        intake1 = follower.pathBuilder()
+            .buildTangentLine(poses.startIntake1, poses.endIntake1).build()
 
         score1 = follower.pathBuilder()
             .buildTangentLine(poses.endIntake1, poses.nearShootPose).setReversed().build()
 
+        dintake2 = follower.pathBuilder()
+            .buildCurvedLine(poses.nearShootPoseFacingObelisk, poses.farIntake2Control, poses.startIntake2).build()
+
         intake2 = follower.pathBuilder()
-            .buildCurvedTangentLine(poses.nearShootPoseFacingObelisk, poses.farIntake2Control, poses.startIntake2)
             .buildTangentLine(poses.startIntake2, poses.endIntake2).build()
 
-        intake2.doIntakeSpeed(follower, fullSpeed, intakeSpeed)
         score2 = follower.pathBuilder()
             .buildCurvedTangentLine(poses.endIntake2, poses.endIntake2Move, poses.nearShootPose).setReversed().build()
 
         park = follower.pathBuilder()
-            .buildTangentLine(poses.nearShootPose, poses.nearParkPose).build()
+            .buildBasicLine(poses.nearShootPose, poses.nearParkPose).build()
 
         return listOf(
             Path(scorePreload, fullSpeed),
-            Path(intake1, fullSpeed),
+            Path(dintake1, fullSpeed),
+            Path(intake1, intakeSpeed),
             Path(score1, fullSpeed),
-            Path(intake2, fullSpeed),
+            Path(dintake2, fullSpeed),
+            Path(intake2, intakeSpeed),
             Path(score2, fullSpeed),
             Path(park, fullSpeed)
         )

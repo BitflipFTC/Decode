@@ -18,12 +18,14 @@ class Far9 (
 ) : BaseAutoPath(
     alliance
 ) {
-    val fullSpeed = 1.0
+    val fullSpeed = 0.8
     val intakeSpeed = 0.67
 
     lateinit var scorePreload: PathChain
+    lateinit var dintake3: PathChain
     lateinit var intake3: PathChain
     lateinit var score3: PathChain
+    lateinit var dintake2: PathChain
     lateinit var intake2: PathChain
     lateinit var score2: PathChain
     lateinit var park: PathChain
@@ -32,20 +34,20 @@ class Far9 (
         scorePreload = follower.pathBuilder()
             .buildBasicLine(poses.farStartPose, poses.farShootPoseFacingObelisk).build()
 
-        intake3 = follower.pathBuilder()
-            .buildCurvedLine(poses.farShootPoseFacingObelisk, poses.farIntake3Control, poses.startIntake3)
-            .buildTangentLine(poses.startIntake3, poses.endIntake3).build()
+        dintake3 = follower.pathBuilder()
+            .buildCurvedLine(poses.farShootPoseFacingObelisk, poses.farIntake3Control, poses.startIntake3).build()
 
-        intake3.doIntakeSpeed(follower, fullSpeed, intakeSpeed)
+        intake3 = follower.pathBuilder()
+            .buildTangentLine(poses.startIntake3, poses.endIntake3).build()
 
         score3 = follower.pathBuilder()
             .buildTangentLine(poses.endIntake3, poses.farShootPose).setReversed().build()
 
-        intake2 = follower.pathBuilder()
-            .buildCurvedLine(poses.farShootPose, poses.farIntake2Control, poses.startIntake2)
-            .buildTangentLine(poses.startIntake2, poses.endIntake2).build()
+        dintake2 = follower.pathBuilder()
+            .buildCurvedLine(poses.farShootPose, poses.farIntake2Control, poses.startIntake2).build()
 
-        intake2.doIntakeSpeed(follower, fullSpeed, intakeSpeed)
+        intake2 = follower.pathBuilder()
+            .buildTangentLine(poses.startIntake2, poses.endIntake2).build()
 
         score2 = follower.pathBuilder()
             .buildTangentLine(poses.endIntake2, poses.farShootPose).setReversed().build()
@@ -55,8 +57,10 @@ class Far9 (
 
         return listOf(
             Path(scorePreload, fullSpeed),
+            Path(dintake3, fullSpeed),
             Path(intake3, intakeSpeed),
             Path(score3, fullSpeed),
+            Path(dintake2, fullSpeed),
             Path(intake2, intakeSpeed),
             Path(score2, fullSpeed),
             Path(park, fullSpeed)
