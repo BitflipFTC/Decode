@@ -32,9 +32,9 @@ class Shooter(): Subsystem {
         const val LOW_PASS = 0.1
 
         @JvmField
-        var kP = 0.008
+        var kP = 0.015
         @JvmField
-        var kV = 0.0026
+        var kV = 0.00248
 
         @JvmField
         var useVelocityCorrection = true
@@ -186,7 +186,7 @@ class Shooter(): Subsystem {
             if (useVelocityCorrection) {
                 val firstHoodDegrees = hoodPosToDegrees(firstHoodPosition)
                 val flywheelDiff = targetFlywheelRPM - filteredFlywheelRPM
-                val hoodOffsetVeloCorrection = (-1.0 * flywheelDiff) / 125.0
+                val hoodOffsetVeloCorrection = ((-1.0 * (distance / 150.0)) * flywheelDiff) / 125.0
                 val targetHoodPosition =
                     degreesToHoodPos(firstHoodDegrees + hoodOffsetVeloCorrection)
                 hoodPosition = targetHoodPosition.coerceIn(0.025..0.45) // limit from 35 to 55 deg
