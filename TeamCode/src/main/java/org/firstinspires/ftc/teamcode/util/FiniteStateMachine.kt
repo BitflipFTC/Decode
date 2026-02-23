@@ -70,3 +70,7 @@ class WaitState (
     override val initialize = { timer.reset() }
     override val endCondition = { timer.milliseconds() > millis }
 }
+
+class WaitUntilState (
+    override val endCondition: () -> Boolean
+) : State("")
