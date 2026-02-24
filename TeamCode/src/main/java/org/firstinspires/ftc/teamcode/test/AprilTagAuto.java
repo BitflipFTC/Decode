@@ -29,74 +29,59 @@
 
 package org.firstinspires.ftc.teamcode.test;
 
-
 import android.annotation.SuppressLint;
 
-import com.bylazar.configurables.annotations.Configurable;
-import com.bylazar.telemetry.JoinedTelemetry;
-import com.bylazar.telemetry.PanelsTelemetry;
-import com.bylazar.utils.LoopTimer;
-import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
-import org.firstinspires.ftc.teamcode.subsystems.OV9281;
-import org.firstinspires.ftc.teamcode.util.PIDController;
-import org.firstinspires.ftc.teamcode.util.SquidController;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
+import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
 import java.util.List;
 
 @Disabled
-@Configurable
 @TeleOp(name = "Concept: AprilTag Auto", group = "Concept")
 public class AprilTagAuto extends LinearOpMode {
-    private OV9281 camera;
-    LoopTimer loopTimer;
+    private WebcamName camera;
+    private VisionPortal visionPortal;
+    private AprilTagProcessor processor;
     DcMotorEx front_left;
     DcMotorEx front_right;
     DcMotorEx back_left;
     DcMotorEx back_right;
     double driveSpeed = 1;
-    public static double currentTagPos;
 
+    // this is the bearing of the apriltag relative to your camera (positive means the tag is on the left half of the FOV)
+    public static double currentTagBearing;
+    public static double targetTagBearing = 0;
+
+    // this is a value that you tune so that your robot turns to face the apriltag without overshooting or oscillating
     public static double kP = 0.011;
-    public static double kI = 0.0;
-    public static double kD = 0.000003;
-    public static double min  = -10.0;
-    public static double max  = 10.0;
-    public static double targetTagPos  = 320.0;
-
-
-    private PIDController controller;
 
     @Override
     public void runOpMode() {
+        // this is the default name for a webcam in the hardware map, change it to whatever
+        // your camera is actually named
+        camera = hardwareMap.get(WebcamName.class, "Webcam 1");
 
-        telemetry = new JoinedTelemetry(PanelsTelemetry.INSTANCE.getFtcTelemetry(), telemetry);
-        camera = new OV9281();
+        // these set up stuff for camera processing
+        processor = AprilTagProcessor.easyCreateWithDefaults();
+        visionPortal = VisionPortal.easyCreateWithDefaults(camera, processor);
 
-        controller = new SquidController();
-        loopTimer = new LoopTimer();
-
+        // declare drive motors, change to whatever your actual motors' names are
         front_left  = hardwareMap.get(DcMotorEx.class, "frontleft");
         front_right = hardwareMap.get(DcMotorEx.class, "frontright");
         back_left   = hardwareMap.get(DcMotorEx.class, "backleft");
         back_right  = hardwareMap.get(DcMotorEx.class, "backright");
 
+        // reverse whatever motors you normally reverse
         front_left.setDirection(DcMotorSimple.Direction.REVERSE);
         back_left.setDirection(DcMotorSimple.Direction.REVERSE);
-
-        telemetry.addData("Initialized", true);
-        telemetry.update();
 
         // Wait for the DS start button to be touched.
         telemetry.addData("DS preview on/off", "3 dots, Camera Stream");
@@ -104,164 +89,46 @@ public class AprilTagAuto extends LinearOpMode {
         telemetry.update();
         waitForStart();
 
-        loopTimer.start();
-
-
-        List<LynxModule> allHubs = hardwareMap.getAll(LynxModule.class);
-
-        for (LynxModule hub : allHubs) {
-            hub.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
-        }
-
         while (opModeIsActive()) {
+            aprilTagProcessing();
 
-            for (LynxModule hub : allHubs) {
-                hub.clearBulkCache();
-            }
+            telemetry.addData("Current tag bearing", currentTagBearing);
+            telemetry.addData("Target tag bearing", targetTagBearing);
 
-            telemetryAprilTag();
+            // this finds how far off we are from where we want to be
+            // this is assuming you want to be facing directly towards the april tag (thus, the target is 0 degrees)
+            double error = targetTagBearing - currentTagBearing;
 
-            // Push telemetry to the Driver Station.
+            // this scales your error by a proportional constant so you can change how quickly it turns to face the tag
+            error *= kP;
 
-            // Save CPU resources; can resume streaming when needed.
-            if (gamepad1.dpad_down) {
-                camera.getVisionPortal().stopStreaming();
-            } else if (gamepad1.dpad_up) {
-                camera.getVisionPortal().resumeStreaming();
-            }
+            telemetry.addData("Error", error);
 
-            if (gamepad1.a) {
-                targetTagPos = 160;
-            } else if (gamepad1.b) {
-                targetTagPos = 320;
-            } else if (gamepad1.x) {
-                targetTagPos = 480;
-            }
-
-            telemetry.addData("Current speed value", driveSpeed);
-            telemetry.addData("Current tag pos", currentTagPos);
-            telemetry.addData("Target Tag Pos", targetTagPos);
-            telemetry.addData("Loop time","%dms",loopTimer.getMs());
-
-            controller.setCoeffs(kP, kI, kD,0,0);
-            controller.setIntegrationBounds(min, max);
-
-            double pidError = controller.calculate(currentTagPos, targetTagPos);
-
-            telemetry.addData("pid Error", pidError);
-
-            if (Math.abs(pidError) > 0.05) {
-                front_left.setPower(-pidError);
-                front_right.setPower(pidError);
-                back_left.setPower(-pidError);
-                back_right.setPower(pidError);
-            } else {
-                front_left.setPower(0);
-                front_right.setPower(0);
-                back_left.setPower(0);
-                back_right.setPower(0);
+            if (Math.abs(error) > 0.05) {
+                front_left.setPower(-error);
+                front_right.setPower(error);
+                back_left.setPower(-error);
+                back_right.setPower(error);
             }
 
             telemetry.update();
         }
-
-        // Save more CPU resources when camera is no longer needed.
-        camera.getVisionPortal().close();
-
     }   // end method runOpMode()
 
-    /**
-     * Add telemetry about AprilTag detections.
-     */
     @SuppressLint("DefaultLocale")
-    private void telemetryAprilTag() {
-
-        List<AprilTagDetection> currentDetections = camera.getAprilTag().getDetections();
+    private void aprilTagProcessing() {
+        List<AprilTagDetection> currentDetections = processor.getDetections();
         telemetry.addData("# AprilTags Detected", currentDetections.size());
 
-
-        /*
-        ======================================
-        DECODE TAG LIBRARY
-        ======================================
-
-        public static AprilTagLibrary getDecodeTagLibrary(){
-        return new AprilTagLibrary.Builder()
-                .addTag(20, "BlueTarget",
-                        6.5, new VectorF(-58.3727f, -55.6425f, 29.5f), DistanceUnit.INCH,
-                        new Quaternion(0.2182149f, -0.2182149f, -0.6725937f, 0.6725937f, 0))
-                .addTag(21, "Obelisk_GPP",
-                        6.5, DistanceUnit.INCH)
-                .addTag(22, "Obelisk_PGP",
-                        6.5, DistanceUnit.INCH)
-                .addTag(23, "Obelisk_PPG",
-                        6.5, DistanceUnit.INCH)
-                .addTag(24, "RedTarget",
-                        6.5, new VectorF(-58.3727f, 55.6425f, 29.5f), DistanceUnit.INCH,
-                        new Quaternion(0.6725937f, -0.6725937f, -0.2182149f, 0.2182149f, 0))
-                .build();
-         }
-
-         Given the targets on the left, Blue on the bottom, red on the top
-         */
-
-        // Step through the list of detections and display info for each one.
         for (AprilTagDetection detection : currentDetections) {
-            if (detection.metadata != null) {
-                if (detection.metadata.name.contains("Obelisk")) {
-                    telemetry.addLine("Obelisk Tag:");
-                }
-                telemetry.addLine(String.format("\n==== (ID %d) %s", detection.id, detection.metadata.name));
-                // Only use tags that don't have Obelisk in them
-                if (!detection.metadata.name.contains("Obelisk")) {
-                    Pose2D tagPos = new Pose2D(DistanceUnit.INCH, detection.metadata.fieldPosition.get(0), detection.metadata.fieldPosition.get(1),
-                            AngleUnit.DEGREES, detection.metadata.fieldOrientation.toOrientation(AxesReference.EXTRINSIC, AxesOrder.XYZ,AngleUnit.DEGREES).secondAngle); // given north is 0, clockwise
-                    Pose2D robotPos = new Pose2D(detection.robotPose.getPosition().unit, detection.robotPose.getPosition().x, detection.robotPose.getPosition().y,
-                            AngleUnit.DEGREES, detection.robotPose.getOrientation().getYaw(AngleUnit.DEGREES));
-
-                    double dist = Math.sqrt(
-                            Math.pow(
-                                    tagPos.getX(DistanceUnit.INCH) - robotPos.getX(DistanceUnit.INCH),
-                                    2
-                            )
-                            + Math.pow(
-                                    tagPos.getY(DistanceUnit.INCH) - robotPos.getY(DistanceUnit.INCH),
-                                    2
-                            )
-                    );
-
-                    telemetry.addData("Distance to tag", dist);
-                    telemetry.addData("aprilTag Rot", tagPos.getHeading(AngleUnit.DEGREES));
-                    telemetry.addData("Robot Rot", robotPos.getHeading(AngleUnit.DEGREES));
-
-                    // sqrt (( pow ( tag.x - rob.x ), 2 ) + ( pow ( tag.y - rob.y ), 2 ))
-                    telemetry.addLine(String.format("XYZ %6.1f %6.1f %6.1f  (inch)",
-                            detection.robotPose.getPosition().x,
-                            detection.robotPose.getPosition().y,
-                            detection.robotPose.getPosition().z));
-                    telemetry.addLine(String.format("PRY %6.1f %6.1f %6.1f  (deg)",
-                            detection.robotPose.getOrientation().getPitch(AngleUnit.DEGREES),
-                            detection.robotPose.getOrientation().getRoll(AngleUnit.DEGREES),
-                            detection.robotPose.getOrientation().getYaw(AngleUnit.DEGREES)));
-                }
-            } else {
-                telemetry.addLine(String.format("\n==== (ID %d) Unknown", detection.id));
-                telemetry.addLine(String.format("Center %6.0f %6.0f   (pixels)", detection.center.x, detection.center.y));
-            }
-
-            currentTagPos = detection.center.x;
+            currentTagBearing = detection.ftcPose.bearing;
         }   // end for() loop
 
         if(currentDetections.isEmpty()) {
             // stop turning (because there is nothing to turn to)
-            currentTagPos = targetTagPos;
+            // this prevents the robot from spinning infinitely when it loses sight of the april tag
+            currentTagBearing = targetTagBearing;
         }
-
-        // Add "key" information to telemetry
-        telemetry.addLine("\nkey:\nXYZ = X (Right), Y (Forward), Z (Up) dist.");
-        telemetry.addLine("PRY = Pitch, Roll & Yaw (XYZ Rotation)");
-        telemetry.addLine("RBE = Range, Bearing & Elevation");
-
     }   // end method telemetryAprilTag()
 
 
