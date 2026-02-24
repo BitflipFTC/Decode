@@ -9,6 +9,7 @@ import org.firstinspires.ftc.teamcode.util.InterpolatedLookupTable
 import org.firstinspires.ftc.teamcode.util.PIDController
 import org.firstinspires.ftc.teamcode.util.hardware.MotorEx
 import org.firstinspires.ftc.teamcode.util.hardware.ServoEx
+import kotlin.math.abs
 
 /**
  * Manages the robot's shooter mechanism, controlling a flywheel and an adjustable hood servo.
@@ -37,7 +38,7 @@ class Shooter(): Subsystem {
         var kV = 0.00248
 
         @JvmField
-        var useVelocityCorrection = true
+        var useVelocityCorrection = false
 
         @JvmField
         var tuning = false
@@ -74,9 +75,9 @@ class Shooter(): Subsystem {
     val speedArray = doubleArrayOf(
         3125.0,
         3625.0,
-        3750.0,
-        4375.0,
-        4625.0,
+        3875.0,
+        4500.0,
+        4750.0,
     )
     val angleArray = doubleArrayOf(
         0.025,
@@ -137,7 +138,7 @@ class Shooter(): Subsystem {
             position = hoodPosition
         }
 
-        flywheelController.setPointTolerance = 100.0
+        flywheelController.setPointTolerance = 50.0
 
         vSensor = ActiveOpMode.hardwareMap.get(VoltageSensor::class.java, "Control Hub")
     }
@@ -161,7 +162,12 @@ class Shooter(): Subsystem {
 
 //        flywheelMotor.power = pidOutput / cachedVoltage
 
-        flywheelMotor.power = if (filteredFlywheelRPM < targetFlywheelRPM) 1.0 else 0.0
+        flywheelMotor.power = if (filteredFlywheelRPM < targetFlywheelRPM && abs(targetFlywheelRPM) >= 250.0) {
+            1.0
+        } else if (targetFlywheelRPM - filteredFlywheelRPM <= -750.0 && abs(targetFlywheelRPM) >= 250.0) {
+            -0.25
+        } else 0.0
+
 
         hoodServo.position = hoodPosition
 

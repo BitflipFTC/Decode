@@ -46,7 +46,9 @@ class Near12(alliance: Alliance) : BaseAutoPath(alliance) {
             .buildCurvedLine(poses.endIntake2, poses.endIntake2Move, poses.emptyRampStart).build()
 
         emptyRamp = follower.pathBuilder()
-            .buildBasicLine(poses.emptyRampStart, poses.emptyRamp).build()
+            .buildBasicLine(poses.emptyRampStart, poses.emptyRamp)
+            .setTValueConstraint(0.8)
+            .build()
 
         score1 = follower.pathBuilder()
             .buildCurvedLine(poses.emptyRamp, poses.emptyRampControl, poses.nearShootPose).build()

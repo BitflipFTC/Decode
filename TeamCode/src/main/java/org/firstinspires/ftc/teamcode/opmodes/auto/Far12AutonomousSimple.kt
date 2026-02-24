@@ -1,12 +1,14 @@
 package org.firstinspires.ftc.teamcode.opmodes.auto
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous
+import dev.nextftc.core.commands.utility.InstantCommand
 import org.firstinspires.ftc.teamcode.opmodes.auto.paths.Far12
 import org.firstinspires.ftc.teamcode.opmodes.teleop.CombinedTeleOp
 import org.firstinspires.ftc.teamcode.opmodes.teleop.CombinedTeleOp.Companion.follower
 import org.firstinspires.ftc.teamcode.util.Alliance
 import org.firstinspires.ftc.teamcode.util.FiniteStateMachine
 import org.firstinspires.ftc.teamcode.util.FollowPathState
+import org.firstinspires.ftc.teamcode.util.InstantState
 import org.firstinspires.ftc.teamcode.util.WaitState
 
 @Suppress("Unused")
@@ -32,6 +34,10 @@ class Far12AutonomousSimple: BaseAutonomous() {
         follower!!.setStartingPose(pathSequence.poses.farStartPose)
 
         finiteStateMachine = FiniteStateMachine(
+            InstantState(")"){
+                shooter.targetFlywheelRPM = 4375.0
+                shooter.hoodPosition = 0.4
+            },
             FollowPathState("D Score Preload", paths[0]),
             startIntake(),
             shootState(),

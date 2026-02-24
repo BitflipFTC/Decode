@@ -23,7 +23,6 @@ public class Transfer implements Subsystem {
     private final double TICKS_PER_REVOLUTION = 145.1;
     private double targetPosition = 0;
     private double currentPosition = 0;
-    private double halfway = -1;
 
     // amount of times the motor should turn every time it transfers an
     // artifact to the flywheel
@@ -35,7 +34,6 @@ public class Transfer implements Subsystem {
     public static double kS = 0.025;
     public static double maxPower = 0.75;
     public static boolean tuning = false;
-    private ElapsedTime stallingTimer = new ElapsedTime();
 
     boolean debugTelemetry = true;
 
@@ -55,7 +53,6 @@ public class Transfer implements Subsystem {
     }
 
     private void setMotorTarget(double ticks) {
-//        halfway = (ticks - targetPosition) / 2 + targetPosition;
         targetPosition = ticks;
         controller.resetTotalError();
     }
@@ -84,16 +81,16 @@ public class Transfer implements Subsystem {
         setMotorTarget(localTargetPosition);
     }
 
-    public void undoTransfer() {
-        setMotorTarget(getTargetPosition() - TICKS_PER_REVOLUTION * MOTOR_TURNS);
-    }
+//    public void undoTransfer() {
+//        setMotorTarget(getTargetPosition() - TICKS_PER_REVOLUTION * MOTOR_TURNS);
+//    }
 
-    public double getTransferMotorAngle() {
-        double degreesPosition = (currentPosition / TICKS_PER_REVOLUTION) * 360;
-        degreesPosition %= 360;
-        degreesPosition = (degreesPosition + 360) % 360;
-        return degreesPosition;
-    }
+//    public double getTransferMotorAngle() {
+//        double degreesPosition = (currentPosition / TICKS_PER_REVOLUTION) * 360;
+//        degreesPosition %= 360;
+//        degreesPosition = (degreesPosition + 360) % 360;
+//        return degreesPosition;
+//    }
 
     /**
      * Updates the transfer mechanism. This method should be called in a loop.
@@ -112,9 +109,9 @@ public class Transfer implements Subsystem {
         if (debugTelemetry) {
             ActiveOpMode.telemetry().addData("Transfer current ticks", currentPosition);
             ActiveOpMode.telemetry().addData("Transfer target ticks", targetPosition);
-            ActiveOpMode.telemetry().addData("Halfway", halfway);
             ActiveOpMode.telemetry().addData("Transfer motor power", pidOutput);
             ActiveOpMode.telemetry().addData("Transfer at set point", atSetPoint());
+            ActiveOpMode.telemetry().addData("Trans rotations", targetPosition / TICKS_PER_REVOLUTION);
             ActiveOpMode.telemetry().addLine("---------------------------");
         }
     }

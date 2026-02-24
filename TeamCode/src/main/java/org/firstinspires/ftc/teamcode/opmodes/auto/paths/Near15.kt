@@ -41,13 +41,13 @@ class Near15(alliance: Alliance) : BaseAutoPath(alliance) {
             .buildBasicLine(poses.nearStartPose, poses.nearShootPoseFacingObelisk).build()
 
         dintake2 = follower.pathBuilder()
-            .buildCurvedLine(poses.nearShootPose,poses.farIntake1Control,poses.startIntake1).build()
+            .buildCurvedLine(poses.nearShootPose,poses.farIntake2Control,poses.startIntake2).build()
 
         intake2 = follower.pathBuilder()
-            .buildTangentLine(poses.startIntake1, poses.endIntake1).build()
+            .buildTangentLine(poses.startIntake2, poses.endIntake2).build()
 
         score2 = follower.pathBuilder()
-            .buildTangentLine(poses.endIntake1, poses.nearShootPose).setReversed().build()
+            .buildCurvedLine(poses.endIntake2, poses.farIntake2Control, poses.nearShootPose).setReversed().build()
 
         dgateintake = follower.pathBuilder()
             .buildCurvedTangentLine(poses.nearStartPose, poses.farIntake2Control, poses.behindGateIntake).build()

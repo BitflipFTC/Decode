@@ -286,9 +286,6 @@ class CombinedTeleOp : LinearOpMode() {
                 shootAllArtifacts()
             }
 
-            if (gamepad1.circleWasPressed()) {
-                transfer.undoTransfer()
-            }
             if (TUNING_FLYWHEEL) {
                 if (gamepad1.dpadDownWasPressed()) {
                     shooter.targetFlywheelRPM -= 125
@@ -330,6 +327,8 @@ class CombinedTeleOp : LinearOpMode() {
                 )
             }
 
+            if (gamepad1.dpadLeftWasPressed()) spindexer.decreaseOffset()
+            if (gamepad1.dpadRightWasPressed()) spindexer.increaseOffset()
             if (spindexer.isFull && !lastSpindexerIsFull) {
                 gamepad1.runRumbleEffect(spindexerFullRumbleEffect)
             }

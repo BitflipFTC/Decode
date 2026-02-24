@@ -116,10 +116,10 @@ abstract class BaseAutonomous: LinearOpMode() {
                 Log.d("FSM", "DETECTED ARTIFACT ${colorSensor.detectedArtifact!!}")
             }
 
-            shooter.setTargetState(turret.goalPose.distanceFrom(follower!!.pose))
-            turret.robotPose = follower!!.pose
-
             follower!!.update()
+            turret.robotPose = follower!!.pose
+//            shooter.setTargetState(turret.goalPose.distanceFrom(turret.turretPose))
+
             telemetry.addData("x", follower!!.pose.x)
             telemetry.addData("y", follower!!.pose.y)
             telemetry.addData("heading", follower!!.pose.heading)

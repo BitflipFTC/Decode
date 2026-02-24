@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.opmodes.auto.paths
 
 import com.pedropathing.follower.Follower
 import com.pedropathing.paths.PathChain
+import com.pedropathing.paths.PathConstraints
 import com.pedropathing.paths.callbacks.ParametricCallback
 import org.firstinspires.ftc.teamcode.opmodes.auto.BaseAutonomous.Companion.PARAMETRIC_END
 import org.firstinspires.ftc.teamcode.util.Alliance
@@ -45,7 +46,9 @@ class Far12 (alliance: Alliance) : BaseAutoPath(alliance) {
             .buildCurvedLine(poses.endIntake2, poses.endIntake2Move, poses.emptyRampStart).build()
 
         emptyRamp = follower.pathBuilder()
-            .buildBasicLine(poses.emptyRampStart, poses.emptyRamp).build()
+            .buildBasicLine(poses.emptyRampStart, poses.emptyRamp)
+            .setTValueConstraint(0.1)
+            .setTimeoutConstraint(5.0).build()
 
         score2 = follower.pathBuilder()
             .buildCurvedLine(poses.emptyRamp, poses.emptyRampControl, poses.farShootPose).build()

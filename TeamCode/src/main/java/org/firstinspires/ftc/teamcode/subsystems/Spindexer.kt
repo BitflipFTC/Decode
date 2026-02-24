@@ -35,16 +35,16 @@ class Spindexer(): Subsystem {
         const val TICKS_PER_REVOLUTION: Double = 537.7 * GEAR_RATIO
 
         @JvmField
-        var kP = 0.0055
+        var kP = 0.008
 
         @JvmField
         var kI = 0.0
 
         @JvmField
-        var kD = 0.00018
+        var kD = 0.00025
 
         @JvmField
-        var kS = 0.05
+        var kS = 0.04
 
         @JvmField
         var setpointTolerance = 3.0 // in degrees
@@ -150,13 +150,13 @@ class Spindexer(): Subsystem {
 
     var spindexerOffset: Double = 0.0
 
-//    fun increaseOffset() {
-//        spindexerOffset += (1.0/18.0) * TICKS_PER_REVOLUTION /2
-//    }
-//
-//    fun decreaseOffset() {
-//        spindexerOffset -= (1.0/18.0) * TICKS_PER_REVOLUTION /2
-//    }
+    fun increaseOffset() {
+        spindexerOffset += (1.0/23.0) * TICKS_PER_REVOLUTION /2
+    }
+
+    fun decreaseOffset() {
+        spindexerOffset -= (1.0/23.0) * TICKS_PER_REVOLUTION /2
+    }
 
     var motifPattern: MotifPattern? = null
 
