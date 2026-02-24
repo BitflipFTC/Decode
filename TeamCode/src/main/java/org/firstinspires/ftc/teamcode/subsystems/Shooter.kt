@@ -124,7 +124,7 @@ class Shooter(): Subsystem {
         private set
     var distance = 0.0
 
-    val velocityFilter = MovingAverageSmoother(15)
+    val velocityFilter = MovingAverageSmoother(3)
 
     var debugTelemetry = true
 
@@ -157,9 +157,11 @@ class Shooter(): Subsystem {
             flywheelController.setCoeffs(kP, 0.0, 0.0, kV, 0.0)
         }
 
-        pidOutput = flywheelController.calculate(filteredFlywheelRPM, targetFlywheelRPM)
+//        pidOutput = flywheelController.calculate(filteredFlywheelRPM, targetFlywheelRPM)
 
-        flywheelMotor.power = pidOutput / cachedVoltage
+//        flywheelMotor.power = pidOutput / cachedVoltage
+
+        flywheelMotor.power = if (filteredFlywheelRPM < targetFlywheelRPM) 1.0 else 0.0
 
         hoodServo.position = hoodPosition
 

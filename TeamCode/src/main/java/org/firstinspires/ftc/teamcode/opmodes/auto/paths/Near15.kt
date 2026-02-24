@@ -15,6 +15,7 @@ import org.firstinspires.ftc.teamcode.util.buildTangentLine
 import org.firstinspires.ftc.teamcode.util.doIntakeSpeed
 
 class Near15(alliance: Alliance) : BaseAutoPath(alliance) {
+    val strafingFullSpeed = 1.0
     val fullSpeed = 0.9
     val intakeSpeed = 0.67
     val gateSpeed = 0.4
@@ -71,7 +72,7 @@ class Near15(alliance: Alliance) : BaseAutoPath(alliance) {
             .buildCurvedLine(poses.emptyRamp, poses.emptyRampControl, poses.nearShootPose).build()
 
         dintake3 = follower.pathBuilder()
-            .buildCurvedTangentLine(poses.nearShootPose,poses.farIntake3Control,  poses.startIntake3).build()
+            .buildCurvedLine(poses.nearShootPose,poses.farIntake3Control,  poses.startIntake3).build()
 
         intake3 = follower.pathBuilder()
             .buildTangentLine(poses.startIntake3, poses.endIntake3).build()
@@ -91,10 +92,10 @@ class Near15(alliance: Alliance) : BaseAutoPath(alliance) {
             Path(dogateempty, gateSpeed),
             Path(intakegate, gateSpeed),
             Path(scoregate, fullSpeed),
-            Path(dintake1, fullSpeed),
+            Path(dintake1, strafingFullSpeed),
             Path(intake1, intakeSpeed),
             Path(score1, fullSpeed),
-            Path(dintake3, fullSpeed),
+            Path(dintake3, strafingFullSpeed),
             Path(intake3, intakeSpeed),
             Path(score3, fullSpeed),
             Path(park, fullSpeed)
