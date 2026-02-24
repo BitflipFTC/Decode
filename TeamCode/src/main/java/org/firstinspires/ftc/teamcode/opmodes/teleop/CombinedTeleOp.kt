@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.opmodes.teleop
 
 import android.util.Log
-import android.view.MotionPredictor
 import com.bylazar.configurables.annotations.Configurable
 import com.bylazar.field.Style
 import com.bylazar.telemetry.JoinedTelemetry
@@ -11,7 +10,6 @@ import com.pedropathing.follower.Follower
 import com.pedropathing.geometry.BezierLine
 import com.pedropathing.geometry.Pose
 import com.pedropathing.paths.HeadingInterpolator
-import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver
 import com.qualcomm.hardware.lynx.LynxModule
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
@@ -31,7 +29,6 @@ import org.firstinspires.ftc.teamcode.util.MotifPattern
 import org.firstinspires.ftc.teamcode.util.TelemetryImplUpstreamSubmission
 import org.firstinspires.ftc.teamcode.util.auto.AutoPoses
 import kotlin.math.abs
-import kotlin.math.max
 
 @Configurable
 @TeleOp(name = "Combined TeleOp")
@@ -269,8 +266,13 @@ class CombinedTeleOp : LinearOpMode() {
             )
 
             if (gamepad1.dpadUpWasPressed() && !turretAutomate) {
-                shooter.setTargetState(autoPoses.farShootTeleop.distanceFrom(turret.goalPose))
-                turret.robotPose = autoPoses.farShootTeleop
+                shooter.setTargetState(autoPoses.farShootTeleopOwnGate.distanceFrom(turret.goalPose))
+                turret.robotPose = autoPoses.farShootTeleopOwnGate
+            }
+
+            if (gamepad1.dpadUpWasPressed() && !turretAutomate) {
+                shooter.setTargetState(autoPoses.farShootTeleopHP.distanceFrom(turret.goalPose))
+                turret.robotPose = autoPoses.farShootTeleopHP
             }
 
             if (gamepad1.circleWasPressed()) {

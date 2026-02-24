@@ -10,7 +10,7 @@ class AutoPoses(
     private fun p (p: Pose): Pose = if (alliance == Alliance.RED) p else p.mirror()
 
     private val HORIZONTAL_INTAKE_START = 100.0
-    private val HORIZONTAL_INTAKE_END = 134.0
+    private val HORIZONTAL_INTAKE_END = 136.0
     private val HORIZONTAL_INTAKE_MOVE_BACK = 110.0
 
     private val INTAKE_1_VERTICAL = 84.0
@@ -52,5 +52,6 @@ class AutoPoses(
     val gateEmptyForIntake = p(Pose(130.0, 60.0, Math.toRadians(20.0)))
     val gateIntake = p(Pose(132.0, 53.0, Math.toRadians(35.0)))
 
-    val farShootTeleop = p(Pose(82.0, 9.0, 0.0))
+    val farShootTeleopOwnGate = p(Pose(88.0, 9.0, 0.0))
+    val farShootTeleopHP = p(Pose(88.0, 9.0, Math.PI))
 }
