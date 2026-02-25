@@ -123,6 +123,7 @@ abstract class BaseAutonomous: LinearOpMode() {
             telemetry.addData("x", follower!!.pose.x)
             telemetry.addData("y", follower!!.pose.y)
             telemetry.addData("heading", follower!!.pose.heading)
+            telemetry.addData("t", follower!!.pathCompletion)
             subsystems.forEach { it.periodic() }
             Drawing.drawDebug(follower)
             telemetry.update()
@@ -194,12 +195,12 @@ abstract class BaseAutonomous: LinearOpMode() {
         }
     }
 //todo
-    protected fun shootState(): State =
-        InitializeState("Shoot state", { shootingState == Shoot.IDLE }, ::shootAllArtifacts)
-
-//    protected fun shootState() = WaitState(1500.0)
-
-    protected fun startIntake(): State = InstantState("Start intake", intake::intake)
-
-//    protected  fun startIntake(): State = WaitState(1.0)
+//    protected fun shootState(): State =
+//        InitializeState("Shoot state", { shootingState == Shoot.IDLE }, ::shootAllArtifacts)
+//
+    protected fun shootState() = WaitState(1500.0)
+//
+//    protected fun startIntake(): State = InstantState("Start intake", intake::intake)
+//
+    protected  fun startIntake(): State = WaitState(1.0)
 }

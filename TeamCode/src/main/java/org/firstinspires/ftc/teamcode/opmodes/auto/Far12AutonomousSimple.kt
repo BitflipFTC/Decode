@@ -34,10 +34,10 @@ class Far12AutonomousSimple: BaseAutonomous() {
         follower!!.setStartingPose(pathSequence.poses.farStartPose)
 
         finiteStateMachine = FiniteStateMachine(
-            InstantState(")"){
-                shooter.targetFlywheelRPM = 4375.0
-                shooter.hoodPosition = 0.4
-            },
+//            InstantState(")"){
+//                shooter.targetFlywheelRPM = 4375.0
+//                shooter.hoodPosition = 0.4
+//            },
             FollowPathState("D Score Preload", paths[0]),
             startIntake(),
             shootState(),
