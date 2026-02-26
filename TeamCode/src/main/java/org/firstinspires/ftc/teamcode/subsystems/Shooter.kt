@@ -38,7 +38,7 @@ class Shooter(): Subsystem {
         var kV = 0.00248
 
         @JvmField
-        var useVelocityCorrection = false
+        var useVelocityCorrection = true
 
         @JvmField
         var tuning = false
@@ -138,7 +138,7 @@ class Shooter(): Subsystem {
             position = hoodPosition
         }
 
-        flywheelController.setPointTolerance = 50.0
+        flywheelController.setPointTolerance = 25.0
 
         vSensor = ActiveOpMode.hardwareMap.get(VoltageSensor::class.java, "Control Hub")
     }
@@ -147,9 +147,9 @@ class Shooter(): Subsystem {
     private var voltageTimer = 0
 
     override fun periodic() {
-        if (voltageTimer++ % 50 == 0) {
-            cachedVoltage = VOLTAGE_FILTER * vSensor.voltage + (1 - VOLTAGE_FILTER) * cachedVoltage
-        }
+//        if (voltageTimer++ % 50 == 0) {
+//            cachedVoltage = VOLTAGE_FILTER * vSensor.voltage + (1 - VOLTAGE_FILTER) * cachedVoltage
+//        }
 
         flywheelRPM = (flywheelMotor.velocity / FLYWHEEL_PPR) * 60
         filteredFlywheelRPM = velocityFilter.addValue(flywheelRPM)
@@ -181,7 +181,7 @@ class Shooter(): Subsystem {
         }
     }
 
-    fun atSetPoint() = flywheelController.atSetPoint()
+    fun atSetPoint() = abs(targetFlywheelRPM - filteredFlywheelRPM) <= 100.0
 
     fun setTargetState(distance: Double) {
         // ensure the parameter distance is actually based on an apriltag reading

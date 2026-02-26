@@ -118,7 +118,7 @@ abstract class BaseAutonomous: LinearOpMode() {
 
             follower!!.update()
             turret.robotPose = follower!!.pose
-//            shooter.setTargetState(turret.goalPose.distanceFrom(turret.turretPose))
+            shooter.setTargetState(turret.goalPose.distanceFrom(turret.turretPose))
 
             telemetry.addData("x", follower!!.pose.x)
             telemetry.addData("y", follower!!.pose.y)
@@ -158,8 +158,8 @@ abstract class BaseAutonomous: LinearOpMode() {
             }
 
             Shoot.TRANSFER_ARTIFACT -> {
-//                Log.d("FSM", "Waiting for shooter or spindexer")
-//                Log.d("FSM", "sp: ${spindexer.currentAngle}, ${spindexer.targetAngle}, sh: ${shooter.flywheelRPM}, ${shooter.targetFlywheelRPM}")
+                Log.d("FSM", "Waiting for shooter or spindexer")
+                Log.d("FSM", "sp: ${spindexer.currentAngle}, ${spindexer.targetAngle}, sh: ${shooter.flywheelRPM}, ${shooter.targetFlywheelRPM}")
                 if ((shooter.atSetPoint()) && spindexer.atSetPoint()) {
                     Log.d("FSM", "-------- Moving spindexer / shooter took ${timer.milliseconds()}")
                     transfer.transferArtifact()
@@ -195,12 +195,12 @@ abstract class BaseAutonomous: LinearOpMode() {
         }
     }
 //todo
-//    protected fun shootState(): State =
-//        InitializeState("Shoot state", { shootingState == Shoot.IDLE }, ::shootAllArtifacts)
-//
-    protected fun shootState() = WaitState(1500.0)
-//
-//    protected fun startIntake(): State = InstantState("Start intake", intake::intake)
-//
-    protected  fun startIntake(): State = WaitState(1.0)
+    protected fun shootState(): State =
+        InitializeState("Shoot state", { shootingState == Shoot.IDLE }, ::shootAllArtifacts)
+
+//    protected fun shootState() = WaitState(1500.0)
+
+    protected fun startIntake(): State = InstantState("Start intake", intake::intake)
+
+//    protected  fun startIntake(): State = WaitState(1.0)
 }
