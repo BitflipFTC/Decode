@@ -6,6 +6,7 @@ import org.firstinspires.ftc.teamcode.opmodes.teleop.CombinedTeleOp.Companion.fo
 import org.firstinspires.ftc.teamcode.util.Alliance
 import org.firstinspires.ftc.teamcode.util.FiniteStateMachine
 import org.firstinspires.ftc.teamcode.util.FollowPathState
+import org.firstinspires.ftc.teamcode.util.InitializeState
 import org.firstinspires.ftc.teamcode.util.WaitState
 
 @Suppress("Unused")
@@ -28,6 +29,7 @@ class RaptoriaAllianceAutonomous: BaseAutonomous() {
             shootState(),
 
             FollowPathState("dtointake", paths[4]),
+            InitializeState("zeep", { follower!!.isBusy }, { follower!!.turnTo(0.0)}),
             WaitState(500.0),
             FollowPathState("do the intake", paths[5]),
             WaitState(500.0),
@@ -35,13 +37,22 @@ class RaptoriaAllianceAutonomous: BaseAutonomous() {
             shootState(),
 
             FollowPathState("dtointake2", paths[7]),
+            InitializeState("zeep", { follower!!.isBusy }, { follower!!.turnTo(0.0)}),
             WaitState(500.0),
             FollowPathState("do the intake2", paths[8]),
             WaitState(500.0),
             FollowPathState("d to shoito2", paths[9]),
             shootState(),
 
-            FollowPathState("Park", paths[10])
+            FollowPathState("dtointake3", paths[10]),
+            InitializeState("zeep", { follower!!.isBusy }, { follower!!.turnTo(0.0)}),
+            WaitState(500.0),
+            FollowPathState("do the intake3", paths[11]),
+            WaitState(500.0),
+            FollowPathState("d to shoito3", paths[12]),
+            shootState(),
+
+            FollowPathState("Park", paths[13])
         )
     }
 }

@@ -47,7 +47,7 @@ class Near12(alliance: Alliance) : BaseAutoPath(alliance) {
 
         emptyRamp = follower.pathBuilder()
             .buildBasicLine(poses.emptyRampStart, poses.emptyRamp)
-            .setTValueConstraint(0.8)
+            .setTValueConstraint(0.6)
             .build()
 
         score1 = follower.pathBuilder()

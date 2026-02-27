@@ -27,9 +27,9 @@ class Far12 (alliance: Alliance) : BaseAutoPath(alliance) {
     lateinit var dintake3: PathChain
     lateinit var intake3: PathChain
     lateinit var score3: PathChain
-    lateinit var dHP: PathChain
-    lateinit var HP: PathChain
-    lateinit var dScoreHP: PathChain
+    lateinit var dintake1: PathChain
+    lateinit var intake1: PathChain
+    lateinit var score1: PathChain
     lateinit var park: PathChain
 
     override fun buildPaths(follower: Follower): List<Path> {
@@ -61,14 +61,14 @@ class Far12 (alliance: Alliance) : BaseAutoPath(alliance) {
         score3 = follower.pathBuilder()
             .buildBasicLine(poses.endIntake3, poses.farShootPose).build()
 
-        dHP = follower.pathBuilder()
-            .buildBasicLine(poses.farShootPose,  poses.HPIntakeStart).build()
+        dintake1 = follower.pathBuilder()
+            .buildCurvedLine(poses.farShootPose, poses.farIntake1Control,poses.startIntake1).build()
 
-        HP = follower.pathBuilder()
-            .buildTangentLine(poses.HPIntakeStart, poses.HPIntakeEnd).build()
+        intake1 = follower.pathBuilder()
+            .buildTangentLine(poses.startIntake1, poses.endIntake1).build()
 
-        dScoreHP = follower.pathBuilder()
-            .buildBasicLine(poses.HPIntakeEnd, poses.farShootPose).build()
+        score1 = follower.pathBuilder()
+            .buildBasicLine(poses.endIntake1, poses.farShootPose).build()
 
         park = follower.pathBuilder()
             .buildBasicLine(poses.farShootPose, poses.HPPark).build()
@@ -83,9 +83,9 @@ class Far12 (alliance: Alliance) : BaseAutoPath(alliance) {
             Path(dintake3, fullSpeed),
             Path(intake3, intakeSpeed),
             Path(score3, fullSpeed),
-            Path(dHP, fullSpeed),
-            Path(HP, 0.25),
-            Path(dScoreHP, fullSpeed),
+            Path(dintake1, fullSpeed),
+            Path(intake1, intakeSpeed),
+            Path(score1, fullSpeed),
             Path(park, fullSpeed)
         )
     }

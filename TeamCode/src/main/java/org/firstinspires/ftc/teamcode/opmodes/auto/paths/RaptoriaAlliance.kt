@@ -25,6 +25,9 @@ class RaptoriaAlliance(alliance: Alliance): BaseAutoPath(alliance) {
     lateinit var dIntakeGate2: PathChain
     lateinit var intakeGate2: PathChain
     lateinit var dScoreGate2: PathChain
+    lateinit var dIntakeGate3: PathChain
+    lateinit var intakeGate3: PathChain
+    lateinit var dScoreGate3: PathChain
     lateinit var park: PathChain
 
     override fun buildPaths(follower: Follower): List<Path> {
@@ -65,6 +68,17 @@ class RaptoriaAlliance(alliance: Alliance): BaseAutoPath(alliance) {
         dScoreGate2 = follower.pathBuilder()
             .buildTangentLine(poses.HPIntakeEnd, poses.farShootPose).setReversed().build()
 
+        dIntakeGate3 = follower.pathBuilder()
+            .buildTangentLine(poses.farShootPose, poses.HPPark).build()
+
+        intakeGate3 = follower.pathBuilder()
+            .addPath(BezierLine(poses.HPPark, poses.HPIntakeEnd))
+            .setLinearHeadingInterpolation(poses.HPPark.heading, Math.toRadians(330.0), 1.0, 0.0)
+            .build()
+
+        dScoreGate3 = follower.pathBuilder()
+            .buildTangentLine(poses.HPIntakeEnd, poses.farShootPose).setReversed().build()
+
         park = follower.pathBuilder()
             .buildTangentLine(poses.farShootPose, poses.HPPark).setReversed().build()
 
@@ -79,6 +93,9 @@ class RaptoriaAlliance(alliance: Alliance): BaseAutoPath(alliance) {
             Path(dIntakeGate2, fullSpeed),
             Path(intakeGate2, intakeSpeed),
             Path(dScoreGate2, fullSpeed),
+            Path(dIntakeGate3, fullSpeed),
+            Path(intakeGate3, intakeSpeed),
+            Path(dScoreGate3, fullSpeed),
             Path(park, fullSpeed)
         )
     }

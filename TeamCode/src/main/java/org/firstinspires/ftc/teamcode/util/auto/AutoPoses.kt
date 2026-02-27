@@ -45,6 +45,7 @@ class AutoPoses(
     val emptyRampControl = p(Pose(nearShootPose.x, INTAKE_2_VERTICAL))
     val redPark        = p(Pose(38.75, 33.25, Math.toRadians(90.0)))
     val HPIntakeEnd    = p(Pose(HORIZONTAL_INTAKE_END, 9.0, Math.toRadians(0.0)))
+    val HPIntakeEndUp = p(Pose(HORIZONTAL_INTAKE_END, 14.0, 0.0))
     val HPIntakeStart = p(Pose(120.0, 9.0, 0.0))
     val HPPark = p(Pose(110.0, 14.0, 0.0))
 
