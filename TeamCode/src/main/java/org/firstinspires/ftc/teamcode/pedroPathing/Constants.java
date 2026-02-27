@@ -20,10 +20,10 @@ public class Constants {
     public static FollowerConstants followerConstants = new FollowerConstants()
             .mass(10.659)
             .predictiveBrakingCoefficients(new PredictiveBrakingCoefficients(
-                    0.0495, 0.06465648557274474, 0.0015042964787405362
+                    0.045, 0.06465648557274474, 0.0015042964787405362
             ))
             .headingPIDFCoefficients(new PIDFCoefficients(
-                    0.5, 0, 0.035, 0.035
+                    0.475, 0, 0.035, 0.035
             ))
             ;
 
