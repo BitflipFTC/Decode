@@ -212,8 +212,8 @@ public class OV9281 implements Subsystem {
             ActiveOpMode.telemetry().addData("Detected April Tags", detectionsBuffer.size());
         for (AprilTagDetection detection : detectionsBuffer) {
             if (detection.metadata == null) {
-                if (debugTelemetry)
-                    ActiveOpMode.telemetry().addData("Current tag", "No metadata");
+//                if (debugTelemetry)
+//                    ActiveOpMode.telemetry().addData("Current tag", "No metadata");
                 newReading = false;
                 continue;
             }

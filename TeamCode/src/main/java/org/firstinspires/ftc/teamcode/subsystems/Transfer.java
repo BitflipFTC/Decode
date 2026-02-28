@@ -109,9 +109,9 @@ public class Transfer implements Subsystem {
         if (debugTelemetry) {
             ActiveOpMode.telemetry().addData("Transfer current ticks", currentPosition);
             ActiveOpMode.telemetry().addData("Transfer target ticks", targetPosition);
-            ActiveOpMode.telemetry().addData("Transfer motor power", pidOutput);
+//            ActiveOpMode.telemetry().addData("Transfer motor power", pidOutput);
             ActiveOpMode.telemetry().addData("Transfer at set point", atSetPoint());
-            ActiveOpMode.telemetry().addData("Trans rotations", targetPosition / TICKS_PER_REVOLUTION);
+//            ActiveOpMode.telemetry().addData("Trans rotations", targetPosition / TICKS_PER_REVOLUTION);
             ActiveOpMode.telemetry().addLine("---------------------------");
         }
     }

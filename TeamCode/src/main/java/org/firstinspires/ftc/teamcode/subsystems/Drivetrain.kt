@@ -83,9 +83,9 @@ class Drivetrain(): Subsystem {
     }
 
     override fun periodic() {
-        if (debugTelemetry) {
-            ActiveOpMode.telemetry.addLine(currentDrivePowers.toString())
-            ActiveOpMode.telemetry.addData("Heading", heading)
-        }
+//        if (debugTelemetry) {
+//            ActiveOpMode.telemetry.addLine(currentDrivePowers.toString())
+//            ActiveOpMode.telemetry.addData("Heading", heading)
+//        }
     }
 }

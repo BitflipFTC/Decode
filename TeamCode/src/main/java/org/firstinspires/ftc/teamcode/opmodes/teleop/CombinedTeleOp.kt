@@ -270,7 +270,7 @@ class CombinedTeleOp : LinearOpMode() {
                 turret.robotPose = autoPoses.farShootTeleopOwnGate
             }
 
-            if (gamepad1.dpadUpWasPressed() && !turretAutomate) {
+            if (gamepad1.dpadDownWasPressed() && !turretAutomate) {
                 shooter.setTargetState(autoPoses.farShootTeleopHP.distanceFrom(turret.goalPose))
                 turret.robotPose = autoPoses.farShootTeleopHP
             }
