@@ -7,7 +7,7 @@ import kotlin.math.atan2
 class AutoPoses(
     val alliance: Alliance
 ) {
-    private fun p (p: Pose): Pose = if (alliance == Alliance.RED) p else p.mirror()
+    private fun p (p: Pose): Pose = if (alliance == Alliance.RED) p else p.mirror().withX(p.x - 2.5)
 
     private val HORIZONTAL_INTAKE_START = 100.0
     private val HORIZONTAL_INTAKE_END = 136.0
@@ -18,9 +18,9 @@ class AutoPoses(
     private val INTAKE_3_VERTICAL = 34.0
     private val INTAKE_HEADING = 0.0
 
-    val farStartPose   = p(Pose(83.0, 9.0, Math.toRadians(90.0)))
-    val farShootPoseFacingObelisk = p(Pose(83.0, 18.0, Math.toRadians(90.0)))
-    val farShootPose   = p(Pose(83.0, 18.0, Math.toRadians(90.0)))
+    val farStartPose   = p(Pose(88.0, 9.0, Math.toRadians(90.0)))
+    val farShootPoseFacingObelisk = p(Pose(88.0, 18.0, Math.toRadians(90.0)))
+    val farShootPose   = p(Pose(88.0, 18.0, Math.toRadians(90.0)))
     val farParkPose    = p(Pose(105.500, 33.500, Math.toRadians(90.0)))
     val nearStartPose  = p(Pose(116.4, 129.6, 0.7463))
     val nearShootPoseFacingObelisk = p(Pose(88.0, 88.0, atan2(144.0 - HORIZONTAL_INTAKE_START, 72.0 - HORIZONTAL_INTAKE_START)))

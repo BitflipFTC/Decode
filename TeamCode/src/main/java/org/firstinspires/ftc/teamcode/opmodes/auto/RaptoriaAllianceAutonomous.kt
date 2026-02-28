@@ -29,7 +29,7 @@ class RaptoriaAllianceAutonomous: BaseAutonomous() {
             shootState(),
 
             FollowPathState("dtointake", paths[4]),
-            InitializeState("zeep", { follower!!.isBusy }, { follower!!.turnTo(0.0)}),
+            InitializeState("zeep", { !follower!!.isBusy }, { follower!!.turnTo(0.0)}),
             WaitState(500.0),
             FollowPathState("do the intake", paths[5]),
             WaitState(500.0),

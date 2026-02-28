@@ -138,13 +138,13 @@ class Shooter(): Subsystem {
             position = hoodPosition
         }
 
-        flywheelController.setPointTolerance = 25.0
+        flywheelController.setPointTolerance = 50.0
 
         vSensor = ActiveOpMode.hardwareMap.get(VoltageSensor::class.java, "Control Hub")
     }
 
-    private var cachedVoltage: Double = 13.0
-    private var voltageTimer = 0
+//    private var cachedVoltage: Double = 13.0
+//    private var voltageTimer = 0
 
     override fun periodic() {
 //        if (voltageTimer++ % 50 == 0) {
@@ -175,7 +175,7 @@ class Shooter(): Subsystem {
             ActiveOpMode.telemetry.addData("Flywheel target RPM", targetFlywheelRPM)
             ActiveOpMode.telemetry.addData("Flywheel current RPM", filteredFlywheelRPM)
             ActiveOpMode.telemetry.addData("Flywheel at set point", atSetPoint())
-            ActiveOpMode.telemetry.addData("Voltage", "%06.2fV", cachedVoltage)
+//            ActiveOpMode.telemetry.addData("Voltage", "%06.2fV", cachedVoltage)
             ActiveOpMode.telemetry.addData("Hood position", hoodPosition)
             ActiveOpMode.telemetry.addLine("---------------------------")
         }
