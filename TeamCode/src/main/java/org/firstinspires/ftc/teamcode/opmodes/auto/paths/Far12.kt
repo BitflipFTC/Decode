@@ -47,7 +47,7 @@ class Far12 (alliance: Alliance) : BaseAutoPath(alliance) {
 
         emptyRamp = follower.pathBuilder()
             .buildBasicLine(poses.emptyRampStart, poses.emptyRamp)
-            .setTValueConstraint(0.6).build()
+            .setTValueConstraint(0.5).build()
 
         score2 = follower.pathBuilder()
             .buildCurvedLine(poses.emptyRamp, poses.emptyRampControl, poses.farShootPose).build()

@@ -9,6 +9,7 @@ import org.firstinspires.ftc.teamcode.util.FiniteStateMachine
 import org.firstinspires.ftc.teamcode.util.FollowPathState
 import org.firstinspires.ftc.teamcode.util.InstantState
 import org.firstinspires.ftc.teamcode.util.State
+import org.firstinspires.ftc.teamcode.util.TimedFollowPathState
 import org.firstinspires.ftc.teamcode.util.WaitState
 import org.firstinspires.ftc.teamcode.util.WaitUntilState
 
@@ -33,11 +34,11 @@ class Near15AutonomousSimple: BaseAutonomous() {
             shootState(),
 
             FollowPathState("drive to gate intake", paths[4]),
-            FollowPathState("Do gate empty", paths[5]),
+            TimedFollowPathState("Do gate empty", paths[5], 2000.0),
             WaitState(250.0),
             FollowPathState("Do gate intake", paths[6]),
             InstantState("") {timer.reset()},
-            WaitUntilState { spindexer.isFull || timer.milliseconds() >= 2500.0 },
+            WaitUntilState { spindexer.isFull || timer.milliseconds() >= 4000.0 },
             FollowPathState("Score gate intake", paths[7]),
 
             FollowPathState("dintake 1", paths[8]),

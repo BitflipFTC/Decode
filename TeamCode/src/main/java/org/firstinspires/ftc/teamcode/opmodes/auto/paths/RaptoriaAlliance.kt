@@ -50,9 +50,7 @@ class RaptoriaAlliance(alliance: Alliance): BaseAutoPath(alliance) {
             .buildTangentLine(poses.farShootPose, poses.HPPark).build()
 
         intakeGate = follower.pathBuilder()
-            .addPath(BezierLine(poses.HPPark, poses.HPIntakeEnd))
-            .setLinearHeadingInterpolation(poses.HPPark.heading, Math.toRadians(330.0), 1.0, 0.0)
-            .build()
+            .buildTangentLine(poses.HPIntakeEnd, poses.farShootPose).setReversed().build()
 
         dScoreGate = follower.pathBuilder()
             .buildTangentLine(poses.HPIntakeEnd, poses.farShootPose).setReversed().build()
@@ -61,9 +59,8 @@ class RaptoriaAlliance(alliance: Alliance): BaseAutoPath(alliance) {
             .buildTangentLine(poses.farShootPose, poses.HPPark).build()
 
         intakeGate2 = follower.pathBuilder()
-            .addPath(BezierLine(poses.HPPark, poses.HPIntakeEnd))
-            .setLinearHeadingInterpolation(poses.HPPark.heading, Math.toRadians(330.0), 1.0, 0.0)
-            .build()
+            .buildTangentLine(poses.HPIntakeEnd, poses.farShootPose).setReversed().build()
+
 
         dScoreGate2 = follower.pathBuilder()
             .buildTangentLine(poses.HPIntakeEnd, poses.farShootPose).setReversed().build()
@@ -72,9 +69,7 @@ class RaptoriaAlliance(alliance: Alliance): BaseAutoPath(alliance) {
             .buildTangentLine(poses.farShootPose, poses.HPPark).build()
 
         intakeGate3 = follower.pathBuilder()
-            .addPath(BezierLine(poses.HPPark, poses.HPIntakeEnd))
-            .setLinearHeadingInterpolation(poses.HPPark.heading, Math.toRadians(330.0), 1.0, 0.0)
-            .build()
+            .buildTangentLine(poses.HPIntakeEnd, poses.farShootPose).setReversed().build()
 
         dScoreGate3 = follower.pathBuilder()
             .buildTangentLine(poses.HPIntakeEnd, poses.farShootPose).setReversed().build()

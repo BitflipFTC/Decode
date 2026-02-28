@@ -6,6 +6,7 @@ import org.firstinspires.ftc.teamcode.opmodes.teleop.CombinedTeleOp.Companion.fo
 import org.firstinspires.ftc.teamcode.util.Alliance
 import org.firstinspires.ftc.teamcode.util.FiniteStateMachine
 import org.firstinspires.ftc.teamcode.util.FollowPathState
+import org.firstinspires.ftc.teamcode.util.TimedFollowPathState
 import org.firstinspires.ftc.teamcode.util.WaitState
 
 @Suppress("Unused")
@@ -25,7 +26,7 @@ class Near12AutonomousSimple: BaseAutonomous() {
             FollowPathState("intake 1", paths[2]),
             WaitState(150.0),
             FollowPathState("dramping it", paths[3]),
-            FollowPathState("ramping ", paths[4]),
+            TimedFollowPathState("ramping ", paths[4], 2000.0),
             WaitState(100.0),
             FollowPathState("dscore1", paths[5]),
             shootState(),

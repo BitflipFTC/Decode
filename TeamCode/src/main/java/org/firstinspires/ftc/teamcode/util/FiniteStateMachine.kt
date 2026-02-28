@@ -57,11 +57,24 @@ open class InitializeState (
     name: String, override val endCondition: () -> Boolean, override val initialize: () -> Unit
 ) : State (name)
 
-class FollowPathState (
+open class FollowPathState (
     name: String, path: Path
 ) : InitializeState (
     name, { !CombinedTeleOp.follower!!.isBusy }, { CombinedTeleOp.follower!!.followCustomPath(path) }
 )
+
+class TimedFollowPathState (
+    name: String, path: Path, timeoutMillis: Double
+) : FollowPathState ( name, path ) {
+    private val timer = ElapsedTime()
+    override val initialize = {
+        CombinedTeleOp.follower!!.followCustomPath(path)
+        timer.reset()
+    }
+    override val endCondition = {
+        !CombinedTeleOp.follower!!.isBusy || timer.milliseconds() >= timeoutMillis
+    }
+}
 
 class WaitState (
     millis: Double, name: String = ""

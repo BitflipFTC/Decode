@@ -7,6 +7,7 @@ import org.firstinspires.ftc.teamcode.opmodes.teleop.CombinedTeleOp.Companion.fo
 import org.firstinspires.ftc.teamcode.util.Alliance
 import org.firstinspires.ftc.teamcode.util.FiniteStateMachine
 import org.firstinspires.ftc.teamcode.util.FollowPathState
+import org.firstinspires.ftc.teamcode.util.TimedFollowPathState
 import org.firstinspires.ftc.teamcode.util.WaitState
 
 @Suppress("Unused")
@@ -32,7 +33,7 @@ class Far15AutonomousSimple: BaseAutonomous() {
             FollowPathState("Intake 2", paths[5]),
             WaitState(150.0),
             FollowPathState("d empty ramp", paths[6]),
-            FollowPathState("Empty Ramp", paths[7]),
+            TimedFollowPathState("Empty Ramp", paths[7], 2500.0),
             WaitState(250.0),
             FollowPathState("D Score 2", paths[8]),
             shootState(),
