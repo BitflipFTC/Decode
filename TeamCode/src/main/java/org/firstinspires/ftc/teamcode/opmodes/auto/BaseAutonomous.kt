@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.opmodes.auto
 import android.util.Log
 import com.bylazar.telemetry.JoinedTelemetry
 import com.bylazar.telemetry.PanelsTelemetry
+import com.pedropathing.geometry.Pose
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.util.ElapsedTime
 import com.skeletonarmy.marrow.prompts.OptionPrompt
@@ -24,6 +25,7 @@ import org.firstinspires.ftc.teamcode.util.Alliance
 import org.firstinspires.ftc.teamcode.util.Artifact
 import org.firstinspires.ftc.teamcode.util.BetterLoopTimeComponent
 import org.firstinspires.ftc.teamcode.util.FiniteStateMachine
+import org.firstinspires.ftc.teamcode.util.FullState
 import org.firstinspires.ftc.teamcode.util.InitConfigurer
 import org.firstinspires.ftc.teamcode.util.InitializeState
 import org.firstinspires.ftc.teamcode.util.InstantState
@@ -57,7 +59,7 @@ abstract class BaseAutonomous: LinearOpMode() {
     val colorSensor: ColorSensor = ColorSensor()
     val camera: OV9281 = OV9281()
 
-    val subsystems = setOf(spindexer, turret, transfer, shooter, intake, colorSensor)
+    val subsystems = setOf(spindexer, turret, transfer, shooter, intake, colorSensor, camera)
 
     protected lateinit var pathSequence: BaseAutoPath
     protected lateinit var finiteStateMachine: FiniteStateMachine
@@ -69,7 +71,6 @@ abstract class BaseAutonomous: LinearOpMode() {
         follower = Constants.createFollower(hardwareMap)
 
         subsystems.forEach { it.initialize() }
-        camera.initialize()
 
         val prompter = Prompter(this)
 
@@ -125,7 +126,7 @@ abstract class BaseAutonomous: LinearOpMode() {
             telemetry.addData("heading", follower!!.pose.heading)
             telemetry.addData("t", follower!!.pathCompletion)
             subsystems.forEach { it.periodic() }
-            Drawing.drawDebug(follower)
+            Drawing.drawDebug(follower!!)
             telemetry.update()
             BetterLoopTimeComponent.postUpdate()
         }
@@ -203,4 +204,34 @@ abstract class BaseAutonomous: LinearOpMode() {
     protected fun startIntake(): State = InstantState("Start intake", intake::intake)
 
 //    protected  fun startIntake(): State = WaitState(1.0)
+
+    val poses = mutableListOf<Pose>()
+    var doneRelo = false
+    protected fun relocalizeState(): State = FullState("Relo", { doneRelo }, { doneRelo = false }, {
+        if (camera.robotPose != Pose(0.0,0.0) )poses.add(camera.robotPose)
+
+        if (poses.size >= 30) {
+            follower!!.pose = averageRelocalization()
+            doneRelo = true
+        }
+    })
+
+    fun averageRelocalization(): Pose {
+        var totalX = 0.0
+        var totalY = 0.0
+        poses.forEach {
+            pose -> totalX += pose.x
+            totalY += pose.y
+        }
+
+        return if (totalX >= 1.0 && totalY >= 1.0) {
+            Pose(
+                totalX / poses.size,
+                totalY / poses.size,
+                follower!!.heading
+            )
+        } else {
+            follower!!.pose
+        }
+    }
 }

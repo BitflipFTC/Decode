@@ -22,11 +22,10 @@ class FlywheelTest : LinearOpMode() {
             driveSpeed = 1.0
         }
 //        val camera = OV9281()
-        val transfer = Transfer()
         val intake = Intake()
         val spindexer = Spindexer()
         val turret = Turret().apply { automatic = false }
-        val subsystems = setOf(shooter,transfer,intake,spindexer, drivetrain, turret)
+        val subsystems = setOf(shooter,intake,spindexer, drivetrain, turret)
         telemetry = JoinedTelemetry(PanelsTelemetry.ftcTelemetry, TelemetryImplUpstreamSubmission(this))
 
         turret.initialize()
@@ -72,21 +71,13 @@ class FlywheelTest : LinearOpMode() {
                 intake.reversed = false
             }
 
-            if (gamepad1.circleWasPressed()) {
-                turret.angle = 0.0
-            }
-
-            if (gamepad1.triangleWasPressed() && spindexer.atSetPoint()) {
-                transfer.transferArtifact()
-            }
-
             if (gamepad1.squareWasPressed()) {
                 intake.toggle()
             }
 
-            if (gamepad1.leftBumperWasPressed() && transfer.atSetPoint()) {
+            if (gamepad1.leftBumperWasPressed()) {
                 spindexer.toNextOuttakePosition()
-            } else if (gamepad1.rightBumperWasPressed() && transfer.atSetPoint()) {
+            } else if (gamepad1.rightBumperWasPressed()) {
                 spindexer.toNextIntakePosition()
             }
 
@@ -96,7 +87,6 @@ class FlywheelTest : LinearOpMode() {
 //            } else {
 //                turret.bearing = 0.0
 //                turret.turningPower = 0.0
-                turret.angle -= (gamepad1.right_trigger - gamepad1.left_trigger) * 1
 //            }
 
             drivetrain.setDrivetrainPowers(drivetrain.calculateDrivetrainPowers(gamepad1.left_stick_x.toDouble(), -gamepad1.left_stick_y.toDouble(),gamepad1.right_stick_x.toDouble()))

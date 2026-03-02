@@ -45,6 +45,15 @@ open class State(
     var started = false
 }
 
+class FullState(
+    name: String,
+    override val endCondition: () -> Boolean,
+    override val initialize: () -> Unit,
+    override val run: () -> Unit
+): State (
+    name
+)
+
 class InstantState (
     name: String, override val initialize: () -> Unit
 ) : State(

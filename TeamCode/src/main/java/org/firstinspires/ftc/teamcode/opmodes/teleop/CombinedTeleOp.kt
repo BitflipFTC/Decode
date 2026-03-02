@@ -42,7 +42,7 @@ class CombinedTeleOp : LinearOpMode() {
         var lowpass = 0.2
 
         const val TUNING_FLYWHEEL = false
-        const val DEBUG_FSM = true
+        const val DEBUG_FSM = false
     }
     enum class Shoot {
         IDLE,
@@ -83,6 +83,7 @@ class CombinedTeleOp : LinearOpMode() {
                 if (shooter.atSetPoint() && spindexer.atSetPoint()) {
                     if (DEBUG_FSM) Log.d("FSM", "Moving spindexer / shooter took ${timer.milliseconds()}")
                     transfer.transferArtifact()
+                    turret.automatic = false
                     if (DEBUG_FSM) {
                         Log.d("FSM", "= = = Transferring = = =")
                         Log.d("FSM", "RPM: ${shooter.flywheelRPM}, Hood angle: ${shooter.hoodPosToDegrees(shooter.hoodPosition)}")
@@ -107,6 +108,7 @@ class CombinedTeleOp : LinearOpMode() {
                         shootingState = Shoot.IDLE
                         gamepad1.rumble(250)
                         spindexer.toFirstEmptyIntakePosition()
+                        turret.automatic = true
                     } else {
                         shootingState = Shoot.MOVE_SPINDEXER
                     }
@@ -224,6 +226,8 @@ class CombinedTeleOp : LinearOpMode() {
             loopTimer.start()
             // more bulk caching
             allHubs.forEach { hub -> hub.clearBulkCache() }
+
+            if (gamepad1.backWasPressed()) turret.automatic = !turret.automatic
 
             // gets it until it is gotten :tm:
             if (motifPattern == null && camera.detectionsAmount > 0) {

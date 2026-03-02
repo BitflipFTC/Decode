@@ -7,7 +7,7 @@ import kotlin.math.atan2
 class AutoPoses(
     val alliance: Alliance
 ) {
-    private fun p (p: Pose): Pose = if (alliance == Alliance.RED) p else p.mirror().withX(p.x - 2.5)
+    private fun p (p: Pose): Pose = if (alliance == Alliance.RED) p else p.mirror().withX(144.0-p.x)
 
     private val HORIZONTAL_INTAKE_START = 100.0
     private val HORIZONTAL_INTAKE_END = 136.0
@@ -18,13 +18,13 @@ class AutoPoses(
     private val INTAKE_3_VERTICAL = 34.0
     private val INTAKE_HEADING = 0.0
 
-    val farStartPose   = p(Pose(84.5, 9.0, Math.toRadians(90.0)))
+    val farStartPose   = p(Pose(83.0, 10.0, Math.toRadians(90.0)))
     val farShootPoseFacingObelisk = p(Pose(84.5, 18.0, Math.toRadians(90.0)))
-    val farShootPose   = p(Pose(84.5, 18.0, Math.toRadians(90.0)))
+    val farShootPose   = p(Pose(83.5, 18.0, Math.toRadians(90.0)))
     val farParkPose    = p(Pose(105.500, 33.500, Math.toRadians(90.0)))
     val nearStartPose  = p(Pose(116.4, 129.6, 0.7463))
     val nearShootPoseFacingObelisk = p(Pose(88.0, 88.0, atan2(144.0 - HORIZONTAL_INTAKE_START, 72.0 - HORIZONTAL_INTAKE_START)))
-    val nearShootPose  = p(Pose(88.0, 88.0, INTAKE_HEADING))
+    val nearShootPose  = p(Pose(88.0, 88.0, Math.toRadians(45.0)))
     val nearParkPose   = p(Pose(120.0, 70.0, Math.toRadians(270.0)))
     val nearIntake1Control = p(Pose(nearShootPose.x, INTAKE_1_VERTICAL))
     val farIntake1Control = p(Pose(farStartPose.x, INTAKE_1_VERTICAL))
@@ -41,12 +41,12 @@ class AutoPoses(
     val endIntake3     = p(Pose(HORIZONTAL_INTAKE_END, INTAKE_3_VERTICAL, INTAKE_HEADING))
     val endIntake3Move = p(Pose(HORIZONTAL_INTAKE_MOVE_BACK, endIntake3.y, INTAKE_HEADING))
     val emptyRampStart = p(Pose(115.0, 68.0, Math.toRadians(90.0)))
-    val emptyRamp      = p(Pose(128.0, 68.0, Math.toRadians(90.0)))
+    val emptyRamp      = p(Pose(131.5, 68.0, Math.toRadians(90.0)))
     val emptyRampControl = p(Pose(nearShootPose.x, INTAKE_2_VERTICAL))
     val redPark        = p(Pose(38.75, 33.25, Math.toRadians(90.0)))
-    val HPIntakeEnd    = p(Pose(HORIZONTAL_INTAKE_END, 9.0, Math.toRadians(0.0)))
+    val HPIntakeEnd    = p(Pose(HORIZONTAL_INTAKE_END, 11.0, Math.toRadians(0.0)))
     val HPIntakeEndUp = p(Pose(HORIZONTAL_INTAKE_END, 14.0, 0.0))
-    val HPIntakeStart = p(Pose(120.0, 9.0, 0.0))
+    val HPIntakeStart = p(Pose(120.0, 11.0, 0.0))
     val HPPark = p(Pose(110.0, 14.0, 0.0))
 
     val behindGateIntake = p(Pose(124.0, 60.0, Math.toRadians(0.0)))

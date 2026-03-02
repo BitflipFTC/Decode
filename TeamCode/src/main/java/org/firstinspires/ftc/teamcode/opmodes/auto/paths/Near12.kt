@@ -16,13 +16,13 @@ import org.firstinspires.ftc.teamcode.util.doIntakeSpeed
 
 class Near12(alliance: Alliance) : BaseAutoPath(alliance) {
     val fullSpeed = 0.9
-    val intakeSpeed = 0.67
+    val intakeSpeed = 0.6
 
     lateinit var scorePreload: PathChain
     lateinit var dintake1: PathChain
     lateinit var intake1: PathChain
-    lateinit var demptyRamp: PathChain
-    lateinit var emptyRamp: PathChain
+//    lateinit var demptyRamp: PathChain
+//    lateinit var emptyRamp: PathChain
     lateinit var score1: PathChain
     lateinit var dintake2: PathChain
     lateinit var intake2: PathChain
@@ -37,39 +37,39 @@ class Near12(alliance: Alliance) : BaseAutoPath(alliance) {
             .buildBasicLine(poses.nearStartPose, poses.nearShootPoseFacingObelisk).build()
 
         dintake1 = follower.pathBuilder()
-            .buildCurvedLine(poses.nearShootPoseFacingObelisk, poses.farIntake2Control,poses.startIntake2).build()
+            .buildBasicLine(poses.nearShootPoseFacingObelisk,poses.startIntake2).build()
 
         intake1 = follower.pathBuilder()
             .buildTangentLine(poses.startIntake2, poses.endIntake2).build()
 
-        demptyRamp = follower.pathBuilder()
-            .buildCurvedLine(poses.endIntake2, poses.endIntake2Move, poses.emptyRampStart).build()
-
-        emptyRamp = follower.pathBuilder()
-            .buildBasicLine(poses.emptyRampStart, poses.emptyRamp)
-            .setTValueConstraint(0.6)
-            .build()
+//        demptyRamp = follower.pathBuilder()
+//            .buildCurvedLine(poses.endIntake2, poses.endIntake2Move, poses.emptyRampStart).build()
+//
+//        emptyRamp = follower.pathBuilder()
+//            .buildBasicLine(poses.emptyRampStart, poses.emptyRamp)
+//            .setTValueConstraint(0.6)
+//            .build()
 
         score1 = follower.pathBuilder()
-            .buildCurvedLine(poses.emptyRamp, poses.emptyRampControl, poses.nearShootPose).build()
+            .buildCurvedLine(poses.endIntake2, poses.endIntake2Move, poses.nearShootPose).build()
 
         dintake2 = follower.pathBuilder()
-            .buildCurvedLine(poses.nearShootPose,poses.farIntake1Control,poses.startIntake1).build()
+            .buildBasicLine(poses.nearShootPose,poses.startIntake1).build()
 
         intake2 = follower.pathBuilder()
             .buildTangentLine(poses.startIntake1, poses.endIntake1).build()
 
         score2 = follower.pathBuilder()
-            .buildTangentLine(poses.endIntake1, poses.nearShootPose).setReversed().build()
+            .buildBasicLine(poses.endIntake1, poses.nearShootPose).build()
 
         dintake3 = follower.pathBuilder()
-            .buildCurvedTangentLine(poses.nearShootPose,poses.farIntake3Control,  poses.startIntake3).build()
+            .buildBasicLine(poses.nearShootPose,  poses.startIntake3).build()
 
         intake3 = follower.pathBuilder()
             .buildTangentLine(poses.startIntake3, poses.endIntake3).build()
 
         score3 = follower.pathBuilder()
-            .buildCurvedTangentLine(poses.endIntake3, poses.endIntake3Move, poses.nearShootPose).setReversed().build()
+            .buildCurvedLine(poses.endIntake3, poses.endIntake3Move, poses.nearShootPose).build()
 
         park = follower.pathBuilder()
             .buildBasicLine(poses.nearShootPose, poses.nearParkPose).build()
@@ -78,8 +78,8 @@ class Near12(alliance: Alliance) : BaseAutoPath(alliance) {
             Path(scorePreload, fullSpeed),
             Path(dintake1, fullSpeed),
             Path(intake1, intakeSpeed),
-            Path(demptyRamp, fullSpeed),
-            Path(emptyRamp, intakeSpeed),
+//            Path(demptyRamp, fullSpeed),
+//            Path(emptyRamp, intakeSpeed),
             Path(score1, fullSpeed),
             Path(dintake2, fullSpeed),
             Path(intake2, intakeSpeed),

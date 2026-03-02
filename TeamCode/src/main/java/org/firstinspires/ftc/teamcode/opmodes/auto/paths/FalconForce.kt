@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.opmodes.auto.paths
 
 import com.pedropathing.follower.Follower
-import com.pedropathing.geometry.BezierLine
 import com.pedropathing.paths.PathChain
 import com.pedropathing.paths.callbacks.ParametricCallback
 import org.firstinspires.ftc.teamcode.util.Alliance
@@ -10,7 +9,7 @@ import org.firstinspires.ftc.teamcode.util.auto.Path
 import org.firstinspires.ftc.teamcode.util.buildBasicLine
 import org.firstinspires.ftc.teamcode.util.buildTangentLine
 
-class RaptoriaAlliance(alliance: Alliance): BaseAutoPath(alliance) {
+class FalconForce(alliance: Alliance): BaseAutoPath(alliance) {
 
     val fullSpeed = 0.8
     val intakeSpeed = 0.5
@@ -44,38 +43,37 @@ class RaptoriaAlliance(alliance: Alliance): BaseAutoPath(alliance) {
             .buildTangentLine(poses.HPIntakeStart, poses.HPIntakeEnd).build()
 
         dScore = follower.pathBuilder()
-            .buildTangentLine(poses.HPIntakeEnd, poses.farShootPose).setReversed().build()
+            .buildBasicLine(poses.HPIntakeEnd, poses.farShootPose).build()
 
         dIntakeGate = follower.pathBuilder()
             .buildTangentLine(poses.farShootPose, poses.HPPark).build()
 
         intakeGate = follower.pathBuilder()
-            .buildTangentLine(poses.HPIntakeEnd, poses.farShootPose).setReversed().build()
+            .buildTangentLine(poses.HPIntakeStart, poses.HPIntakeEnd).build()
 
         dScoreGate = follower.pathBuilder()
-            .buildTangentLine(poses.HPIntakeEnd, poses.farShootPose).setReversed().build()
+            .buildBasicLine(poses.HPIntakeEnd, poses.farShootPose).build()
 
         dIntakeGate2 = follower.pathBuilder()
             .buildTangentLine(poses.farShootPose, poses.HPPark).build()
 
         intakeGate2 = follower.pathBuilder()
-            .buildTangentLine(poses.HPIntakeEnd, poses.farShootPose).setReversed().build()
-
+            .buildTangentLine(poses.HPIntakeStart, poses.HPIntakeEnd).build()
 
         dScoreGate2 = follower.pathBuilder()
-            .buildTangentLine(poses.HPIntakeEnd, poses.farShootPose).setReversed().build()
+            .buildBasicLine(poses.HPIntakeEnd, poses.farShootPose).build()
 
         dIntakeGate3 = follower.pathBuilder()
             .buildTangentLine(poses.farShootPose, poses.HPPark).build()
 
         intakeGate3 = follower.pathBuilder()
-            .buildTangentLine(poses.HPIntakeEnd, poses.farShootPose).setReversed().build()
+            .buildTangentLine(poses.HPIntakeStart, poses.HPIntakeEnd).build()
 
         dScoreGate3 = follower.pathBuilder()
-            .buildTangentLine(poses.HPIntakeEnd, poses.farShootPose).setReversed().build()
+            .buildBasicLine(poses.HPIntakeEnd, poses.farShootPose).build()
 
         park = follower.pathBuilder()
-            .buildTangentLine(poses.farShootPose, poses.HPPark).setReversed().build()
+            .buildBasicLine(poses.farShootPose, poses.HPPark).build()
 
         return listOf(
             Path(scorePreload, fullSpeed),

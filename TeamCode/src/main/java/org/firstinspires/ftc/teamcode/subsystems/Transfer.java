@@ -26,13 +26,13 @@ public class Transfer implements Subsystem {
 
     // amount of times the motor should turn every time it transfers an
     // artifact to the flywheel
-    public static int MOTOR_TURNS = 1;
+    public static int MOTOR_TURNS = 3;
 
-    public static double kP = 0.006;
+    public static double kP = 0.0045;
     public static double kI = 0.0;
-    public static double kD = 0.00012;
-    public static double kS = 0.025;
-    public static double maxPower = 0.75;
+    public static double kD = 0.0001;
+    public static double kS = 0.0325;
+    public static double maxPower = 0.8;
     public static boolean tuning = false;
 
     boolean debugTelemetry = true;
@@ -62,6 +62,10 @@ public class Transfer implements Subsystem {
     }
 
     public double getTargetPosition() {
+        return targetPosition;
+    }
+
+    public double setTargetPosition(double position) {
         return targetPosition;
     }
 
