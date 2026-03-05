@@ -53,15 +53,26 @@ class Turret(): Subsystem {
     // DO NOT DO IT
     // BAD
     var turretPose = Pose()
-        private set(pose) {
+        private set(newRobotPose) {
             val r = TURRET_OFFSET
-            val theta = pose.heading
+            val theta = newRobotPose.heading
 
             val x = r * cos(theta)
             val y = r * sin(theta)
 
-            field = Pose(pose.x - x, pose.y - y, pose.heading)
+            field = Pose(newRobotPose.x - x, newRobotPose.y - y, normalizeRadians(newRobotPose.heading + angleRads, true))
         }
+
+    fun turretPoseToRobotPose(newTurretPose: Pose): Pose {
+        val newRobotHeading = normalizeRadians(newTurretPose.heading - angleRads,true)
+
+        val r = TURRET_OFFSET
+
+        val x = r * cos(newRobotHeading)
+        val y = r * sin(newRobotHeading)
+
+        return Pose(newTurretPose.x + x, newTurretPose.y + y, newRobotHeading)
+    }
 
     // this lazily initialies the goal pose, so if it's not manually set in the opmode, it assumes RED.
     // this has been verified to work.
@@ -88,6 +99,9 @@ class Turret(): Subsystem {
             position = scaledAngle
         }
 
+    val angleRads: Double
+        get() = Math.toRadians(angle)
+
     override fun initialize() {
         servoL = ServoEx("turretL")
         servoR = ServoEx("turretR")
@@ -103,7 +117,7 @@ class Turret(): Subsystem {
         bearing = Math.toDegrees(atan2(goalPose.y - turretPose.y, goalPose.x - turretPose.x))
 
         // normalize robot pose between (-180, 180]
-        val robotHeading = Math.toDegrees(if (turretPose.heading > Math.PI) { turretPose.heading - (2 * Math.PI) } else { turretPose.heading } )
+        val robotHeading = Math.toDegrees(normalizeRadians(robotPose.heading, false))
 
         // allows you to do manual control just by setting automatic to false and updating turret.angle
         if (automatic) {
@@ -114,9 +128,10 @@ class Turret(): Subsystem {
             ActiveOpMode.telemetry.run{
 //                addData("Turret calculated bearing", bearing)
 //                addData("Turret robot heading", robotHeading)
-//                addData("Turret target angle", angle)
-//                addData("Turret current position", position)
+                addData("Turret target angle", angle)
+                addData("Turret current position", position)
                 addData("Turret Distance", goalPose.distanceFrom(turretPose))
+
                 addLine("---------------------------")
             }
         }

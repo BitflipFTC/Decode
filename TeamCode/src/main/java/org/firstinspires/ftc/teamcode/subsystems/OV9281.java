@@ -21,9 +21,11 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagGameDatabase;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
+import java.security.cert.PKIXRevocationChecker;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -40,6 +42,7 @@ public class OV9281 implements Subsystem {
     private long defaultExposure;
     private int defaultGain;
     boolean debugTelemetry = true;
+    private double cameraTagOffset = 0.0;
     public int viewContainerId = -1;
 
     private final ArrayList<AprilTagDetection> detectionsBuffer = new ArrayList<>();
@@ -51,7 +54,8 @@ public class OV9281 implements Subsystem {
         Suppose your camera is positioned 5 inches to the left, 7 inches forward, and 12 inches above the ground - you would need to set the position to (-5, 7, 12).
      */
     private final Position cameraPosition = new Position(DistanceUnit.MM,
-            0.03380, 212.51288, 271.44038, 0);
+            0.0, 268.79544, 289.42108, 0);
+    // this is relative to the COR of turret
 
     private Pose robotPose = new Pose();
     private MedianPoseFilter filter = new MedianPoseFilter();
@@ -66,7 +70,7 @@ public class OV9281 implements Subsystem {
         You can also set the roll to +/-90 degrees if it’s vertical, or 180 degrees if it’s upside-down.
      */
     private final YawPitchRollAngles cameraOrientation = new YawPitchRollAngles(AngleUnit.DEGREES,
-            0, -75, 0, 0);
+            0, -90, 180, 0);
 
     double fx = 549.993552641,
             fy = 549.993552641,
@@ -188,6 +192,11 @@ public class OV9281 implements Subsystem {
         }
 
         return pattern;
+    }
+
+    public double getBearingOffset() {
+        cameraTagOffset = detectionsBuffer.stream().filter(x -> x.id == 20 || x.id == 24).findFirst().map(x -> x.ftcPose.bearing).orElse(cameraTagOffset);
+        return cameraTagOffset;
     }
 
     @Override

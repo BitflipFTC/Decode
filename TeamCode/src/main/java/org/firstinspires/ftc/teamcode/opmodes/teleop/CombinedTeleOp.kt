@@ -41,7 +41,7 @@ class CombinedTeleOp : LinearOpMode() {
         @JvmField
         var lowpass = 0.2
 
-        const val TUNING_FLYWHEEL = false
+        const val TUNING_FLYWHEEL = true
         const val DEBUG_FSM = false
     }
     enum class Shoot {
@@ -324,10 +324,11 @@ class CombinedTeleOp : LinearOpMode() {
             }
 
             if (camera.hasNewReading && gamepad1.left_trigger > 0.2) {
+                val correctedRobotPose = turret.turretPoseToRobotPose(camera.robotPose)
                 fol.pose = Pose(
-                    (1-lowpass) * fol.pose.x + lowpass * camera.robotPose.x,
-                    (1-lowpass) * fol.pose.y + lowpass * camera.robotPose.y,
-                    (1-lowpass) * fol.pose.heading + lowpass * camera.robotPose.heading
+                    (1-lowpass) * fol.pose.x + lowpass * correctedRobotPose.x,
+                    (1-lowpass) * fol.pose.y + lowpass * correctedRobotPose.y,
+                    (1-lowpass) * fol.pose.heading + lowpass * correctedRobotPose.heading
                 )
             }
 
@@ -351,14 +352,8 @@ class CombinedTeleOp : LinearOpMode() {
 //            }
 
             updateShootingFSM()
-            val lastFolVel = fol.velocity.magnitude
-            val lastFolAcc = fol.acceleration.magnitude
-            val lastFolPose = fol.pose
             fol.update()
 
-//            if (!fol.pose.roughlyEquals(lastFolPose, lastFolVel * (loopTimer.ms/1000.0) + 0.5 *  (lastFolAcc * (loopTimer.ms/1000.0) * (loopTimer.ms/1000.0)) + 1.0)) {
-//                fol.pose = lastFolPose
-//            }
             // like repeat a bit yknow
 
             var lastInAirTime: Double

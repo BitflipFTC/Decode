@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import org.firstinspires.ftc.teamcode.subsystems.Drivetrain
 import org.firstinspires.ftc.teamcode.subsystems.Intake
+import org.firstinspires.ftc.teamcode.subsystems.OV9281
 import org.firstinspires.ftc.teamcode.subsystems.Shooter
 import org.firstinspires.ftc.teamcode.subsystems.Spindexer
 import org.firstinspires.ftc.teamcode.subsystems.Transfer
@@ -21,7 +22,7 @@ class FlywheelTest : LinearOpMode() {
             fieldCentric = false
             driveSpeed = 1.0
         }
-//        val camera = OV9281()
+        val camera = OV9281()
         val intake = Intake()
         val spindexer = Spindexer()
         val turret = Turret().apply { automatic = false }
@@ -74,6 +75,8 @@ class FlywheelTest : LinearOpMode() {
             if (gamepad1.squareWasPressed()) {
                 intake.toggle()
             }
+
+            turret.angle += ( 0.2 * (gamepad1.right_trigger - gamepad1.left_trigger))
 
             if (gamepad1.leftBumperWasPressed()) {
                 spindexer.toNextOuttakePosition()
