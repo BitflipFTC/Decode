@@ -91,17 +91,18 @@ public class OV9281 implements Subsystem {
     public void initialize () {
         aprilTag = new AprilTagProcessor.Builder()
                 .setTagLibrary(AprilTagGameDatabase.getDecodeTagLibrary())
-                .setDrawTagOutline(true)
+                .setDrawTagOutline(false)
                 .setDrawTagID(true)
-                .setDrawAxes(true)
-                .setDrawCubeProjection(true)
+                .setDrawAxes(false)
+                .setDrawCubeProjection(false)
                 .setLensIntrinsics(fx,fy,cx,cy)
                 .setNumThreads(3)
                 .setCameraPose(cameraPosition,cameraOrientation)
                 .setOutputUnits(DistanceUnit.INCH, AngleUnit.DEGREES)
                 .build();
 
-        aprilTag.setDecimation(1f);
+        aprilTag.setDecimation(2f);
+        aprilTag.setPoseSolver(AprilTagProcessor.PoseSolver.OPENCV_SQPNP);
 
         if (viewContainerId == -1) {
             visionPortal = new VisionPortal.Builder()
