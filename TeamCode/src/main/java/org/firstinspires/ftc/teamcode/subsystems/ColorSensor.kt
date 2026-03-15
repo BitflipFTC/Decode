@@ -2,8 +2,11 @@ package org.firstinspires.ftc.teamcode.subsystems
 
 import android.graphics.Color
 import android.util.Log
+import com.qualcomm.hardware.lynx.LynxI2cColorRangeSensor
+import com.qualcomm.hardware.lynx.LynxI2cDeviceSynch
 import com.qualcomm.hardware.rev.RevColorSensorV3
 import com.qualcomm.robotcore.hardware.I2cDeviceSynch
+import com.qualcomm.robotcore.hardware.I2cDeviceSynchSimple
 import com.qualcomm.robotcore.hardware.NormalizedRGBA
 import com.qualcomm.robotcore.util.Range
 import com.qualcomm.robotcore.util.TypeConversion
@@ -17,10 +20,14 @@ import kotlin.math.pow
 
 class ColorSensor(): Subsystem {
     private lateinit var colorSensor: RevColorSensorV3
+    private lateinit var device: I2cDeviceSynchSimple
+
     var colors: NormalizedRGBA = NormalizedRGBA()
         private set
 
     var detectedArtifact: Artifact? = null
+
+    var old = false
 
     // make sure this starts above 5.0 to avoid the color sensor making a fake read on the first loop
     var distance: Double = 10.0
@@ -64,71 +71,77 @@ class ColorSensor(): Subsystem {
 
     override fun initialize() {
         colorSensor = ActiveOpMode.hardwareMap.get(RevColorSensorV3::class.java, "colorSensor")
+        val field = colorSensor.javaClass.superclass.superclass.superclass.getDeclaredField("deviceClient")
+        field.isAccessible = true
+        device = field.get(colorSensor) as I2cDeviceSynchSimple
+        Log.d("CS", "on")
+
         colorSensor.gain = 20.0f
+
     }
 
     var preTime: Long = 0
+    var posti2cTime: Long = 0
     var postTime: Long = 0
 
     val limit = 1048575
     override fun periodic() {
         preTime = System.nanoTime()
-        val bytes = (colorSensor as I2cDeviceSynch).read(0x08, 14)
-        // 0x07 is MAIN_STATUS
-        // default value is 0x20, or 00100000
-        // b7 b6 are 0, b3 is LS (light sensor) data status, b0 is ps (prox sensor) status
-        // ngl read the docs though https://docs.broadcom.com/doc/APDS-9151-DS
 
-        // Read red, green and blue values
-        green = (((bytes[7].toInt() and 0x0F) shl 16) or
-                ((bytes[6].toInt() and 0xFF) shl 8) or
-                (bytes[5].toInt() and 0xFF))
+        if (!old) {
+            val bytes = device.read(0x08, 14)
+            posti2cTime = System.nanoTime()
+            // 0x07 is MAIN_STATUS
+            // default value is 0x20, or 00100000
+            // b7 b6 are 0, b3 is LS (light sensor) data status, b0 is ps (prox sensor) status
+            // ngl read the docs though https://docs.broadcom.com/doc/APDS-9151-DS
 
-        blue = Range.clip(
-            ((((bytes[10].toInt() and 0x0F) shl 16) or
-                    ((bytes[9].toInt() and 0xFF) shl 8) or
-                    (bytes[8].toInt() and 0xFF)) * 1.55).toInt(),
-            0,limit
-        )
+            // Read red, green and blue values
+            green = (((bytes[7].toInt() and 0x0F) shl 16) or
+                    ((bytes[6].toInt() and 0xFF) shl 8) or
+                    (bytes[5].toInt() and 0xFF))
 
-        red = Range.clip(
-            ((((bytes[13].toInt() and 0x0F) shl 16) or
-                    ((bytes[12].toInt() and 0xFF) shl 8) or
-                    (bytes[11].toInt() and 0xFF)) * 1.07).toInt(),
-            0, limit
-        )
+            blue = Range.clip(
+                ((((bytes[10].toInt() and 0x0F) shl 16) or
+                        ((bytes[9].toInt() and 0xFF) shl 8) or
+                        (bytes[8].toInt() and 0xFF)) * 1.55).toInt(),
+                0, limit
+            )
 
-        // normalize to [0, 1]
-        this.colors.red = Range.clip(
-            (red.toFloat() * colorSensor.gain) / limit,
-            0f,
-            1f
-        )
-        this.colors.green = Range.clip(
-            (green.toFloat() * colorSensor.gain) / limit,
-            0f,
-            1f
-        )
-        this.colors.blue = Range.clip(
-            (blue.toFloat() * colorSensor.gain) / limit,
-            0f,
-            1f
-        )
+            red = Range.clip(
+                ((((bytes[13].toInt() and 0x0F) shl 16) or
+                        ((bytes[12].toInt() and 0xFF) shl 8) or
+                        (bytes[11].toInt() and 0xFF)) * 1.07).toInt(),
+                0, limit
+            )
 
-        val rawOptical = (((bytes[1].toInt() and 0xFF) shl 8) or (bytes[0].toInt() and 0xFF)) and 0x7FF
-        distance = DistanceUnit.CM.fromUnit(DistanceUnit.INCH, inFromOptical(rawOptical))
+            // normalize to [0, 1]
+            this.colors.red = Range.clip(
+                (red.toFloat() * colorSensor.gain) / limit,
+                0f,
+                1f
+            )
+            this.colors.green = Range.clip(
+                (green.toFloat() * colorSensor.gain) / limit,
+                0f,
+                1f
+            )
+            this.colors.blue = Range.clip(
+                (blue.toFloat() * colorSensor.gain) / limit,
+                0f,
+                1f
+            )
+
+            val rawOptical =
+                (((bytes[1].toInt() and 0xFF) shl 8) or (bytes[0].toInt() and 0xFF)) and 0x7FF
+            distance = DistanceUnit.CM.fromUnit(DistanceUnit.INCH, inFromOptical(rawOptical))
+        } else {
+            distance = colorSensor.getDistance(DistanceUnit.CM)
+            colors = colorSensor.normalizedColors
+        }
 
         Color.RGBToHSV((colors.red * 255).toInt(), (colors.green * 255).toInt(), (colors.blue * 255).toInt(), hsv.col)
         postTime = System.nanoTime()
-
-
-
-        // old version
-
-//        distance = colorSensor.getDistance(DistanceUnit.CM)
-//        colors = colorSensor.normalizedColors
-
-        // end old version
 
         detectedArtifact = if (distance < 3.0) {
             Log.d("CS", "colors, h: ${hsv.h}, s: ${hsv.s}, v: ${hsv.v}")
@@ -154,7 +167,9 @@ class ColorSensor(): Subsystem {
 //                addData("hue","%07.4f", hsv.h)
 //                addData("sat","%07.4f", hsv.s)
 //                addData("val","%07.4f", hsv.v)
-                addData("Read time", "%04.2fms",(postTime - preTime) / 1E6)
+                addData("Total time", "%04.2fms",(postTime - preTime) / 1E6)
+                addData("i2c Read time", "%04.2fms",(posti2cTime - preTime) / 1E6)
+                addData("Calculations time", "%04.2fms",(postTime - posti2cTime) / 1E6)
                 addLine("------------------------------")
             }
         }
