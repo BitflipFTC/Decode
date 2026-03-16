@@ -314,10 +314,11 @@ class CombinedTeleOp : LinearOpMode() {
                 )
             }
 
-            if (gamepad1.dpadLeftWasPressed()) spindexer.decreaseOffset()
-            if (gamepad1.dpadRightWasPressed()) spindexer.increaseOffset()
+//            if (gamepad1.dpadLeftWasPressed()) spindexer.decreaseOffset()
+//            if (gamepad1.dpadRightWasPressed()) spindexer.increaseOffset()
             if (spindexer.isFull && !lastSpindexerIsFull) {
                 gamepad1.rumble(500)
+                spindexer.toMotifOuttakePosition()
             }
 
 //            // timer rumble!!

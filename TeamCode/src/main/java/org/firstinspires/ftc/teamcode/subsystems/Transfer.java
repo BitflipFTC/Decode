@@ -1,76 +1,26 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
 import com.bylazar.configurables.annotations.Configurable;
-import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.util.Range;
 
-import org.firstinspires.ftc.teamcode.util.PIDController;
 import org.firstinspires.ftc.teamcode.util.hardware.MotorEx;
 
-import dev.nextftc.core.commands.utility.LambdaCommand;
 import dev.nextftc.core.subsystems.Subsystem;
-import dev.nextftc.ftc.ActiveOpMode;
 
 /**
- * Manages the transfer mechanism, which moves artifacts from the spindexer to the shooter.
- * This class uses a PID controller to precisely control the rotation of the transfer motor.
- * The main function is [transferArtifact], which initiates a transfer sequence.
- * The [update] method must be called in a loop to drive the motor to its target position.
+ * Manages the transfer mechanism, which is a simple motor. It has two states, on and off.
  */
 @Configurable
 public class Transfer implements Subsystem {
-    // 1150rpm motor, so
-    private final double TICKS_PER_REVOLUTION = 145.1;
-    private double targetPosition = 0;
-    private double currentPosition = 0;
-
-    // amount of times the motor should turn every time it transfers an
-    // artifact to the flywheel
-    public static int MOTOR_TURNS = 3;
-
-    public static double kP = 0.0045;
-    public static double kI = 0.0;
-    public static double kD = 0.0001;
-    public static double kS = 0.0325;
-    public static double maxPower = 0.8;
-    public static boolean tuning = false;
-
-    boolean debugTelemetry = true;
-
     private MotorEx motor = null;
-
-    private final PIDController controller = new PIDController(kP, kI, kD, 0.0, kS);
+    public boolean transferOn = true;
 
     @Override
     public void initialize() {
-        controller.setSetPointTolerance(5.125);
-        motor = new MotorEx("transfer").zeroed().brake();
-        motor.setCurrentAlert(5.5);
+        motor = new MotorEx("transfer").reverse().zeroed().floa();
     }
 
-    public void setPower (double power) {
+    private void setPower (double power) {
         motor.setPower(power);
-    }
-
-    private void setMotorTarget(double ticks) {
-        targetPosition = ticks;
-        controller.resetTotalError();
-    }
-
-    public double getCurrentPosition() {
-        return currentPosition;
-    }
-
-    public double getTargetPosition() {
-        return targetPosition;
-    }
-
-    public double setTargetPosition(double position) {
-        return targetPosition;
-    }
-
-    public boolean isStalling() {
-        return motor.isOverCurrent();
     }
 
     /**
@@ -78,58 +28,23 @@ public class Transfer implements Subsystem {
      * turning (at most) one additional time in order to return to the nearest rotation
      * and always return to the same spot.
      */
-    public void transferArtifact() {
-        // set the initial target position (the current position + MOTOR_TURNS rotations)
-        double localTargetPosition = getTargetPosition() + MOTOR_TURNS * TICKS_PER_REVOLUTION; // ticks
-
-        setMotorTarget(localTargetPosition);
+    public void on() {
+        transferOn = true;
     }
 
-//    public void undoTransfer() {
-//        setMotorTarget(getTargetPosition() - TICKS_PER_REVOLUTION * MOTOR_TURNS);
-//    }
-
-//    public double getTransferMotorAngle() {
-//        double degreesPosition = (currentPosition / TICKS_PER_REVOLUTION) * 360;
-//        degreesPosition %= 360;
-//        degreesPosition = (degreesPosition + 360) % 360;
-//        return degreesPosition;
-//    }
+    public void off() {
+        transferOn = false;
+    }
 
     /**
      * Updates the transfer mechanism. This method should be called in a loop.
      */
     @Override
     public void periodic() {
-        currentPosition = motor.getCurrentPosition();
-        double pidOutput = controller.calculate(currentPosition, targetPosition);
-
-        motor.setPower(Range.clip(pidOutput, -maxPower, maxPower));
-
-        if (tuning) {
-            controller.setCoeffs(kP, kI, kD, 0.0, kS);
+        if (transferOn) {
+            motor.setPower(1.0);
+        } else {
+            motor.setPower(0.0);
         }
-
-        if (debugTelemetry) {
-            ActiveOpMode.telemetry().addData("Transfer current ticks", currentPosition);
-            ActiveOpMode.telemetry().addData("Transfer target ticks", targetPosition);
-//            ActiveOpMode.telemetry().addData("Transfer motor power", pidOutput);
-            ActiveOpMode.telemetry().addData("Transfer at set point", atSetPoint());
-//            ActiveOpMode.telemetry().addData("Trans rotations", targetPosition / TICKS_PER_REVOLUTION);
-            ActiveOpMode.telemetry().addLine("---------------------------");
-        }
-    }
-
-    public boolean atSetPoint() {
-        return controller.atSetPoint();
-    }
-
-    public LambdaCommand shootArtifact() {
-        return new LambdaCommand()
-                .setStart(this::transferArtifact)
-                .setIsDone(this::atSetPoint)
-                .setName("Shoot artifact")
-                .setInterruptible(true)
-                .setRequirements(this);
     }
 }
