@@ -46,33 +46,6 @@ class Intake(): Subsystem {
         power = State.OFF
     }
 
-    fun runIntake() = LambdaCommand()
-//        .setStart { intake() }
-//        .setStop { interrupted -> if (!interrupted) {off()} }
-//        .setRequirements(this)
-//        .setInterruptible(true)
-//        .setName("Intake")
-//
-    fun toggleRun() = LambdaCommand()
-//        .setStart { toggle() }
-//        .setRequirements(this)
-//        .setInterruptible(true)
-//        .setName("Toggle Intake")
-//
-    fun stopIntake() = LambdaCommand()
-//        .setStart { off() }
-//        .setRequirements(this)
-//        .setInterruptible(true)
-//        .setName("Stop intake")
-//
-    fun reverse() = LambdaCommand()
-//        .setStart { this.reversed = true }
-//        .setRequirements(this)
-//
-    fun forward() = LambdaCommand()
-//        .setStart { this.reversed = false }
-//        .setRequirements(this)
-
     override fun initialize() {
         motor = MotorEx("intake").reverse().brake().zeroed()
     }
