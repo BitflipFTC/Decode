@@ -47,7 +47,6 @@ class CombinedTeleOp : LinearOpMode() {
     enum class Shoot {
         IDLE,
         MOVE_SPINDEXER,
-        TRANSFER_ARTIFACT,
         WAIT_FOR_COMPLETION
     }
 
@@ -69,35 +68,17 @@ class CombinedTeleOp : LinearOpMode() {
             Shoot.MOVE_SPINDEXER      -> {
                 spindexer.toMotifOuttakePosition()
                 if (DEBUG_FSM) Log.d("FSM", " * * * * * NEW CYCLE: * * * * * moving spindexer to ${spindexer.state.name}, ${spindexer.getArtifactString()}")
-                shootingState = Shoot.TRANSFER_ARTIFACT
                 timer.reset()
-            }
-
-            Shoot.TRANSFER_ARTIFACT   -> {
-                if (DEBUG_FSM) {
-                    Log.d("FSM", "          Waiting for shooter: ${shooter.atSetPoint()}\n          Waiting for spindexer: ${spindexer.atSetPoint()}")
-                    Log.d("FSM", "          spindexer: ${spindexer.currentAngle}, ${spindexer.targetAngle},\n" +
-                            "          shooter: ${shooter.flywheelRPM}, ${shooter.targetFlywheelRPM}")
-                }
-
-                if (shooter.atSetPoint() && spindexer.atSetPoint()) {
-                    if (DEBUG_FSM) Log.d("FSM", "Moving spindexer / shooter took ${timer.milliseconds()}")
-                    transfer.transferArtifact()
-                    turret.automatic = false
-                    if (DEBUG_FSM) {
-                        Log.d("FSM", "= = = Transferring = = =")
-                        Log.d("FSM", "RPM: ${shooter.flywheelRPM}, Hood angle: ${shooter.hoodPosToDegrees(shooter.hoodPosition)}")
-                    }
-                    shootingState = Shoot.WAIT_FOR_COMPLETION
-                    timer.reset()
-                }
+                shootingState = Shoot.WAIT_FOR_COMPLETION
             }
 
             Shoot.WAIT_FOR_COMPLETION -> {
-                if (DEBUG_FSM) Log.d("FSM", "          Waiting for transfer, current: ${transfer.currentPosition}, target: ${transfer.targetPosition}, diff: ${transfer.targetPosition - transfer.currentPosition}")
-                if (transfer.atSetPoint()) {
-                    if (DEBUG_FSM) Log.d("FSM", "transferring took ${timer.milliseconds()}")
-                    spindexer.recordOuttake()
+                if (DEBUG_FSM) Log.d("FSM", "          Waiting for spindexer, current: ${spindexer.currentAngle}, target: ${spindexer.targetAngle}, diff: ${spindexer.targetAngle - spindexer.currentAngle}")
+                if (spindexer.atSetPoint()) {
+                    if (DEBUG_FSM) Log.d("FSM", "spindexer took ${timer.milliseconds()} to rotate")
+                    transfer.on() // assume instantaneous transfer
+//                    spindexer.recordOuttake()
+                    // we should be able to omit this because there's code for detection later
                     if (DEBUG_FSM) {
                         Log.d("FSM", "EVALUATING SPINDEXER FULLNESS")
                         Log.d("FSM", "Spindexer isEmpty: " + spindexer.isEmpty + ", isFull: " + spindexer.isFull + ", Str: " + spindexer.getArtifactString())
@@ -105,10 +86,11 @@ class CombinedTeleOp : LinearOpMode() {
 
                     timer.reset()
                     if (spindexer.isEmpty) {
+                        // DONE
                         shootingState = Shoot.IDLE
+                        transfer.off()
                         gamepad1.rumble(250)
                         spindexer.toFirstEmptyIntakePosition()
-                        turret.automatic = true
                     } else {
                         shootingState = Shoot.MOVE_SPINDEXER
                     }
@@ -235,18 +217,18 @@ class CombinedTeleOp : LinearOpMode() {
                 spindexer.motifPattern = motifPattern
             }
 
-            // transfer
-            if (gamepad1.triangleWasPressed() && spindexer.atSetPoint()) {
-                transfer.transferArtifact()
+            transfer.transferOn = gamepad1.triangle
+
+            if (spindexer.slotsToOuttakes.contains(spindexer.state) && spindexer.atSetPoint() && transfer.transferOn) {
                 spindexer.recordOuttake()
             }
 
             // spindexer
-            if (gamepad1.leftBumperWasPressed() && transfer.atSetPoint()) {
+            if (gamepad1.leftBumperWasPressed()) {
                 spindexer.toNextOuttakePosition()
             }
 
-            if (gamepad1.rightBumperWasPressed() && transfer.atSetPoint()) {
+            if (gamepad1.rightBumperWasPressed()) {
                 spindexer.toNextIntakePosition()
             }
 
@@ -269,15 +251,15 @@ class CombinedTeleOp : LinearOpMode() {
                 true
             )
 
-            if (gamepad1.dpadUpWasPressed() && !turretAutomate) {
-                shooter.setTargetState(autoPoses.farShootTeleopOwnGate.distanceFrom(turret.goalPose))
-                turret.robotPose = autoPoses.farShootTeleopOwnGate
-            }
-
-            if (gamepad1.dpadDownWasPressed() && !turretAutomate) {
-                shooter.setTargetState(autoPoses.farShootTeleopHP.distanceFrom(turret.goalPose))
-                turret.robotPose = autoPoses.farShootTeleopHP
-            }
+//            if (gamepad1.dpadUpWasPressed() && !turretAutomate) {
+//                shooter.setTargetState(autoPoses.farShootTeleopOwnGate.distanceFrom(turret.goalPose))
+//                turret.robotPose = autoPoses.farShootTeleopOwnGate
+//            }
+//
+//            if (gamepad1.dpadDownWasPressed() && !turretAutomate) {
+//                shooter.setTargetState(autoPoses.farShootTeleopHP.distanceFrom(turret.goalPose))
+//                turret.robotPose = autoPoses.farShootTeleopHP
+//            }
 
             if (gamepad1.circleWasPressed()) {
                 spindexer.toFirstEmptyIntakePosition()
@@ -286,7 +268,7 @@ class CombinedTeleOp : LinearOpMode() {
 
             // update all mechanisms
 
-            if (gamepad1.rightTriggerWasPressed() && transfer.atSetPoint()) {
+            if (gamepad1.rightTriggerWasPressed()) {
                 shootAllArtifacts()
             }
 
@@ -370,7 +352,7 @@ class CombinedTeleOp : LinearOpMode() {
                 } else {
                     shooter.setTimeInAir(turret.goalPose.distanceFrom(futurePose))
                 }
-            } while (abs(lastInAirTime - shooter.expectedTimeInAir) > 0.001)
+            } while (abs(lastInAirTime - shooter.expectedTimeInAir) > 0.0001)
 
             futurePose = Pose(
                 fol.pose.x + shooter.expectedTimeInAir * fol.velocity.xComponent,

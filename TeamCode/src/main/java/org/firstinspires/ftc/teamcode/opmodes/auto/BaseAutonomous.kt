@@ -7,7 +7,6 @@ import com.pedropathing.geometry.Pose
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.util.ElapsedTime
 import com.skeletonarmy.marrow.prompts.OptionPrompt
-import com.skeletonarmy.marrow.prompts.Prompt
 import com.skeletonarmy.marrow.prompts.Prompter
 import org.firstinspires.ftc.teamcode.opmodes.teleop.CombinedTeleOp.Companion.alliance
 import org.firstinspires.ftc.teamcode.opmodes.teleop.CombinedTeleOp.Companion.follower
@@ -26,12 +25,10 @@ import org.firstinspires.ftc.teamcode.util.Artifact
 import org.firstinspires.ftc.teamcode.util.BetterLoopTimeComponent
 import org.firstinspires.ftc.teamcode.util.FiniteStateMachine
 import org.firstinspires.ftc.teamcode.util.FullState
-import org.firstinspires.ftc.teamcode.util.InitConfigurer
 import org.firstinspires.ftc.teamcode.util.InitializeState
 import org.firstinspires.ftc.teamcode.util.InstantState
 import org.firstinspires.ftc.teamcode.util.State
 import org.firstinspires.ftc.teamcode.util.TelemetryImplUpstreamSubmission
-import org.firstinspires.ftc.teamcode.util.WaitState
 import org.firstinspires.ftc.teamcode.util.auto.BaseAutoPath
 import org.firstinspires.ftc.teamcode.util.auto.Path
 
@@ -39,13 +36,13 @@ import org.firstinspires.ftc.teamcode.util.auto.Path
 abstract class BaseAutonomous: LinearOpMode() {
     companion object {
         const val PARAMETRIC_END = 0.94
+        const val DEBUG_FSM = false
     }
     abstract fun initialize(alliance: Alliance)
 
     private enum class Shoot {
         IDLE,
         MOVE_SPINDEXER,
-        TRANSFER_ARTIFACT,
         WAIT_FOR_COMPLETION
     }
 
@@ -150,40 +147,28 @@ abstract class BaseAutonomous: LinearOpMode() {
         when (shootingState) {
             Shoot.MOVE_SPINDEXER      -> {
                 spindexer.toMotifOuttakePosition()
-                Log.d(
-                    "FSM",
-                    "MOVING SPINDEXER TO ${spindexer.state.name}, ${spindexer.getArtifactString()}"
-                )
-                shootingState = Shoot.TRANSFER_ARTIFACT
+                if (DEBUG_FSM) Log.d("FSM", " * * * * * NEW CYCLE: * * * * * moving spindexer to ${spindexer.state.name}, ${spindexer.getArtifactString()}")
                 timer.reset()
-            }
-
-            Shoot.TRANSFER_ARTIFACT -> {
-                Log.d("FSM", "Waiting for shooter or spindexer")
-                Log.d("FSM", "sp: ${spindexer.currentAngle}, ${spindexer.targetAngle}, sh: ${shooter.flywheelRPM}, ${shooter.targetFlywheelRPM}")
-                if ((shooter.atSetPoint()) && spindexer.atSetPoint()) {
-                    Log.d("FSM", "-------- Moving spindexer / shooter took ${timer.milliseconds()}")
-                    transfer.transferArtifact()
-                    Log.d("FSM", "TRANSFERING")
-                    shootingState = Shoot.WAIT_FOR_COMPLETION
-                    timer.reset()
-                }
+                shootingState = Shoot.WAIT_FOR_COMPLETION
             }
 
             Shoot.WAIT_FOR_COMPLETION -> {
-//                Log.d("FSM", "WAITING FOR TRANSFER, current: ${transfer.currentPosition}, target: ${transfer.targetPosition}, diff: ${transfer.targetPosition - transfer.currentPosition}")
-                if (transfer.atSetPoint()) {
-                    Log.d("FSM", "------- transferring took ${timer.milliseconds()}")
+                if (DEBUG_FSM) Log.d("FSM", "          Waiting for spindexer, current: ${spindexer.currentAngle}, target: ${spindexer.targetAngle}, diff: ${spindexer.targetAngle - spindexer.currentAngle}")
+                if (spindexer.atSetPoint()) {
+                    if (DEBUG_FSM) Log.d("FSM", "spindexer took ${timer.milliseconds()} to rotate")
+                    transfer.on() // assume instantaneous transfer
                     spindexer.recordOuttake()
-                    Log.d("FSM", "EVALUATING SPINDEXER FULLNESS")
-                    Log.d(
-                        "FSM",
-                        "Spindexer isEmpty: " + spindexer.isEmpty + ", isFull: " + spindexer.isFull + ", Str: " + spindexer.getArtifactString()
-                    )
+                    if (DEBUG_FSM) {
+                        Log.d("FSM", "EVALUATING SPINDEXER FULLNESS")
+                        Log.d("FSM", "Spindexer isEmpty: " + spindexer.isEmpty + ", isFull: " + spindexer.isFull + ", Str: " + spindexer.getArtifactString())
+                    }
 
                     timer.reset()
                     if (spindexer.isEmpty) {
+                        // DONE
                         shootingState = Shoot.IDLE
+                        transfer.off()
+                        gamepad1.rumble(250)
                         spindexer.toFirstEmptyIntakePosition()
                     } else {
                         shootingState = Shoot.MOVE_SPINDEXER
@@ -191,8 +176,7 @@ abstract class BaseAutonomous: LinearOpMode() {
                 }
             }
 
-            Shoot.IDLE                -> {
-            }
+            Shoot.IDLE                -> {}
         }
     }
 //todo
