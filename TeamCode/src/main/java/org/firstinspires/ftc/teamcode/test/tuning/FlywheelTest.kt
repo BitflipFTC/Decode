@@ -5,6 +5,7 @@ import com.bylazar.telemetry.PanelsTelemetry
 import com.qualcomm.hardware.lynx.LynxModule
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
+import org.firstinspires.ftc.teamcode.subsystems.ColorSensor
 import org.firstinspires.ftc.teamcode.subsystems.Drivetrain
 import org.firstinspires.ftc.teamcode.subsystems.Intake
 import org.firstinspires.ftc.teamcode.subsystems.OV9281
@@ -13,6 +14,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Spindexer
 import org.firstinspires.ftc.teamcode.subsystems.Transfer
 import org.firstinspires.ftc.teamcode.subsystems.Turret
 import org.firstinspires.ftc.teamcode.util.TelemetryImplUpstreamSubmission
+import org.opencv.video.TrackerNano
 
 @TeleOp(name = "Test: Flywheel", group = "Test")
 class FlywheelTest : LinearOpMode() {
@@ -26,7 +28,9 @@ class FlywheelTest : LinearOpMode() {
         val intake = Intake()
         val spindexer = Spindexer()
         val turret = Turret().apply { automatic = false }
-        val subsystems = setOf(shooter,intake,spindexer, drivetrain, turret)
+        val colorSensor = ColorSensor()
+        val transfer = Transfer()
+        val subsystems = setOf(shooter,intake,spindexer, drivetrain, turret, colorSensor, transfer)
         telemetry = JoinedTelemetry(PanelsTelemetry.ftcTelemetry, TelemetryImplUpstreamSubmission(this))
 
         turret.initialize()
@@ -49,23 +53,29 @@ class FlywheelTest : LinearOpMode() {
 //            // reset the target rpm
 //            // reset the target rpm
             if (gamepad1.dpadDownWasPressed()) {
-                shooter.targetFlywheelRPM -= 250
+                shooter.targetFlywheelRPM -= 125
             }
 //
             if (gamepad1.dpadUpWasPressed()) {
-                shooter.targetFlywheelRPM += 250
+                shooter.targetFlywheelRPM += 125
             }
 
             if (gamepad1.dpadRightWasPressed()) {
-                shooter.hoodPosition += 0.05
+                shooter.hoodPosition += 0.025
             }
 
             if (gamepad1.dpadLeftWasPressed()) {
-                shooter.hoodPosition -= 0.05
+                shooter.hoodPosition -= 0.025
             }
 
             if (gamepad1.crossWasPressed()) {
                 intake.reversed = true
+            }
+
+            if (gamepad1.triangle){
+                transfer.transferArtifact()
+            } else {
+                transfer.stopTransfer()
             }
 
             if (gamepad1.crossWasReleased()) {
@@ -76,7 +86,7 @@ class FlywheelTest : LinearOpMode() {
                 intake.toggle()
             }
 
-            turret.angle += ( 0.2 * (gamepad1.right_trigger - gamepad1.left_trigger))
+            turret.angle -= ( 2.0 * (gamepad1.right_trigger - gamepad1.left_trigger))
 
             if (gamepad1.leftBumperWasPressed()) {
                 spindexer.toNextOuttakePosition()
