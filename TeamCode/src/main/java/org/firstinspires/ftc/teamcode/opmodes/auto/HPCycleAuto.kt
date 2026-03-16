@@ -1,7 +1,7 @@
 package org.firstinspires.ftc.teamcode.opmodes.auto
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous
-import org.firstinspires.ftc.teamcode.opmodes.auto.paths.FalconForce
+import org.firstinspires.ftc.teamcode.opmodes.auto.paths.HPCycle
 import org.firstinspires.ftc.teamcode.opmodes.teleop.CombinedTeleOp.Companion.follower
 import org.firstinspires.ftc.teamcode.util.Alliance
 import org.firstinspires.ftc.teamcode.util.FiniteStateMachine
@@ -9,10 +9,10 @@ import org.firstinspires.ftc.teamcode.util.TimedFollowPathState
 import org.firstinspires.ftc.teamcode.util.WaitState
 
 @Suppress("Unused")
-@Autonomous(name = "Falcon Force Partner", preselectTeleOp = "Combined TeleOp")
-class FalconForceAlliance: BaseAutonomous() {
+@Autonomous(name = "HP Cycle Partner FAR", preselectTeleOp = "Combined TeleOp")
+class HPCycleAuto: BaseAutonomous() {
     override fun initialize(alliance: Alliance) {
-        pathSequence = FalconForce(alliance)
+        pathSequence = HPCycle(alliance)
         paths = pathSequence.buildPaths(follower!!)
         follower!!.setStartingPose(pathSequence.poses.farStartPose)
 

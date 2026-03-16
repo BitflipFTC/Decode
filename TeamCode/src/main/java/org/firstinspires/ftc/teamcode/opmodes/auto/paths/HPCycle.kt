@@ -9,7 +9,7 @@ import org.firstinspires.ftc.teamcode.util.auto.Path
 import org.firstinspires.ftc.teamcode.util.buildBasicLine
 import org.firstinspires.ftc.teamcode.util.buildTangentLine
 
-class FalconForce(alliance: Alliance): BaseAutoPath(alliance) {
+class HPCycle(alliance: Alliance): BaseAutoPath(alliance) {
 
     val fullSpeed = 0.8
     val intakeSpeed = 0.5
