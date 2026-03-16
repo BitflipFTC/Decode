@@ -14,10 +14,9 @@ import org.firstinspires.ftc.teamcode.subsystems.Spindexer
 import org.firstinspires.ftc.teamcode.subsystems.Transfer
 import org.firstinspires.ftc.teamcode.subsystems.Turret
 import org.firstinspires.ftc.teamcode.util.TelemetryImplUpstreamSubmission
-import org.opencv.video.TrackerNano
 
-@TeleOp(name = "Test: Flywheel", group = "Test")
-class FlywheelTest : LinearOpMode() {
+@TeleOp(name = "Test: Manual Subsystems", group = "Test")
+class SystemsTest : LinearOpMode() {
     override fun runOpMode() {
         val shooter = Shooter()
         val drivetrain = Drivetrain().apply {
@@ -73,9 +72,9 @@ class FlywheelTest : LinearOpMode() {
             }
 
             if (gamepad1.triangle){
-                transfer.transferArtifact()
+                transfer.on()
             } else {
-                transfer.stopTransfer()
+                transfer.off()
             }
 
             if (gamepad1.crossWasReleased()) {
