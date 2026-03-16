@@ -9,11 +9,10 @@ import org.firstinspires.ftc.teamcode.subsystems.Intake
 import org.firstinspires.ftc.teamcode.subsystems.Spindexer
 import org.firstinspires.ftc.teamcode.util.TelemetryImplUpstreamSubmission
 
-@TeleOp(name = "Test: Color Sensor (DEPRECATED)", group = "Test")
+@TeleOp(name = "Test: Color Sensor", group = "Test")
 class ColorSensorTest : LinearOpMode() {
     override fun runOpMode() {
         val colorSensor = ColorSensor()
-        colorSensor.old = true
 
         colorSensor.initialize()
         telemetry = JoinedTelemetry(PanelsTelemetry.ftcTelemetry, TelemetryImplUpstreamSubmission(this))
@@ -21,7 +20,10 @@ class ColorSensorTest : LinearOpMode() {
         while (opModeIsActive()) {
             colorSensor.periodic()
 
-//
+            telemetry.addData("Distance", "%05.2fcm", colorSensor.distance)
+            telemetry.addData("Hue","%07.4f", colorSensor.hsv.h)
+            telemetry.addData("Saturation","%07.4f", colorSensor.hsv.s)
+            telemetry.addData("Value","%07.4f", colorSensor.hsv.v)
             telemetry.update()
         }
     }

@@ -166,10 +166,10 @@ class ColorSensor(): Subsystem {
 
         ActiveOpMode.telemetry.run {
             addData("Color Sensor Detected Artifact", detectedArtifact?.name ?: "None")
-            addData("Distance", "%05.2fcm", distance)
-            addData("Hue","%07.4f", hsv.h)
-            addData("Saturation","%07.4f", hsv.s)
-            addData("Value","%07.4f", hsv.v)
+//            addData("Distance", "%05.2fcm", distance)
+//            addData("Hue","%07.4f", hsv.h)
+//            addData("Saturation","%07.4f", hsv.s)
+//            addData("Value","%07.4f", hsv.v)
             addData("Total time", "%04.2fms",(postTime - preTime) / 1E6)
             addData("i2c Read time", "%04.2fms",(posti2cTime - preTime) / 1E6)
             addData("Calculations time", "%04.2fms",(postTime - posti2cTime) / 1E6)
