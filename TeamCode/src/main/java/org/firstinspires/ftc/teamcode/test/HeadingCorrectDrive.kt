@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.test
 
 import com.bylazar.configurables.annotations.Configurable
-import com.bylazar.gamepad.PanelsGamepad
 import com.bylazar.telemetry.JoinedTelemetry
 import com.bylazar.telemetry.PanelsTelemetry
 import com.bylazar.utils.LoopTimer
@@ -44,8 +43,6 @@ class HeadingCorrectDrive : LinearOpMode() {
     private var rotating = false
 
     private var fieldCentric : Boolean = false
-
-    val ga1 = PanelsGamepad.firstManager
 
     var driveSpeed : Double = 0.5
 
@@ -117,7 +114,6 @@ class HeadingCorrectDrive : LinearOpMode() {
         while (opModeIsActive()) {
             // more bulk caching
             allHubs.forEach { hub -> hub.clearBulkCache() }
-            ga1.asCombinedFTCGamepad(gamepad1)
 
             var x : Double = gamepad1.left_stick_x.toDouble()
             var y : Double = -gamepad1.left_stick_y.toDouble()
