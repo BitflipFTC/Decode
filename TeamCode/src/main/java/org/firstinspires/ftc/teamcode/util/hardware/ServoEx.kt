@@ -11,7 +11,7 @@ import kotlin.math.abs
  */
 class ServoEx(
     servoName: String,
-    var cacheTolerance: Double = 0.01
+    var cacheTolerance: Double = 0.004
 ) {
     private val servo: ServoImplEx =
         ActiveOpMode.hardwareMap.get(ServoImplEx::class.java, servoName).apply {

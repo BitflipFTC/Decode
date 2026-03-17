@@ -11,7 +11,7 @@ import kotlin.math.abs
  */
 class CRServoEx(
     servoName: String,
-    var cacheTolerance: Double = 0.01
+    var cacheTolerance: Double = 0.04
 ) {
     private val crServo = ActiveOpMode.hardwareMap.get(CRServoImplEx::class.java, servoName).apply {
         pwmRange = PwmControl.PwmRange(500.0, 2500.0)

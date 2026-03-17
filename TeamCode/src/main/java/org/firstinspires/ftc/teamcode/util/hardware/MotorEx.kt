@@ -15,7 +15,7 @@ import kotlin.math.abs
  */
 class MotorEx @JvmOverloads constructor(
     motorName: String,
-    var cacheTolerance: Double = 0.01,
+    var cacheTolerance: Double = 0.005,
     var maxSlewRate: Double = Double.POSITIVE_INFINITY
 ) {
     private val motor: DcMotorEx = ActiveOpMode.hardwareMap.get(DcMotorEx::class.java, motorName)
