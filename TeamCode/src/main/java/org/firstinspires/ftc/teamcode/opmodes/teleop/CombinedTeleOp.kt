@@ -63,12 +63,15 @@ class CombinedTeleOp : LinearOpMode() {
         }
     }
 
+    var transferShot = false
+
     fun updateShootingFSM() {
         when (shootingState) {
             Shoot.MOVE_SPINDEXER      -> {
                 spindexer.toMotifOuttakePosition()
                 if (DEBUG_FSM) Log.d("FSM", " * * * * * NEW CYCLE: * * * * * moving spindexer to ${spindexer.state.name}, ${spindexer.getArtifactString()}")
                 timer.reset()
+                transferShot = false
                 shootingState = Shoot.WAIT_FOR_COMPLETION
             }
 
@@ -79,6 +82,8 @@ class CombinedTeleOp : LinearOpMode() {
                     transfer.on() // assume instantaneous transfer
 //                    spindexer.recordOuttake()
                     // we should be able to omit this because there's code for detection later
+                    transferShot = true
+
                     if (DEBUG_FSM) {
                         Log.d("FSM", "EVALUATING SPINDEXER FULLNESS")
                         Log.d("FSM", "Spindexer isEmpty: " + spindexer.isEmpty + ", isFull: " + spindexer.isFull + ", Str: " + spindexer.getArtifactString())
@@ -97,7 +102,7 @@ class CombinedTeleOp : LinearOpMode() {
                 }
             }
 
-            Shoot.IDLE                -> {}
+            Shoot.IDLE                -> { transferShot = false }
         }
     }
 
@@ -198,7 +203,8 @@ class CombinedTeleOp : LinearOpMode() {
         turret.selectedAlliance = alliance ?: Alliance.RED
         loopTimer.start()
 
-        var turretAutomate = true
+        // todo
+        var turretAutomate = false
 
         fol.startTeleopDrive(true)
         matchTimer.reset()
@@ -348,7 +354,7 @@ class CombinedTeleOp : LinearOpMode() {
                 )
                 lastInAirTime = shooter.expectedTimeInAir
 
-                if (!TUNING_FLYWHEEL && turretAutomate) {
+                if (!TUNING_FLYWHEEL) {
                     shooter.setTargetState(turret.goalPose.distanceFrom(futurePose))
                 } else {
                     shooter.setTimeInAir(turret.goalPose.distanceFrom(futurePose))
@@ -391,6 +397,7 @@ class CombinedTeleOp : LinearOpMode() {
                 addData("y", fol.pose.y)
                 addData("heading", fol.pose.heading)
                 addData("Time Elapsed", matchTimer.seconds())
+                addData("Shooting ", transferShot)
                 update()
             }
         }
