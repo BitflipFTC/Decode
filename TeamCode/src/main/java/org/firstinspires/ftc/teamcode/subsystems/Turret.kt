@@ -128,11 +128,9 @@ class Turret(): Subsystem {
             ActiveOpMode.telemetry.run{
 //                addData("Turret calculated bearing", bearing)
 //                addData("Turret robot heading", robotHeading)
-                addData("Turret target angle", angle)
-                addData("Turret current position", position)
-                addData("Turret Distance", goalPose.distanceFrom(turretPose))
-
-                addLine("---------------------------")
+//                addData("Turret target angle", angle)
+//                addData("Turret current position", position)
+                addData("Goal Distance", goalPose.distanceFrom(turretPose))
             }
         }
     }

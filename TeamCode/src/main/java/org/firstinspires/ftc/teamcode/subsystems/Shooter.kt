@@ -28,7 +28,7 @@ import kotlin.math.abs
 @Configurable
 class Shooter(): Subsystem {
     companion object {
-        const val GEAR_RATIO = 60.0/58.0 // output / input
+        const val GEAR_RATIO = 60.0/56.0 // output / input
         const val FLYWHEEL_PPR = 28 * GEAR_RATIO
         const val LOW_PASS = 0.1
 

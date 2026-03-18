@@ -349,9 +349,9 @@ class Spindexer(): Subsystem {
         if (debugTelemetry) {
             ActiveOpMode.telemetry.addData("Spindexer target angle", targetAngle)
             ActiveOpMode.telemetry.addData("Spindexer current angle", currentAngle)
-            ActiveOpMode.telemetry.addData("Spindexer current state", state.name)
+//            ActiveOpMode.telemetry.addData("Spindexer current state", state.name)
             ActiveOpMode.telemetry.addData("Spindexer atSetPoint", atSetPoint())
-            ActiveOpMode.telemetry.addData("Spindexer power", motor.power)
+//            ActiveOpMode.telemetry.addData("Spindexer power", motor.power)
             ActiveOpMode.telemetry.addData("Spindexer indexed artifacts", getArtifactString())
             ActiveOpMode.telemetry.addData("Motif Pattern", motifPattern?.name ?: "NONE")
             ActiveOpMode.telemetry.addLine("---------------------------")

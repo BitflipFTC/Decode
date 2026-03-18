@@ -170,10 +170,10 @@ class ColorSensor(): Subsystem {
 //            addData("Hue","%07.4f", hsv.h)
 //            addData("Saturation","%07.4f", hsv.s)
 //            addData("Value","%07.4f", hsv.v)
-            addData("Total time", "%04.2fms",(postTime - preTime) / 1E6)
-            addData("i2c Read time", "%04.2fms",(posti2cTime - preTime) / 1E6)
-            addData("Calculations time", "%04.2fms",(postTime - posti2cTime) / 1E6)
-            addLine("------------------------------")
+//            addData("Total time", "%04.2fms",(postTime - preTime) / 1E6)
+//            addData("i2c Read time", "%04.2fms",(posti2cTime - preTime) / 1E6)
+//            addData("Calculations time", "%04.2fms",(postTime - posti2cTime) / 1E6)
+//            addLine("------------------------------")
         }
     }
 }

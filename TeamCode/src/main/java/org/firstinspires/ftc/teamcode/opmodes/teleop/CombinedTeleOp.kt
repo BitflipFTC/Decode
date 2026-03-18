@@ -44,6 +44,9 @@ class CombinedTeleOp : LinearOpMode() {
         const val TUNING_FLYWHEEL = true
         const val DEBUG_FSM = false
     }
+
+    var turretAutomate = false
+
     enum class Shoot {
         IDLE,
         MOVE_SPINDEXER,
@@ -92,10 +95,7 @@ class CombinedTeleOp : LinearOpMode() {
                     timer.reset()
                     if (spindexer.isEmpty) {
                         // DONE
-                        shootingState = Shoot.IDLE
-                        transfer.off()
-                        gamepad1.rumble(250)
-                        spindexer.toFirstEmptyIntakePosition()
+                        endShootingCycle()
                     } else {
                         shootingState = Shoot.MOVE_SPINDEXER
                     }
@@ -104,6 +104,13 @@ class CombinedTeleOp : LinearOpMode() {
 
             Shoot.IDLE                -> { transferShot = false }
         }
+    }
+
+    fun endShootingCycle() {
+        shootingState = Shoot.IDLE
+        transfer.off()
+        gamepad1.rumble(250)
+        spindexer.toFirstEmptyIntakePosition()
     }
 
     val intake = Intake()
@@ -117,10 +124,10 @@ class CombinedTeleOp : LinearOpMode() {
         intake,
         transfer,
         spindexer,
-        shooter,
         turret,
         camera,
-        colorSensor
+        colorSensor,
+        shooter,
     )
 
     var lastSpindexerIsFull = false
@@ -203,9 +210,6 @@ class CombinedTeleOp : LinearOpMode() {
         turret.selectedAlliance = alliance ?: Alliance.RED
         loopTimer.start()
 
-        // todo
-        var turretAutomate = false
-
         fol.startTeleopDrive(true)
         matchTimer.reset()
 
@@ -268,8 +272,7 @@ class CombinedTeleOp : LinearOpMode() {
 //            }
 
             if (gamepad1.circleWasPressed()) {
-                spindexer.toFirstEmptyIntakePosition()
-                shootingState = Shoot.IDLE
+                endShootingCycle()
             }
 
             // update all mechanisms

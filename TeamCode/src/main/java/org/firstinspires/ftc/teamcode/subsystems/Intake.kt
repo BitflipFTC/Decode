@@ -24,8 +24,6 @@ class Intake(): Subsystem {
 
     var reversed = false
 
-    var debugTelemetry = true
-
     /**
      * The current power of the intake motor. Can be set to any value between -1.0 and 1.0.
      */
