@@ -28,6 +28,7 @@ import org.firstinspires.ftc.teamcode.util.Alliance
 import org.firstinspires.ftc.teamcode.util.MotifPattern
 import org.firstinspires.ftc.teamcode.util.TelemetryImplUpstreamSubmission
 import org.firstinspires.ftc.teamcode.util.auto.AutoPoses
+import org.firstinspires.ftc.teamcode.util.normalizeRadians
 import kotlin.math.abs
 
 @Configurable
@@ -41,21 +42,24 @@ class CombinedTeleOp : LinearOpMode() {
         @JvmField
         var lowpass = 0.2
 
-        const val TUNING_FLYWHEEL = true
-        const val DEBUG_FSM = false
+        const val TUNING_FLYWHEEL = false
+        const val DEBUG_FSM = true
     }
 
-    var turretAutomate = false
+    var turretAutomate = true
 
     enum class Shoot {
         IDLE,
+
         MOVE_SPINDEXER,
-        WAIT_FOR_COMPLETION
+        WAIT_FOR_COMPLETION,
+        WAIT_FOR_LAST_SHOT
     }
 
     private var shootingState = Shoot.IDLE
     val timer = ElapsedTime()
     val matchTimer = ElapsedTime()
+    val lastShotTimer = ElapsedTime()
 
     var artifactDetected = false
     var lastArtifactDetected = false
@@ -83,8 +87,7 @@ class CombinedTeleOp : LinearOpMode() {
                 if (spindexer.atSetPoint()) {
                     if (DEBUG_FSM) Log.d("FSM", "spindexer took ${timer.milliseconds()} to rotate")
                     transfer.on() // assume instantaneous transfer
-//                    spindexer.recordOuttake()
-                    // we should be able to omit this because there's code for detection later
+                    spindexer.recordOuttake()
                     transferShot = true
 
                     if (DEBUG_FSM) {
@@ -93,12 +96,19 @@ class CombinedTeleOp : LinearOpMode() {
                     }
 
                     timer.reset()
+                    lastShotTimer.reset()
                     if (spindexer.isEmpty) {
-                        // DONE
-                        endShootingCycle()
+                        shootingState = Shoot.WAIT_FOR_LAST_SHOT
                     } else {
-                        shootingState = Shoot.MOVE_SPINDEXER
+                        endShootingCycle()
                     }
+                }
+            }
+
+            Shoot.WAIT_FOR_LAST_SHOT -> {
+                if (DEBUG_FSM) Log.d("FSM", "waiting for last shot to clear. ${ 100 - lastShotTimer.milliseconds()} remaining")
+                if (lastShotTimer.milliseconds() >= 10.0) {
+                    endShootingCycle()
                 }
             }
 
@@ -213,6 +223,7 @@ class CombinedTeleOp : LinearOpMode() {
         fol.startTeleopDrive(true)
         matchTimer.reset()
 
+        if (!turretAutomate) turret.automatic = false; turret.angle = 0.0
         while (opModeIsActive()) {
             loopTimer.end()
             loopTimer.start()
@@ -227,9 +238,11 @@ class CombinedTeleOp : LinearOpMode() {
                 spindexer.motifPattern = motifPattern
             }
 
-            transfer.transferOn = gamepad1.triangle
+            if (shootingState == Shoot.IDLE) {
+                transfer.transferOn = gamepad1.triangle
+            }
 
-            if (spindexer.slotsToOuttakes.contains(spindexer.state) && spindexer.atSetPoint() && transfer.transferOn) {
+            if (spindexer.slotsToOuttakes.contains(spindexer.state) && spindexer.atSetPoint() && transfer.transferOn && shootingState == Shoot.IDLE) {
                 spindexer.recordOuttake()
             }
 
@@ -314,12 +327,25 @@ class CombinedTeleOp : LinearOpMode() {
                 colorSensor.detectedArtifact = null
             }
 
-            if (camera.hasNewReading && gamepad1.left_trigger > 0.2) {
-                val correctedRobotPose = turret.turretPoseToRobotPose(camera.robotPose)
+            if (camera.hasNewReading && gamepad1.left_trigger > 0.2 && camera.bufferSize == 3) {
+                val correctedRobotPose = turret.turretPoseToRobotPose(camera.turretPose)
+
+                // Calculate the shortest path difference between the two angles
+                val headingDelta = normalizeRadians(
+                    correctedRobotPose.heading - fol.pose.heading,
+                    false
+                )
+
+                // Apply the lowpass to the delta, then add it to the current heading
+                val newHeading = normalizeRadians(
+                    fol.pose.heading + (lowpass * headingDelta),
+                    true
+                )
+
                 fol.pose = Pose(
                     (1-lowpass) * fol.pose.x + lowpass * correctedRobotPose.x,
                     (1-lowpass) * fol.pose.y + lowpass * correctedRobotPose.y,
-                    (1-lowpass) * fol.pose.heading + lowpass * correctedRobotPose.heading
+                    if (gamepad1.right_stick_button) newHeading else fol.pose.heading
                 )
             }
 
@@ -374,6 +400,15 @@ class CombinedTeleOp : LinearOpMode() {
                 turret.robotPose = futurePose
             }
 
+            val correctedRobotPose = turret.turretPoseToRobotPose(camera.turretPose)
+            Drawing.drawRobot(
+                camera.turretPose,
+                Style(
+                    "",
+                    "#0000FF",
+                    0.75
+                )
+            )
             Drawing.drawRobot(
                     fol.pose,
                     Style(
@@ -382,18 +417,20 @@ class CombinedTeleOp : LinearOpMode() {
                         0.75
                     )
                 )
-                Drawing.drawRobot(
-                    futurePose,
-                    Style(
-                        "",
-                        "#FF881E",
-                        0.75
-                    )
+            Drawing.drawRobot(
+                correctedRobotPose,
+                Style(
+                    "",
+                    "#FF881E",
+                    0.75
                 )
-                Drawing.sendPacket()
+            )
+            Drawing.sendPacket()
 
             lastSpindexerIsFull = spindexer.isFull
             subsystems.forEach { it.periodic() }
+
+
             telemetry.run{
                 addData("Loop ms", "%05.2f", loopTimer.ms.toDouble())
                 addData("x", fol.pose.x)
@@ -401,6 +438,10 @@ class CombinedTeleOp : LinearOpMode() {
                 addData("heading", fol.pose.heading)
                 addData("Time Elapsed", matchTimer.seconds())
                 addData("Shooting ", transferShot)
+                addData("Camera pose adj", "x: %05.2f, y: %05.2f, h: %05.2f", correctedRobotPose.x, correctedRobotPose.y,
+                    correctedRobotPose.heading)
+                addData("Camera pose", "x: %05.2f, y: %05.2f, h: %05.2f", camera.turretPose.x, camera.turretPose.y,
+                    camera.turretPose.heading)
                 update()
             }
         }

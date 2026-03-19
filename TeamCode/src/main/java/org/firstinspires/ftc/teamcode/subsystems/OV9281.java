@@ -21,13 +21,10 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagGameDatabase;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
-import java.security.cert.PKIXRevocationChecker;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import dev.nextftc.core.subsystems.Subsystem;
 import dev.nextftc.ftc.ActiveOpMode;
@@ -57,9 +54,8 @@ public class OV9281 implements Subsystem {
             0.0, 268.79544, 289.42108, 0);
     // this is relative to the COR of turret
 
-    private Pose robotPose = new Pose();
+    private Pose turretPose = new Pose(72.0,72,0);
     private MedianPoseFilter filter = new MedianPoseFilter();
-    private Pose newPose = new Pose();
     private Pose2D robotPose2d;
     private boolean newReading = false;
 
@@ -101,7 +97,7 @@ public class OV9281 implements Subsystem {
                 .setOutputUnits(DistanceUnit.INCH, AngleUnit.DEGREES)
                 .build();
 
-        aprilTag.setDecimation(2f);
+        aprilTag.setDecimation(1.5f);
         aprilTag.setPoseSolver(AprilTagProcessor.PoseSolver.OPENCV_SQPNP);
 
         if (viewContainerId == -1) {
@@ -138,7 +134,7 @@ public class OV9281 implements Subsystem {
         exposureControl.setMode(ExposureControl.Mode.Manual);
         defaultExposure = exposureControl.getExposure(TimeUnit.MILLISECONDS);
         defaultGain = gainControl.getGain();
-        exposureControl.setExposure(6, TimeUnit.MILLISECONDS);
+        exposureControl.setExposure(2, TimeUnit.MILLISECONDS);
         gainControl.setGain(7);
     }
 
@@ -213,23 +209,15 @@ public class OV9281 implements Subsystem {
             if (debugTelemetry)
                 ActiveOpMode.telemetry().addData("Detected April Tags", 0);
             newReading = false;
+            filter.empty();
             return;
         }
 
         if (debugTelemetry)
             ActiveOpMode.telemetry().addData("Detected April Tags", detectionsBuffer.size());
         for (AprilTagDetection detection : detectionsBuffer) {
-            if (detection.metadata == null) {
-//                if (debugTelemetry)
-//                    ActiveOpMode.telemetry().addData("Current tag", "No metadata");
-                newReading = false;
-                continue;
-            }
-
-
             if (debugTelemetry) {
-                ActiveOpMode.telemetry().addData("TAG NAME", detection.metadata.name);
-//                ActiveOpMode.telemetry().addData("ID", detection.id);
+                ActiveOpMode.telemetry().addData("ID", detection.id);
                 ActiveOpMode.telemetry().addData("Sureness", detection.decisionMargin);
             }
 
@@ -237,10 +225,11 @@ public class OV9281 implements Subsystem {
                 robotPose2d = new Pose2D(
                         DistanceUnit.INCH, detection.robotPose.getPosition().x, detection.robotPose.getPosition().y, AngleUnit.DEGREES, detection.robotPose.getOrientation().getYaw(AngleUnit.DEGREES)
                 );
-                robotPose = filter.update(new Pose(robotPose2d.getY(DistanceUnit.INCH) + 72.0, (-1 * robotPose2d.getX(DistanceUnit.INCH)) + 72.0, robotPose2d.getHeading(AngleUnit.RADIANS)));
+                turretPose = filter.update(new Pose(robotPose2d.getY(DistanceUnit.INCH) + 72.0, (-1 * robotPose2d.getX(DistanceUnit.INCH)) + 72.0, robotPose2d.getHeading(AngleUnit.RADIANS)));
 
                 newReading = true;
             } else {
+                filter.empty();
                 newReading = false;
             }
         }
@@ -254,12 +243,12 @@ public class OV9281 implements Subsystem {
         return detectionsBuffer.size();
     }
 
-    public Pose getRobotPose() {
-        return robotPose;
+    public Pose getTurretPose() {
+        return turretPose;
     }
 
-    public Pose getNewPose() {
-        return newPose;
+    public int getBufferSize() {
+        return filter.getBufferSize();
     }
 
     public Pose2D getRobotPose2d () {
@@ -274,6 +263,12 @@ public class OV9281 implements Subsystem {
 class MedianPoseFilter {
 
     private final Deque<Pose> buffer = new ArrayDeque<>(3);
+
+    public void empty() {
+        for (int i = 0; i < buffer.size(); i++) {
+            buffer.removeFirst();
+        }
+    }
 
     public Pose update(Pose newPose) {
         if (buffer.size() == 3) {
@@ -312,5 +307,9 @@ class MedianPoseFilter {
         double mx = median3(Math.cos(a), Math.cos(b), Math.cos(c));
         double my = median3(Math.sin(a), Math.sin(b), Math.sin(c));
         return Math.atan2(my, mx);
+    }
+
+    public int getBufferSize() {
+        return buffer.size();
     }
 }

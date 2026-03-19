@@ -192,7 +192,7 @@ abstract class BaseAutonomous: LinearOpMode() {
     val poses = mutableListOf<Pose>()
     var doneRelo = false
     protected fun relocalizeState(): State = FullState("Relo", { doneRelo }, { doneRelo = false }, {
-        if (camera.robotPose != Pose(0.0,0.0) )poses.add(camera.robotPose)
+        if (camera.turretPose != Pose(0.0,0.0) )poses.add(camera.turretPose)
 
         if (poses.size >= 30) {
             follower!!.pose = averageRelocalization()

@@ -66,32 +66,24 @@ class Shooter(): Subsystem {
     // longest short zone is approx. 80 in. from peak to center
     // shortest we can see from is about 25.0.
     val distanceArray = doubleArrayOf(
-        46.0,
-        72.0,
-        97.0,
-        137.0,
-        152.0,
+        45.0,
+        67.0,
+        100.0
     )
     val speedArray = doubleArrayOf(
-        3125.0,
-        3625.0,
-        3875.0,
-        4500.0,
-        4750.0,
+        2875.0,
+        3250.0,
+        3625.0
     )
     val angleArray = doubleArrayOf(
-        0.025,
-        0.35,
-        0.3875,
-        0.4,
-        0.425
+        0.0,
+        0.1,
+        0.2
     )
     val timeInAirArray = doubleArrayOf(
-        0.5,
-        0.55,
-        0.65,
-        0.8,
-        0.9
+        0.35,
+        0.45,
+        0.55
     )
 
     private val velocityLookupTable = InterpolatedLookupTable(
@@ -165,8 +157,8 @@ class Shooter(): Subsystem {
         flywheelMotor.power = if (filteredFlywheelRPM < targetFlywheelRPM && abs(targetFlywheelRPM) >= 250.0) {
             1.0
         } else if (targetFlywheelRPM - filteredFlywheelRPM <= -750.0 && abs(targetFlywheelRPM) >= 250.0) {
-            -0.25
-        } else 0.0
+            0.0
+        } else 0.25 * (targetFlywheelRPM / 5600.0)
 
 
         hoodServo.position = hoodPosition
