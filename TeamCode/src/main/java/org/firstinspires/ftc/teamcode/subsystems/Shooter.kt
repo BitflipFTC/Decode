@@ -30,20 +30,12 @@ class Shooter(): Subsystem {
     companion object {
         const val GEAR_RATIO = 60.0/56.0 // output / input
         const val FLYWHEEL_PPR = 28 * GEAR_RATIO
-        const val LOW_PASS = 0.1
 
         @JvmField
-        var kP = 0.015
-        @JvmField
-        var kV = 0.00248
+        var gain = 0.0005
 
         @JvmField
         var useVelocityCorrection = true
-
-        @JvmField
-        var tuning = false
-
-        const val VOLTAGE_FILTER = 0.01
 
         // 125 rpm change is approximately fixed by a 2.5 degree lowering of the hood
         // we have an angle range of exactly 35 degrees to 60 degrees.
@@ -60,7 +52,6 @@ class Shooter(): Subsystem {
     private lateinit var vSensor: VoltageSensor
     private lateinit var hoodServo: ServoEx
     private lateinit var flywheelMotor: MotorEx
-    private val flywheelController = PIDController(kP, 0.0, 0.0, kV)
 
     // long goal is approximately 125 in. from peak of long to center of goal tag
     // longest short zone is approx. 80 in. from peak to center
@@ -113,8 +104,9 @@ class Shooter(): Subsystem {
         private set
     var filteredFlywheelRPM = 0.0
         private set
-    var pidOutput = 0.0
+    var output = 0.0
         private set
+    var tbh = 0.0
     var distance = 0.0
 
     val velocityFilter = MovingAverageSmoother(3)
@@ -130,13 +122,14 @@ class Shooter(): Subsystem {
             position = hoodPosition
         }
 
-        flywheelController.setPointTolerance = 50.0
-
         vSensor = ActiveOpMode.hardwareMap.get(VoltageSensor::class.java, "Control Hub")
     }
 
 //    private var cachedVoltage: Double = 13.0
 //    private var voltageTimer = 0
+
+    var error = 0.0
+    var lastError = 0.0
 
     override fun periodic() {
 //        if (voltageTimer++ % 50 == 0) {
@@ -146,19 +139,24 @@ class Shooter(): Subsystem {
         flywheelRPM = (flywheelMotor.velocity / FLYWHEEL_PPR) * 60
         filteredFlywheelRPM = velocityFilter.addValue(flywheelRPM)
 
-        if (tuning) {
-            flywheelController.setCoeffs(kP, 0.0, 0.0, kV, 0.0)
+        lastError = error
+        error = targetFlywheelRPM - flywheelRPM
+
+        if (error >= 67.0) {
+            flywheelMotor.power = 1.0
+            output = targetFlywheelRPM * (1.0/5600.0)
+            tbh = output
+        } else {
+            output += gain * error
+            output = output.coerceIn(-0.05,1.0)
+
+            if ((error > 0 && lastError < 0) || (error < 0 && lastError > 0)) {
+                output = 0.5 * (output + tbh)
+                tbh = output
+            }
+
+            flywheelMotor.power = output
         }
-
-//        pidOutput = flywheelController.calculate(filteredFlywheelRPM, targetFlywheelRPM)
-
-//        flywheelMotor.power = pidOutput / cachedVoltage
-
-        flywheelMotor.power = if (filteredFlywheelRPM < targetFlywheelRPM && abs(targetFlywheelRPM) >= 250.0) {
-            1.0
-        } else if (targetFlywheelRPM - filteredFlywheelRPM <= -750.0 && abs(targetFlywheelRPM) >= 250.0) {
-            0.0
-        } else 0.25 * (targetFlywheelRPM / 5600.0)
 
 
         hoodServo.position = hoodPosition
