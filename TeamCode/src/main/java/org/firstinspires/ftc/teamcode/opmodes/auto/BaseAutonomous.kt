@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.util.ElapsedTime
 import com.skeletonarmy.marrow.prompts.OptionPrompt
 import com.skeletonarmy.marrow.prompts.Prompter
+import org.firstinspires.ftc.teamcode.opmodes.teleop.CombinedTeleOp
 import org.firstinspires.ftc.teamcode.opmodes.teleop.CombinedTeleOp.Companion.alliance
 import org.firstinspires.ftc.teamcode.opmodes.teleop.CombinedTeleOp.Companion.follower
 import org.firstinspires.ftc.teamcode.opmodes.teleop.CombinedTeleOp.Companion.motifPattern
@@ -40,13 +41,75 @@ abstract class BaseAutonomous: LinearOpMode() {
     }
     abstract fun initialize(alliance: Alliance)
 
-    private enum class Shoot {
+    private var shootingState = Shoot.IDLE
+    val matchTimer = ElapsedTime()
+    val lastShotTimer = ElapsedTime()
+    val lastlastshottimer = ElapsedTime()
+
+    enum class Shoot {
         IDLE,
         MOVE_SPINDEXER,
-        WAIT_FOR_COMPLETION
+        WAIT_FOR_COMPLETION,
+        WAIT_FOR_LAST_SHOT,
+        LAST_SHOT_DELAY
     }
 
-    private var shootingState = Shoot.IDLE
+    fun shootAllArtifacts() {
+        if (!spindexer.isEmpty) {
+            shootingState = Shoot.MOVE_SPINDEXER
+        }
+    }
+
+    fun updateShootingFSM() {
+        when (shootingState) {
+            Shoot.MOVE_SPINDEXER      -> {
+                spindexer.toMotifOuttakePosition()
+                timer.reset()
+                shootingState = Shoot.WAIT_FOR_COMPLETION
+            }
+
+            Shoot.WAIT_FOR_COMPLETION -> {
+                if (spindexer.atSetPoint()) {
+                    transfer.on() // assume instantaneous transfer
+                    spindexer.recordOuttake()
+
+                    timer.reset()
+                    lastShotTimer.reset()
+                    shootingState = Shoot.WAIT_FOR_LAST_SHOT
+                }
+            }
+
+            Shoot.WAIT_FOR_LAST_SHOT -> {
+                if (lastShotTimer.milliseconds() >= 50.0) {
+                    shootingState = if (spindexer.isEmpty) {
+                        lastlastshottimer.reset()
+                        Shoot.LAST_SHOT_DELAY
+                    } else {
+                        Shoot.MOVE_SPINDEXER
+                    }
+                }
+            }
+
+            Shoot.LAST_SHOT_DELAY -> {
+                if (lastlastshottimer.milliseconds() in 50.0..150.0) {
+                    transfer.reverse()
+                } else if (lastlastshottimer.milliseconds() in 150.0..300.0) {
+                    transfer.deReverse()
+                } else if (lastlastshottimer.milliseconds() >= 300.0) {
+                    endShootingCycle()
+                }
+            }
+
+            Shoot.IDLE                -> { }
+        }
+    }
+
+    fun endShootingCycle() {
+        shootingState = Shoot.IDLE
+        transfer.off()
+        gamepad1.rumble(250)
+        spindexer.toFirstEmptyIntakePosition()
+    }
 
     val spindexer: Spindexer = Spindexer()
     val turret: Turret = Turret()
@@ -77,6 +140,7 @@ abstract class BaseAutonomous: LinearOpMode() {
                 alliance = prompter.get<Alliance>("alliance")
                 initialize(alliance!!)
                 turret.selectedAlliance = alliance!!
+                telemetry.addLine("six seven")
             }
 
         while (opModeInInit()) {
@@ -133,61 +197,16 @@ abstract class BaseAutonomous: LinearOpMode() {
 
     private val timer = ElapsedTime()
 
-    protected fun shootAllArtifacts() {
-        if (!spindexer.isEmpty) {
-            shootingState = Shoot.MOVE_SPINDEXER
-            Log.d(
-                "FSM",
-                "Shooting: spindexer has ${spindexer.getArtifactString()}, motif is ${spindexer.motifPattern}"
-            )
-        }
-    }
-
-    private fun updateShootingFSM() {
-        when (shootingState) {
-            Shoot.MOVE_SPINDEXER      -> {
-                spindexer.toMotifOuttakePosition()
-                if (DEBUG_FSM) Log.d("FSM", " * * * * * NEW CYCLE: * * * * * moving spindexer to ${spindexer.state.name}, ${spindexer.getArtifactString()}")
-                timer.reset()
-                shootingState = Shoot.WAIT_FOR_COMPLETION
-            }
-
-            Shoot.WAIT_FOR_COMPLETION -> {
-                if (DEBUG_FSM) Log.d("FSM", "          Waiting for spindexer, current: ${spindexer.currentAngle}, target: ${spindexer.targetAngle}, diff: ${spindexer.targetAngle - spindexer.currentAngle}")
-                if (spindexer.atSetPoint()) {
-                    if (DEBUG_FSM) Log.d("FSM", "spindexer took ${timer.milliseconds()} to rotate")
-                    transfer.on() // assume instantaneous transfer
-                    spindexer.recordOuttake()
-                    if (DEBUG_FSM) {
-                        Log.d("FSM", "EVALUATING SPINDEXER FULLNESS")
-                        Log.d("FSM", "Spindexer isEmpty: " + spindexer.isEmpty + ", isFull: " + spindexer.isFull + ", Str: " + spindexer.getArtifactString())
-                    }
-
-                    timer.reset()
-                    if (spindexer.isEmpty) {
-                        // DONE
-                        shootingState = Shoot.IDLE
-                        transfer.off()
-                        gamepad1.rumble(250)
-                        spindexer.toFirstEmptyIntakePosition()
-                    } else {
-                        shootingState = Shoot.MOVE_SPINDEXER
-                    }
-                }
-            }
-
-            Shoot.IDLE                -> {}
-        }
-    }
 //todo
     protected fun shootState(): State =
-        InitializeState("Shoot state", { shootingState == Shoot.IDLE }, ::shootAllArtifacts)
+        InitializeState("Shoot state", { shootingState == Shoot.IDLE || shootingState == Shoot.LAST_SHOT_DELAY && lastlastshottimer.milliseconds() >= 150.0 }, ::shootAllArtifacts)
 
-//    protected fun shootState() = WaitState(1500.0)
+//    protected fun shootState() = WaitState(700.0)
 
     protected fun startIntake(): State = InstantState("Start intake", intake::intake)
+    protected fun stopIntake(): State = InstantState("Stop Intake", intake::off)
 
-//    protected  fun startIntake(): State = WaitState(1.0)
+//    protected  fun startIntake(): State = WaitState(250.0)
 
     val poses = mutableListOf<Pose>()
     var doneRelo = false

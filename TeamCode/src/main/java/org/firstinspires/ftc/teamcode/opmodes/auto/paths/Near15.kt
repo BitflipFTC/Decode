@@ -15,90 +15,72 @@ import org.firstinspires.ftc.teamcode.util.buildTangentLine
 import org.firstinspires.ftc.teamcode.util.doIntakeSpeed
 
 class Near15(alliance: Alliance) : BaseAutoPath(alliance) {
-    val strafingFullSpeed = 1.0
-    val fullSpeed = 0.9
-    val intakeSpeed = 0.67
-    val gateSpeed = 0.4
+    val fullSpeed = 1.0
 
     lateinit var scorePreload: PathChain
     lateinit var dintake2: PathChain
-    lateinit var intake2: PathChain
     lateinit var score2: PathChain
     lateinit var dgateintake: PathChain
     lateinit var dogateempty: PathChain
     lateinit var intakegate: PathChain
     lateinit var scoregate: PathChain
     lateinit var dintake1: PathChain
-    lateinit var intake1: PathChain
     lateinit var score1: PathChain
     lateinit var dintake3: PathChain
-    lateinit var intake3: PathChain
     lateinit var score3: PathChain
-    lateinit var park: PathChain
 
     override fun buildPaths(follower: Follower): List<Path> {
         scorePreload = follower.pathBuilder()
-            .buildBasicLine(poses.nearStartPose, poses.nearShootPoseFacingObelisk).build()
+            .buildBasicLine(poses.nearStartPose, poses.nearShootPose).build()
 
         dintake2 = follower.pathBuilder()
-            .buildCurvedLine(poses.nearShootPose,poses.farIntake2Control,poses.startIntake2).build()
-
-        intake2 = follower.pathBuilder()
-            .buildTangentLine(poses.startIntake2, poses.endIntake2).build()
+            .buildCurvedTangentLine(poses.nearShootPose,poses.nearIntake2Control,poses.endIntake2)
+            .build()
 
         score2 = follower.pathBuilder()
-            .buildCurvedLine(poses.endIntake2, poses.farIntake2Control, poses.nearShootPose).setReversed().build()
+            .buildCurvedTangentLine(poses.endIntake2, poses.farIntake2Control, poses.nearShootPose).setReversed().build()
 
         dgateintake = follower.pathBuilder()
-            .buildCurvedTangentLine(poses.nearStartPose, poses.farIntake2Control, poses.behindGateIntake).build()
+            .buildCurvedLine(poses.nearShootPose.withHeading(Math.toRadians(270.0)), poses.nearIntake2Control, poses.behindGateIntake)
+            .build()
 
         dogateempty = follower.pathBuilder()
-            .buildBasicLine(poses.behindGateIntake, poses.gateEmptyForIntake).build()
+            .buildBasicLine(poses.behindGateIntake, poses.gateEmptyForIntake)
+            .build()
 
         intakegate = follower.pathBuilder()
-            .buildBasicLine(poses.gateEmptyForIntake,
-                poses.gateIntake).build()
+            .buildBasicLine(poses.gateEmptyForIntake, poses.gateIntake)
+            .build()
 
         scoregate = follower.pathBuilder()
-            .buildCurvedTangentLine(poses.gateIntake, poses.farIntake2Control, poses.nearShootPose).build()
+            .buildCurvedLine(poses.gateIntake, poses.farIntake2Control, poses.nearShootPose).build()
 
         dintake1 = follower.pathBuilder()
-            .buildCurvedLine(poses.nearShootPoseFacingObelisk, poses.farIntake2Control,poses.startIntake2).build()
-
-        intake1 = follower.pathBuilder()
-            .buildTangentLine(poses.startIntake2, poses.endIntake2).build()
+            .buildCurvedLine(poses.nearShootPose, poses.nearIntake1Control,poses.endIntake1)
+            .build()
 
         score1 = follower.pathBuilder()
-            .buildCurvedLine(poses.emptyRamp, poses.emptyRampControl, poses.nearShootPose).build()
+            .buildTangentLine(poses.endIntake1, poses.nearShootPose).setReversed().build()
 
         dintake3 = follower.pathBuilder()
-            .buildCurvedLine(poses.nearShootPose,poses.farIntake3Control,  poses.startIntake3).build()
-
-        intake3 = follower.pathBuilder()
-            .buildTangentLine(poses.startIntake3, poses.endIntake3).build()
+            .buildCurvedTangentLine(poses.nearShootPose,poses.farIntake3Control,  poses.endIntake3)
+            .build()
 
         score3 = follower.pathBuilder()
-            .buildCurvedTangentLine(poses.endIntake3, poses.endIntake3Move, poses.nearShootPose).setReversed().build()
-
-        park = follower.pathBuilder()
-            .buildBasicLine(poses.nearShootPose, poses.nearParkPose).build()
+            .buildCurvedTangentLine(poses.endIntake3, poses.endIntake3Move, poses.nearShootPoseInZone).setReversed().build()
 
         return listOf(
             Path(scorePreload, fullSpeed),
             Path(dintake2, fullSpeed),
-            Path(intake2, intakeSpeed),
             Path(score2, fullSpeed),
             Path(dgateintake, fullSpeed),
-            Path(dogateempty, gateSpeed),
-            Path(intakegate, gateSpeed),
+            Path(dogateempty, fullSpeed),
+            Path(intakegate, fullSpeed),
             Path(scoregate, fullSpeed),
-            Path(dintake1, strafingFullSpeed),
-            Path(intake1, intakeSpeed),
+            Path(dintake1, fullSpeed),
             Path(score1, fullSpeed),
-            Path(dintake3, strafingFullSpeed),
-            Path(intake3, intakeSpeed),
+            Path(dintake3, fullSpeed),
             Path(score3, fullSpeed),
-            Path(park, fullSpeed)
         )
     }
 }

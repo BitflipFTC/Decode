@@ -48,21 +48,22 @@ class CombinedTeleOp : LinearOpMode() {
 
     var turretAutomate = true
 
-    enum class Shoot {
-        IDLE,
-
-        MOVE_SPINDEXER,
-        WAIT_FOR_COMPLETION,
-        WAIT_FOR_LAST_SHOT
-    }
+    var artifactDetected = false
+    var lastArtifactDetected = false
 
     private var shootingState = Shoot.IDLE
     val timer = ElapsedTime()
     val matchTimer = ElapsedTime()
     val lastShotTimer = ElapsedTime()
+    val lastlastshottimer = ElapsedTime()
 
-    var artifactDetected = false
-    var lastArtifactDetected = false
+    enum class Shoot {
+        IDLE,
+        MOVE_SPINDEXER,
+        WAIT_FOR_COMPLETION,
+        WAIT_FOR_LAST_SHOT,
+        LAST_SHOT_DELAY
+    }
 
     fun shootAllArtifacts() {
         if (!spindexer.isEmpty) {
@@ -70,15 +71,12 @@ class CombinedTeleOp : LinearOpMode() {
         }
     }
 
-    var transferShot = false
-
     fun updateShootingFSM() {
         when (shootingState) {
             Shoot.MOVE_SPINDEXER      -> {
                 spindexer.toMotifOuttakePosition()
                 if (DEBUG_FSM) Log.d("FSM", " * * * * * NEW CYCLE: * * * * * moving spindexer to ${spindexer.state.name}, ${spindexer.getArtifactString()}")
                 timer.reset()
-                transferShot = false
                 shootingState = Shoot.WAIT_FOR_COMPLETION
             }
 
@@ -88,7 +86,6 @@ class CombinedTeleOp : LinearOpMode() {
                     if (DEBUG_FSM) Log.d("FSM", "spindexer took ${timer.milliseconds()} to rotate")
                     transfer.on() // assume instantaneous transfer
                     spindexer.recordOuttake()
-                    transferShot = true
 
                     if (DEBUG_FSM) {
                         Log.d("FSM", "EVALUATING SPINDEXER FULLNESS")
@@ -97,22 +94,33 @@ class CombinedTeleOp : LinearOpMode() {
 
                     timer.reset()
                     lastShotTimer.reset()
-                    if (spindexer.isEmpty) {
-                        shootingState = Shoot.WAIT_FOR_LAST_SHOT
-                    } else {
-                        endShootingCycle()
-                    }
+                    shootingState = Shoot.WAIT_FOR_LAST_SHOT
                 }
             }
 
             Shoot.WAIT_FOR_LAST_SHOT -> {
-                if (DEBUG_FSM) Log.d("FSM", "waiting for last shot to clear. ${ 100 - lastShotTimer.milliseconds()} remaining")
-                if (lastShotTimer.milliseconds() >= 10.0) {
+                if (DEBUG_FSM) Log.d("FSM", "waiting for last shot to clear. ${ 50 - lastShotTimer.milliseconds()} remaining")
+                if (lastShotTimer.milliseconds() >= if ((turret.goalPose.distanceFrom(turret.turretPose)) >= 110.0) 150.0 else 75.0) {
+                    shootingState = if (spindexer.isEmpty) {
+                        lastlastshottimer.reset()
+                        Shoot.LAST_SHOT_DELAY
+                    } else {
+                        Shoot.MOVE_SPINDEXER
+                    }
+                }
+            }
+
+            Shoot.LAST_SHOT_DELAY -> {
+                if (lastlastshottimer.milliseconds() in 50.0..150.0) {
+                    transfer.reverse()
+                } else if (lastlastshottimer.milliseconds() in 150.0..300.0) {
+                    transfer.deReverse()
+                } else if (lastlastshottimer.milliseconds() >= 300.0) {
                     endShootingCycle()
                 }
             }
 
-            Shoot.IDLE                -> { transferShot = false }
+            Shoot.IDLE                -> { }
         }
     }
 
@@ -425,11 +433,18 @@ class CombinedTeleOp : LinearOpMode() {
                     0.75
                 )
             )
+            Drawing.drawRobot(
+                turret.goalPose,
+                Style(
+                    "",
+                    "#FFFF00",
+                    0.5
+                )
+            )
             Drawing.sendPacket()
 
             lastSpindexerIsFull = spindexer.isFull
             subsystems.forEach { it.periodic() }
-
 
             telemetry.run{
                 addData("Loop ms", "%05.2f", loopTimer.ms.toDouble())
@@ -437,7 +452,6 @@ class CombinedTeleOp : LinearOpMode() {
                 addData("y", fol.pose.y)
                 addData("heading", fol.pose.heading)
                 addData("Time Elapsed", matchTimer.seconds())
-                addData("Shooting ", transferShot)
                 addData("Camera pose adj", "x: %05.2f, y: %05.2f, h: %05.2f", correctedRobotPose.x, correctedRobotPose.y,
                     correctedRobotPose.heading)
                 addData("Camera pose", "x: %05.2f, y: %05.2f, h: %05.2f", camera.turretPose.x, camera.turretPose.y,

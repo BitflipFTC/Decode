@@ -134,7 +134,7 @@ public class OV9281 implements Subsystem {
         exposureControl.setMode(ExposureControl.Mode.Manual);
         defaultExposure = exposureControl.getExposure(TimeUnit.MILLISECONDS);
         defaultGain = gainControl.getGain();
-        exposureControl.setExposure(2, TimeUnit.MILLISECONDS);
+        exposureControl.setExposure(4, TimeUnit.MILLISECONDS);
         gainControl.setGain(7);
     }
 

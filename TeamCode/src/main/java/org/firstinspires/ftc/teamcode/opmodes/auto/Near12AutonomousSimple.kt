@@ -10,6 +10,7 @@ import org.firstinspires.ftc.teamcode.util.InitializeState
 import org.firstinspires.ftc.teamcode.util.InstantState
 import org.firstinspires.ftc.teamcode.util.TimedFollowPathState
 import org.firstinspires.ftc.teamcode.util.WaitState
+import org.firstinspires.ftc.teamcode.util.WaitUntilState
 
 @Suppress("Unused")
 @Autonomous(name = "NEAR 12 Ball", preselectTeleOp = "Combined TeleOp")
@@ -21,39 +22,35 @@ class Near12AutonomousSimple: BaseAutonomous() {
         follower!!.setStartingPose(pathSequence.poses.nearStartPose)
 
         finiteStateMachine = FiniteStateMachine(
+            InstantState("zeep", { turret.automatic = false
+            turret.angle = 90.0} ),
             FollowPathState("Score preload", paths[0]),
             startIntake(),
-            InstantState("zeep", { follower!!.turnTo(Math.toRadians(45.0))} ),
-            WaitState(750.0),
-            relocalizeState(),
+//            WaitUntilState( { spindexer.motifPattern != null }),
+            InstantState("aaaa",{turret.automatic = true}),
+            WaitState(400.0),
+            WaitUntilState(shooter::atSetPoint),
             shootState(),
 
             FollowPathState("dintake 1", paths[1]),
-            FollowPathState("intake 1", paths[2]),
             WaitState(150.0),
-//            FollowPathState("dramping it", paths[3]),
-//            TimedFollowPathState("ramping ", paths[4], 2000.0),
-//            WaitState(100.0),
-            FollowPathState("dscore1", paths[3]),
-            relocalizeState(),
+            FollowPathState("dramping it", paths[2]),
+            TimedFollowPathState("ramping ", paths[3], 750.0),
+            FollowPathState("dscore1", paths[4]),
             shootState(),
 
-            FollowPathState("dintake 2", paths[4]),
-            FollowPathState("intake 2", paths[5]),
+            FollowPathState("dintake 2", paths[5]),
             WaitState(150.0),
 
             FollowPathState("DScore 3", paths[6]),
-            relocalizeState(),
             shootState(),
 
             FollowPathState("dIntake 3", paths[7]),
-            FollowPathState("intake 3", paths[8]),
             WaitState(150.0),
-            FollowPathState("DScore 3", paths[9]),
-            relocalizeState(),
+            FollowPathState("DScore 3", paths[8]),
             shootState(),
-
-            FollowPathState("Park", paths[10])
         )
     }
+
+
 }

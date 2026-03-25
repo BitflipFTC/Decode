@@ -20,10 +20,10 @@ public class Constants {
     public static FollowerConstants followerConstants = new FollowerConstants()
             .mass(10.659)
             .predictiveBrakingCoefficients(new PredictiveBrakingCoefficients(
-                    0.045, 0.06465648557274474, 0.0015042964787405362
+                    0.067, 0.06465648557274474, 0.0016042964787405362
             ))
             .headingPIDFCoefficients(new PIDFCoefficients(
-                    0.475, 0, 0.035, 0.035
+                    0.85, 0, 0.035, 0.02
             ))
             ;
 
@@ -42,8 +42,8 @@ public class Constants {
             .rightRearMotorDirection(DcMotorSimple.Direction.REVERSE);
 
     public static PinpointConstants localizerConstants = new PinpointConstants()
-            .forwardPodY(7.125) // 8.3
-            .strafePodX(-0.314961)
+            .forwardPodY(6.969488188976378) // 8.3
+            .strafePodX(1.8731208861343163)
             .distanceUnit(DistanceUnit.INCH)
             .hardwareMapName("pinpoint")
             .encoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD)

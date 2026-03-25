@@ -32,7 +32,7 @@ class Shooter(): Subsystem {
         const val FLYWHEEL_PPR = 28 * GEAR_RATIO
 
         @JvmField
-        var gain = 0.0005
+        var gain = 0.005
 
         @JvmField
         var useVelocityCorrection = true
@@ -57,24 +57,28 @@ class Shooter(): Subsystem {
     // longest short zone is approx. 80 in. from peak to center
     // shortest we can see from is about 25.0.
     val distanceArray = doubleArrayOf(
-        45.0,
-        67.0,
-        100.0
+        47.0,
+        62.0,
+        81.0,
+        132.0
     )
     val speedArray = doubleArrayOf(
         2875.0,
-        3250.0,
-        3625.0
+        3125.0,
+        3375.0,
+        4250.0,
     )
     val angleArray = doubleArrayOf(
-        0.0,
+        0.01,
         0.1,
-        0.2
+        0.225,
+        0.375
     )
     val timeInAirArray = doubleArrayOf(
         0.35,
         0.45,
-        0.55
+        0.55,
+        0.75
     )
 
     private val velocityLookupTable = InterpolatedLookupTable(
@@ -142,7 +146,7 @@ class Shooter(): Subsystem {
         lastError = error
         error = targetFlywheelRPM - flywheelRPM
 
-        if (error >= 67.0) {
+        if (error >= 40.0) {
             flywheelMotor.power = 1.0
             output = targetFlywheelRPM * (1.0/5600.0)
             tbh = output
@@ -184,10 +188,10 @@ class Shooter(): Subsystem {
             if (useVelocityCorrection) {
                 val firstHoodDegrees = hoodPosToDegrees(firstHoodPosition)
                 val flywheelDiff = targetFlywheelRPM - filteredFlywheelRPM
-                val hoodOffsetVeloCorrection = ((-1.0 * (distance / 150.0)) * flywheelDiff) / 125.0
+                val hoodOffsetVeloCorrection = ((-1.25 * (distance / 150.0)) * flywheelDiff) / 125.0
                 val targetHoodPosition =
                     degreesToHoodPos(firstHoodDegrees + hoodOffsetVeloCorrection)
-                hoodPosition = targetHoodPosition.coerceIn(0.025..0.45) // limit from 35 to 55 deg
+                hoodPosition = targetHoodPosition.coerceIn(0.025..0.5) // limit from 35 to 55 deg
             } else {
                 hoodPosition = firstHoodPosition
             }

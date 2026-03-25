@@ -12,7 +12,8 @@ import dev.nextftc.core.subsystems.Subsystem;
 @Configurable
 public class Transfer implements Subsystem {
     private MotorEx motor = null;
-    public boolean transferOn = true;
+    public boolean transferOn = false;
+    public boolean transferReverse = false;
 
     @Override
     public void initialize() {
@@ -34,6 +35,15 @@ public class Transfer implements Subsystem {
 
     public void off() {
         transferOn = false;
+        transferReverse = false;
+    }
+
+    public void reverse() {
+        transferReverse = true;
+    }
+
+    public void deReverse() {
+        transferReverse = false;
     }
 
     /**
@@ -42,7 +52,7 @@ public class Transfer implements Subsystem {
     @Override
     public void periodic() {
         if (transferOn) {
-            motor.setPower(1.0);
+            motor.setPower((transferReverse ? -1.0 : 1.0));
         } else {
             motor.setPower(0.0);
         }

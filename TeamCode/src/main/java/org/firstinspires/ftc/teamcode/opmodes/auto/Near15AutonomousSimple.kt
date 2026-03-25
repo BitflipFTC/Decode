@@ -23,37 +23,43 @@ class Near15AutonomousSimple: BaseAutonomous() {
         val timer = ElapsedTime()
 
         finiteStateMachine = FiniteStateMachine(
+            InstantState("zeep", { turret.automatic = false
+                turret.angle = 90.0} ),
             FollowPathState("Score preload", paths[0]),
             startIntake(),
+//            WaitUntilState( { spindexer.motifPattern != null }),
+            InstantState("aaaa",{turret.automatic = true}),
+            WaitState(350.0),
+            WaitUntilState(shooter::atSetPoint),
             shootState(),
 
             FollowPathState("dintake 2", paths[1]),
-            FollowPathState("intake 2", paths[2]),
-            WaitState(150.0),
-            FollowPathState("DScore 3", paths[3]),
+            WaitState(375.0),
+            FollowPathState("DScore 2", paths[2]),
             shootState(),
 
-            FollowPathState("drive to gate intake", paths[4]),
-            TimedFollowPathState("Do gate empty", paths[5], 2000.0),
-            WaitState(250.0),
-            FollowPathState("Do gate intake", paths[6]),
+            FollowPathState("Do gate drive", paths[3]),
+            TimedFollowPathState("Do gate empty", paths[4], 750.0),
+//            WaitState(250.0),
+            FollowPathState("Do gate intake", paths[5]),
             InstantState("") {timer.reset()},
-            WaitUntilState { spindexer.isFull || timer.milliseconds() >= 4000.0 },
-            FollowPathState("Score gate intake", paths[7]),
-
-            FollowPathState("dintake 1", paths[8]),
-            FollowPathState("intake 1", paths[9]),
-            WaitState(150.0),
-            FollowPathState("dscore1", paths[10]),
+            WaitUntilState { spindexer.isFull || timer.milliseconds() >= 2000.0 },
+//            stopIntake(),
+            FollowPathState("Score gate intake", paths[6]),
+//            startIntake(),
             shootState(),
 
-            FollowPathState("dIntake 3", paths[11]),
-            FollowPathState("intake 3", paths[12]),
-            WaitState(150.0),
-            FollowPathState("DScore 3", paths[13]),
+            FollowPathState("intake 1", paths[7]),
+            WaitState(500.0),
+            FollowPathState("dscore1", paths[8]),
             shootState(),
 
-            FollowPathState("Park", paths[14])
+            FollowPathState("intake 3", paths[9]),
+            WaitState(150.0),
+//            stopIntake(),
+            FollowPathState("DScore 3", paths[10]),
+//            startIntake(),
+            shootState(),
         )
     }
 }
