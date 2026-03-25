@@ -34,7 +34,6 @@ class Near12(alliance: Alliance) : BaseAutoPath(alliance) {
 
         dintake1 = follower.pathBuilder()
             .buildCurvedTangentLine(poses.nearShootPose, poses.nearIntake2Control, poses.endIntake2)
-//            .buildTangentLine(poses.startIntake2, poses.endIntake2)
             .build()
 
         demptyRamp = follower.pathBuilder()

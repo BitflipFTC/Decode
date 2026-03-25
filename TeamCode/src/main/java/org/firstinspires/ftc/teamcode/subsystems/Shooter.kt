@@ -64,7 +64,7 @@ class Shooter(): Subsystem {
     )
     val speedArray = doubleArrayOf(
         2875.0,
-        3125.0,
+        3250.0,
         3375.0,
         4250.0,
     )
@@ -75,10 +75,10 @@ class Shooter(): Subsystem {
         0.375
     )
     val timeInAirArray = doubleArrayOf(
-        0.35,
-        0.45,
-        0.55,
-        0.75
+        0.6,
+        0.7,
+        0.8,
+        0.9
     )
 
     private val velocityLookupTable = InterpolatedLookupTable(

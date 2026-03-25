@@ -42,8 +42,8 @@ abstract class BaseAutonomous: LinearOpMode() {
     abstract fun initialize(alliance: Alliance)
 
     private var shootingState = Shoot.IDLE
+    val timer = ElapsedTime()
     val matchTimer = ElapsedTime()
-    val lastShotTimer = ElapsedTime()
     val lastlastshottimer = ElapsedTime()
 
     enum class Shoot {
@@ -64,29 +64,35 @@ abstract class BaseAutonomous: LinearOpMode() {
         when (shootingState) {
             Shoot.MOVE_SPINDEXER      -> {
                 spindexer.toMotifOuttakePosition()
+                if (DEBUG_FSM) Log.d("FSM", " * * * * * NEW CYCLE: * * * * * moving spindexer to ${spindexer.state.name}, ${spindexer.getArtifactString()}")
                 timer.reset()
                 shootingState = Shoot.WAIT_FOR_COMPLETION
             }
 
             Shoot.WAIT_FOR_COMPLETION -> {
-                if (spindexer.atSetPoint()) {
+                if (DEBUG_FSM) Log.d("FSM", "          Waiting for spindexer, current: ${spindexer.currentAngle}, target: ${spindexer.targetAngle}, diff: ${spindexer.targetAngle - spindexer.currentAngle}")
+                if (spindexer.atSetPoint() && shooter.atSetPoint()) {
+                    if (DEBUG_FSM) Log.d("FSM", "spindexer took ${timer.milliseconds()} to rotate")
                     transfer.on() // assume instantaneous transfer
                     spindexer.recordOuttake()
 
+                    if (DEBUG_FSM) {
+                        Log.d("FSM", "EVALUATING SPINDEXER FULLNESS")
+                        Log.d("FSM", "Spindexer isEmpty: " + spindexer.isEmpty + ", isFull: " + spindexer.isFull + ", Str: " + spindexer.getArtifactString())
+                    }
+
                     timer.reset()
-                    lastShotTimer.reset()
                     shootingState = Shoot.WAIT_FOR_LAST_SHOT
                 }
             }
 
             Shoot.WAIT_FOR_LAST_SHOT -> {
-                if (lastShotTimer.milliseconds() >= 50.0) {
-                    shootingState = if (spindexer.isEmpty) {
-                        lastlastshottimer.reset()
-                        Shoot.LAST_SHOT_DELAY
-                    } else {
-                        Shoot.MOVE_SPINDEXER
-                    }
+                // one loop between transfer on and go to next position, which is like 20-40ms
+                shootingState = if (spindexer.isEmpty) {
+                    lastlastshottimer.reset()
+                    Shoot.LAST_SHOT_DELAY
+                } else {
+                    Shoot.MOVE_SPINDEXER
                 }
             }
 
@@ -166,6 +172,7 @@ abstract class BaseAutonomous: LinearOpMode() {
             if (motifPattern == null) {
                 motifPattern = camera.motif
                 spindexer.motifPattern = motifPattern
+                turret.automatic = true
             }
 
             val artifactDetected =
@@ -195,11 +202,9 @@ abstract class BaseAutonomous: LinearOpMode() {
         follower!!.breakFollowing()
     }
 
-    private val timer = ElapsedTime()
-
 //todo
     protected fun shootState(): State =
-        InitializeState("Shoot state", { shootingState == Shoot.IDLE || shootingState == Shoot.LAST_SHOT_DELAY && lastlastshottimer.milliseconds() >= 150.0 }, ::shootAllArtifacts)
+        InitializeState("Shoot state", { shootingState == Shoot.IDLE || shootingState == Shoot.LAST_SHOT_DELAY && lastlastshottimer.milliseconds() >= 200.0 }, ::shootAllArtifacts)
 
 //    protected fun shootState() = WaitState(700.0)
 

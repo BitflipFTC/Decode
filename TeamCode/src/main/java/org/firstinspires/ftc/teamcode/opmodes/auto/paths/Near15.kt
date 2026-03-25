@@ -16,6 +16,7 @@ import org.firstinspires.ftc.teamcode.util.doIntakeSpeed
 
 class Near15(alliance: Alliance) : BaseAutoPath(alliance) {
     val fullSpeed = 1.0
+    val intakeSpeed = 0.7
 
     lateinit var scorePreload: PathChain
     lateinit var dintake2: PathChain
@@ -36,6 +37,8 @@ class Near15(alliance: Alliance) : BaseAutoPath(alliance) {
         dintake2 = follower.pathBuilder()
             .buildCurvedTangentLine(poses.nearShootPose,poses.nearIntake2Control,poses.endIntake2)
             .build()
+
+        dintake2.doIntakeSpeed(follower,fullSpeed,intakeSpeed)
 
         score2 = follower.pathBuilder()
             .buildCurvedTangentLine(poses.endIntake2, poses.farIntake2Control, poses.nearShootPose).setReversed().build()
@@ -58,6 +61,7 @@ class Near15(alliance: Alliance) : BaseAutoPath(alliance) {
         dintake1 = follower.pathBuilder()
             .buildCurvedLine(poses.nearShootPose, poses.nearIntake1Control,poses.endIntake1)
             .build()
+        dintake1.doIntakeSpeed(follower,fullSpeed,intakeSpeed)
 
         score1 = follower.pathBuilder()
             .buildTangentLine(poses.endIntake1, poses.nearShootPose).setReversed().build()
@@ -65,6 +69,8 @@ class Near15(alliance: Alliance) : BaseAutoPath(alliance) {
         dintake3 = follower.pathBuilder()
             .buildCurvedTangentLine(poses.nearShootPose,poses.farIntake3Control,  poses.endIntake3)
             .build()
+
+        dintake3.doIntakeSpeed(follower,fullSpeed,intakeSpeed)
 
         score3 = follower.pathBuilder()
             .buildCurvedTangentLine(poses.endIntake3, poses.endIntake3Move, poses.nearShootPoseInZone).setReversed().build()

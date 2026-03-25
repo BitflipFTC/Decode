@@ -54,7 +54,6 @@ class CombinedTeleOp : LinearOpMode() {
     private var shootingState = Shoot.IDLE
     val timer = ElapsedTime()
     val matchTimer = ElapsedTime()
-    val lastShotTimer = ElapsedTime()
     val lastlastshottimer = ElapsedTime()
 
     enum class Shoot {
@@ -82,7 +81,7 @@ class CombinedTeleOp : LinearOpMode() {
 
             Shoot.WAIT_FOR_COMPLETION -> {
                 if (DEBUG_FSM) Log.d("FSM", "          Waiting for spindexer, current: ${spindexer.currentAngle}, target: ${spindexer.targetAngle}, diff: ${spindexer.targetAngle - spindexer.currentAngle}")
-                if (spindexer.atSetPoint()) {
+                if (spindexer.atSetPoint() && shooter.atSetPoint()) {
                     if (DEBUG_FSM) Log.d("FSM", "spindexer took ${timer.milliseconds()} to rotate")
                     transfer.on() // assume instantaneous transfer
                     spindexer.recordOuttake()
@@ -93,20 +92,17 @@ class CombinedTeleOp : LinearOpMode() {
                     }
 
                     timer.reset()
-                    lastShotTimer.reset()
                     shootingState = Shoot.WAIT_FOR_LAST_SHOT
                 }
             }
 
             Shoot.WAIT_FOR_LAST_SHOT -> {
-                if (DEBUG_FSM) Log.d("FSM", "waiting for last shot to clear. ${ 50 - lastShotTimer.milliseconds()} remaining")
-                if (lastShotTimer.milliseconds() >= if ((turret.goalPose.distanceFrom(turret.turretPose)) >= 110.0) 150.0 else 75.0) {
-                    shootingState = if (spindexer.isEmpty) {
-                        lastlastshottimer.reset()
-                        Shoot.LAST_SHOT_DELAY
-                    } else {
-                        Shoot.MOVE_SPINDEXER
-                    }
+                // one loop between transfer on and go to next position, which is like 20-40ms
+                shootingState = if (spindexer.isEmpty) {
+                    lastlastshottimer.reset()
+                    Shoot.LAST_SHOT_DELAY
+                } else {
+                    Shoot.MOVE_SPINDEXER
                 }
             }
 

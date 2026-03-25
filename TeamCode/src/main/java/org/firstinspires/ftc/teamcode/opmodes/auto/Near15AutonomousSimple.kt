@@ -28,13 +28,14 @@ class Near15AutonomousSimple: BaseAutonomous() {
             FollowPathState("Score preload", paths[0]),
             startIntake(),
 //            WaitUntilState( { spindexer.motifPattern != null }),
-            InstantState("aaaa",{turret.automatic = true}),
+            InstantState("aaaa",{turret.automatic = true}), // per the code the turret goes to auto
+            // when the motif is detected. this is a fallback in case the motif isn't detected.
             WaitState(350.0),
             WaitUntilState(shooter::atSetPoint),
             shootState(),
 
             FollowPathState("dintake 2", paths[1]),
-            WaitState(375.0),
+//            WaitState(375.0),
             FollowPathState("DScore 2", paths[2]),
             shootState(),
 
@@ -50,12 +51,12 @@ class Near15AutonomousSimple: BaseAutonomous() {
             shootState(),
 
             FollowPathState("intake 1", paths[7]),
-            WaitState(500.0),
+//            WaitState(500.0),
             FollowPathState("dscore1", paths[8]),
             shootState(),
 
             FollowPathState("intake 3", paths[9]),
-            WaitState(150.0),
+//            WaitState(150.0),
 //            stopIntake(),
             FollowPathState("DScore 3", paths[10]),
 //            startIntake(),

@@ -65,8 +65,8 @@ fun Follower.followCustomPath(path: Path) = this.followPath(path.path, path.spee
 
 fun PathChain.doIntakeSpeed(follower: Follower, fullSpeed: Double, intakeSpeed: Double) {
     this.setCallbacks(
-        ParametricCallback(0, PARAMETRIC_END, follower, {follower.setMaxPower(intakeSpeed)}),
-        ParametricCallback(1, PARAMETRIC_END, follower,{follower.setMaxPower(fullSpeed)})
+        ParametricCallback(0, 0.5, follower, {follower.setMaxPower(intakeSpeed)}),
+        ParametricCallback(0, PARAMETRIC_END, follower,{follower.setMaxPower(fullSpeed)})
     )
 }
 

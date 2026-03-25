@@ -69,7 +69,11 @@ open class InitializeState (
 open class FollowPathState (
     name: String, path: Path
 ) : InitializeState (
-    name, { !CombinedTeleOp.follower!!.isBusy }, { CombinedTeleOp.follower!!.followCustomPath(path) }
+    name,
+    {
+        CombinedTeleOp.follower!!.atParametricEnd()
+     && CombinedTeleOp.follower!!.headingError < CombinedTeleOp.follower!!.currentPath.pathEndHeadingConstraint
+    }, { CombinedTeleOp.follower!!.followCustomPath(path) }
 )
 
 class TimedFollowPathState (
