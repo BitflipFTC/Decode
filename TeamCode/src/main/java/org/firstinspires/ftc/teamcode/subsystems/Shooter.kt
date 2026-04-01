@@ -32,7 +32,7 @@ class Shooter(): Subsystem {
         const val FLYWHEEL_PPR = 28 * GEAR_RATIO
 
         @JvmField
-        var gain = 0.005
+        var gain = 0.0001
 
         @JvmField
         var useVelocityCorrection = true
@@ -64,7 +64,7 @@ class Shooter(): Subsystem {
     )
     val speedArray = doubleArrayOf(
         2875.0,
-        3250.0,
+        3175.0,
         3375.0,
         4250.0,
     )
@@ -119,7 +119,7 @@ class Shooter(): Subsystem {
 
     override fun initialize() {
         flywheelMotor = MotorEx("flywheel").zeroed().floa().reverse().apply {
-            maxSlewRate = 0.5
+            maxSlewRate = 0.333333
         }
 
         hoodServo = ServoEx("hood").apply{
@@ -146,9 +146,9 @@ class Shooter(): Subsystem {
         lastError = error
         error = targetFlywheelRPM - flywheelRPM
 
-        if (error >= 40.0) {
+        if (error >= 40.0 && targetFlywheelRPM >= 1000.0) {
             flywheelMotor.power = 1.0
-            output = targetFlywheelRPM * (1.0/5600.0)
+            output = targetFlywheelRPM * (1.0/5000.0)
             tbh = output
         } else {
             output += gain * error
@@ -158,6 +158,7 @@ class Shooter(): Subsystem {
                 output = 0.5 * (output + tbh)
                 tbh = output
             }
+            output = output.coerceIn(-0.05,1.0)
 
             flywheelMotor.power = output
         }
@@ -169,13 +170,15 @@ class Shooter(): Subsystem {
             ActiveOpMode.telemetry.addData("Flywheel target RPM", targetFlywheelRPM)
             ActiveOpMode.telemetry.addData("Flywheel current RPM", filteredFlywheelRPM)
             ActiveOpMode.telemetry.addData("Flywheel at set point", atSetPoint())
+            ActiveOpMode.telemetry.addData("Flywheel Power", flywheelMotor.power)
 //            ActiveOpMode.telemetry.addData("Voltage", "%06.2fV", cachedVoltage)
             ActiveOpMode.telemetry.addData("Hood position", hoodPosition)
+//            ActiveOpMode.telemetry.addData("flywheel Current", flywheelMotor.getCurrent())
             ActiveOpMode.telemetry.addLine("---------------------------")
         }
     }
 
-    fun atSetPoint() = abs(targetFlywheelRPM - filteredFlywheelRPM) <= 100.0
+    fun atSetPoint() = abs(targetFlywheelRPM - filteredFlywheelRPM) <= 200.0
 
     fun setTargetState(distance: Double) {
         // ensure the parameter distance is actually based on an apriltag reading

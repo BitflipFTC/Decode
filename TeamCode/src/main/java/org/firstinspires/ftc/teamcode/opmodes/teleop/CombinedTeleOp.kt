@@ -6,6 +6,7 @@ import com.bylazar.field.Style
 import com.bylazar.telemetry.JoinedTelemetry
 import com.bylazar.telemetry.PanelsTelemetry
 import com.bylazar.utils.LoopTimer
+import com.pedropathing.drivetrain.Drivetrain
 import com.pedropathing.follower.Follower
 import com.pedropathing.geometry.BezierLine
 import com.pedropathing.geometry.Pose
@@ -15,6 +16,9 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import com.qualcomm.robotcore.hardware.Gamepad
 import com.qualcomm.robotcore.util.ElapsedTime
+import com.skeletonarmy.marrow.prompts.BooleanPrompt
+import com.skeletonarmy.marrow.prompts.OptionPrompt
+import com.skeletonarmy.marrow.prompts.Prompter
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants
 import org.firstinspires.ftc.teamcode.pedroPathing.Drawing
 import org.firstinspires.ftc.teamcode.subsystems.ColorSensor
@@ -42,11 +46,12 @@ class CombinedTeleOp : LinearOpMode() {
         @JvmField
         var lowpass = 0.2
 
-        const val TUNING_FLYWHEEL = false
+        var TUNING_FLYWHEEL = false
         const val DEBUG_FSM = true
     }
 
     var turretAutomate = true
+    var lastPose = Pose(0.0,0.0,0.0)
 
     var artifactDetected = false
     var lastArtifactDetected = false
@@ -54,6 +59,7 @@ class CombinedTeleOp : LinearOpMode() {
     private var shootingState = Shoot.IDLE
     val timer = ElapsedTime()
     val matchTimer = ElapsedTime()
+    val lastShotTimer = ElapsedTime()
     val lastlastshottimer = ElapsedTime()
 
     enum class Shoot {
@@ -92,17 +98,19 @@ class CombinedTeleOp : LinearOpMode() {
                     }
 
                     timer.reset()
+                    lastShotTimer.reset()
                     shootingState = Shoot.WAIT_FOR_LAST_SHOT
                 }
             }
 
             Shoot.WAIT_FOR_LAST_SHOT -> {
-                // one loop between transfer on and go to next position, which is like 20-40ms
-                shootingState = if (spindexer.isEmpty) {
-                    lastlastshottimer.reset()
-                    Shoot.LAST_SHOT_DELAY
-                } else {
-                    Shoot.MOVE_SPINDEXER
+                if ((lastShotTimer.milliseconds() >= 100.0 && shooter.atSetPoint()) || lastShotTimer.milliseconds() >= 200.0) {
+                    shootingState = if (spindexer.isEmpty) {
+                        lastlastshottimer.reset()
+                        Shoot.LAST_SHOT_DELAY
+                    } else {
+                        Shoot.MOVE_SPINDEXER
+                    }
                 }
             }
 
@@ -134,6 +142,7 @@ class CombinedTeleOp : LinearOpMode() {
     val turret = Turret()
     val camera = OV9281()
     val colorSensor = ColorSensor()
+    val drivetrain = org.firstinspires.ftc.teamcode.subsystems.Drivetrain()
     val subsystems = listOf(
         intake,
         transfer,
@@ -142,6 +151,7 @@ class CombinedTeleOp : LinearOpMode() {
         camera,
         colorSensor,
         shooter,
+        drivetrain
     )
 
     var lastSpindexerIsFull = false
@@ -162,8 +172,18 @@ class CombinedTeleOp : LinearOpMode() {
             follower = this
         }
 
+        val prompter = Prompter(this)
+
+        prompter
+            .prompt("tf", BooleanPrompt("TUNING FLYWHEEL", false))
+            .onComplete {
+                TUNING_FLYWHEEL = prompter.get<Boolean>("tf")
+                telemetry.addLine("six seven")
+            }
+
         fol.breakFollowing()
         fol.setMaxPower(1.0)
+        fol.startTeleopDrive(true)
 
         spindexer.motifPattern = motifPattern
         gamepad1.triggerThreshold = 0.15f
@@ -175,6 +195,8 @@ class CombinedTeleOp : LinearOpMode() {
         Drawing.init()
         while (opModeInInit()) {
             telemetry.update()
+            fol.update()
+            prompter.run()
         }
 
         val autoPoses = AutoPoses(alliance ?: Alliance.RED)
@@ -224,7 +246,6 @@ class CombinedTeleOp : LinearOpMode() {
         turret.selectedAlliance = alliance ?: Alliance.RED
         loopTimer.start()
 
-        fol.startTeleopDrive(true)
         matchTimer.reset()
 
         if (!turretAutomate) turret.automatic = false; turret.angle = 0.0
@@ -234,6 +255,7 @@ class CombinedTeleOp : LinearOpMode() {
             // more bulk caching
             allHubs.forEach { hub -> hub.clearBulkCache() }
 
+            drivetrain.setDrivetrainPowers(drivetrain.calculateDrivetrainPowers(gamepad1.left_stick_x.toDouble(), -gamepad1.left_stick_y.toDouble(), gamepad1.right_stick_x.toDouble()))
             if (gamepad1.backWasPressed()) turret.automatic = !turret.automatic
 
             // gets it until it is gotten :tm:
@@ -270,13 +292,6 @@ class CombinedTeleOp : LinearOpMode() {
             if (gamepad1.aWasReleased()) {
                 intake.reversed = false
             }
-
-            fol.setTeleOpDrive(
-                -gamepad1.left_stick_y.toDouble(),
-                -gamepad1.left_stick_x.toDouble(),
-                -gamepad1.right_stick_x.toDouble(),
-                true
-            )
 
 //            if (gamepad1.dpadUpWasPressed() && !turretAutomate) {
 //                shooter.setTargetState(autoPoses.farShootTeleopOwnGate.distanceFrom(turret.goalPose))
@@ -319,6 +334,8 @@ class CombinedTeleOp : LinearOpMode() {
             if (gamepad1.touchpadWasPressed()) {
                 turretAutomate = !turretAutomate
             }
+
+
 
             lastArtifactDetected = artifactDetected
             artifactDetected =
@@ -375,6 +392,18 @@ class CombinedTeleOp : LinearOpMode() {
 
             updateShootingFSM()
             fol.update()
+            if (fol.pose.copy().roughlyEquals(Pose(0.0,0.0,0.0), 1.0) ||
+                fol.pose.x <= 1.0 ||
+                fol.pose.y <= 1.0) {
+                gamepad1.rumble(500)
+                fol.pose = lastPose.copy()
+            } else {
+                lastPose = Pose(
+                    (fol.pose.x + fol.velocity.xComponent * (loopTimer.ms / 1000)),
+                    (fol.pose.y + fol.velocity.yComponent * (loopTimer.ms / 1000)),
+                    normalizeRadians(fol.pose.heading + fol.angularVelocity * (loopTimer.ms / 1000), true)
+                )
+            }
 
             // like repeat a bit yknow
 
@@ -447,6 +476,9 @@ class CombinedTeleOp : LinearOpMode() {
                 addData("x", fol.pose.x)
                 addData("y", fol.pose.y)
                 addData("heading", fol.pose.heading)
+                addData("LAST x", lastPose.x)
+                addData("LAST y", lastPose.y)
+                addData("LAST heading", lastPose.heading)
                 addData("Time Elapsed", matchTimer.seconds())
                 addData("Camera pose adj", "x: %05.2f, y: %05.2f, h: %05.2f", correctedRobotPose.x, correctedRobotPose.y,
                     correctedRobotPose.heading)

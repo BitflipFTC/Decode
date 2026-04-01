@@ -36,7 +36,7 @@ import org.firstinspires.ftc.teamcode.util.auto.Path
 @Suppress("UNUSED")
 abstract class BaseAutonomous: LinearOpMode() {
     companion object {
-        const val PARAMETRIC_END = 0.94
+        const val PARAMETRIC_END = 0.9
         const val DEBUG_FSM = false
     }
     abstract fun initialize(alliance: Alliance)
@@ -44,6 +44,7 @@ abstract class BaseAutonomous: LinearOpMode() {
     private var shootingState = Shoot.IDLE
     val timer = ElapsedTime()
     val matchTimer = ElapsedTime()
+    val lastShotTimer = ElapsedTime()
     val lastlastshottimer = ElapsedTime()
 
     enum class Shoot {
@@ -82,17 +83,19 @@ abstract class BaseAutonomous: LinearOpMode() {
                     }
 
                     timer.reset()
+                    lastShotTimer.reset()
                     shootingState = Shoot.WAIT_FOR_LAST_SHOT
                 }
             }
 
             Shoot.WAIT_FOR_LAST_SHOT -> {
-                // one loop between transfer on and go to next position, which is like 20-40ms
-                shootingState = if (spindexer.isEmpty) {
-                    lastlastshottimer.reset()
-                    Shoot.LAST_SHOT_DELAY
-                } else {
-                    Shoot.MOVE_SPINDEXER
+                if ((lastShotTimer.milliseconds() >= 50.0 && shooter.atSetPoint()) || lastShotTimer.milliseconds() >= 150.0) {
+                    shootingState = if (spindexer.isEmpty) {
+                        lastlastshottimer.reset()
+                        Shoot.LAST_SHOT_DELAY
+                    } else {
+                        Shoot.MOVE_SPINDEXER
+                    }
                 }
             }
 
@@ -192,7 +195,7 @@ abstract class BaseAutonomous: LinearOpMode() {
             telemetry.addData("x", follower!!.pose.x)
             telemetry.addData("y", follower!!.pose.y)
             telemetry.addData("heading", follower!!.pose.heading)
-            telemetry.addData("t", follower!!.pathCompletion)
+            telemetry.addData("PATH COMP", follower!!.pathCompletion.toDouble())
             subsystems.forEach { it.periodic() }
             Drawing.drawDebug(follower!!)
             telemetry.update()
@@ -215,10 +218,13 @@ abstract class BaseAutonomous: LinearOpMode() {
 
     val poses = mutableListOf<Pose>()
     var doneRelo = false
-    protected fun relocalizeState(): State = FullState("Relo", { doneRelo }, { doneRelo = false }, {
-        if (camera.turretPose != Pose(0.0,0.0) )poses.add(camera.turretPose)
 
-        if (poses.size >= 30) {
+    val reloTimer = ElapsedTime()
+    protected fun relocalizeState(): State = FullState("Relo", { doneRelo }, { doneRelo = false
+                                                                             reloTimer.reset()}, {
+        if (camera.turretPose != Pose(0.0,0.0) && camera.detectionsAmount != 0 )poses.add(turret.turretPoseToRobotPose(camera.turretPose))
+
+        if (poses.size >= 20 || reloTimer.milliseconds() >= 1000.0) {
             follower!!.pose = averageRelocalization()
             doneRelo = true
         }

@@ -9,7 +9,6 @@ import org.firstinspires.ftc.teamcode.util.FiniteStateMachine
 import org.firstinspires.ftc.teamcode.util.FollowPathState
 import org.firstinspires.ftc.teamcode.util.InstantState
 import org.firstinspires.ftc.teamcode.util.State
-import org.firstinspires.ftc.teamcode.util.TimedFollowPathState
 import org.firstinspires.ftc.teamcode.util.WaitState
 import org.firstinspires.ftc.teamcode.util.WaitUntilState
 
@@ -24,13 +23,14 @@ class Near15AutonomousSimple: BaseAutonomous() {
 
         finiteStateMachine = FiniteStateMachine(
             InstantState("zeep", { turret.automatic = false
-                turret.angle = 90.0} ),
+                turret.angle = 135.0} ),
             FollowPathState("Score preload", paths[0]),
             startIntake(),
 //            WaitUntilState( { spindexer.motifPattern != null }),
             InstantState("aaaa",{turret.automatic = true}), // per the code the turret goes to auto
             // when the motif is detected. this is a fallback in case the motif isn't detected.
             WaitState(350.0),
+//            relocalizeState(),
             WaitUntilState(shooter::atSetPoint),
             shootState(),
 
@@ -39,8 +39,8 @@ class Near15AutonomousSimple: BaseAutonomous() {
             FollowPathState("DScore 2", paths[2]),
             shootState(),
 
-            FollowPathState("Do gate drive", paths[3]),
-            TimedFollowPathState("Do gate empty", paths[4], 750.0),
+            FollowPathState("Do gate drive", paths[3], 1000.0),
+            FollowPathState("Do gate empty", paths[4], 750.0),
 //            WaitState(250.0),
             FollowPathState("Do gate intake", paths[5]),
             InstantState("") {timer.reset()},

@@ -9,7 +9,6 @@ import org.firstinspires.ftc.teamcode.util.Alliance
 import org.firstinspires.ftc.teamcode.util.FiniteStateMachine
 import org.firstinspires.ftc.teamcode.util.FollowPathState
 import org.firstinspires.ftc.teamcode.util.InstantState
-import org.firstinspires.ftc.teamcode.util.TimedFollowPathState
 import org.firstinspires.ftc.teamcode.util.WaitState
 import kotlin.time.TimedValue
 
@@ -44,7 +43,7 @@ class Far12AutonomousSimple: BaseAutonomous() {
             FollowPathState("Intake 2", paths[2]),
             WaitState(150.0),
             FollowPathState("d empty ramp", paths[3]),
-            TimedFollowPathState("Empty Ramp", paths[4], 2000.0),
+            FollowPathState("Empty Ramp", paths[4], 2000.0),
             WaitState(250.0),
             FollowPathState("D Score 2", paths[5]),
             shootState(),

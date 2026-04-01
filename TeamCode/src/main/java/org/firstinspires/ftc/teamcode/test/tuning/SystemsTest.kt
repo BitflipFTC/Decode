@@ -52,11 +52,11 @@ class SystemsTest : LinearOpMode() {
 //            // reset the target rpm
 //            // reset the target rpm
             if (gamepad1.dpadDownWasPressed()) {
-                shooter.targetFlywheelRPM -= 125
+                shooter.targetFlywheelRPM = if(shooter.targetFlywheelRPM == 1000.0) 0.0 else shooter.targetFlywheelRPM - 125.0
             }
 //
             if (gamepad1.dpadUpWasPressed()) {
-                shooter.targetFlywheelRPM += 125
+                shooter.targetFlywheelRPM = if (shooter.targetFlywheelRPM == 0.0) 1000.0 else shooter.targetFlywheelRPM + 125.0
             }
 
             if (gamepad1.dpadRightWasPressed()) {
@@ -68,7 +68,7 @@ class SystemsTest : LinearOpMode() {
             }
 
             if (gamepad1.crossWasPressed()) {
-                intake.reversed = true
+                shooter.targetFlywheelRPM = 3250.0
             }
 
             if (gamepad1.triangle){

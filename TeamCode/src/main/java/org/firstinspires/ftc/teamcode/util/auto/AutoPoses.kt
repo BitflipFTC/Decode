@@ -22,7 +22,7 @@ class AutoPoses(
     val farShootPoseFacingObelisk = p(Pose(84.5, 18.0, Math.toRadians(90.0)))
     val farShootPose   = p(Pose(83.5, 18.0, Math.toRadians(90.0)))
     val farParkPose    = p(Pose(105.500, 33.500, Math.toRadians(90.0)))
-    val nearStartPose  = p(Pose(116.4, 129.6, 0.7463))
+    val nearStartPose  = p(Pose(120.0, 114.7, 0.0))
     val nearShootPoseFacingObelisk = p(Pose(88.0, 88.0, atan2(144.0 - HORIZONTAL_INTAKE_START, 72.0 - HORIZONTAL_INTAKE_START)))
     val nearShootPose  = p(Pose(91.0, 88.0, 0.0))
     val nearShootPoseInZone = p(Pose(88.0, 110.0, Math.toRadians(45.0)))

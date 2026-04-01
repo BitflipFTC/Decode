@@ -11,7 +11,7 @@ import org.firstinspires.ftc.teamcode.util.buildTangentLine
 
 class Far15 (alliance: Alliance) : BaseAutoPath(alliance) {
     val fullSpeed = 1.0
-    val intakeSpeed = 0.67
+    val intakeSpeed = 0.33
 
     lateinit var scorePreload: PathChain
     lateinit var dintake1: PathChain

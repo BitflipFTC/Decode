@@ -31,20 +31,20 @@ import kotlin.math.roundToInt
 @Configurable
 class Spindexer(): Subsystem {
     companion object {
-        const val GEAR_RATIO: Double = 24.0 / 16.0 // 18t spndexer to 16t motor
+        const val GEAR_RATIO: Double = 24.0 / 16.0 // 18t spindexer to 16t motor
         const val TICKS_PER_REVOLUTION: Double = 537.7 * GEAR_RATIO
 
         @JvmField
-        var kP = 0.007
+        var kP = 0.0055
 
         @JvmField
-        var kI = 0.05
+        var kI = 0.01
 
         @JvmField
-        var kD = 0.0002
+        var kD = 0.00015
 
         @JvmField
-        var kS = 0.0375
+        var kS = 0.032
 
         @JvmField
         var setpointTolerance = 5.0 // in degrees
@@ -353,6 +353,7 @@ class Spindexer(): Subsystem {
             ActiveOpMode.telemetry.addData("Spindexer atSetPoint", atSetPoint())
 //            ActiveOpMode.telemetry.addData("Spindexer power", motor.power)
             ActiveOpMode.telemetry.addData("Spindexer indexed artifacts", getArtifactString())
+//            ActiveOpMode.telemetry.addData("Spindexer current", motor.getCurrent())
             ActiveOpMode.telemetry.addData("Motif Pattern", motifPattern?.name ?: "NONE")
             ActiveOpMode.telemetry.addLine("---------------------------")
         }

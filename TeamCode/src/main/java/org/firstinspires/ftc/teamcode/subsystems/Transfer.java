@@ -5,6 +5,7 @@ import com.bylazar.configurables.annotations.Configurable;
 import org.firstinspires.ftc.teamcode.util.hardware.MotorEx;
 
 import dev.nextftc.core.subsystems.Subsystem;
+import dev.nextftc.ftc.ActiveOpMode;
 
 /**
  * Manages the transfer mechanism, which is a simple motor. It has two states, on and off.
@@ -56,5 +57,7 @@ public class Transfer implements Subsystem {
         } else {
             motor.setPower(0.0);
         }
+
+//        ActiveOpMode.telemetry().addData("current", motor.getCurrent());
     }
 }

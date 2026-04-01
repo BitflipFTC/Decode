@@ -8,7 +8,6 @@ import org.firstinspires.ftc.teamcode.util.FiniteStateMachine
 import org.firstinspires.ftc.teamcode.util.FollowPathState
 import org.firstinspires.ftc.teamcode.util.InitializeState
 import org.firstinspires.ftc.teamcode.util.InstantState
-import org.firstinspires.ftc.teamcode.util.TimedFollowPathState
 import org.firstinspires.ftc.teamcode.util.WaitState
 import org.firstinspires.ftc.teamcode.util.WaitUntilState
 
@@ -35,7 +34,7 @@ class Near12AutonomousSimple: BaseAutonomous() {
             FollowPathState("dintake 1", paths[1]),
             WaitState(150.0),
             FollowPathState("dramping it", paths[2]),
-            TimedFollowPathState("ramping ", paths[3], 750.0),
+            FollowPathState("ramping ", paths[3], 750.0),
             FollowPathState("dscore1", paths[4]),
             shootState(),
 

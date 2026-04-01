@@ -6,7 +6,6 @@ import org.firstinspires.ftc.teamcode.opmodes.teleop.CombinedTeleOp.Companion.fo
 import org.firstinspires.ftc.teamcode.util.Alliance
 import org.firstinspires.ftc.teamcode.util.FiniteStateMachine
 import org.firstinspires.ftc.teamcode.util.FollowPathState
-import org.firstinspires.ftc.teamcode.util.TimedFollowPathState
 import org.firstinspires.ftc.teamcode.util.WaitState
 
 @Suppress("Unused")
@@ -33,14 +32,14 @@ class Near9AutonomousSimple: BaseAutonomous() {
             FollowPathState("Dintake 1", paths[1]),
             FollowPathState("Intake 1", paths[2]),
             WaitState(150.0),
-            TimedFollowPathState("D Score 1", paths[3], 5000.0),
+            FollowPathState("D Score 1", paths[3], 5000.0),
             relocalizeState(),
             shootState(),
 
             FollowPathState("Dintake 2", paths[4]),
             FollowPathState("Intake 2", paths[5]),
             WaitState(150.0),
-            TimedFollowPathState("D Score 2", paths[6], 5000.0),
+            FollowPathState("D Score 2", paths[6], 5000.0),
             relocalizeState(),
             shootState(),
 

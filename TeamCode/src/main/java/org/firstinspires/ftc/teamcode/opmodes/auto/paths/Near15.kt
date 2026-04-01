@@ -16,7 +16,7 @@ import org.firstinspires.ftc.teamcode.util.doIntakeSpeed
 
 class Near15(alliance: Alliance) : BaseAutoPath(alliance) {
     val fullSpeed = 1.0
-    val intakeSpeed = 0.7
+    val intakeSpeed = 0.5
 
     lateinit var scorePreload: PathChain
     lateinit var dintake2: PathChain
