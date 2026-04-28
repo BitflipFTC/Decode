@@ -33,7 +33,7 @@ class Near9 (
 
     override fun buildPaths(follower: Follower): List<Path> {
         scorePreload = follower.pathBuilder()
-            .buildBasicLine(poses.nearStartPose, poses.nearShootPoseFacingObelisk).build()
+            .buildCurvedLine(poses.nearStartPose, poses.nearStartToShoot, poses.nearShootPose).build()
 
         dintake1 = follower.pathBuilder()
             .buildCurvedLine(poses.nearShootPoseFacingObelisk, poses.farIntake1Control, poses.startIntake1).build()

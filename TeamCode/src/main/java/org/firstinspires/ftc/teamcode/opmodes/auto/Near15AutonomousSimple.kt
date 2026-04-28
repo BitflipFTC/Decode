@@ -24,7 +24,7 @@ class Near15AutonomousSimple: BaseAutonomous() {
 
         finiteStateMachine = FiniteStateMachine(
             InstantState("zeep", { turret.automatic = false
-                turret.angle = 90.0} ),
+                turret.angle = 120.0} ),
             FollowPathState("Score preload", paths[0]),
             startIntake(),
 //            WaitUntilState( { spindexer.motifPattern != null }),

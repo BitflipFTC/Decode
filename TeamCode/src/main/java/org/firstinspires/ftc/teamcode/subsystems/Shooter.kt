@@ -32,7 +32,7 @@ class Shooter(): Subsystem {
         const val FLYWHEEL_PPR = 28 * GEAR_RATIO
 
         @JvmField
-        var gain = 0.005
+        var gain = 0.001
 
         @JvmField
         var useVelocityCorrection = true
@@ -64,21 +64,21 @@ class Shooter(): Subsystem {
     )
     val speedArray = doubleArrayOf(
         2875.0,
-        3125.0,
+        3250.0,
         3375.0,
-        4250.0,
+        4375.0,
     )
     val angleArray = doubleArrayOf(
         0.01,
-        0.1,
+        0.09,
         0.225,
         0.375
     )
     val timeInAirArray = doubleArrayOf(
-        0.35,
-        0.45,
-        0.55,
-        0.75
+        0.5,
+        0.6,
+        0.7,
+        0.8
     )
 
     private val velocityLookupTable = InterpolatedLookupTable(
@@ -148,7 +148,7 @@ class Shooter(): Subsystem {
 
         if (error >= 40.0) {
             flywheelMotor.power = 1.0
-            output = targetFlywheelRPM * (1.0/5600.0)
+            output = targetFlywheelRPM * (1.0/5000.0)
             tbh = output
         } else {
             output += gain * error
@@ -158,6 +158,8 @@ class Shooter(): Subsystem {
                 output = 0.5 * (output + tbh)
                 tbh = output
             }
+
+            output = output.coerceIn(0.01,1.0)
 
             flywheelMotor.power = output
         }

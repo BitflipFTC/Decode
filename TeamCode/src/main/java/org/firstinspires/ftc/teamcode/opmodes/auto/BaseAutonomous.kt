@@ -42,6 +42,7 @@ abstract class BaseAutonomous: LinearOpMode() {
     abstract fun initialize(alliance: Alliance)
 
     private var shootingState = Shoot.IDLE
+    val timer = ElapsedTime()
     val matchTimer = ElapsedTime()
     val lastShotTimer = ElapsedTime()
     val lastlastshottimer = ElapsedTime()
@@ -64,14 +65,22 @@ abstract class BaseAutonomous: LinearOpMode() {
         when (shootingState) {
             Shoot.MOVE_SPINDEXER      -> {
                 spindexer.toMotifOuttakePosition()
+                if (DEBUG_FSM) Log.d("FSM", " * * * * * NEW CYCLE: * * * * * moving spindexer to ${spindexer.state.name}, ${spindexer.getArtifactString()}")
                 timer.reset()
                 shootingState = Shoot.WAIT_FOR_COMPLETION
             }
 
             Shoot.WAIT_FOR_COMPLETION -> {
+                if (DEBUG_FSM) Log.d("FSM", "          Waiting for spindexer, current: ${spindexer.currentAngle}, target: ${spindexer.targetAngle}, diff: ${spindexer.targetAngle - spindexer.currentAngle}")
                 if (spindexer.atSetPoint()) {
+                    if (DEBUG_FSM) Log.d("FSM", "spindexer took ${timer.milliseconds()} to rotate")
                     transfer.on() // assume instantaneous transfer
                     spindexer.recordOuttake()
+
+                    if (DEBUG_FSM) {
+                        Log.d("FSM", "EVALUATING SPINDEXER FULLNESS")
+                        Log.d("FSM", "Spindexer isEmpty: " + spindexer.isEmpty + ", isFull: " + spindexer.isFull + ", Str: " + spindexer.getArtifactString())
+                    }
 
                     timer.reset()
                     lastShotTimer.reset()
@@ -80,7 +89,8 @@ abstract class BaseAutonomous: LinearOpMode() {
             }
 
             Shoot.WAIT_FOR_LAST_SHOT -> {
-                if (lastShotTimer.milliseconds() >= 50.0) {
+                if (DEBUG_FSM) Log.d("FSM", "waiting for last shot to clear. ${ 50 - lastShotTimer.milliseconds()} remaining")
+                if (lastShotTimer.milliseconds() >= if ((turret.goalPose.distanceFrom(turret.turretPose)) >= 110.0) 400.0 else 250.0) {
                     shootingState = if (spindexer.isEmpty) {
                         lastlastshottimer.reset()
                         Shoot.LAST_SHOT_DELAY
@@ -194,8 +204,6 @@ abstract class BaseAutonomous: LinearOpMode() {
 
         follower!!.breakFollowing()
     }
-
-    private val timer = ElapsedTime()
 
 //todo
     protected fun shootState(): State =

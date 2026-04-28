@@ -15,6 +15,8 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import com.qualcomm.robotcore.hardware.Gamepad
 import com.qualcomm.robotcore.util.ElapsedTime
+import com.skeletonarmy.marrow.prompts.BooleanPrompt
+import com.skeletonarmy.marrow.prompts.Prompter
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants
 import org.firstinspires.ftc.teamcode.pedroPathing.Drawing
 import org.firstinspires.ftc.teamcode.subsystems.ColorSensor
@@ -42,9 +44,9 @@ class CombinedTeleOp : LinearOpMode() {
         @JvmField
         var lowpass = 0.2
 
-        const val TUNING_FLYWHEEL = false
         const val DEBUG_FSM = true
     }
+    var TUNING_FLYWHEEL = false
 
     var turretAutomate = true
 
@@ -100,7 +102,7 @@ class CombinedTeleOp : LinearOpMode() {
 
             Shoot.WAIT_FOR_LAST_SHOT -> {
                 if (DEBUG_FSM) Log.d("FSM", "waiting for last shot to clear. ${ 50 - lastShotTimer.milliseconds()} remaining")
-                if (lastShotTimer.milliseconds() >= if ((turret.goalPose.distanceFrom(turret.turretPose)) >= 110.0) 150.0 else 75.0) {
+                if (lastShotTimer.milliseconds() >= if ((turret.goalPose.distanceFrom(turret.turretPose)) >= 110.0) 300.0 else 125.0) {
                     shootingState = if (spindexer.isEmpty) {
                         lastlastshottimer.reset()
                         Shoot.LAST_SHOT_DELAY
@@ -175,10 +177,19 @@ class CombinedTeleOp : LinearOpMode() {
         val loopTimer = LoopTimer(10)
 
         subsystems.forEach { it.initialize() }
-        fol.update()
+        val prompter = Prompter(this)
+
+        prompter
+            .prompt("tf", BooleanPrompt("TUNING FLYWHEEL", false))
+            .onComplete {
+                TUNING_FLYWHEEL = prompter.get<Boolean>("tf")
+                telemetry.addLine("six seven")
+            }
         Drawing.init()
         while (opModeInInit()) {
             telemetry.update()
+            prompter.run()
+            fol.update()
         }
 
         val autoPoses = AutoPoses(alliance ?: Alliance.RED)
@@ -356,9 +367,7 @@ class CombinedTeleOp : LinearOpMode() {
                     if (gamepad1.right_stick_button) newHeading else fol.pose.heading
                 )
             }
-
-//            if (gamepad1.dpadLeftWasPressed()) spindexer.decreaseOffset()
-//            if (gamepad1.dpadRightWasPressed()) spindexer.increaseOffset()
+            
             if (spindexer.isFull && !lastSpindexerIsFull) {
                 gamepad1.rumble(500)
                 spindexer.toMotifOuttakePosition()

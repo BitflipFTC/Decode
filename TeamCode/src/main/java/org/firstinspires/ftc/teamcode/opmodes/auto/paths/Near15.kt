@@ -31,7 +31,7 @@ class Near15(alliance: Alliance) : BaseAutoPath(alliance) {
 
     override fun buildPaths(follower: Follower): List<Path> {
         scorePreload = follower.pathBuilder()
-            .buildBasicLine(poses.nearStartPose, poses.nearShootPose).build()
+            .buildCurvedLine(poses.nearStartPose, poses.nearStartToShoot,poses.nearShootPose).build()
 
         dintake2 = follower.pathBuilder()
             .buildCurvedTangentLine(poses.nearShootPose,poses.nearIntake2Control,poses.endIntake2)

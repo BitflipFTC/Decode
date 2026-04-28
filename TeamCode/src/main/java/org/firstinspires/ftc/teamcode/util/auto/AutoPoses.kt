@@ -22,9 +22,10 @@ class AutoPoses(
     val farShootPoseFacingObelisk = p(Pose(84.5, 18.0, Math.toRadians(90.0)))
     val farShootPose   = p(Pose(83.5, 18.0, Math.toRadians(90.0)))
     val farParkPose    = p(Pose(105.500, 33.500, Math.toRadians(90.0)))
-    val nearStartPose  = p(Pose(116.4, 129.6, 0.7463))
+    val nearStartPose  = p(Pose(124.0, 113.0, 0.0))
     val nearShootPoseFacingObelisk = p(Pose(88.0, 88.0, atan2(144.0 - HORIZONTAL_INTAKE_START, 72.0 - HORIZONTAL_INTAKE_START)))
     val nearShootPose  = p(Pose(91.0, 88.0, 0.0))
+    val nearStartToShoot = p(Pose(nearShootPose.x, nearStartPose.y, 0.0))
     val nearShootPoseInZone = p(Pose(88.0, 110.0, Math.toRadians(45.0)))
     val nearParkPose   = p(Pose(120.0, 70.0, Math.toRadians(270.0)))
     val nearIntake1Control = p(Pose(nearShootPose.x, INTAKE_1_VERTICAL))
@@ -51,7 +52,7 @@ class AutoPoses(
     val HPPark = p(Pose(110.0, 14.0, 0.0))
 
     val behindGateIntake = p(Pose(116.0, 66.0, Math.toRadians(0.0)))
-    val gateEmptyForIntake = p(Pose(132.5, 67.0, Math.toRadians(20.0)))
+    val gateEmptyForIntake = p(Pose(132.0, 66.0, Math.toRadians(20.0)))
     val gateIntake = p(Pose(133.5, 58.7, Math.toRadians(35.0)))
 
     val farShootTeleopOwnGate = p(Pose(83.0, 9.0, 0.0))
