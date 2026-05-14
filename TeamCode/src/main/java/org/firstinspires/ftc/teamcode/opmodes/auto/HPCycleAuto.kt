@@ -7,6 +7,7 @@ import org.firstinspires.ftc.teamcode.util.Alliance
 import org.firstinspires.ftc.teamcode.util.FiniteStateMachine
 import org.firstinspires.ftc.teamcode.util.TimedFollowPathState
 import org.firstinspires.ftc.teamcode.util.WaitState
+import org.firstinspires.ftc.teamcode.util.WaitUntilState
 
 @Suppress("Unused")
 @Autonomous(name = "HP Cycle Partner FAR", preselectTeleOp = "Combined TeleOp")
@@ -19,36 +20,23 @@ class HPCycleAuto: BaseAutonomous() {
         finiteStateMachine = FiniteStateMachine(
             TimedFollowPathState("Score preload", paths[0], 2000.0),
             startIntake(),
+            WaitUntilState(shooter::atSetPoint),
             shootState(),
 
-            WaitState(5000.0),
-
-            TimedFollowPathState("D HP", paths[1], 2000.0),
-            TimedFollowPathState("Intake", paths[2], 3000.0),
+            TimedFollowPathState("D HP", paths[1], 3000.0),
             WaitState(150.0),
-            TimedFollowPathState("D Score", paths[3], 2000.0),
+            TimedFollowPathState("D Score", paths[2], 2000.0),
             shootState(),
 
-            TimedFollowPathState("dtointake", paths[4], 2000.0),
-//            InitializeState("zeep", { !follower!!.isBusy }, { follower!!.turnTo(0.0)}),
-            TimedFollowPathState("do the intake", paths[5], 3000.0),
-            TimedFollowPathState("d to shoito", paths[6], 2000.0),
+            TimedFollowPathState("dtointake", paths[3], 3000.0),
+            TimedFollowPathState("d to shoito", paths[4], 2000.0),
             shootState(),
 
-            TimedFollowPathState("dtointake2", paths[7], 2000.0),
-//            InitializeState("zeep", { !follower!!.isBusy }, { follower!!.turnTo(0.0)}),
-            TimedFollowPathState("do the intake2", paths[8], 3000.0),
-            TimedFollowPathState("d to shoito2", paths[9], 2000.0),
+            TimedFollowPathState("dtointake2", paths[5], 3000.0),
+            TimedFollowPathState("d to shoito2", paths[6], 2000.0),
             shootState(),
 
-//            TimedFollowPathState("dtointake3", paths[10], 2000.0),
-//            InitializeState("zeep", { !follower!!.isBusy }, { follower!!.turnTo(0.0)}),
-//            TimedFollowPathState("do the intake3", paths[11], 3000.0),
-//            TimedFollowPathState("d to shoito3", paths[12], 2000.0),
-//            relocalizeState(),
-//            shootState(),
-
-            TimedFollowPathState("Park", paths[13], 2000.0)
+            TimedFollowPathState("Park", paths[7], 2000.0)
         )
     }
 }

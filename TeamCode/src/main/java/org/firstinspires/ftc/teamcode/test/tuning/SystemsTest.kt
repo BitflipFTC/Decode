@@ -77,6 +77,14 @@ class SystemsTest : LinearOpMode() {
                 transfer.off()
             }
 
+            if (gamepad1.leftTriggerWasPressed()) {
+                transfer.reverse()
+            }
+
+            if (gamepad1.leftTriggerWasReleased()) {
+                transfer.deReverse()
+            }
+
             if (gamepad1.crossWasReleased()) {
                 intake.reversed = false
             }
@@ -85,7 +93,7 @@ class SystemsTest : LinearOpMode() {
                 intake.toggle()
             }
 
-            turret.angle -= ( 2.0 * (gamepad1.right_trigger - gamepad1.left_trigger))
+//            turret.angle -= ( 2.0 * (gamepad1.right_trigger - gamepad1.left_trigger))
 
             if (gamepad1.leftBumperWasPressed()) {
                 spindexer.toNextOuttakePosition()

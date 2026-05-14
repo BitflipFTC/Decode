@@ -77,6 +77,7 @@ class CombinedTeleOp : LinearOpMode() {
         when (shootingState) {
             Shoot.MOVE_SPINDEXER      -> {
                 spindexer.toMotifOuttakePosition()
+                intake.intake()
                 if (DEBUG_FSM) Log.d("FSM", " * * * * * NEW CYCLE: * * * * * moving spindexer to ${spindexer.state.name}, ${spindexer.getArtifactString()}")
                 timer.reset()
                 shootingState = Shoot.WAIT_FOR_COMPLETION
@@ -102,7 +103,7 @@ class CombinedTeleOp : LinearOpMode() {
 
             Shoot.WAIT_FOR_LAST_SHOT -> {
                 if (DEBUG_FSM) Log.d("FSM", "waiting for last shot to clear. ${ 50 - lastShotTimer.milliseconds()} remaining")
-                if (lastShotTimer.milliseconds() >= if ((turret.goalPose.distanceFrom(turret.turretPose)) >= 110.0) 300.0 else 125.0) {
+                if (shooter.atSetPoint() || (lastShotTimer.milliseconds() >= 2500.0) ){
                     shootingState = if (spindexer.isEmpty) {
                         lastlastshottimer.reset()
                         Shoot.LAST_SHOT_DELAY
@@ -138,14 +139,14 @@ class CombinedTeleOp : LinearOpMode() {
     val spindexer = Spindexer()
     val shooter = Shooter()
     val turret = Turret()
-    val camera = OV9281()
+//    val camera = OV9281()
     val colorSensor = ColorSensor()
     val subsystems = listOf(
         intake,
         transfer,
         spindexer,
         turret,
-        camera,
+//        camera,
         colorSensor,
         shooter,
     )
@@ -251,11 +252,26 @@ class CombinedTeleOp : LinearOpMode() {
 
             if (gamepad1.backWasPressed()) turret.automatic = !turret.automatic
 
-            // gets it until it is gotten :tm:
-            if (motifPattern == null && camera.detectionsAmount > 0) {
-                motifPattern = camera.motif
+            if (gamepad1.dpadDownWasPressed()) {
+                motifPattern = MotifPattern.PGP
                 spindexer.motifPattern = motifPattern
             }
+
+            if (gamepad1.dpadLeftWasPressed()) {
+                motifPattern = MotifPattern.GPP
+                spindexer.motifPattern = motifPattern
+            }
+
+            if (gamepad1.dpadRightWasPressed()) {
+                motifPattern = MotifPattern.PPG
+                spindexer.motifPattern = motifPattern
+            }
+
+            // gets it until it is gotten :tm:
+//            if (motifPattern == null && camera.detectionsAmount > 0) {
+//                motifPattern = camera.motif
+//                spindexer.motifPattern = motifPattern
+//            }
 
             if (shootingState == Shoot.IDLE) {
                 transfer.transferOn = gamepad1.triangle
@@ -346,31 +362,36 @@ class CombinedTeleOp : LinearOpMode() {
                 colorSensor.detectedArtifact = null
             }
 
-            if (camera.hasNewReading && gamepad1.left_trigger > 0.2 && camera.bufferSize == 3) {
-                val correctedRobotPose = turret.turretPoseToRobotPose(camera.turretPose)
-
-                // Calculate the shortest path difference between the two angles
-                val headingDelta = normalizeRadians(
-                    correctedRobotPose.heading - fol.pose.heading,
-                    false
-                )
-
-                // Apply the lowpass to the delta, then add it to the current heading
-                val newHeading = normalizeRadians(
-                    fol.pose.heading + (lowpass * headingDelta),
-                    true
-                )
-
-                fol.pose = Pose(
-                    (1-lowpass) * fol.pose.x + lowpass * correctedRobotPose.x,
-                    (1-lowpass) * fol.pose.y + lowpass * correctedRobotPose.y,
-                    if (gamepad1.right_stick_button) newHeading else fol.pose.heading
-                )
+            if (gamepad1.leftTriggerWasPressed()) {
+                fol.pose = if (alliance == Alliance.RED ) Pose(126.0,83.5,Math.toRadians(90.0)) else Pose(18.0,83.5, Math.toRadians(90.0))
             }
+
+//            if (camera.hasNewReading && gamepad1.left_trigger > 0.2 && camera.bufferSize == 3) {
+//                val correctedRobotPose = turret.turretPoseToRobotPose(camera.turretPose)
+//
+//                 Calculate the shortest path difference between the two angles
+//                val headingDelta = normalizeRadians(
+//                    correctedRobotPose.heading - fol.pose.heading,
+//                    false
+//                )
+//
+//                 Apply the lowpass to the delta, then add it to the current heading
+//                val newHeading = normalizeRadians(
+//                    fol.pose.heading + (lowpass * headingDelta),
+//                    true
+//                )
+//
+//                fol.pose = Pose(
+//                    (1-lowpass) * fol.pose.x + lowpass * correctedRobotPose.x,
+//                    (1-lowpass) * fol.pose.y + lowpass * correctedRobotPose.y,
+//                    if (gamepad1.right_stick_button) newHeading else fol.pose.heading
+//                )
+//            }
             
             if (spindexer.isFull && !lastSpindexerIsFull) {
                 gamepad1.rumble(500)
                 spindexer.toMotifOuttakePosition()
+                intake.off()
             }
 
 //            // timer rumble!!
@@ -417,41 +438,41 @@ class CombinedTeleOp : LinearOpMode() {
                 turret.robotPose = futurePose
             }
 
-            val correctedRobotPose = turret.turretPoseToRobotPose(camera.turretPose)
-            Drawing.drawRobot(
-                camera.turretPose,
-                Style(
-                    "",
-                    "#0000FF",
-                    0.75
-                )
-            )
-            Drawing.drawRobot(
-                    fol.pose,
-                    Style(
-                        "",
-                        "#FFFFFF",
-                        0.75
-                    )
-                )
-            Drawing.drawRobot(
-                correctedRobotPose,
-                Style(
-                    "",
-                    "#FF881E",
-                    0.75
-                )
-            )
-            Drawing.drawRobot(
-                turret.goalPose,
-                Style(
-                    "",
-                    "#FFFF00",
-                    0.5
-                )
-            )
-            Drawing.sendPacket()
-
+//            val correctedRobotPose = turret.turretPoseToRobotPose(camera.turretPose)
+//            Drawing.drawRobot(
+//                camera.turretPose,
+//                Style(
+//                    "",
+//                    "#0000FF",
+//                    0.75
+//                )
+//            )
+//            Drawing.drawRobot(
+//                    fol.pose,
+//                    Style(
+//                        "",
+//                        "#FFFFFF",
+//                        0.75
+//                    )
+//                )
+//            Drawing.drawRobot(
+//                correctedRobotPose,
+//                Style(
+//                    "",
+//                    "#FF881E",
+//                    0.75
+//                )
+//            )
+//            Drawing.drawRobot(
+//                turret.goalPose,
+//                Style(
+//                    "",
+//                    "#FFFF00",
+//                    0.5
+//                )
+//            )
+//            Drawing.sendPacket()
+//
             lastSpindexerIsFull = spindexer.isFull
             subsystems.forEach { it.periodic() }
 
@@ -461,10 +482,10 @@ class CombinedTeleOp : LinearOpMode() {
                 addData("y", fol.pose.y)
                 addData("heading", fol.pose.heading)
                 addData("Time Elapsed", matchTimer.seconds())
-                addData("Camera pose adj", "x: %05.2f, y: %05.2f, h: %05.2f", correctedRobotPose.x, correctedRobotPose.y,
-                    correctedRobotPose.heading)
-                addData("Camera pose", "x: %05.2f, y: %05.2f, h: %05.2f", camera.turretPose.x, camera.turretPose.y,
-                    camera.turretPose.heading)
+//                addData("Camera pose adj", "x: %05.2f, y: %05.2f, h: %05.2f", correctedRobotPose.x, correctedRobotPose.y,
+//                    correctedRobotPose.heading)
+//                addData("Camera pose", "x: %05.2f, y: %05.2f, h: %05.2f", camera.turretPose.x, camera.turretPose.y,
+//                    camera.turretPose.heading)
                 update()
             }
         }

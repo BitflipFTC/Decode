@@ -24,11 +24,7 @@ class Near12AutonomousSimple: BaseAutonomous() {
         follower!!.setStartingPose(pathSequence.poses.nearStartPose)
 
         finiteStateMachine = FiniteStateMachine(
-            InstantState("zeep", { turret.automatic = false
-                turret.angle = 120.0} ),
             FollowPathState("Score preload", paths[0]),
-            startIntake(),
-//            WaitUntilState( { spindexer.motifPattern != null }),
             InstantState("aaaa",{turret.automatic = true}),
             WaitState(750.0),
             WaitUntilState(shooter::atSetPoint),
@@ -45,16 +41,13 @@ class Near12AutonomousSimple: BaseAutonomous() {
             TimedFollowPathState("Do gate intake", paths[5], 2000.0),
             InstantState("") {timer.reset()},
             WaitUntilState { spindexer.isFull || timer.milliseconds() >= 2000.0 },
-            stopIntake(),
             FollowPathState("Score gate intake", paths[6]),
-            startIntake(),
             shootState(),
 
             FollowPathState("intake 1", paths[7]),
             WaitState(125.0),
             FollowPathState("dscore1", paths[8]),
             shootState(),
-            shootState()
         )
     }
 

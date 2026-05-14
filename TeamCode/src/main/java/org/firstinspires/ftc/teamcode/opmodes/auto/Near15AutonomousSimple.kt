@@ -8,8 +8,8 @@ import org.firstinspires.ftc.teamcode.util.Alliance
 import org.firstinspires.ftc.teamcode.util.FiniteStateMachine
 import org.firstinspires.ftc.teamcode.util.FollowPathState
 import org.firstinspires.ftc.teamcode.util.InstantState
-import org.firstinspires.ftc.teamcode.util.State
 import org.firstinspires.ftc.teamcode.util.TimedFollowPathState
+import org.firstinspires.ftc.teamcode.util.TurnToState
 import org.firstinspires.ftc.teamcode.util.WaitState
 import org.firstinspires.ftc.teamcode.util.WaitUntilState
 
@@ -23,43 +23,42 @@ class Near15AutonomousSimple: BaseAutonomous() {
         val timer = ElapsedTime()
 
         finiteStateMachine = FiniteStateMachine(
-            InstantState("zeep", { turret.automatic = false
-                turret.angle = 120.0} ),
             FollowPathState("Score preload", paths[0]),
             startIntake(),
-//            WaitUntilState( { spindexer.motifPattern != null }),
-            InstantState("aaaa",{turret.automatic = true}),
-            WaitState(350.0),
             WaitUntilState(shooter::atSetPoint),
             shootState(),
 
             FollowPathState("dintake 2", paths[1]),
-            WaitState(375.0),
             FollowPathState("DScore 2", paths[2]),
+            TurnToState(paths[2].path.endPose().heading, 1000.0),
             shootState(),
 
-            FollowPathState("Do gate drive", paths[3]),
+            TimedFollowPathState("Do gate drive", paths[3], 1000.0),
             TimedFollowPathState("Do gate empty", paths[4], 750.0),
 //            WaitState(250.0),
-            FollowPathState("Do gate intake", paths[5]),
+            TimedFollowPathState("Do gate intake", paths[5], 1000.0),
             InstantState("") {timer.reset()},
             WaitUntilState { spindexer.isFull || timer.milliseconds() >= 2000.0 },
-//            stopIntake(),
-            FollowPathState("Score gate intake", paths[6]),
-//            startIntake(),
+            TimedFollowPathState("Score gate intake", paths[6], 2000.0),
+            TurnToState(paths[6].path.endPose().heading, 1000.0),
             shootState(),
 
-            FollowPathState("intake 1", paths[7]),
+            TimedFollowPathState("Do gate drive", paths[7], 1000.0),
+            TimedFollowPathState("Do gate empty", paths[8], 750.0),
+//            WaitState(250.0),
+            TimedFollowPathState("Do gate intake", paths[9], 1000.0),
+            InstantState("") {timer.reset()},
+            WaitUntilState { spindexer.isFull || timer.milliseconds() >= 2000.0 },
+            TimedFollowPathState("Score gate intake", paths[10], 2000.0),
+            TurnToState(paths[10].path.endPose().heading, 1000.0),
+            shootState(),
+
+            TimedFollowPathState("intake 1", paths[11], 2000.0),
             WaitState(500.0),
-            FollowPathState("dscore1", paths[8]),
+            TimedFollowPathState("dscore1", paths[12],2000.0),
+
             shootState(),
 
-            FollowPathState("intake 3", paths[9]),
-            WaitState(150.0),
-//            stopIntake(),
-            FollowPathState("DScore 3", paths[10]),
-//            startIntake(),
-            shootState(),
         )
     }
 }

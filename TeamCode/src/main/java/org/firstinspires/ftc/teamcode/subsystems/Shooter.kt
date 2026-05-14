@@ -35,7 +35,7 @@ class Shooter(): Subsystem {
         var gain = 0.001
 
         @JvmField
-        var useVelocityCorrection = true
+        var useVelocityCorrection = false
 
         // 125 rpm change is approximately fixed by a 2.5 degree lowering of the hood
         // we have an angle range of exactly 35 degrees to 60 degrees.
@@ -60,25 +60,29 @@ class Shooter(): Subsystem {
         47.0,
         62.0,
         81.0,
-        132.0
+        132.0,
+        150.0
     )
     val speedArray = doubleArrayOf(
         2875.0,
         3250.0,
         3375.0,
-        4375.0,
+        4459.0,
+        4675.0
     )
     val angleArray = doubleArrayOf(
         0.01,
         0.09,
         0.225,
-        0.375
+        0.35,
+        0.365
     )
     val timeInAirArray = doubleArrayOf(
         0.5,
         0.6,
         0.7,
-        0.8
+        0.8,
+        1.0
     )
 
     private val velocityLookupTable = InterpolatedLookupTable(

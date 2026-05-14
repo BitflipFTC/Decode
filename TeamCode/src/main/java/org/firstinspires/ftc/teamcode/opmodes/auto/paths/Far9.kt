@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.opmodes.auto.paths
 import com.pedropathing.follower.Follower
 import com.pedropathing.paths.PathChain
 import com.pedropathing.paths.callbacks.ParametricCallback
+import com.qualcomm.robotcore.eventloop.opmode.Disabled
 import org.firstinspires.ftc.teamcode.opmodes.auto.BaseAutonomous.Companion.PARAMETRIC_END
 import org.firstinspires.ftc.teamcode.util.Alliance
 import org.firstinspires.ftc.teamcode.util.auto.BaseAutoPath

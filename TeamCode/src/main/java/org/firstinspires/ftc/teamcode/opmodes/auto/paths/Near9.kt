@@ -20,15 +20,13 @@ class Near9 (
     alliance
 ) {
     val fullSpeed = 0.8
-    val intakeSpeed = 0.67
+    val intakeSpeed = 0.5
 
     lateinit var scorePreload: PathChain
     lateinit var dintake1: PathChain
     lateinit var intake1: PathChain
     lateinit var score1: PathChain
-    lateinit var dintake2: PathChain
-    lateinit var intake2: PathChain
-    lateinit var score2: PathChain
+    lateinit var gateempty: PathChain
     lateinit var park: PathChain
 
     override fun buildPaths(follower: Follower): List<Path> {
@@ -44,26 +42,19 @@ class Near9 (
         score1 = follower.pathBuilder()
             .buildBasicLine(poses.endIntake1, poses.nearShootPose).build()
 
-        dintake2 = follower.pathBuilder()
-            .buildCurvedLine(poses.nearShootPoseFacingObelisk, poses.farIntake2Control, poses.startIntake2).build()
-
-        intake2 = follower.pathBuilder()
-            .buildTangentLine(poses.startIntake2, poses.endIntake2).build()
-
-        score2 = follower.pathBuilder()
-            .buildCurvedLine(poses.endIntake2, poses.endIntake2Move, poses.nearShootPose).build()
+        gateempty = follower.pathBuilder()
+            .buildCurvedLine(poses.nearShootPose, poses.emptyRampControl,poses.emptyRampStart)
+            .buildBasicLine(poses.emptyRampStart, poses.emptyRamp).build()
 
         park = follower.pathBuilder()
-            .buildBasicLine(poses.nearShootPose, poses.nearParkPose).build()
+            .buildBasicLine(poses.emptyRamp, poses.nearParkPose).build()
 
         return listOf(
             Path(scorePreload, fullSpeed),
             Path(dintake1, fullSpeed),
             Path(intake1, intakeSpeed),
             Path(score1, fullSpeed),
-            Path(dintake2, fullSpeed),
-            Path(intake2, intakeSpeed),
-            Path(score2, fullSpeed),
+            Path(gateempty, intakeSpeed),
             Path(park, fullSpeed)
         )
     }
