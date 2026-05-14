@@ -36,7 +36,7 @@ import org.firstinspires.ftc.teamcode.util.auto.Path
 @Suppress("UNUSED")
 abstract class BaseAutonomous: LinearOpMode() {
     companion object {
-        const val PARAMETRIC_END = 0.9
+        const val PARAMETRIC_END = 0.94
         const val DEBUG_FSM = false
     }
     abstract fun initialize(alliance: Alliance)
@@ -65,6 +65,7 @@ abstract class BaseAutonomous: LinearOpMode() {
         when (shootingState) {
             Shoot.MOVE_SPINDEXER      -> {
                 spindexer.toMotifOuttakePosition()
+                intake.intake()
                 if (DEBUG_FSM) Log.d("FSM", " * * * * * NEW CYCLE: * * * * * moving spindexer to ${spindexer.state.name}, ${spindexer.getArtifactString()}")
                 timer.reset()
                 shootingState = Shoot.WAIT_FOR_COMPLETION
@@ -72,7 +73,7 @@ abstract class BaseAutonomous: LinearOpMode() {
 
             Shoot.WAIT_FOR_COMPLETION -> {
                 if (DEBUG_FSM) Log.d("FSM", "          Waiting for spindexer, current: ${spindexer.currentAngle}, target: ${spindexer.targetAngle}, diff: ${spindexer.targetAngle - spindexer.currentAngle}")
-                if (spindexer.atSetPoint() && shooter.atSetPoint()) {
+                if (spindexer.atSetPoint()) {
                     if (DEBUG_FSM) Log.d("FSM", "spindexer took ${timer.milliseconds()} to rotate")
                     transfer.on() // assume instantaneous transfer
                     spindexer.recordOuttake()
@@ -89,7 +90,8 @@ abstract class BaseAutonomous: LinearOpMode() {
             }
 
             Shoot.WAIT_FOR_LAST_SHOT -> {
-                if ((lastShotTimer.milliseconds() >= 50.0 && shooter.atSetPoint()) || lastShotTimer.milliseconds() >= 150.0) {
+                if (DEBUG_FSM) Log.d("FSM", "waiting for last shot to clear. ${ 50 - lastShotTimer.milliseconds()} remaining")
+                if (lastShotTimer.milliseconds() >= if ((turret.goalPose.distanceFrom(turret.turretPose)) >= 110.0) 500.0 else 250.0) {
                     shootingState = if (spindexer.isEmpty) {
                         lastlastshottimer.reset()
                         Shoot.LAST_SHOT_DELAY
@@ -126,9 +128,13 @@ abstract class BaseAutonomous: LinearOpMode() {
     val shooter: Shooter = Shooter()
     val intake: Intake = Intake()
     val colorSensor: ColorSensor = ColorSensor()
-    val camera: OV9281 = OV9281()
+//    val camera: OV9281 = OV9281()
 
-    val subsystems = setOf(spindexer, turret, transfer, shooter, intake, colorSensor, camera)
+    val subsystems = setOf(spindexer, turret, transfer, shooter, intake, colorSensor,
+//        camera
+    )
+
+    var lastSpindexerIsFull = false
 
     protected lateinit var pathSequence: BaseAutoPath
     protected lateinit var finiteStateMachine: FiniteStateMachine
@@ -172,11 +178,6 @@ abstract class BaseAutonomous: LinearOpMode() {
             // in this order to let spindexer call a periodic
             updateShootingFSM()
             finiteStateMachine.run()
-            if (motifPattern == null) {
-                motifPattern = camera.motif
-                spindexer.motifPattern = motifPattern
-                turret.automatic = true
-            }
 
             val artifactDetected =
                 colorSensor.detectedArtifact != null && !spindexer.isFull && spindexer.slotsToIntakes.contains(
@@ -188,6 +189,11 @@ abstract class BaseAutonomous: LinearOpMode() {
                 Log.d("FSM", "DETECTED ARTIFACT ${colorSensor.detectedArtifact!!}")
             }
 
+            if (spindexer.isFull && !lastSpindexerIsFull) {
+                spindexer.toMotifOuttakePosition()
+                intake.off()
+            }
+
             follower!!.update()
             turret.robotPose = follower!!.pose
             shooter.setTargetState(turret.goalPose.distanceFrom(turret.turretPose))
@@ -195,7 +201,8 @@ abstract class BaseAutonomous: LinearOpMode() {
             telemetry.addData("x", follower!!.pose.x)
             telemetry.addData("y", follower!!.pose.y)
             telemetry.addData("heading", follower!!.pose.heading)
-            telemetry.addData("PATH COMP", follower!!.pathCompletion.toDouble())
+            telemetry.addData("t", follower!!.pathCompletion)
+            lastSpindexerIsFull = spindexer.isFull
             subsystems.forEach { it.periodic() }
             Drawing.drawDebug(follower!!)
             telemetry.update()
@@ -207,7 +214,7 @@ abstract class BaseAutonomous: LinearOpMode() {
 
 //todo
     protected fun shootState(): State =
-        InitializeState("Shoot state", { shootingState == Shoot.IDLE || shootingState == Shoot.LAST_SHOT_DELAY && lastlastshottimer.milliseconds() >= 200.0 }, ::shootAllArtifacts)
+        InitializeState("Shoot state", { shootingState == Shoot.IDLE || shootingState == Shoot.LAST_SHOT_DELAY && lastlastshottimer.milliseconds() >= 150.0 }, ::shootAllArtifacts)
 
 //    protected fun shootState() = WaitState(700.0)
 
@@ -218,17 +225,14 @@ abstract class BaseAutonomous: LinearOpMode() {
 
     val poses = mutableListOf<Pose>()
     var doneRelo = false
-
-    val reloTimer = ElapsedTime()
-    protected fun relocalizeState(): State = FullState("Relo", { doneRelo }, { doneRelo = false
-                                                                             reloTimer.reset()}, {
-        if (camera.turretPose != Pose(0.0,0.0) && camera.detectionsAmount != 0 )poses.add(turret.turretPoseToRobotPose(camera.turretPose))
-
-        if (poses.size >= 20 || reloTimer.milliseconds() >= 1000.0) {
-            follower!!.pose = averageRelocalization()
-            doneRelo = true
-        }
-    })
+//    protected fun relocalizeState(): State = FullState("Relo", { doneRelo }, { doneRelo = false }, {
+//        if (camera.turretPose != Pose(0.0,0.0) )poses.add(camera.turretPose)
+//
+//        if (poses.size >= 30) {
+//            follower!!.pose = averageRelocalization()
+//            doneRelo = true
+//        }
+//    })
 
     fun averageRelocalization(): Pose {
         var totalX = 0.0

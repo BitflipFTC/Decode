@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.opmodes.auto.paths
 
 import com.pedropathing.follower.Follower
 import com.pedropathing.paths.PathChain
+import com.qualcomm.robotcore.eventloop.opmode.Disabled
 import org.firstinspires.ftc.teamcode.util.Alliance
 import org.firstinspires.ftc.teamcode.util.auto.BaseAutoPath
 import org.firstinspires.ftc.teamcode.util.auto.Path
@@ -9,6 +10,7 @@ import org.firstinspires.ftc.teamcode.util.buildBasicLine
 import org.firstinspires.ftc.teamcode.util.buildCurvedLine
 import org.firstinspires.ftc.teamcode.util.buildTangentLine
 
+@Disabled
 class Far15 (alliance: Alliance) : BaseAutoPath(alliance) {
     val fullSpeed = 1.0
     val intakeSpeed = 0.33

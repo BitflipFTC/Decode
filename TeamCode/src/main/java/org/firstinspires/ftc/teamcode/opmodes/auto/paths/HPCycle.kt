@@ -2,75 +2,51 @@ package org.firstinspires.ftc.teamcode.opmodes.auto.paths
 
 import com.pedropathing.follower.Follower
 import com.pedropathing.paths.PathChain
-import com.pedropathing.paths.callbacks.ParametricCallback
 import org.firstinspires.ftc.teamcode.util.Alliance
 import org.firstinspires.ftc.teamcode.util.auto.BaseAutoPath
 import org.firstinspires.ftc.teamcode.util.auto.Path
 import org.firstinspires.ftc.teamcode.util.buildBasicLine
+import org.firstinspires.ftc.teamcode.util.buildCurvedLine
 import org.firstinspires.ftc.teamcode.util.buildTangentLine
 
 class HPCycle(alliance: Alliance): BaseAutoPath(alliance) {
 
-    val fullSpeed = 0.8
-    val intakeSpeed = 0.5
+    val fullSpeed = 0.9
+    val intakeSpeed = 0.7
 
     lateinit var scorePreload: PathChain
     lateinit var dHP: PathChain
-    lateinit var HP: PathChain
     lateinit var dScore: PathChain
-    lateinit var dIntakeGate: PathChain
-    lateinit var intakeGate: PathChain
+    lateinit var dhp1: PathChain
     lateinit var dScoreGate: PathChain
-    lateinit var dIntakeGate2: PathChain
-    lateinit var intakeGate2: PathChain
-    lateinit var dScoreGate2: PathChain
-    lateinit var dIntakeGate3: PathChain
-    lateinit var intakeGate3: PathChain
-    lateinit var dScoreGate3: PathChain
+    lateinit var dhp2: PathChain
+    lateinit var dscore2: PathChain
     lateinit var park: PathChain
 
     override fun buildPaths(follower: Follower): List<Path> {
         scorePreload = follower.pathBuilder()
-                .buildBasicLine(poses.farStartPose, poses.farShootPoseFacingObelisk).setTValueConstraint(0.1).build()
-        scorePreload.setCallbacks(ParametricCallback(
-            0, 0.1, follower, follower::breakFollowing
-        ))
+                .buildBasicLine(poses.farStartPose, poses.farShootPose).build()
 
         dHP = follower.pathBuilder()
-            .buildTangentLine(poses.farShootPoseFacingObelisk, poses.HPIntakeStart).build()
-
-        HP = follower.pathBuilder()
-            .buildTangentLine(poses.HPIntakeStart, poses.HPIntakeEnd).build()
+            .buildTangentLine(poses.farShootPose, poses.HPIntakeStart)
+            .buildBasicLine(poses.HPIntakeStart, poses.HPIntakeEnd).build()
 
         dScore = follower.pathBuilder()
             .buildBasicLine(poses.HPIntakeEnd, poses.farShootPose).build()
 
-        dIntakeGate = follower.pathBuilder()
-            .buildTangentLine(poses.farShootPose, poses.HPPark).build()
-
-        intakeGate = follower.pathBuilder()
+        dhp1 = follower.pathBuilder()
+            .buildTangentLine(poses.farShootPose, poses.HPPark)
             .buildTangentLine(poses.HPIntakeStart, poses.HPIntakeEnd).build()
 
         dScoreGate = follower.pathBuilder()
             .buildBasicLine(poses.HPIntakeEnd, poses.farShootPose).build()
 
-        dIntakeGate2 = follower.pathBuilder()
-            .buildTangentLine(poses.farShootPose, poses.HPPark).build()
+        dhp2 = follower.pathBuilder()
+            .buildBasicLine(poses.farShootPose, poses.AboveHPIntakeStart)
+            .buildBasicLine(poses.AboveHPIntakeStart, poses.AboveHPIntakeEnd).build()
 
-        intakeGate2 = follower.pathBuilder()
-            .buildTangentLine(poses.HPIntakeStart, poses.HPIntakeEnd).build()
-
-        dScoreGate2 = follower.pathBuilder()
-            .buildBasicLine(poses.HPIntakeEnd, poses.farShootPose).build()
-
-        dIntakeGate3 = follower.pathBuilder()
-            .buildTangentLine(poses.farShootPose, poses.HPPark).build()
-
-        intakeGate3 = follower.pathBuilder()
-            .buildTangentLine(poses.HPIntakeStart, poses.HPIntakeEnd).build()
-
-        dScoreGate3 = follower.pathBuilder()
-            .buildBasicLine(poses.HPIntakeEnd, poses.farShootPose).build()
+        dscore2 = follower.pathBuilder()
+            .buildBasicLine(poses.AboveHPIntakeEnd, poses.farShootPose).build()
 
         park = follower.pathBuilder()
             .buildBasicLine(poses.farShootPose, poses.HPPark).build()
@@ -78,17 +54,11 @@ class HPCycle(alliance: Alliance): BaseAutoPath(alliance) {
         return listOf(
             Path(scorePreload, fullSpeed),
             Path(dHP, intakeSpeed),
-            Path(HP, intakeSpeed),
             Path(dScore, fullSpeed),
-            Path(dIntakeGate, fullSpeed),
-            Path(intakeGate, intakeSpeed),
+            Path(dhp1, intakeSpeed),
             Path(dScoreGate, fullSpeed),
-            Path(dIntakeGate2, fullSpeed),
-            Path(intakeGate2, intakeSpeed),
-            Path(dScoreGate2, fullSpeed),
-            Path(dIntakeGate3, fullSpeed),
-            Path(intakeGate3, intakeSpeed),
-            Path(dScoreGate3, fullSpeed),
+            Path(dhp2, intakeSpeed),
+            Path(dscore2, fullSpeed),
             Path(park, fullSpeed)
         )
     }

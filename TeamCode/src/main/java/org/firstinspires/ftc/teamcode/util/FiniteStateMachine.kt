@@ -84,6 +84,20 @@ open class FollowPathState (
     }
 }
 
+class TurnToState (
+    target: Double, timeoutMillis: Double
+) : State (""){
+    private val timer = ElapsedTime(
+    )
+    override val initialize = {
+        CombinedTeleOp.follower!!.turnTo(target)
+        timer.reset()
+    }
+    override val endCondition = {
+        (target - CombinedTeleOp.follower!!.heading) < (Math.PI / 16) || timer.milliseconds() >= timeoutMillis
+    }
+}
+
 class WaitState (
     millis: Double, name: String = ""
 ) : State (name) {
